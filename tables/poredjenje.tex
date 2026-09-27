@@ -1,25 +1,91 @@
-% TODO: Popuniti svaku ćeliju uz citat ili run ID; crtica znači da podatak nije unet.
-\begin{landscape}
-\begin{table}[p]
+\begin{table}[htbp]
 \centering
-\scriptsize
-\setlength{\tabcolsep}{3pt}
-\begin{tabularx}{\linewidth}{@{}l*{10}{>{\raggedright\arraybackslash}X}@{}}
-\toprule
-Standard & Godina & Blok (bit) & Ključ (bit) & Struktura & Runde &
-Procenjena sigurnost & Softverske performanse & Hardverske performanse &
-Status 2026. & Istorijske primene \\
-\midrule
-DES & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-TDEA (2 ključa) & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-TDEA (3 ključa) & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-AES-128 & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-AES-192 & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-AES-256 & -- & -- & -- & -- & -- & -- & -- & -- & -- & -- \\
-\bottomrule
-\end{tabularx}
-\caption{Obrazac poređenja; podaci još nisu uneti. Godinu standardizacije
-odvojiti od godine revizije, a dužinu ključa od procene sigurnosti.}
+\caption{Poređenje osnovnih karakteristika DES-a, TDEA i AES-a.
+Sigurnosna snaga TDEA ne odgovara neposredno zbirnoj dužini ključnog
+materijala. Performanse zavise od konkretne implementacije i platforme.}
 \label{tab:poredjenje}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lccccccc}
+\toprule
+Standard &
+Prva standardizacija &
+Blok &
+Ključni materijal &
+Proc. sigurnost &
+Struktura &
+Runde / prolazi &
+Status 2026. \\
+\midrule
+
+DES &
+1977 &
+64 &
+56 &
+$\leq 56$ &
+Feistel &
+16 rundi &
+Povučen \\
+
+2TDEA &
+1999\textsuperscript{a} &
+64 &
+112 &
+$\approx 80$\textsuperscript{b} &
+3$\times$DES EDE &
+3 DES prolaza &
+Nedozvoljen za novu zaštitu \\
+
+3TDEA &
+1999\textsuperscript{a} &
+64 &
+168 &
+$\approx 112$ &
+3$\times$DES EDE &
+3 DES prolaza &
+Povučen za novu zaštitu \\
+
+AES-128 &
+2001 &
+128 &
+128 &
+$\approx 128$\textsuperscript{c} &
+SPN &
+10 rundi &
+Aktivan standard \\
+
+AES-192 &
+2001 &
+128 &
+192 &
+$\approx 192$\textsuperscript{c} &
+SPN &
+12 rundi &
+Aktivan standard \\
+
+AES-256 &
+2001 &
+128 &
+256 &
+$\approx 256$\textsuperscript{c} &
+SPN &
+14 rundi &
+Aktivan standard \\
+
+\bottomrule
+\end{tabular}
+}
+\vspace{1mm}
+
+\begin{minipage}{0.98\textwidth}
+\footnotesize
+\textsuperscript{a} TDEA konstrukcija je starija od FIPS~46-3, ali je
+1999. ovde uzeta kao godina relevantne federalne standardizacije u
+okviru FIPS~46-3.\\
+\textsuperscript{b} NIST je 2TDEA tradicionalno procenjivao na oko
+80 bita sigurnosne snage u relevantnim modelima napada.\\
+\textsuperscript{c} Brojevi označavaju generičku klasičnu sigurnost
+protiv iscrpne pretrage; poznati teorijski napadi na puni AES mogu
+formalno smanjiti složenost, ali ne do praktičnog nivoa.
+\end{minipage}
 \end{table}
-\end{landscape}
