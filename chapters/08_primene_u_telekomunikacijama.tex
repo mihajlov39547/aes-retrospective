@@ -256,53 +256,123 @@ za autentifikaciju i upravljanje ključevima.
 \subsection{Mobilni sistemi}
 \label{subsec:mobilni}
 
-Mobilne mreže predstavljaju posebno interesantan primer zato što u
-njima AES nije jedini dozvoljeni simetrični algoritam. 3GPP definiše
-više algoritamskih familija radi interoperabilnosti, regulatornih
-zahteva i dugoročnog razvoja standarda.
+Mobilne mreže predstavljaju posebno interesantan primer primene
+simetrične kriptografije zato što AES nije jedini algoritam koji
+3GPP standardi mogu da koriste. Bezbednosne arhitekture mobilnih
+sistema definišu više algoritamskih familija, dok se izbor konkretne
+varijante vrši u skladu sa mogućnostima mreže i korisničkog uređaja.
 
-U LTE bezbednosnoj arhitekturi AES predstavlja osnovu algoritma
-128-EEA2 za zaštitu poverljivosti. 3GPP TS~33.401 definiše
-128-EEA2 kao jednu od standardizovanih EPS encryption algorithm
-varijanti~\cite{3gpp-33401}.
+U LTE odnosno EPS bezbednosnoj arhitekturi definisani su posebni
+algoritmi za zaštitu poverljivosti i integriteta. AES predstavlja
+osnovu algoritama 128-EEA2 i 128-EIA2
+~\cite{3gpp-33401}.
 
-128-EEA2 koristi AES u Counter modu, odnosno AES-CTR, za šifrovanje
-korisničkih i signalizacionih podataka.
+Algoritam 128-EEA2 koristi AES sa 128-bitnim ključem u Counter modu
+za zaštitu poverljivosti podataka. Njegova funkcija može se
+pojednostavljeno prikazati kao
 
-Odgovarajući AES-zasnovani algoritam za integritet označava se kao
-128-EIA2. On ne koristi CTR, već AES-CMAC konstrukciju za generisanje
-integritetske oznake~\cite{3gpp-33401,3gpp-35215}.
+\begin{equation}
+    \text{128-EEA2}
+    \rightarrow
+    \text{AES-128-CTR}
+    \rightarrow
+    \text{poverljivost}.
+\end{equation}
 
-Zato treba jasno razlikovati:
+Counter način rada omogućava generisanje toka ključa nezavisnom
+enkripcijom vrednosti brojača, nakon čega se rezultat kombinuje sa
+otvorenim tekstom XOR operacijom. Ovakva konstrukcija pogodna je za
+komunikacione sisteme zato što omogućava efikasnu obradu i ne zahteva
+padding podataka.
+
+Za zaštitu integriteta LTE koristi poseban AES-zasnovani algoritam
+128-EIA2. Za razliku od 128-EEA2, njegova osnovna funkcija nije
+šifrovanje podataka već izračunavanje autentifikacione vrednosti.
+128-EIA2 je zasnovan na AES-CMAC konstrukciji:
+
+\begin{equation}
+    \text{128-EIA2}
+    \rightarrow
+    \text{AES-128-CMAC}
+    \rightarrow
+    \text{integritet}.
+\end{equation}
+
+Zbog toga se poverljivost i integritet u LTE sistemu moraju posmatrati
+kao dve različite kriptografske funkcije. Iako obe mogu koristiti AES
+kao osnovnu blokovsku šifru, način na koji se AES koristi i cilj
+operacije nisu isti.
+
+Ovo razdvajanje može se sažeti kao
 
 \begin{align}
-\text{128-EEA2} &\rightarrow \text{AES-CTR, poverljivost},\\
-\text{128-EIA2} &\rightarrow \text{AES-CMAC, integritet}.
+    \text{128-EEA2} &\rightarrow \text{AES-CTR}
+    \rightarrow \text{poverljivost},\\
+    \text{128-EIA2} &\rightarrow \text{AES-CMAC}
+    \rightarrow \text{integritet}.
 \end{align}
 
-U 5G sistemima isti osnovni koncept nastavlja se kroz algoritme
-128-NEA2 i 128-NIA2 definisane u 5G bezbednosnoj arhitekturi
+AES nije jedina algoritamska familija definisana za LTE. 3GPP
+bezbednosna arhitektura predviđa i druge algoritamske opcije, pa nije
+precizno tvrditi da LTE kao celina koristi isključivo AES.
+Ispravnije je reći da LTE standardizuje AES-zasnovane algoritme
+128-EEA2 i 128-EIA2 kao deo šireg skupa bezbednosnih algoritama
+~\cite{3gpp-33401}.
+
+U 5G sistemima nastavlja se isti koncept odvajanja poverljivosti i
+integriteta. 3GPP TS~33.501 definiše 5G bezbednosnu arhitekturu i
+algoritamske identifikatore koji uključuju AES-zasnovane varijante
+128-NEA2 i 128-NIA2
 ~\cite{3gpp-33501}.
 
-Pojednostavljeno:
+Algoritam 128-NEA2 koristi se za zaštitu poverljivosti:
 
-\begin{align}
-\text{128-NEA2} &\rightarrow \text{AES-zasnovana enkripcija},\\
-\text{128-NIA2} &\rightarrow \text{AES-zasnovana zaštita integriteta}.
-\end{align}
+\begin{equation}
+    \text{128-NEA2}
+    \rightarrow
+    \text{AES-zasnovana enkripcija}
+    \rightarrow
+    \text{poverljivost},
+\end{equation}
 
-AES, međutim, nije jedina algoritamska familija u mobilnim standardima.
-3GPP definiše i druge algoritme kao što su SNOW~3G i ZUC. Zbog toga
-nije precizno tvrditi da LTE ili 5G ``koriste AES'' kao jedini
-kriptografski algoritam. Preciznije je reći da standardi definišu
-AES-zasnovane algoritamske opcije koje predstavljaju deo šireg skupa
-standardizovanih bezbednosnih algoritama.
+dok 128-NIA2 predstavlja odgovarajuću AES-zasnovanu funkciju za
+zaštitu integriteta:
 
-Mobilni sistemi su važni za ovaj rad i sa stanovišta performansi.
-Velike brzine radio-interfejsa zahtevaju da šifrovanje i proveravanje
-integriteta ne postanu usko grlo. AES-CTR omogućava paralelnu obradu
-brojačkih blokova, dok hardverska AES podrška prisutna u savremenim
-ARM sistemima dodatno smanjuje procesorski trošak.
+\begin{equation}
+    \text{128-NIA2}
+    \rightarrow
+    \text{AES-zasnovana autentifikaciona funkcija}
+    \rightarrow
+    \text{integritet}.
+\end{equation}
+
+Kao i kod LTE sistema, 5G ne treba predstavljati kao sistem koji
+koristi isključivo AES. Standard definiše više algoritamskih opcija,
+dok AES predstavlja jednu od standardizovanih familija za
+poverljivost i integritet.
+
+Ovaj primer je posebno značajan za temu rada zato što pokazuje kako
+ista blokovska šifra može imati različite funkcije unutar jedne
+telekomunikacione arhitekture. AES u mobilnim sistemima nije
+samostalan protokol: koristi se unutar strogo definisanih algoritama
+koji određuju konstrukciju brojača, ulazne parametre, pravila
+generisanja autentifikacionih vrednosti i način povezivanja sa
+hijerarhijom ključeva mobilne mreže.
+
+Sa stanovišta performansi, AES-zasnovani mobilni algoritmi takođe
+dobro ilustruju značaj implementacione efikasnosti. Mobilni uređaji i
+bazne stanice moraju da obrađuju velike količine saobraćaja uz
+ograničenja latencije, energije i procesorskih resursa. Paralelizabilna
+priroda CTR moda i kasnija dostupnost hardverskih AES instrukcija na
+ARM i drugim procesorskim arhitekturama zato predstavljaju značajne
+implementacione prednosti.
+
+U okviru ovog rada neće se pretpostavljati da sama činjenica da je
+određeni algoritam definisan u 3GPP standardu predstavlja dokaz njegove
+stvarne zastupljenosti u svim mobilnim mrežama. Standardizovana podrška
+posmatra se kao dokaz interoperabilne mogućnosti, dok bi procena realne
+zastupljenosti zahtevala zasebne podatke iz konkretnih operatora,
+uređaja ili mrežnih merenja.
 
 
 \subsection{Infrastruktura, optičke mreže i mrežna oprema}
@@ -467,7 +537,7 @@ Poverljivost &
 
 5G 128-NIA2 &
 AES-128 &
-AES-zasnovan MAC &
+AES-zasnovana autentifikaciona funkcija &
 Integritet &
 5G key hierarchy &
 3GPP TS 33.501 \\
