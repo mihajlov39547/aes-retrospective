@@ -615,6 +615,20 @@ procesorske podrške. Eksperimentalni deo ovog rada će zbog toga
 pokušati da razdvoji hardverski ubrzanu i softversku putanju izvršavanja
 AES-a na istoj platformi.
 
+\subsubsection{GPU paralelizacija}
+
+Za razliku od AES-NI i sličnih procesorskih ekstenzija, GPU pristup
+u ovom eksperimentu ne zasniva se na namenskoj instrukciji za AES rundu.
+Koristi se masovno paralelna CUDA arhitektura za istovremenu obradu
+nezavisnih blokova~\cite{nvidia-cuda-model}. To odgovara CTR modu,
+u kojem se blokovi brojača mogu šifrovati nezavisno~\cite{sp800-38a}.
+
+Prednost zavisi od veličine ulaza i lokacije podataka. Kod malih poruka
+trošak pokretanja kernela i prenosa između sistemske i GPU memorije može
+nadmašiti korist paralelizacije. Zato će odeljak~\ref{sec:eksperimenti}
+uporediti softverski CPU AES, CPU AES akceleraciju i NVIDIA CUDA putanju
+na istoj platformi, bez unapred pretpostavljenog pobednika.
+
 
 \begin{figure}[htbp]
 \centering

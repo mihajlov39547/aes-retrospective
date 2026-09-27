@@ -44,4 +44,13 @@ RFC Editor stranica RFC 8446 pri proveri navodi RFC 9846 kao naslednika: https:/
 
 ## Pravila evidencije
 
+GPU metodologija: provereni su NVIDIA CUDA Programming Model (Warps and SIMT),
+Intro to CUDA Python, CuPy RawKernel i Performance Best Practices.
+Zapisi nemaju izmišljenu godinu izdanja ili DOI; datum pristupa je 2026-09-27.
+Dokumentacija opisuje mehanizam izvršavanja, ne dokazuje prednost AES-a na GPU-u.
+NIST SP 800-38A, dodatak F.1.1 (str. 24) i F.5.1 (str. 55–56), koristi se
+za ECB/CTR AES-128 validacione vektore u `aes_gpu.py`.
+TODO: verify reference for akademske GPU AES implementacije, njihove licence,
+modove rada, GPU modele i metod razdvajanja transfera od kernela.
+
 Za svaki nalaz voditi: tvrdnja, izvor i verzija, odeljak/stranica, model napada ili profil protokola, datum provere, ograničenje zaključka. DOI/ISBN i stranice uneti samo kada su provereni. Blogovi i forumi mogu predložiti pitanje, ali ne zamenjuju dokaz. Neslaganja izvora beležiti otvoreno. Tek nakon provere dodati BibLaTeX zapis i postojeći ključ u poglavlje.

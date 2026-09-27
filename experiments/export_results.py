@@ -3,6 +3,119 @@ import argparse
 import csv
 import json
 from pathlib import Path
+import math
+
+
+def export_cpu_gpu(folder, metadata):
+    """No output is created without a validated run and complete comparison groups."""
+    if metadata.get("method", {}).get("gpu_validation", {}).get("passed") is not True:
+        raise ValueError("CPU/GPU export requires recorded GPU validation.")
+    with (folder / "summary.csv").open(encoding="utf-8", newline="") as source:
+        rows = list(csv.DictReader(source))
+    groups = {}
+    for row in rows:
+        if row["backend"] not in ("cpu_software", "cpu_aesni", "gpu_cuda") or row["mode"] not in ("ECB", "CTR"):
+            raise ValueError("Unexpected CPU/GPU mode or backend.")
+        if row["algorithm"] != "AES-128" or int(row["key_bits"]) != 128:
+            raise ValueError("Initial GPU exporter supports AES-128 only.")
+        key = (row["mode"], int(row["input_bytes"]))
+        if row["backend"] in groups.setdefault(key, {}):
+            raise ValueError("Duplicate backend in CPU/GPU summary.")
+        groups[key][row["backend"]] = row
+        metrics = ["end_to_end_ms_median", "throughput_mib_s_median", "end_to_end_ms_mean"]
+        if row["backend"] == "gpu_cuda":
+            metrics += ["kernel_ms_median", "kernel_ms_mean", "transfer_ms_mean",
+                        "kernel_throughput_mib_s_median"]
+        for metric in metrics:
+            if not math.isfinite(float(row[metric])) or float(row[metric]) <= 0:
+                raise ValueError(f"Invalid timing or throughput: {metric}")
+        if int(row["end_to_end_ms_count"]) < 2:
+            raise ValueError("At least two measured iterations are required.")
+    if not groups or any(set(g) != {"cpu_software", "cpu_aesni", "gpu_cuda"} for g in groups.values()):
+        raise ValueError("Incomplete CPU/GPU comparison; no graphs generated.")
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    for mode in sorted({key[0] for key in groups}):
+        sizes = sorted(size for m, size in groups if m == mode)
+        selected = [groups[mode, size] for size in sizes]
+        target = folder / mode
+        target.mkdir(exist_ok=True)
+        title = f'{mode} / AES-128 / {metadata["purpose"]}\n{metadata["run_id"]}'
+
+        def series(backend, field):
+            return [float(g[backend][field]) for g in selected]
+
+        def save(figure, name):
+            figure.suptitle(title, fontsize=8)
+            figure.tight_layout()
+            for extension in ("pdf", "png"):
+                figure.savefig(target / f"{name}.{extension}", dpi=180)
+            plt.close(figure)
+
+        fig, ax = plt.subplots(figsize=(8, 5))
+        for backend, field, label in (
+            ("cpu_software", "throughput_mib_s_median", "CPU software (end-to-end)"),
+            ("cpu_aesni", "throughput_mib_s_median", "CPU AES-NI (end-to-end)"),
+            ("gpu_cuda", "kernel_throughput_mib_s_median", "GPU kernel-only"),
+            ("gpu_cuda", "throughput_mib_s_median", "GPU end-to-end")):
+            ax.plot(sizes, series(backend, field), marker="o", label=label)
+        ax.set(xscale="log", xlabel="Input bytes", ylabel="Median throughput (MiB/s)")
+        ax.legend()
+        ax.grid(alpha=.2)
+        save(fig, "throughput_vs_size")
+
+        fig, ax = plt.subplots(figsize=(8, 5))
+        for backend in ("cpu_software", "cpu_aesni", "gpu_cuda"):
+            ax.plot(sizes, series(backend, "end_to_end_ms_median"), marker="o", label=backend)
+        ax.set(xscale="log", yscale="log", xlabel="Input bytes", ylabel="Median end-to-end latency (ms)")
+        ax.legend()
+        ax.grid(alpha=.2)
+        save(fig, "latency_vs_size")
+
+        transfer = series("gpu_cuda", "transfer_ms_mean")
+        kernel = series("gpu_cuda", "kernel_ms_mean")
+        total = series("gpu_cuda", "end_to_end_ms_mean")
+        residual = [t - h - k for t, h, k in zip(total, transfer, kernel)]
+        fig, ax = plt.subplots(figsize=(9, 5))
+        positions = list(range(len(sizes)))
+        ax.bar(positions, [100*h/t for h, t in zip(transfer, total)], label="Transfer")
+        ax.bar(positions, [100*k/t for k, t in zip(kernel, total)],
+               bottom=[100*h/t for h, t in zip(transfer, total)], label="Kernel")
+        ax.bar(positions, [100*r/t for r, t in zip(residual, total)],
+               bottom=[100*(h+k)/t if r >= 0 else 0
+                       for h, k, r, t in zip(transfer, kernel, residual, total)], label="Other residual")
+        if any(r < 0 for r in residual):
+            ax.text(.02, .98, "Negative residual: timing uncertainty; not physical negative overhead.",
+                    transform=ax.transAxes, va="top", fontsize=8)
+        ax.set_xticks(positions, [f"{n / 1024:g} KiB" for n in sizes], rotation=30)
+        ax.set_ylabel("Share of mean end-to-end time (%)")
+        ax.legend()
+        save(fig, "gpu_overhead_breakdown")
+
+        fig, ax = plt.subplots(figsize=(8, 5))
+        cpu = series("cpu_aesni", "end_to_end_ms_median")
+        for field, label in (("kernel_ms_median", "GPU kernel-only / CPU AES-NI"),
+                             ("end_to_end_ms_median", "GPU end-to-end / CPU AES-NI")):
+            ax.plot(sizes, [c/g for c, g in zip(cpu, series("gpu_cuda", field))], marker="o", label=label)
+        ax.axhline(1, color="black", linewidth=.7)
+        ax.set(xscale="log", xlabel="Input bytes", ylabel="Speedup = CPU time / GPU time")
+        ax.legend()
+        ax.grid(alpha=.2)
+        save(fig, "speedup_vs_size")
+
+        table = [f"% {mode}; median times in ms; end-to-end CPU/GPU speedup.",
+                 r"\begin{tabular}{rrrrrr}", r"\toprule",
+                 r"Bajtovi & CPU soft. & CPU AES-NI & GPU kernel & GPU ukupno & Faktor \\",
+                 r"\midrule"]
+        for size, g in zip(sizes, selected):
+            sw = float(g["cpu_software"]["end_to_end_ms_median"])
+            hw = float(g["cpu_aesni"]["end_to_end_ms_median"])
+            kern = float(g["gpu_cuda"]["kernel_ms_median"])
+            end = float(g["gpu_cuda"]["end_to_end_ms_median"])
+            table.append(f"{size} & {sw:.6g} & {hw:.6g} & {kern:.6g} & {end:.6g} & {hw/end:.4g}" + r" \\")
+        table.extend([r"\bottomrule", r"\end{tabular}"])
+        (target / "aes_cpu_gpu_table.tex").write_text("\n".join(table) + "\n", encoding="utf-8")
 
 
 def main():
@@ -11,6 +124,12 @@ def main():
     args = cli.parse_args()
     folder = args.run_directory.resolve()
     metadata = json.loads((folder / "metadata.json").read_text(encoding="utf-8"))
+    if metadata["experiment"] == "aes_cpu_gpu":
+        try:
+            export_cpu_gpu(folder, metadata)
+        except (ValueError, KeyError) as exc:
+            cli.error(str(exc))
+        return
     if metadata["experiment"] not in ("benchmark", "aes_acceleration"):
         cli.error("Exporter supports benchmark and aes_acceleration runs.")
     acceleration = metadata["experiment"] == "aes_acceleration"

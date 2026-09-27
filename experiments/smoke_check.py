@@ -8,6 +8,8 @@ from unittest.mock import patch
 
 from aes_acceleration import probe, verify_dispatch
 from common import modules
+from aes_gpu import CudaAES, cpu_cipher, memory_skip_reason, validate_encrypt
+from export_results import export_cpu_gpu
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "build" / "smoke"
@@ -37,7 +39,7 @@ def read_csv(folder, name="raw.csv"):
 
 
 def main():
-    for script in ("benchmark.py", "avalanche_test.py", "brute_force_demo.py", "aes_acceleration.py"):
+    for script in ("benchmark.py", "avalanche_test.py", "brute_force_demo.py", "aes_acceleration.py", "aes_gpu.py"):
         plan = json.loads(invoke(script).stdout)
         assert plan["status"] == "plan_only"
     invoke("benchmark.py", "--sizes", 17, success=False)
@@ -46,6 +48,34 @@ def main():
     invoke("brute_force_demo.py", "--bits", 21, success=False)
     invoke("aes_acceleration.py", "--sizes", 17, success=False)
     invoke("aes_acceleration.py", "--repeats", 1, success=False)
+    invoke("aes_gpu.py", "--sizes", 17, success=False)
+    invoke("aes_gpu.py", "--repeats", 1, success=False)
+    pending_output = OUTPUT / "gpu-must-not-produce-results"
+    invoke("aes_gpu.py", "--run", "--output", pending_output, success=False)
+    assert not pending_output.exists()
+    validate_encrypt(lambda mode, key, counter, data:
+                     cpu_cipher(mode, key, counter, "cpu_software").encrypt(data))
+    try:
+        validate_encrypt(lambda mode, key, counter, data: bytes(len(data)))
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("Invalid encryption must fail before timing.")
+    try:
+        CudaAES(None, 128)
+    except RuntimeError as exc:
+        assert "skeleton" in str(exc)
+    else:
+        raise AssertionError("Current CUDA skeleton must prevent compilation.")
+    assert memory_skip_reason(2**30, 2**30, 8 * 2**30)
+    assert memory_skip_reason(2**30, 16 * 2**30, 2**30)
+    assert memory_skip_reason(1024, 2**30, 2**30) is None
+    try:
+        export_cpu_gpu(OUTPUT / "must-not-be-created", {"method": {}})
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("GPU export must reject unvalidated results.")
     aes, _, _ = modules()
     with patch.object(aes, "_raw_aesni_lib", None):
         try:
@@ -55,6 +85,8 @@ def main():
         else:
             raise AssertionError("Missing AES-NI library must prevent comparison.")
     if probe()["available"]:
+        for mode in ("ECB", "CTR"):
+            assert verify_dispatch(mode)["mode"] == mode
         accelerated = run("aes_acceleration.py", "--sizes", 1024, "--repeats", 2, "--warmup", 1)
         rows = read_csv(accelerated)
         assert len(rows) == 24
@@ -95,7 +127,8 @@ def main():
         assert int(row["attempts"]) == int(row["target_index"]) + 1
         assert 1 <= int(row["attempts"]) <= 64
     assert len(read_csv(brute, "summary.csv")) == 10
-    print("PASS: plan-only CLI, validation, CBC round-trip, export, avalanche reproducibility, bounded search.")
+    print("PASS: CLI, CPU paths, exports, avalanche, bounded search, NIST fixtures, GPU guards and memory policy.")
+    print("GPU kernels/timers/graphs not executed: CUDA implementation is intentionally a skeleton.")
     print(f"Non-study artifacts: {OUTPUT}")
 
 

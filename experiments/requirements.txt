@@ -2,3 +2,7 @@
 pycryptodome>=3.23.0,<4
 matplotlib>=3.10,<4
 psutil>=7,<8
+# Optional GPU dependency: install ONE CuPy wheel matching the verified CUDA
+# runtime/Toolkit, driver, OS and Python. Do not infer it from nvidia-smi alone.
+# Examples only (not installed by this file): cupy-cuda12x, cupy-cuda13x.
+# See https://docs.cupy.dev/en/stable/install.html and experiments/README.md.

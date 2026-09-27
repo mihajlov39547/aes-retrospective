@@ -19,6 +19,17 @@ Eksperimentalnu vezu sa ovom temom pružiće poređenje iz
 odeljka~\ref{sec:aes-akceleracija}. Tumačenje će odvojiti doprinos savremenih
 procesorskih instrukcija od svojstava same šifre.
 
+\subsection{Kako se ostvaruju AES performanse: 2001--2003. i 2026.}
+Retrospektiva će razlikovati efikasnost originalnog dizajna Rijndaela,
+optimizacije softverskih implementacija, SIMD mogućnosti, namenske CPU
+AES instrukcije i masovno paralelno GPU izvršavanje. CPU--GPU poređenje iz
+odeljka~\ref{sec:cpu-gpu-poredjenje} povezaće ovu temu sa veličinom poruke,
+troškovima prenosa i položajem podataka u memoriji.
+GPU deo predstavlja savremeni razvoj koji se posmatra retrospektivno;
+ne pripisuje se originalnim očekivanjima AES procesa.
+% TODO: Za očekivanja 2001--2003. koristiti tadašnje izvore; razdvojiti SIMD i SIMT, namenske AES instrukcije i opštu paralelizaciju.
+% TODO: Tek posle validacije i merenja diskutovati eventualni prag prednosti GPU-a. Softverski režim današnjeg CPU-a nije istorijski računar.
+
 \subsection{Dužina bloka i retrospektivna pitanja}
 % TODO: Ispitati dovoljan obim podataka pod jednim ključem i zavisnost od moda, tagova i broja korisnika; 128-bitni blok nije neograničena bezbednost.
 

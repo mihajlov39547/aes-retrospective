@@ -37,6 +37,7 @@ Svi projektni izvori su prikazani; lokalno okruženje, Git baza i generisani bui
 ├── tables/
 │   ├── README.md
 │   ├── poredjenje.tex
+│   ├── aes_cpu_gpu.tex
 │   └── prediction_vs_reality.tex
 ├── experiments/
 │   ├── README.md
@@ -44,6 +45,8 @@ Svi projektni izvori su prikazani; lokalno okruženje, Git baza i generisani bui
 │   ├── common.py
 │   ├── benchmark.py
 │   ├── aes_acceleration.py
+│   ├── aes_gpu.py
+│   ├── aes_gpu_kernel.cu
 │   ├── avalanche_test.py
 │   ├── brute_force_demo.py
 │   ├── export_results.py
@@ -111,6 +114,34 @@ Neutralni `article` naknadno prilagoditi časopisu. Paketi uključuju `graphicx`
 Koristiti postojeće oznake `sec:`, `fig:` i `tab:` za cross-reference.
 
 ## Python
+
+### Novi CPU/GPU eksperiment
+
+Dodati su `experiments/aes_gpu.py`, `experiments/aes_gpu_kernel.cu` i
+`tables/aes_cpu_gpu.tex`. Poglavlje 9 sada obuhvata tri AES-128 putanje u
+ECB/CTR modu: CPU software, CPU AES-NI i NVIDIA CUDA. CBC ostaje odvojeni
+istorijski CPU eksperiment. Poglavlja 6 i 10 povezuju ovu metodologiju sa
+paralelizacijom i retrospektivom, bez unapred pretpostavljene prednosti GPU-a.
+
+```powershell
+python experiments/aes_gpu.py
+python experiments/aes_gpu.py --check
+```
+
+Prva komanda prikazuje plan, druga otkriva CPU/GPU okruženje bez merenja.
+CUDA fajl je namerno blokiran skeleton: potrebno je implementirati i validirati
+AES-128 pre `--validate-only` i `--run`. Ni GPU merenja ni grafikoni još nisu
+generisani. CuPy je opciona zavisnost; konkretan paket bira se nakon provere
+runtime-a, drajvera, platforme i Python verzije, prema uputstvu u
+[eksperimentalnom README-u](experiments/README.md#gpu-cuda-okvir).
+
+Izvoz je pripremljen za stvarne, validirane podatke:
+`python experiments/export_results.py experiments/results/aes_cpu_gpu-pilot-ID`.
+U poddirektorijumima `ECB/` i `CTR/` nastaju `throughput_vs_size.pdf`,
+`latency_vs_size.pdf`, `gpu_overhead_breakdown.pdf` i `speedup_vs_size.pdf`,
+uz PNG kopije i LaTeX tabelu. Bez validacije exporter odbija GPU grafikone.
+
+### Osnovne zavisnosti
 
 Python 3.10 ili noviji. Postojeće odgovarajuće `.venv` ne treba ponovo praviti:
 

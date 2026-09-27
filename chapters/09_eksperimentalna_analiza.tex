@@ -1,43 +1,176 @@
 \section{Eksperimentalna analiza: plan i metodologija}
 \label{sec:eksperimenti}
-% TODO: Razraditi poglavlje tek nakon provere izvora; ne unositi neproverene činjenice.
-Eksperimenti su planirani kao poređenje konkretnih bibliotečkih
-implementacija i edukativne demonstracije. DES i Triple DES koriste se
-isključivo radi istorijskog poređenja. Merenja još nisu sprovedena za potrebe
-rada; ovo poglavlje ne sadrži rezultate niti rangiranje algoritama.
+Eksperimentalni deo obuhvata istorijsko CPU poređenje i zaseban eksperiment
+sa tri putanje AES-a na istoj platformi. Tekst definiše metodologiju;
+rezultati još nisu prikupljeni za rad.
+% TODO: Pre merenja usaglasiti protokol; tehničke smoke provere nisu rezultati članka.
 
 \subsection{Pitanja i obuhvat eksperimenata}
-% TODO: Definisati hipoteze i kriterijume analize pre merenja. Uključiti DES, troključni TDEA, AES-128/192/256; dvoključni TDEA ostaviti kao opciono proširenje.
+Osnovni benchmark poredi DES, troključni TDEA i AES-128/192/256.
+Novi eksperiment poredi softverski CPU AES-128, CPU AES-128 sa potvrđenim
+AES-NI i NVIDIA GPU/CUDA putanju. Ispituje se zavisnost propusnosti i
+latencije od veličine ulaza, bez pretpostavke da GPU mora biti brži.
+% TODO: AES-192/256 na GPU-u dodati tek posle stabilne AES-128 implementacije i zasebne validacije.
+% TODO: Definisati hipoteze: prednost CPU-a za male poruke, eventualni prag prednosti GPU-a i uticaj rezidentnih podataka. Dopustiti ishod bez preseka krivih.
 
 \subsection{Okruženje i reproduktivnost}
-% TODO: Evidentirati seed, Python, OS, CPU, biblioteke, commit, opterećenje, napajanje i akceleraciju. Seed služi ponovljivim test podacima, nikada produkcionim ključevima.
+Za svako izvršavanje beleže se CPU model, fizička i logička jezgra,
+potvrđena AES putanja, GPU model, compute capability, slobodna i ukupna GPU
+memorija, verzije NVIDIA drajvera, CUDA runtime-a, CuPy-ja, Pythona,
+operativnog sistema i CPU kriptografske biblioteke. Uz seed, argumente,
+identifikator verzije koda i hash CUDA izvora čuvaju se beleške o opterećenju.
+% TODO: Zabeležiti napajanje, temperaturu, CPU/GPU taktove, WDDM/TCC režim i pozadinsko opterećenje.
+% TODO: Razlikovati CUDA podršku drajvera prijavljenu kroz nvidia-smi od instaliranog Toolkit-a, NVRTC-a i stvarno učitanog runtime-a. Nepoznate vrednosti ostaviti nepoznatim.
+% TODO: Seedovani ključevi i ponovljeni test ulazi služe isključivo sintetičkom eksperimentu.
 
-\subsection{Benchmark enkripcije i dekripcije}
-% TODO: Primarni zajednički mod: CBC, bez padding-a uz dužine deljive sa 16. Meriti samo transformaciju bafera; inicijalizaciju i key schedule izdvojiti. Novi objekat i IV za svako ponavljanje; warmup, više ponavljanja i provera povratne dekripcije izvan tajmera.
+\subsection{Osnovni CPU benchmark DES-a, TDEA i AES-a}
+Postojeći CBC benchmark ostaje istorijsko poređenje bibliotečkih
+implementacija. Vreme transformacije odvaja se od inicijalizacije šifre;
+povratna dekripcija proverava se izvan merenog intervala. DES i TDEA ovde
+nisu preporuke za novu zaštitu podataka.
+% TODO: Zadržati warmup, više ponavljanja, sredinu, medijanu i SD; ulazi 1 KiB, 1 MiB i 10 MiB, opciono 100 MiB.
+% TODO: Obeležiti da postojeći CPU benchmark koristi decimalne MB/s. Ne mešati njegove CBC rezultate sa novim ECB/CTR rezultatima u MiB/s.
 
-\subsection{Veličine uzorka, statistika i jedinice}
-% TODO: Koristiti 1 KiB, 1 MiB, 10 MiB, opciono 100 MiB; navesti tačne bajtove. Throughput MB/s je bytes/10^6/s. Sačuvati pojedinačna merenja, aritmetičku sredinu, medijanu i uzoračku standardnu devijaciju; bez uklanjanja odstupanja bez kriterijuma.
-
-\subsection{AES sa hardverskom akceleracijom i bez nje}
+\subsection{AES sa i bez CPU hardverske akceleracije}
 \label{sec:aes-akceleracija}
-Planirano je upareno poređenje AES-128, AES-192 i AES-256 sa AES-NI putanjom
-i prenosivom softverskom implementacijom iste biblioteke, na istom procesoru.
-Ovaj eksperiment treba da poveže implementacione performanse sa retrospektivom
-u odeljku~\ref{sec:retrospektiva}; njegova softverska putanja ne predstavlja
-rekonstrukciju računara iz 2003. godine.
-% TODO: Pokrenuti experiments/aes_acceleration.py nakon kontrole okruženja. Potvrditi CPU podršku, učitanu biblioteku i izbor native putanje; ne zaključivati samo iz use_aesni=True ili odnosa brzina.
-% TODO: Za oba backend-a koristiti iste poruke, ključeve i IV u uparenom CBC poređenju, uz warmup i nasumičan redosled enkripcije/dekripcije i backend-a. Ponovna upotreba IV ovde je samo kontrolisano ponavljanje identičnog testa.
-% TODO: Prikazati vremena, MB/s, sredinu, medijanu, SD i faktor kao medijana softverskog vremena / medijana AES-NI vremena. Objasniti uticaj veličine bafera, CBC zavisnosti i keša; ne tumačiti SD kao interval poverenja.
-% TODO: Softverska putanja je kompajlirana implementacija bez AES-NI, ne čisti Python niti garantovano constant-time rešenje. ARM crypto extensions ostaju zaseban budući eksperiment.
+CPU AES-NI koristi instrukcije namenjene AES transformacijama, dok
+softverska putanja koristi prenosivu kompajliranu implementaciju iste
+biblioteke~\cite{intel-aes-ni}. Eksperiment zahteva potvrđen izbor putanje;
+sam zahtev \texttt{use\_aesni=True} nije dovoljan. Postojeće CBC poređenje
+zadržava se, a za CPU--GPU eksperiment obe CPU putanje mere se ponovo
+u istim ECB i CTR režimima kao GPU.
+% TODO: Sačuvati proveru native inicijalizacije za konkretan mod i verziju biblioteke.
+% TODO: Bez pouzdane kontrole AES-NI eksperiment označiti nepotpunim, ne preimenovati auto putanju u cpu_software.
+% TODO: ARM akceleracija zahteva novi potvrđeni adapter; sadašnje oznake cpu_aesni odnose se na x86.
+% TODO: Softverski AES na današnjem CPU-u nije rekonstrukcija performansi iz 2003.
+
+\subsection{AES na NVIDIA GPU/CUDA platformi}
+\label{sec:aes-gpu}
+CUDA pristup raspoređuje obradu nezavisnih blokova na paralelne niti u SIMT
+modelu~\cite{nvidia-cuda-model}. Python okruženje može upravljati korisničkim
+kernelima~\cite{nvidia-cuda-python}; predviđena implementacija koristi
+CuPy \texttt{RawKernel}, CUDA C izvor i eksplicitnu grid/block konfiguraciju
+~\cite{cupy-rawkernel}. GPU paralelizacija i namenske CPU AES instrukcije
+zato predstavljaju različite mehanizme ubrzanja.
+
+ECB će služiti isključivo merenju nezavisne AES primitive, ne kao preporuka
+za zaštitu podataka. Glavni paralelizabilni mod biće CTR:
+\begin{equation}
+C_i = P_i \oplus E_K(T_i).
+\label{eq:eksperiment-ctr}
+\end{equation}
+Blokovi brojača mogu se obrađivati nezavisno. Nasuprot tome, CBC enkripcija
+\begin{equation}
+C_i = E_K(P_i \oplus C_{i-1})
+\end{equation}
+ima zavisnost između susednih blokova i nije primarni GPU encryption
+benchmark~\cite{sp800-38a}. CTR sam ne obezbeđuje autentifikaciju.
+
+Pre vremenskih merenja GPU rezultat mora odgovarati NIST SP 800-38A
+vektorima F.1.1 i F.5.1 i referentnoj CPU implementaciji za isti ključ,
+poruku i početni brojač. Proveravaju se jedan i više blokova, prenos
+brojača preko bajtova i nepotpuni završni CTR blok. Neuspešna validacija
+blokira benchmark; prolazak nije dokaz kriptografske bezbednosti.
+% TODO: Implementirati i pregledati aes_gpu_kernel.cu. Skeleton trenutno namerno blokira kompilaciju; GPU ispravnost nije potvrđena.
+% TODO: Dokumentovati poreklo CUDA implementacije; ne preuzimati nepoznatu PyPI šifru.
+% TODO: Najpre čitljiva AES-128 implementacija, zatim validacija; optimizacije tek posle toga.
+
+\subsection{CPU--GPU poređenje i uticaj veličine ulaza}
+\label{sec:cpu-gpu-poredjenje}
+Planirani ulazi su 1 KiB, 16 KiB, 1 MiB, 16 MiB, 100 MiB i 1 GiB.
+Nedovoljna RAM/GPU memorija dovodi do preskakanja veličine uz zabeležen
+razlog, ne do upisivanja nulte propusnosti. Za svaku kombinaciju moda,
+veličine i putanje predviđeni su warmup i najmanje deset merenih ponavljanja;
+broj nezavisnih sesija treba utvrditi pre studije.
+
+Prvo CUDA izvršavanje može uključivati inicijalizaciju i kompilaciju
+kernela; \texttt{RawKernel} može keširati prevedeni kod
+~\cite{cupy-rawkernel}. JIT kompilacija, alokacija bafera i GPU priprema
+ključa izuzimaju se iz stabilnog merenja. Vreme kernela meri se CUDA
+događajima, uz obaveznu sinhronizaciju~\cite{cupy-performance}.
+Posebno se beleže:
+\begin{itemize}
+\item \texttt{kernel\_ms}: GPU kernel između događaja;
+\item \texttt{transfer\_ms}: zbir H2D i D2H zidnog vremena, uključujući
+      sinhronizaciju i eventualno host staging kopiranje;
+\item \texttt{end\_to\_end\_ms}: H2D, kernel, D2H i završna sinhronizacija
+      za unapred alocirane bafere;
+\item rezidentni prolaz: kernel i ukupno vreme poziva kada je ulaz već
+      u GPU memoriji, bez transfera.
+\end{itemize}
+CPU redovi zasebno sadrže vreme kriptografske operacije i ukupno vreme
+inicijalizacije šifre i enkripcije sa alokacijom izlaza.
+Ovo je eksplicitno ograničen stabilni protokol, ne cold-start aplikativna
+latencija. Razlike u alokacijama i pripremi ključa treba uzeti u obzir.
+% TODO: Kao dopunski eksperiment kasnije meriti cold-start, alokacije i GPU key setup; ne pripisivati ove troškove sadašnjem end-to-end rezultatu.
+
+Za vreme i throughput u MiB/s izračunavaju se sredina, medijana, uzoračka
+standardna devijacija, minimum i maksimum. Faktori ubrzanja definišu se
+odvojeno za GPU kernel i ukupnu GPU putanju:
+\begin{equation}
+S_{\mathrm{GPU/CPU}} =
+\frac{T_{\mathrm{CPU}}}{T_{\mathrm{GPU}}}.
+\end{equation}
+U centralnoj tabeli koristiće se odnos medijana CPU AES-NI ukupnog vremena
+i GPU ukupnog vremena. Vrednost veća od jedan označava kraće GPU vreme.
+% TODO: Pronaći eventualni prag prednosti zasebno za ECB/CTR i kernel/ukupno vreme, uz varijabilnost između sesija. Ne interpolirati neizmereni prag kao činjenicu.
+% TODO: Mešati redosled backend-a; za male poruke analizirati Python poziv, launch, tajmer, keš i sinhronizaciju. SD nije interval poverenja.
+\input{tables/aes_cpu_gpu}
 
 \subsection{Edukativna brute-force demonstracija}
-% TODO: Ograničiti promenljive bitove AES ključa; nikada ne pretraživati puni DES/AES prostor. Meriti pokušaje/s i ekstrapolirati 2^56, 2^112, 2^128, 2^192 i 2^256 u naučnoj notaciji. Razdvojiti celo i prosečno pretraživanje. Rezultati jedne AES petlje nisu brzine DES/3DES napada; ASIC/GPU/paralelizacija i MITM menjaju model.
+% TODO: Zadržati ograničeni AES keyspace; ne pokretati puni DES/AES brute-force.
+% TODO: Ekstrapolacije 2^56, 2^112, 2^128, 2^192 i 2^256 prikazati u naučnoj notaciji kao ilustraciju, uz razliku celog i očekivanog pretraživanja.
+% TODO: GPU throughput enkripcije sa jednim ključem nije brzina pretraživanja različitih ključeva; ne koristiti ga za takvu procenu bez zasebnog eksperimenta. TDEA i MITM zahtevaju poseban model.
 
 \subsection{Avalanche efekat}
-% TODO: Za sve algoritme izolovati jedan blok (ECB kao primitiva), menjati jedan bit poruke i jedan efektivni bit ključa; DES paritet isključiti. Za TDEA dokumentovati politiku degenerisanih ključeva. Meriti Hamming distance i normalizovani udeo, raspodelu po varijanti i tipu promene; oko 50% nije dokaz sigurnosti.
+% TODO: Menjati jedan bit poruke ili efektivnog ključa, isključiti DES paritet, dokumentovati TDEA degeneracije.
+% TODO: Hamming distance normalizovati prema dužini bloka; prikazati raspodele, ne predstavljati test kao dokaz sigurnosti.
 
-\subsection{Izvoz, grafikoni i ograničenja}
-% TODO: CSV/JSON, metapodaci i figure vezani istim run ID-jem. Uvoz LaTeX tabela tek posle pregleda. Odvojiti CBC rezultate od budućeg GCM/AEAD eksperimenta; AES-NI automatski backend nije potvrda korišćenog izvršnog puta.
+\subsection{Izvoz rezultata, grafikoni i ograničenja}
+Sirovi CSV, statistički sažetak i JSON okruženja povezani su istim run ID-jem.
+CPU polja za GPU kernel i transfer ostaju prazna, a ne nula.
+Grafikoni i tabele generisaće se odvojeno za ECB i CTR, isključivo iz
+validiranih izvršavanja. Ostatak ukupnog vremena nakon oduzimanja transfera
+i kernela predstavlja procenu ostalog overhead-a, ne izolovano vreme
+launch-a; različiti časovnici i rezolucija mogu dati mali negativan ostatak.
 
-\subsection{Rezultati i diskusija nakon merenja}
-% TODO: Ostaviti prazno do sprovođenja metodološki odobrenog eksperimenta; smoke testovi nisu podaci za članak. Razmotriti Python overhead na malim baferima, redosled algoritama, termalno stanje i ograničenu generalizaciju.
+GPU kod je istraživački. Eksperiment ne ispituje constant-time svojstva,
+bočne kanale, fault injection niti bezbedno upravljanje i brisanje ključeva
+u GPU memoriji. Performanse ne dokazuju produkcionu bezbednost.
+% TODO: Sačuvati verzije i sirova merenja; grafikone uključiti tek nakon pregleda, bez automatske zamene placeholdera.
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][14mm][c]{0.90\linewidth}{\centering
+Plan: \texttt{throughput\_vs\_size.pdf}\\
+CPU software, CPU AES-NI, GPU kernel i GPU ukupno; logaritamska X osa.}}
+\caption{Mesto za propusnost u zavisnosti od ulaza; rezultati još nisu uneti.}
+\label{fig:gpu-throughput}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][14mm][c]{0.90\linewidth}{\centering
+Plan: \texttt{latency\_vs\_size.pdf}\\
+Ukupna latencija tri putanje.}}
+\caption{Mesto za poređenje latencije; rezultati još nisu uneti.}
+\label{fig:gpu-latency}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][14mm][c]{0.90\linewidth}{\centering
+Plan: \texttt{gpu\_overhead\_breakdown.pdf}\\
+Transfer, kernel i ostatak ukupnog vremena.}}
+\caption{Mesto za strukturu GPU vremena; rezultati još nisu uneti.}
+\label{fig:gpu-overhead}
+\end{figure}
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][14mm][c]{0.90\linewidth}{\centering
+Plan: \texttt{speedup\_vs\_size.pdf}\\
+Odvojeni kernel-only i end-to-end odnosi prema CPU AES-NI.}}
+\caption{Mesto za faktore ubrzanja; ne pretpostavlja se prednost GPU-a.}
+\label{fig:gpu-speedup}
+\end{figure}
+
+\subsection{Rezultati i diskusija}
+% TODO: Pisati tek nakon validacije i stvarnih merenja. Razlikovati funkcionalnu proveru, pilot i rezultate za rad.
+% TODO: Razmotriti ograničenja jednog računara, driver/WDDM overhead, prenos preko PCIe, efekte keša i memorijske kapacitete; ne tvrditi unapred da GPU pobeđuje.

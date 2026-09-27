@@ -37,7 +37,9 @@ class StartObserver:
         return observed
 
 
-def verify_dispatch():
+def verify_dispatch(mode="CBC"):
+    if mode not in ("CBC", "ECB", "CTR"):
+        raise ValueError("Unsupported dispatch verification mode.")
     evidence = probe()
     if not evidence["available"]:
         raise RuntimeError("AES-NI CPU support and native library are required; no fallback comparison.")
@@ -53,9 +55,12 @@ def verify_dispatch():
             ciphertexts = []
             for backend in BACKENDS:
                 counts.update(software=0, aesni=0)
-                enc = aes.new(bytes(key_bytes), aes.MODE_CBC, iv=bytes(16),
+                options = {"iv": bytes(16)} if mode == "CBC" else {}
+                if mode == "CTR":
+                    options = {"nonce": b"", "initial_value": 0}
+                enc = aes.new(bytes(key_bytes), getattr(aes, "MODE_" + mode), **options,
                               use_aesni=backend == "aesni")
-                dec = aes.new(bytes(key_bytes), aes.MODE_CBC, iv=bytes(16),
+                dec = aes.new(bytes(key_bytes), getattr(aes, "MODE_" + mode), **options,
                               use_aesni=backend == "aesni")
                 encrypted = enc.encrypt(bytes(32))
                 if dec.decrypt(encrypted) != bytes(32):
@@ -70,7 +75,7 @@ def verify_dispatch():
                 raise RuntimeError("AES backends produced different ciphertexts.")
     finally:
         aes._raw_aes_lib, aes._raw_aesni_lib = portable, accelerated
-    return {**evidence, "preflight": records,
+    return {**evidence, "mode": mode, "preflight": records,
             "scope": "Native backend initialization observed; not a CPU instruction trace."}
 
 
