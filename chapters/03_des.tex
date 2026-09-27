@@ -1,0 +1,27 @@
+\section{Data Encryption Standard (DES)}
+\label{sec:des}
+% TODO: Razraditi poglavlje tek nakon provere izvora; ne unositi neproverene činjenice.
+Poglavlje će povezati konstrukciju DES-a sa njegovim istorijskim uslovima
+primene i praktičnim ograničenjima. FIPS 46-3 koristi se kao istorijski
+izvor, uz dokument o njegovom povlačenju~\cite{fips46-3,des-withdrawal-2005}.
+
+\subsection{Istorijat i standardizacija}
+% TODO: Istražiti nastanak, prvo izdanje i revizije; razlikovati godinu prvog standarda od 1999. godine FIPS 46-3.
+
+\subsection{Blok, ključ i Feistel arhitektura}
+% TODO: Opisati 64-bitni blok, 64-bitni zapis ključa sa 8 bitova parnosti i 56 efektivnih bitova. Objasniti inicijalnu i završnu permutaciju, polovine bloka i 16 rundi.
+
+\subsection{Funkcija runde i S-kutije}
+% TODO: Razložiti ekspanziju, XOR sa potključem, S-box i permutaciju; dodati šemu sa proverom prema standardu.
+
+\subsection{Raspored ključeva i dekripcija}
+% TODO: Objasniti izbor bitova, rotacije, 48-bitne potključeve i obrnuti redosled pri dekripciji.
+
+\subsection{Hardverska efikasnost i istorijska primena}
+% TODO: Uporediti projektne okolnosti i implementacije; ne preneti današnji Python throughput na tadašnji hardver.
+
+\subsection{Bezbednosna ograničenja i iscrpna pretraga}
+% TODO: Objasniti da mali ključ predstavlja centralni praktični problem, bez tvrdnje da je konstrukcija potpuno kriptoanalitički uništena. Uključiti granice 64-bitnog bloka i odvojiti diferencijalnu/linearnu kriptoanalizu od brute-force napada.
+
+\subsection{Istorijski projekti razbijanja DES-a}
+% TODO: Proveriti originalnu dokumentaciju EFF Deep Crack i distribuiranih izazova: datume, budžet, opremu i uslove. Ne unositi neproverene brzine.

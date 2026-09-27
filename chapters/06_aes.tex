@@ -1,0 +1,36 @@
+\section{Konstrukcija AES-a i implementaciona bezbednost}
+\label{sec:aes}
+% TODO: Razraditi poglavlje tek nakon provere izvora; ne unositi neproverene činjenice.
+Opis AES-a biće ograničen na nivo detalja potreban za razumevanje poređenja
+i implementacionih kompromisa. Normativna osnova je ažurirano izdanje FIPS
+197~\cite{fips197-2023}; teorijska kriptoanaliza i napadi na implementaciju
+biće obrađeni odvojeno.
+
+\subsection{Stanje, varijante i broj rundi}
+% TODO: Prikazati state od 4x4 bajta i raspored po kolonama; povezati AES-128/192/256 sa 10/12/14 rundi.
+
+\subsection{Aritmetika u konačnom polju}
+% TODO: Objasniti GF(2^8), XOR, množenje i redukcioni polinom samo koliko je potrebno za S-box i MixColumns.
+
+\subsection{Transformacije runde}
+% TODO: Obraditi SubBytes, ShiftRows, MixColumns i AddRoundKey. Izdvojiti početni AddRoundKey i završnu rundu bez MixColumns.
+
+\subsection{Proširenje ključa i dekripcija}
+% TODO: Objasniti key expansion za sve dužine ključa, potključeve i inverzne transformacije; ne pretpostaviti isti raspored ključa za sve varijante.
+
+\subsection{Bezbednosna margina i teorijski napadi}
+% TODO: Za svaki rezultat navesti broj rundi, model single-key/related-key, podatke, vreme i memoriju. Istražiti biclique i redukovane runde; ne predstavljati ih kao praktičan potpuni break standardnog AES-a. Tvrdnje proveriti do datuma preseka.
+
+\subsection{Bočni kanali i hardverska akceleracija}
+% TODO: Istražiti timing/cache napade, constant-time implementacije, AES-NI i ARM crypto extensions. Odvojiti bezbednost primitive, softvera, hardvera i protokola; AES-NI nije univerzalna zaštita od svih fizičkih napada.
+
+\begin{figure}[htbp]
+\centering
+\fbox{\parbox[c][28mm][c]{0.85\linewidth}{\centering
+Planirana slika: tok jedne AES runde.\\
+Dijagram još nije izrađen.}}
+\caption{Mesto za autorski dijagram AES runde prema FIPS 197.}
+\label{fig:aes-runda}
+\end{figure}
+% TODO: Zameniti okvir sa \includegraphics[width=.85\linewidth]{aes_runda.pdf}.
+% TODO: Prikazati početnu i završnu fazu odvojeno; u tekstu koristiti sliku~\ref{fig:aes-runda}.

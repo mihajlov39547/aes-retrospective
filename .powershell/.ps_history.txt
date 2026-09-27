@@ -1,0 +1,2 @@
+(Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned) ; (& c:\Projects\aes\.venv\Scripts\Activate.ps1)
+.\start-codex.ps1

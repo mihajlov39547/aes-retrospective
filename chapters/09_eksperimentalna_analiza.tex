@@ -1,0 +1,31 @@
+\section{Eksperimentalna analiza: plan i metodologija}
+\label{sec:eksperimenti}
+% TODO: Razraditi poglavlje tek nakon provere izvora; ne unositi neproverene činjenice.
+Eksperimenti su planirani kao poređenje konkretnih bibliotečkih
+implementacija i edukativne demonstracije. DES i Triple DES koriste se
+isključivo radi istorijskog poređenja. Merenja još nisu sprovedena za potrebe
+rada; ovo poglavlje ne sadrži rezultate niti rangiranje algoritama.
+
+\subsection{Pitanja i obuhvat eksperimenata}
+% TODO: Definisati hipoteze i kriterijume analize pre merenja. Uključiti DES, troključni TDEA, AES-128/192/256; dvoključni TDEA ostaviti kao opciono proširenje.
+
+\subsection{Okruženje i reproduktivnost}
+% TODO: Evidentirati seed, Python, OS, CPU, biblioteke, commit, opterećenje, napajanje i akceleraciju. Seed služi ponovljivim test podacima, nikada produkcionim ključevima.
+
+\subsection{Benchmark enkripcije i dekripcije}
+% TODO: Primarni zajednički mod: CBC, bez padding-a uz dužine deljive sa 16. Meriti samo transformaciju bafera; inicijalizaciju i key schedule izdvojiti. Novi objekat i IV za svako ponavljanje; warmup, više ponavljanja i provera povratne dekripcije izvan tajmera.
+
+\subsection{Veličine uzorka, statistika i jedinice}
+% TODO: Koristiti 1 KiB, 1 MiB, 10 MiB, opciono 100 MiB; navesti tačne bajtove. Throughput MB/s je bytes/10^6/s. Sačuvati pojedinačna merenja, aritmetičku sredinu, medijanu i uzoračku standardnu devijaciju; bez uklanjanja odstupanja bez kriterijuma.
+
+\subsection{Edukativna brute-force demonstracija}
+% TODO: Ograničiti promenljive bitove AES ključa; nikada ne pretraživati puni DES/AES prostor. Meriti pokušaje/s i ekstrapolirati 2^56, 2^112, 2^128, 2^192 i 2^256 u naučnoj notaciji. Razdvojiti celo i prosečno pretraživanje. Rezultati jedne AES petlje nisu brzine DES/3DES napada; ASIC/GPU/paralelizacija i MITM menjaju model.
+
+\subsection{Avalanche efekat}
+% TODO: Za sve algoritme izolovati jedan blok (ECB kao primitiva), menjati jedan bit poruke i jedan efektivni bit ključa; DES paritet isključiti. Za TDEA dokumentovati politiku degenerisanih ključeva. Meriti Hamming distance i normalizovani udeo, raspodelu po varijanti i tipu promene; oko 50% nije dokaz sigurnosti.
+
+\subsection{Izvoz, grafikoni i ograničenja}
+% TODO: CSV/JSON, metapodaci i figure vezani istim run ID-jem. Uvoz LaTeX tabela tek posle pregleda. Odvojiti CBC rezultate od budućeg GCM/AEAD eksperimenta; AES-NI automatski backend nije potvrda korišćenog izvršnog puta.
+
+\subsection{Rezultati i diskusija nakon merenja}
+% TODO: Ostaviti prazno do sprovođenja metodološki odobrenog eksperimenta; smoke testovi nisu podaci za članak. Razmotriti Python overhead na malim baferima, redosled algoritama, termalno stanje i ograničenu generalizaciju.

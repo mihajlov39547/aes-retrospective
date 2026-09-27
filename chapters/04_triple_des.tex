@@ -1,0 +1,24 @@
+\section{Triple DES / TDEA kao tranziciono rešenje}
+\label{sec:tdea}
+% TODO: Razraditi poglavlje tek nakon provere izvora; ne unositi neproverene činjenice.
+Triple DES biće razmotren kao način produženja upotrebljivosti postojeće
+DES infrastrukture i kao prelaz ka novom standardu. Specifikacija i kasnija
+odluka o povlačenju čine odvojene vrste dokaza~\cite{sp800-67r2,tdea-withdrawal-2023}.
+
+\subsection{Motivacija i ograničenje Double DES-a}
+% TODO: Kratko objasniti meet-in-the-middle za 2DES; ne tretirati ga kao četvrti glavni standard.
+
+\subsection{EDE konstrukcija i kompatibilnost}
+% TODO: Definisati E_K3(D_K2(E_K1(P))), DES-EDE i slučaj jednakih ključeva. Razlikovati dve nezavisne komponente (K3=K1) od tri.
+
+\subsection{Veličina ključa i efektivna sigurnost}
+% TODO: Razdvojiti 112/168 efektivnih bitova materijala, zapis sa paritetom i sigurnost pod konkretnim napadom. Dokumentovati vremenske, memorijske i podatkovne uslove; ne sabirati naivno sigurnost DES instanci.
+
+\subsection{Performanse i prednosti tranzicije}
+% TODO: Obraditi tri DES operacije, kompatibilnost, postojeći hardver i trošak migracije.
+
+\subsection{Ograničenja bloka i Sweet32}
+% TODO: Istražiti birthday granice za 64-bitni blok i konkretne uslove Sweet32 napada; ne poistovećivati koliziju bloka sa pronalaženjem ključa.
+
+\subsection{Povlačenje i preostale nasleđene primene}
+% TODO: Razdvojiti NIST zabranu primene nove zaštite od dozvoljene obrade ranije zaštićenih podataka, uz datume i opseg politike. Status standarda nije dokaz nestanka svih instalacija.

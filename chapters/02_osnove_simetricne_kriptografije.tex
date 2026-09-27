@@ -1,0 +1,24 @@
+\section{Osnove simetrične kriptografije}
+\label{sec:osnove}
+% TODO: Razraditi poglavlje tek nakon provere izvora; ne unositi neproverene činjenice.
+Cilj poglavlja je uspostavljanje terminologije koja razdvaja blokovsku
+šifru, način rada i protokol. Istorijska upotreba šifara za poverljivost
+posmatraće se odvojeno od autentifikovane enkripcije~\cite{sp800-38a,sp800-38d}.
+
+\subsection{Simetrična kriptografija, blok i ključ}
+% TODO: Definisati deljeni tajni ključ, blokovsku šifru kao familiju permutacija i E_K/D_K. Razlikovati dužinu bloka od prostora ključeva i upravljanje ključevima od algoritma.
+
+\subsection{Konfuzija i difuzija}
+% TODO: Objasniti pojmove i pronaći primarni istorijski izvor; odvojiti avalanche ilustraciju od dokaza sigurnosti.
+
+\subsection{Feistel mreže i supstituciono-permutacione mreže}
+% TODO: Uporediti tok podataka, reverzibilnost i ulogu nelinearnosti; pripremiti jednostavne šeme.
+
+\subsection{Načini rada: ECB, CBC i CTR}
+% TODO: Objasniti nezavisne blokove ECB-a i otkrivanje obrazaca; ulančavanje CBC-a, IV i padding; brojač CTR-a i zabranu ponovne upotrebe nonce-a pod istim ključem. Razlikovati zahteve IV-a i nonce-a.
+
+\subsection{GCM i autentifikovana enkripcija}
+% TODO: Razdvojiti AES, GCM, GMAC, AAD i tag; objasniti proveru taga pre prihvatanja poruke, jedinstvenost nonce-a i limite obima podataka.
+
+\subsection{Istorijska perspektiva i današnji AEAD}
+% TODO: Dokumentovati šta je bilo uobičajeno 2001--2003, a šta je preporuka odabranih savremenih protokola. CBC/CTR sami ne obezbeđuju integritet.

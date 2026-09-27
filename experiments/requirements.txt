@@ -1,0 +1,4 @@
+# Python >= 3.10. Standardna biblioteka pokriva CSV, JSON i statistiku.
+pycryptodome>=3.23.0,<4
+matplotlib>=3.10,<4
+psutil>=7,<8

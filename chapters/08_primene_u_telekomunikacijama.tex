@@ -1,0 +1,32 @@
+\section{Primene u telekomunikacijama}
+\label{sec:telekom}
+% TODO: Razraditi poglavlje tek nakon provere izvora; ne unositi neproverene činjenice.
+Analiza primena pratiće tri nivoa: AES kao primitivu, način rada i protokol
+koji određuje format poruke i upravljanje ključevima. Početne tačke su
+specifikacije IPsec ESP sa GCM i istorijska specifikacija TLS 1.3
+iz 2018.~\cite{rfc4106,rfc8446}; podrška algoritmu ne dokazuje obim njegove
+stvarne upotrebe.
+
+\subsection{Mrežni slojevi i zaštita podataka u tranzitu}
+% TODO: Razdvojiti pristupnu, transportnu i aplikativnu zaštitu, granice poverenja i upravljanje ključevima.
+
+\subsection{VPN i IPsec}
+% TODO: Obraditi ESP, AES-GCM i istorijske režime; odvojiti IKE razmenu ključeva od šifrovanja saobraćaja, uz tačne RFC odeljke.
+
+\subsection{TLS i transportni protokoli}
+% TODO: Mapirati konkretne verzije i cipher suites na primitive i AEAD; proveriti naslednike, errata i važenje RFC 8446 na datum preseka.
+
+\subsection{Wi-Fi, WPA2 i WPA3}
+% TODO: Proveriti IEEE 802.11 i Wi-Fi Alliance dokumente za CCMP/GCMP i profile; razlikovati autentifikaciju SAE od šifrovanja saobraćaja. Ne tvrditi da svaki profil koristi isti mod ili ključ.
+
+\subsection{Mobilni sistemi}
+% TODO: Istražiti tačne 3GPP specifikacije i release za AES-zasnovane EEA2/NEA2 i EIA2/NIA2 gde je relevantno; odvojiti enkripciju od integriteta i od drugih algoritama.
+
+\subsection{Infrastruktura, optičke mreže i mrežna oprema}
+% TODO: Proveriti MACsec i eventualne optičke standarde; podatke proizvođača o akceleraciji označiti kao implementacione tvrdnje, a ne normativne zahteve.
+
+\subsection{Embedded i IoT uređaji}
+% TODO: Razmotriti RAM, energiju, latenciju, životni vek ključeva i dostupnost akceleracije; ograničiti broj primera da rad ostane fokusiran.
+
+\subsection{Mapa dokaza za primene}
+% TODO: Za svaki primer pripremiti red: standard/verzija, odeljak, AES varijanta, mod, funkcija, obavezna/opciona podrška i datum provere. Izostaviti nepotvrđene primene.

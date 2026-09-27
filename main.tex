@@ -1,0 +1,52 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[english,serbian]{babel}
+\usepackage[margin=25mm]{geometry}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,tabularx,longtable,array}
+\usepackage{pdflscape}
+\usepackage{siunitx}
+\usepackage{csquotes}
+\usepackage[backend=biber,style=numeric,sorting=none,autolang=other]{biblatex}
+\addbibresource{references.bib}
+\usepackage[hidelinks]{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+\crefname{section}{odeljak}{odeljci}
+\crefname{figure}{slika}{slike}
+\crefname{table}{tabela}{tabele}
+\addto\captionsserbian{\renewcommand{\contentsname}{Sadržaj}
+  \renewcommand{\figurename}{Slika}\renewcommand{\tablename}{Tabela}}
+\graphicspath{{figures/}}
+\setlength{\emergencystretch}{2em}
+\setcounter{tocdepth}{1}
+\newif\ifshowsummary
+\showsummarytrue % TODO: Isključiti sadržaj za kraću verziju prema pravilima časopisa.
+\title{Od DES-a do AES-a: više od dve decenije razvoja, primene i perspektive simetrične kriptografije u telekomunikacijama\\[1em]
+\large From DES to AES: More Than Two Decades of Evolution, Applications and Perspectives of Symmetric Cryptography in Telecommunications}
+\author{Ime i prezime autora / autora 2\\
+\small Naziv ustanove, grad, država\\
+\small \texttt{autor@example.org}}
+\date{Radna struktura, septembar 2026.}
+\hypersetup{pdftitle={Od DES-a do AES-a},pdfauthor={Autor: dopuniti}}
+\begin{document}
+\maketitle
+\input{chapters/00_abstract}
+\ifshowsummary\clearpage\tableofcontents\clearpage\fi
+\input{chapters/01_uvod}
+\input{chapters/02_osnove_simetricne_kriptografije}
+\input{chapters/03_des}
+\input{chapters/04_triple_des}
+\input{chapters/05_nastanak_aes}
+\input{chapters/06_aes}
+\input{chapters/07_poredjenje_des_3des_aes}
+\input{chapters/08_primene_u_telekomunikacijama}
+\input{chapters/09_eksperimentalna_analiza}
+\input{chapters/10_prediction_vs_reality}
+\input{chapters/11_savremeni_izazovi_i_future_work}
+\input{chapters/12_zakljucak}
+\printbibliography[heading=bibintoc,title={Literatura}]
+\end{document}
