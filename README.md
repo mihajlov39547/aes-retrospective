@@ -9,7 +9,7 @@ Cilj je retrospektiva očekivanja iz 2001–2003. prema iskustvu do 2026, uz man
 
 ## Struktura
 
-Svi projektni izvori su prikazani; lokalno okruženje, Git baza i generisani build fajlovi skraćeni su.
+Pregled projektnih izvora; lokalni direktorijumi navedeni su zasebno ispod.
 
 ```text
 .
@@ -55,12 +55,15 @@ Svi projektni izvori su prikazani; lokalno okruženje, Git baza i generisani bui
 │       └── README.md
 ├── bibliography/
 │   └── notes.md
-├── build/                    # generisani PDF, logovi i tehničke provere
-├── .venv/                    # lokalno Python okruženje
-├── .git/                     # postojeći repozitorijum
-├── .powershell/              # postojeća lokalna konfiguracija
 └── start-codex.ps1            # postojeća skripta
 ```
+
+### Lokalno, ali nije verzionisano
+
+- `build/`: generisani PDF, TXT, logovi i tehničke provere.
+- `.venv/`: lokalno Python okruženje.
+- `.git/`: lokalni Git metapodaci, nisu deo verzionisanog sadržaja projekta.
+- `.powershell/`: lokalna PowerShell konfiguracija.
 
 ## Poglavlja
 
@@ -203,18 +206,26 @@ Metod i otvoreni zadaci su u [experiments/README.md](experiments/README.md).
 
 ## Bibliografija i metodološka pravila
 
-`references.bib` sadrži 12 početnih zapisa: FIPS 46-3, FIPS 197 (2001 i 2023),
-NIST izveštaj o AES izboru, predlog Rijndaela (1999), SP 800-67 Rev. 2,
-obaveštenja o povlačenju DES/TDEA, SP 800-38A/38D i RFC 4106/8446.
-URL-ovi i datum provere nalaze se uz zapise. Nepotvrđeni metapodaci su izostavljeni.
+`references.bib` sadrži proverene primarne standarde i relevantne
+akademske izvore za DES, TDEA, AES, kriptoanalizu, implementacionu
+bezbednost i telekomunikacione primene.
 
-[bibliography/notes.md](bibliography/notes.md) navodi zadatke za kriptoanalizu,
-bočne kanale, AES-NI, Sweet32, telekomunikacione profile, kvantne resurse i
-aktuelne standarde. RFC 8446 je istorijski izvor; proveriti njegovog naslednika.
-Početna bibliografija nije dovoljan dokaz svih tvrdnji o stanju u 2026.
+Prioritet imaju:
+- NIST/FIPS dokumenti;
+- NIST Special Publications;
+- originalna AES/Rijndael dokumentacija;
+- RFC specifikacije;
+- 3GPP i IEEE standardi;
+- originalni ili recenzirani akademski radovi.
 
-Razlikovati algoritam, mod i protokol; teorijski, praktičan i implementacioni napad;
-veličinu ključa i efektivnu sigurnost. AES ne opisivati kao „neprobojan“.
-DES/TDEA nisu preporuke za novu zaštitu. Seedovani ključevi služe samo sintetičkim
-merenjima. Ne pisati zaključak pre literature i rezultata.
-Sledeća faza je istraživanje i pisanje poglavlja jedno po jedno.
+RFC 8446 se koristi kao istorijska TLS 1.3 specifikacija iz 2018,
+dok je RFC 9846 aktuelna TLS 1.3 specifikacija za vremenski presek
+rada iz 2026.
+
+Nepotvrđene tvrdnje i otvoreni bibliografski zadaci vode se u
+[bibliography/notes.md](bibliography/notes.md).
+
+Razlikovati algoritam, mod i protokol; teorijski, praktičan i
+implementacioni napad; veličinu ključa i efektivnu sigurnosnu snagu.
+AES se ne opisuje kao „neprobojan“. DES i TDEA se ne predstavljaju
+kao preporučeni algoritmi za novu zaštitu.

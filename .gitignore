@@ -1,7 +1,37 @@
+# Python
 .venv/
 __pycache__/
 *.py[cod]
+
+# LaTeX / build
 build/
-experiments/results/*/
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+
+# Generated experiment output
+experiments/results/*
+!experiments/results/README.md
+
+# Local tooling
 .powershell/
 
+# Secrets / environment
+.env
+.env.*
+*.key
+*.pem
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
