@@ -94,7 +94,16 @@ Iz korena projekta:
 .\build.ps1
 ```
 
-Rezultat je `build/aes20y.pdf`. Bibliografiju automatski obrađuje Biber.
+Rezultati su `build/aes20y.pdf` i `build/aes20y.txt`. Bibliografiju automatski obrađuje Biber.
+TXT se automatski izvozi iz upravo izgrađenog PDF-a pomoću `pdftotext`
+(dostupan uz TeX Live ili zasebno kroz Poppler; mora biti na `PATH`).
+UTF-8 izvoz čuva naslove, pasuse, citate, bibliografiju, opise slika i približan
+raspored tabela, bez samih slika i kontrolnih znakova za prelome stranica.
+Fajl može da se priloži drugom agentu za pregled iste verzije rada.
+Tekst ostaje prelomljen u redove kao u PDF-u, uključujući brojeve stranica;
+složene formule mogu izgubiti deo rasporeda, a tekst unutar rasterskih slika
+se ne prepoznaje (nema OCR-a). Za proveru formula i dijagrama merodavan je PDF.
+Direktne LaTeX komande ispod prave samo PDF; za oba formata koristiti skriptu.
 Skripta radi i kada se pozove punom putanjom iz drugog direktorijuma; pri grešci
 prekida rad i ne prijavljuje stari PDF kao uspešno izgrađen.
 Direktna komanda: `latexmk -xelatex -interaction=nonstopmode -halt-on-error -jobname=aes20y -outdir=build main.tex`.

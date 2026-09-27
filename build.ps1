@@ -2,9 +2,9 @@
 param()
 
 $ErrorActionPreference = 'Stop'
-foreach ($tool in @('latexmk', 'xelatex', 'biber')) {
+foreach ($tool in @('latexmk', 'xelatex', 'biber', 'pdftotext')) {
     if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) {
-        throw "Missing tool: $tool. Install TeX Live or MiKTeX and add its tools to PATH."
+        throw "Missing tool: $tool. Install TeX Live or MiKTeX (pdftotext is also available in Poppler) and add its tools to PATH."
     }
 }
 
@@ -18,7 +18,18 @@ try {
     if (-not (Test-Path -LiteralPath $pdfPath -PathType Leaf)) {
         throw "Build finished without the expected PDF: $pdfPath"
     }
+    $txtPath = Join-Path $PSScriptRoot 'build/aes20y.txt'
+    # Preserve table columns and captions without exporting image data.
+    & pdftotext -layout -enc UTF-8 -nopgbrk $pdfPath $txtPath
+    if ($LASTEXITCODE -ne 0) {
+        throw "Text export failed (exit $LASTEXITCODE). PDF is available at: $pdfPath"
+    }
+    if (-not (Test-Path -LiteralPath $txtPath -PathType Leaf) -or
+        [string]::IsNullOrWhiteSpace([System.IO.File]::ReadAllText($txtPath, [System.Text.Encoding]::UTF8))) {
+        throw "Text export did not produce a nonempty document: $txtPath"
+    }
     Write-Host "PDF: $pdfPath"
+    Write-Host "TXT: $txtPath"
 }
 finally {
     Pop-Location
