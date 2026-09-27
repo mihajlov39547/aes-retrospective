@@ -5,7 +5,7 @@ Radni naslov: **Od DES-a do AES-a: više od dve decenije razvoja, primene i pers
 
 English title: **From DES to AES: More Than Two Decades of Evolution, Applications and Perspectives of Symmetric Cryptography in Telecommunications**.
 
-Cilj je retrospektiva očekivanja iz 2001–2003. prema iskustvu do 2026, uz manji eksperimentalni deo. Projekat nije kompletan članak, novi algoritam niti reprodukcija magistarskog rada. Autor, afilijacija i kontakt su placeholderi. Zaključak ostaje otvoren do završetka istraživanja.
+Cilj je retrospektiva očekivanja iz 2001–2003. prema iskustvu do 2026, uz manji eksperimentalni deo. Projekat nije kompletan članak, novi algoritam niti reprodukcija magistarskog rada. Autor je Marko Mihajlović; afilijacija i kontakt biće dodati kasnije. Zaključak ostaje otvoren do završetka istraživanja.
 
 ## Struktura
 
@@ -81,8 +81,8 @@ Brute-force i avalanche su pododeljci 09; dizajnerska retrospektiva i future wor
 
 ## Kompilacija
 
-Potrebni su TeX Live ili MiKTeX, pdfLaTeX, Biber i latexmk (na Windows-u i Perl).
-UTF-8, T1, Latin Modern i Babel `serbian` omogućavaju srpsku latinicu.
+Potrebni su TeX Live ili MiKTeX, XeLaTeX, Biber i latexmk (na Windows-u i Perl),
+kao i instaliran font Times New Roman. UTF-8, fontspec i Babel `serbian` omogućavaju srpsku latinicu.
 Planirana AES ilustracija ima označen okvir, pa nema nedostajućih slika.
 
 Iz korena projekta:
@@ -94,15 +94,15 @@ Iz korena projekta:
 Rezultat je `build/aes20y.pdf`. Bibliografiju automatski obrađuje Biber.
 Skripta radi i kada se pozove punom putanjom iz drugog direktorijuma; pri grešci
 prekida rad i ne prijavljuje stari PDF kao uspešno izgrađen.
-Direktna komanda: `latexmk -pdf -interaction=nonstopmode -halt-on-error -jobname=aes20y -outdir=build main.tex`.
+Direktna komanda: `latexmk -xelatex -interaction=nonstopmode -halt-on-error -jobname=aes20y -outdir=build main.tex`.
 Alternativa bez latexmk, takođe iz korena:
 
 ```powershell
 New-Item -ItemType Directory -Force build
-pdflatex -interaction=nonstopmode -halt-on-error -jobname=aes20y -output-directory=build main.tex
+xelatex -interaction=nonstopmode -halt-on-error -jobname=aes20y -output-directory=build main.tex
 biber --input-directory=build --output-directory=build aes20y
-pdflatex -interaction=nonstopmode -halt-on-error -jobname=aes20y -output-directory=build main.tex
-pdflatex -interaction=nonstopmode -halt-on-error -jobname=aes20y -output-directory=build main.tex
+xelatex -interaction=nonstopmode -halt-on-error -jobname=aes20y -output-directory=build main.tex
+xelatex -interaction=nonstopmode -halt-on-error -jobname=aes20y -output-directory=build main.tex
 ```
 
 Za isključivanje sadržaja promeniti `\showsummarytrue` u `\showsummaryfalse`.

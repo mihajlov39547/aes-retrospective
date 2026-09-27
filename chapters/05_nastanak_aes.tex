@@ -1,24 +1,435 @@
 \section{Nastanak i izbor AES-a}
 \label{sec:nastanak}
-% TODO: Razraditi poglavlje tek nakon provere izvora; ne unositi neproverene činjenice.
-Ovo poglavlje čini istorijsko jezgro rada. Dokumentacija izbora omogućiće
-rekonstrukciju tadašnjih zahteva i obrazloženja izbora, nezavisno od kasnijeg
-uspeha standarda~\cite{nist-aes-report-2001,rijndael-proposal-1999}.
+
+Proces nastanka Advanced Encryption Standarda (AES) predstavlja jedan
+od najotvorenijih i najdetaljnije dokumentovanih postupaka izbora
+kriptografskog standarda. Za razliku od DES-a, čiji je proces
+standardizacije tokom sedamdesetih godina bio predmet brojnih rasprava
+o transparentnosti i projektantskim odlukama, razvoj AES-a zasnivao se
+na međunarodnom javnom pozivu, objavljenim specifikacijama kandidata,
+otvorenoj kriptoanalizi i višegodišnjoj evaluaciji performansi
+~\cite{nist-aes-report-2001,nist-aes-call-1997}.
+
+NIST je proces pokrenuo 1997. godine sa ciljem da pronađe dugoročni
+naslednik DES-a koji bi mogao da zaštiti osetljive, ali neklasifikovane
+informacije američke federalne administracije i istovremeno bude
+slobodno dostupan široj međunarodnoj zajednici. Od početka je bilo
+predviđeno da algoritam bude javno objavljen i dostupan bez naknade za
+licenciranje širom sveta~\cite{nist-aes-call-1997}.
+
+Proces se odvijao kroz više faza. Nakon formalnog poziva kandidatima u
+septembru 1997. godine, NIST je tokom 1998. prihvatio petnaest
+algoritama koji su zadovoljili minimalne kriterijume. Nakon prve runde
+javne analize taj broj je 1999. smanjen na pet finalista: MARS, RC6,
+Rijndael, Serpent i Twofish. Posle dodatne evaluacije, testiranja i
+javne rasprave NIST je 2. oktobra 2000. objavio izbor algoritma Rijndael.
+Konačni standard FIPS~197 objavljen je 26. novembra 2001. godine
+~\cite{nist-aes-report-2001,nist-aes-finalists-1999,
+nist-rijndael-selection-2000,fips197-2001}.
+
+Ovaj proces je naročito značajan za retrospektivnu analizu zato što
+dokumentacija omogućava da se kriterijumi iz perioda izbora AES-a
+posmatraju nezavisno od kasnijeg uspeha algoritma. Time je moguće
+razdvojiti ono što se od novog standarda očekivalo 1997--2001. godine
+od onoga što se zaista dogodilo tokom narednih više od dve decenije.
+
 
 \subsection{Potreba za naslednikom DES-a i zahtevi konkursa}
-% TODO: Istražiti NIST poziv, rokove, bezbednosne zahteve, javnost procesa i licencne uslove.
+\label{subsec:aes_potreba}
+
+Krajem devedesetih godina postalo je jasno da DES ne predstavlja
+odgovarajuću dugoročnu osnovu za novi kriptografski standard. Kao što
+je pokazano u Poglavlju~\ref{sec:des}, njegova efektivna dužina ključa
+od 56 bita omogućila je praktičnu iscrpnu pretragu specijalizovanim
+hardverom. Triple DES je povećavao sigurnosnu snagu, ali je zahtevao
+tri uzastopne DES operacije i zadržavao 64-bitnu veličinu bloka. Zbog
+toga je NIST tražio novu konstrukciju koja neće biti samo proširenje
+postojećeg DES-a.
+
+NIST je 2. januara 1997. najavio početak razvoja novog standarda, a
+formalni poziv za predlaganje algoritama objavljen je 12. septembra
+1997. godine~\cite{nist-aes-development,nist-aes-call-1997}. Period
+za dostavljanje kandidata trajao je približno devet meseci, do
+15. juna 1998. godine~\cite{nist-aes-history}.
+
+Minimalni tehnički zahtevi bili su precizno definisani. Kandidat je
+morao da bude:
+
+\begin{itemize}
+    \item simetrični algoritam sa tajnim ključem;
+    \item blokovska šifra;
+    \item sposoban da obrađuje blokove veličine 128 bita;
+    \item sposoban da koristi ključeve od 128, 192 i 256 bita.
+\end{itemize}
+
+Drugim rečima, obavezne kombinacije veličine ključa i bloka bile su
+
+\begin{equation}
+    (128,128),\qquad
+    (192,128),\qquad
+    (256,128),
+\end{equation}
+
+gde prvi broj označava dužinu ključa, a drugi veličinu bloka
+~\cite{nist-aes-call-1997,nist-aes-history}.
+
+Ovi zahtevi su već sami po sebi predstavljali značajan odmak od DES-a.
+Čak je i najmanja zahtevana AES varijanta sa 128-bitnim ključem imala
+prostor ključeva od
+
+\begin{equation}
+    2^{128},
+\end{equation}
+
+što je neuporedivo veće od DES prostora od $2^{56}$ ključeva.
+
+Međutim, veličina ključa nije bila jedini kriterijum. NIST je kandidate
+planirao da ocenjuje prema tri široke grupe faktora:
+
+\begin{enumerate}
+    \item bezbednosti;
+    \item trošku, odnosno računarskoj efikasnosti;
+    \item karakteristikama algoritma i implementacije.
+\end{enumerate}
+
+U praktičnom smislu to je značilo da kandidat nije smeo samo da bude
+otporan na poznate napade. Morao je da bude pogodan za različite vrste
+računarskih platformi, od snažnih procesora do uređaja sa ograničenim
+resursima, i da pruža prihvatljive softverske i hardverske performanse
+~\cite{nist-aes-report-2001}.
+
+Otvorenost procesa predstavljala je još jedan važan zahtev. NIST je
+nameravao da sve prihvaćene prijave učini javno dostupnim kako bi
+istraživačka zajednica mogla da analizira, testira i pokušava da napadne
+predložene algoritme. Poziv je bio otvoren industriji, univerzitetima,
+istraživačkim institucijama, organizacijama za standardizaciju i
+pojedincima iz različitih zemalja
+~\cite{nist-aes-call-1997}.
+
+NIST je takođe zahtevao da konačni AES bude nekategorisan
+(\emph{unclassified}), javno objavljen i dostupan bez autorskih
+naknada širom sveta. Ovaj zahtev bio je važan za mogućnost široke
+međunarodne primene standarda i izbegavanje zavisnosti od vlasničkih
+licenci~\cite{nist-aes-call-1997}.
+
+Od podnosilaca su, pored matematičkog opisa algoritma, zahtevane i
+referentne i optimizovane implementacije, uključujući programski kod,
+kao i dokumentacija o bezbednosti, efikasnosti i fleksibilnosti
+kandidata~\cite{nist-aes-history}. Time je performansna analiza bila
+ugrađena u sam proces selekcije, a ne ostavljena za period nakon
+standardizacije.
+
 
 \subsection{Kandidati i finalisti}
-% TODO: Proveriti spisak kandidata i faze; obraditi MARS, RC6, Rijndael, Serpent i Twofish bez neosnovanog rangiranja.
+\label{subsec:aes_kandidati}
+
+NIST je do roka primio 21 kandidacioni paket. Šest prijava nije
+ispunilo sve proceduralne ili tehničke zahteve, pa je petnaest
+algoritama prihvaćeno kao formalni kandidati
+~\cite{nist-aes-development-2021}.
+
+Petnaest kandidata javno je predstavljeno na Prvoj AES konferenciji
+održanoj u Venturi u Kaliforniji od 20. do 22. avgusta 1998. godine.
+Prihvaćeni kandidati bili su:
+
+\begin{itemize}
+    \item CAST-256;
+    \item CRYPTON;
+    \item DEAL;
+    \item DFC;
+    \item E2;
+    \item FROG;
+    \item HPC;
+    \item LOKI97;
+    \item MAGENTA;
+    \item MARS;
+    \item RC6;
+    \item Rijndael;
+    \item SAFER+;
+    \item Serpent;
+    \item Twofish.
+\end{itemize}
+
+Kandidate su razvili istraživači i organizacije iz više država, što je
+procesu dalo izrazito međunarodni karakter
+~\cite{nist-aes-candidates-1998}.
+
+Prva faza javne evaluacije trajala je od avgusta 1998. do
+15. aprila 1999. godine. Tokom tog perioda međunarodna kriptografska
+zajednica analizirala je konstrukcije, predlagala napade, proveravala
+implementacije i razmatrala njihove performanse
+~\cite{nist-aes-first-round-1999}.
+
+Na osnovu javnih komentara, naučnih radova, diskusija sa druge AES
+konferencije, sopstvenih testiranja i drugih dostupnih rezultata NIST
+je izabrao pet finalista:
+
+\begin{enumerate}
+    \item MARS;
+    \item RC6;
+    \item Rijndael;
+    \item Serpent;
+    \item Twofish.
+\end{enumerate}
+
+Odluka je javno objavljena 9. avgusta 1999. godine
+~\cite{nist-aes-finalists-1999}.
+
+MARS je bio IBM-ov kandidat sa relativno složenom hibridnom strukturom
+i različitim tipovima rundi. RC6 je razvijen u RSA Laboratories kao
+evolucija algoritma RC5 i intenzivno je koristio operacije zavisne od
+podataka. Serpent, čiji su autori Ross Anderson, Eli Biham i Lars
+Knudsen, projektovan je sa konzervativnom sigurnosnom marginom.
+Twofish su razvili Bruce Schneier, John Kelsey, Doug Whiting, David
+Wagner, Chris Hall i Niels Ferguson, dok su Rijndael razvili Joan
+Daemen i Vincent Rijmen~\cite{nist-aes-finalists-1999}.
+
+Važno je izbeći naknadno predstavljanje procesa kao takmičenja u kojem
+je jedan algoritam bio ``dobar'', a ostali ``loši''. NIST je u trenutku
+izbora finalista naveo da tokom prve runde nisu otkrivene značajne
+bezbednosne slabosti kod pet odabranih algoritama i da su svi smatrani
+potencijalno pogodnim za zaštitu podataka
+~\cite{nist-aes-finalists-1999}.
+
+Druga runda zato nije bila samo potraga za kriptoanalitičkim
+``pobednikom''. Fokus je bio na finijem poređenju bezbednosnih margina,
+performansi, memorijskih zahteva, hardverskih implementacija,
+fleksibilnosti i drugih praktičnih karakteristika.
+
 
 \subsection{Autori i projektne osobine Rijndaela}
-% TODO: Predstaviti Joan Daemen i Vincent Rijmen; koristiti originalni predlog, uz tačnu verziju dokumenta.
+\label{subsec:rijndael_autori}
+
+Rijndael su razvili belgijski kriptografi Joan Daemen i Vincent Rijmen.
+Naziv algoritma nastao je kombinovanjem njihovih prezimena.
+U vreme AES procesa Daemen je radio u kompaniji Proton World
+International, dok je Rijmen bio povezan sa Katholieke Universiteit
+Leuven i istraživačkom grupom COSIC
+~\cite{rijndael-proposal-1999,nist-rijndael-selection-2000}.
+
+Originalni Rijndael dokument dostavljen je NIST-u tokom 1998. godine,
+dok je unapređena verzija dokumentacije za drugu rundu objavljena
+3. septembra 1999. godine. Upravo ta verzija predstavlja istorijski
+dokument na koji se ovaj rad oslanja
+~\cite{rijndael-proposal-1999}.
+
+Rijndael je projektovan kao iterativna supstituciono-permutaciona
+blokovska šifra. Za razliku od DES-a, nije zasnovan na Feistel mreži.
+Stanje se kroz niz rundi transformiše kombinacijom nelinearne
+supstitucije, permutacije bajtova, linearnog mešanja i dodavanja
+podključa. Detaljna konstrukcija biće opisana u
+Poglavlju~\ref{sec:aes}.
+
+Projektanti su u dokumentaciji posebno naglasili nekoliko svojstava
+Rijndaela:
+
+\begin{itemize}
+    \item efikasne implementacije na procesorima opšte namene;
+    \item mogućnost kompaktne implementacije na pametnim karticama;
+    \item relativno mali memorijski zahtev;
+    \item paralelnu strukturu transformacija;
+    \item jednostavnost dizajna;
+    \item odsustvo zavisnosti od specifičnog endian rasporeda procesora;
+    \item mogućnost proširenja na različite veličine blokova i ključeva.
+\end{itemize}
+
+~\cite{rijndael-proposal-1999}.
+
+Jedno od važnih projektnih načela bila je takozvana
+\emph{wide trail} strategija, kojom su Daemen i Rijmen nastojali da
+obezbede veliki broj aktivnih nelinearnih komponenti kroz više rundi i
+time ograniče efikasnost diferencijalnih i linearnih kriptoanalitičkih
+tragova. Ova filozofija dizajna biće detaljnije pomenuta pri analizi
+bezbednosne margine AES-a.
+
+Posebno je značajno da Rijndael nije prvobitno bio ograničen samo na
+parametre koji su kasnije postali AES. Njegova struktura bila je
+projektovana kao šira familija blokovskih šifara, što je kasnije
+omogućilo NIST-u da za AES izabere samo određeni podskup parametara.
+
 
 \subsection{Kriterijumi i obrazloženje izbora}
-% TODO: Razmotriti bezbednost, softverske i hardverske performanse, memoriju, fleksibilnost i različite platforme; izbegavati retrospektivno pripisivanje AES-NI tadašnjim očekivanjima.
+\label{subsec:aes_kriterijumi}
+
+NIST nije izabrao Rijndael samo na osnovu brzine niti samo na osnovu
+veličine sigurnosne margine. Završna odluka predstavljala je procenu
+kombinacije više faktora.
+
+Bezbednost je imala najveći značaj. NIST je razmatrao otpornost
+kandidata na poznate oblike kriptoanalize, sigurnosnu marginu u odnosu
+na redukovane varijante algoritama, jednostavnost analize konstrukcije
+i sve rezultate koje je tokom otvorenog procesa objavila međunarodna
+istraživačka zajednica~\cite{nist-aes-report-2001}.
+
+Nakon bezbednosti razmatrane su performanse i implementaciona
+svojstva. To je uključivalo:
+
+\begin{itemize}
+    \item brzinu šifrovanja i dešifrovanja u softveru;
+    \item performanse na različitim procesorskim arhitekturama;
+    \item zahteve za RAM i ROM memorijom;
+    \item efikasnost rasporeda ključeva;
+    \item hardversku implementaciju;
+    \item mogućnost implementacije na pametnim karticama i drugim
+    uređajima ograničenih resursa;
+    \item sposobnost iskorišćavanja paralelizma;
+    \item fleksibilnost implementacije.
+\end{itemize}
+
+NIST je u završnoj analizi zaključio da je svih pet finalista nudilo
+visok nivo sigurnosti. Zbog toga je odluka u velikoj meri zavisila od
+njihovih relativnih performansi i implementacionih kompromisa
+~\cite{nist-aes-report-2001,nist-rijndael-selection-2000}.
+
+Rijndael se posebno izdvojio uravnoteženim ponašanjem na različitim
+platformama. NIST je ocenio da pruža veoma dobre softverske performanse
+na različitim procesorima, dobru efikasnost na uređajima sa ograničenim
+resursima i pogodnu hardversku strukturu. Njegov raspored ključeva bio
+je relativno jednostavan, a algoritam je posedovao visok stepen
+paralelizma.
+
+U javnom saopštenju povodom izbora NIST je odluku sažeo navodeći da je
+Rijndael pružio najbolju ukupnu kombinaciju sigurnosti, performansi,
+efikasnosti, implementabilnosti i fleksibilnosti
+~\cite{nist-rijndael-selection-2000}.
+
+Ovo je važna formulacija za retrospektivu u ovom radu. NIST nije tvrdio
+da je Rijndael apsolutno najbolji u svakoj pojedinačnoj kategoriji.
+Naprotiv, drugi finalisti su u određenim testovima imali bolje
+rezultate. Rijndael je izabran zato što je ukupni skup njegovih osobina
+procijenjen kao najpogodniji za dugoročni standard namenjen veoma
+različitim platformama.
+
+Takođe je važno ne projektovati današnje implementacione mogućnosti
+unazad na ovu odluku. Hardverske instrukcije kao što je AES-NI nisu
+postojale u vreme selekcije. Performanse Rijndaela ocenjene su na
+tadašnjim procesorima, pametnim karticama i simuliranim ili stvarnim
+hardverskim arhitekturama. Kasnija pojava specijalizovanih AES
+instrukcija predstavlja rezultat dugoročnog uspeha i raširenosti
+standarda, a ne kriterijum prema kojem je Rijndael prvobitno izabran.
+
 
 \subsection{Izbor 2000. i standardizacija 2001. godine}
-% TODO: Dokumentovati tačne datume i FIPS 197; odvojiti uredničko ažuriranje 2023. od tehničke promene algoritma.
+\label{subsec:aes_standardizacija}
+
+Nakon završetka druge runde evaluacije i razmatranja rezultata Treće
+AES konferencije održane tokom aprila 2000. godine, NIST je završio
+analizu pet finalista.
+
+Dana 2. oktobra 2000. godine američki Secretary of Commerce zvanično je
+objavio da je Rijndael izabran kao predloženi Advanced Encryption
+Standard~\cite{nist-rijndael-selection-2000}.
+
+Izbor algoritma nije odmah predstavljao završetak formalnog postupka.
+Nakon objave NIST je pripremio nacrt Federal Information Processing
+Standarda i otvorio dodatni period za javne komentare. Tek nakon te
+procedure Rijndael je formalno standardizovan kao AES.
+
+FIPS~197 objavljen je
+
+\begin{equation}
+    26.~\text{novembra 2001. godine}.
+\end{equation}
+
+~\cite{fips197-2001}.
+
+Standard je definisao tri varijante:
+
+\begin{itemize}
+    \item AES-128;
+    \item AES-192;
+    \item AES-256.
+\end{itemize}
+
+Sve tri koriste blok od 128 bita, dok broj u nazivu označava dužinu
+ključa. Broj rundi zavisi od dužine ključa:
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Varijanta & Veličina bloka & Veličina ključa & Broj rundi \\
+\midrule
+AES-128 & 128 bita & 128 bita & 10 \\
+AES-192 & 128 bita & 192 bita & 12 \\
+AES-256 & 128 bita & 256 bita & 14 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+~\cite{fips197-2001}.
+
+FIPS~197 je 9. maja 2023. objavljen u urednički ažuriranoj verziji.
+NIST eksplicitno navodi da ovo ažuriranje nije promenilo AES algoritam.
+Izmene su se odnosile na terminologiju, formatiranje, dodatne dijagrame,
+jasnije definicije i ažurirane reference
+~\cite{fips197-2023}.
+
+Zato se u ovom radu FIPS~197 iz 2001. koristi kao istorijska referenca
+za originalnu standardizaciju, dok se izdanje iz 2023. koristi kada je
+potrebno jasnije savremeno predstavljanje iste tehničke specifikacije.
+
 
 \subsection{Rijndael i standardizovani AES}
-% TODO: Eksplicitno navesti AES blok od 128 bita i ključeve 128/192/256 bita; razlikovati širu familiju Rijndael sa drugim dimenzijama bloka.
+\label{subsec:rijndael_vs_aes}
+
+Nazivi Rijndael i AES često se koriste kao sinonimi, ali tehnički nisu
+potpuno identični.
+
+Rijndael predstavlja širu familiju blokovskih šifara koju su definisali
+Daemen i Rijmen. Originalna konstrukcija i njena proširena specifikacija
+omogućavaju nezavisno biranje veličine ključa i veličine bloka između
+128 i 256 bita u koracima od 32 bita:
+
+\begin{equation}
+    128,\ 160,\ 192,\ 224,\ 256~\text{bita}.
+\end{equation}
+
+~\cite{rijndael-proposal-1999,rijndael-naming-2003}.
+
+Broj rundi u opštoj Rijndael familiji može se izraziti kao
+
+\begin{equation}
+    N_r = \max(N_k,N_b) + 6,
+\end{equation}
+
+gde $N_k$ predstavlja dužinu ključa izraženu brojem 32-bitnih reči,
+a $N_b$ veličinu bloka izraženu na isti način
+~\cite{rijndael-proposal-1999}.
+
+AES predstavlja samo tri konkretna člana te šire familije. FIPS~197
+fiksira veličinu bloka na
+
+\begin{equation}
+    128~\text{bita},
+\end{equation}
+
+dok dozvoljava samo tri veličine ključa:
+
+\begin{equation}
+    128,\qquad192,\qquad256~\text{bita}.
+\end{equation}
+
+Zato važi:
+
+\begin{equation}
+    \text{AES} \subset \text{Rijndael},
+\end{equation}
+
+u smislu skupa dozvoljenih parametara.
+
+Na primer, Rijndael sa 256-bitnim blokom i 256-bitnim ključem pripada
+Rijndael familiji, ali nije AES-256. AES-256 koristi 256-bitni ključ
+uz blok koji je i dalje veličine 128 bita.
+
+Ova razlika je značajna i za retrospektivni deo rada. Kada se razmatra
+pitanje da li bi danas mogao biti izabran veći blok od 128 bita, važno
+je razumeti da takva mogućnost nije strana originalnom dizajnu
+Rijndaela. Šira konstrukcija je podržavala veće blokove, dok je NIST
+za AES standardizovao samo 128-bitni blok.
+
+Izbor ovog podskupa imao je posledice na dugoročnu interoperabilnost:
+svi sistemi koji implementiraju AES mogu polaziti od jedinstvene
+veličine bloka, dok se sigurnosni nivo menja izborom veličine ključa.
+Istovremeno, odluka da blok ostane fiksiran na 128 bita predstavlja
+jednu od projektnih odluka koja se može ponovo analizirati iz
+perspektive više od dve decenije praktične upotrebe.

@@ -1,36 +1,691 @@
 \section{Konstrukcija AES-a i implementaciona bezbednost}
 \label{sec:aes}
-% TODO: Razraditi poglavlje tek nakon provere izvora; ne unositi neproverene činjenice.
-Opis AES-a biće ograničen na nivo detalja potreban za razumevanje poređenja
-i implementacionih kompromisa. Normativna osnova je ažurirano izdanje FIPS
-197~\cite{fips197-2023}; teorijska kriptoanaliza i napadi na implementaciju
-biće obrađeni odvojeno.
+
+Advanced Encryption Standard (AES) je simetrična blokovska šifra
+zasnovana na supstituciono-permutacionoj mreži. Za razliku od DES-a,
+AES ne koristi Feistel strukturu niti deli blok na dve polovine.
+Umesto toga, svih 128 bitova ulaznog bloka organizuje se u matricu
+bajtova nad kojom se u svakoj rundi primenjuje niz invertibilnih
+transformacija.
+
+Normativnu osnovu algoritma predstavlja FIPS~197. Ažurirano izdanje
+standarda iz 2023. godine nije promenilo AES algoritam, već je
+unapredilo terminologiju, dijagrame i opis rasporeda ključeva
+~\cite{fips197-2023}. AES postoji u tri standardizovane varijante,
+AES-128, AES-192 i AES-256, koje koriste isti 128-bitni blok, ali
+različite dužine ključa i broj rundi.
+
+Pri razmatranju bezbednosti AES-a potrebno je razlikovati najmanje tri
+nivoa. Prvi predstavlja kriptoanalizu same blokovske šifre. Drugi se
+odnosi na način na koji je AES implementiran u softveru ili hardveru,
+gde mogu nastati bočni kanali koji nisu posledica slabosti matematičke
+konstrukcije. Treći nivo predstavljaju načini rada i protokoli u kojima
+se AES koristi. Ova razlika je ključna za pravilno tumačenje istorije
+AES-a: praktično kompromitovana implementacija AES-a ne znači nužno da
+je sama AES primitiva kriptoanalitički razbijena.
+
 
 \subsection{Stanje, varijante i broj rundi}
-% TODO: Prikazati state od 4x4 bajta i raspored po kolonama; povezati AES-128/192/256 sa 10/12/14 rundi.
+\label{subsec:aes_state}
+
+AES uvek obrađuje blok od 128 bita, odnosno 16 bajtova. Tokom
+šifrovanja ovih 16 bajtova organizuje se u matricu poznatu kao
+\emph{State}. Matrica ima četiri reda i četiri kolone:
+
+\begin{equation}
+S =
+\begin{bmatrix}
+s_{0,0} & s_{0,1} & s_{0,2} & s_{0,3} \\
+s_{1,0} & s_{1,1} & s_{1,2} & s_{1,3} \\
+s_{2,0} & s_{2,1} & s_{2,2} & s_{2,3} \\
+s_{3,0} & s_{3,1} & s_{3,2} & s_{3,3}
+\end{bmatrix}.
+\label{eq:aes-state}
+\end{equation}
+
+Ulazni bajtovi smeštaju se po kolonama, tako da za ulazni niz
+$\mathrm{in}[0],\ldots,\mathrm{in}[15]$ važi
+
+\begin{equation}
+s_{r,c} = \mathrm{in}[r+4c],
+\qquad
+0\leq r<4,\quad 0\leq c<4.
+\end{equation}
+
+Ovakva organizacija važna je za razumevanje transformacija
+\texttt{ShiftRows} i \texttt{MixColumns}. AES transformacije ne deluju
+na ulaz kao na jedan 128-bitni broj, već na njegove bajtove i kolone
+organizovane u State matrici.
+
+FIPS~197 koristi parametar $N_k$ za broj 32-bitnih reči u ključu,
+$N_b$ za broj reči u bloku i $N_r$ za broj rundi. Kod AES-a je
+
+\begin{equation}
+N_b = 4,
+\end{equation}
+
+dok vrednosti $N_k$ i $N_r$ zavise od varijante:
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Varijanta & $N_k$ & Dužina ključa & $N_r$ \\
+\midrule
+AES-128 & 4 & 128 bita & 10 \\
+AES-192 & 6 & 192 bita & 12 \\
+AES-256 & 8 & 256 bita & 14 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+~\cite{fips197-2023}.
+
+Sve tri varijante koriste iste osnovne transformacije runde. Razlika
+je pre svega u dužini glavnog ključa, broju generisanih potključeva i
+ukupnom broju rundi.
+
+Šifrovanje ne počinje kompletnom AES rundom. Pre prve runde izvršava
+se početni \texttt{AddRoundKey}. Nakon toga sledi $N_r-1$ punih rundi,
+a poslednja runda razlikuje se po tome što ne sadrži
+\texttt{MixColumns}.
+
 
 \subsection{Aritmetika u konačnom polju}
-% TODO: Objasniti GF(2^8), XOR, množenje i redukcioni polinom samo koliko je potrebno za S-box i MixColumns.
+\label{subsec:aes_gf}
+
+AES je bajtovski orijentisana šifra. Mnoge njegove transformacije
+mogu se prirodno opisati operacijama u konačnom polju
+
+\begin{equation}
+GF(2^8).
+\end{equation}
+
+Jedan bajt
+
+\begin{equation}
+b_7b_6\ldots b_1b_0
+\end{equation}
+
+može se predstaviti kao polinom stepena najviše sedam sa
+koeficijentima iz $GF(2)$:
+
+\begin{equation}
+b(x)=
+b_7x^7+b_6x^6+\cdots+b_1x+b_0.
+\end{equation}
+
+Pošto su koeficijenti binarni, sabiranje dva elementa polja odgovara
+bitovskoj XOR operaciji:
+
+\begin{equation}
+a(x)+b(x)=a(x)\oplus b(x).
+\end{equation}
+
+Za razliku od sabiranja, množenje zahteva redukciju rezultujućeg
+polinoma. AES koristi ireducibilni polinom
+
+\begin{equation}
+m(x)=x^8+x^4+x^3+x+1.
+\label{eq:aes-mod-polynomial}
+\end{equation}
+
+U heksadecimalnom zapisu ovaj polinom odgovara vrednosti
+
+\begin{equation}
+\mathtt{0x11B}.
+\end{equation}
+
+Množenje u AES-u zato predstavlja množenje polinoma modulo $m(x)$.
+Ova aritmetika koristi se naročito u transformacijama
+\texttt{SubBytes} i \texttt{MixColumns}.
+
+Česta pomoćna operacija jeste množenje elementa sa $\{02\}$, odnosno
+sa polinomom $x$. Ako najviši bit nije postavljen, operacija odgovara
+pomaku ulevo za jedan bit. Ako bi pomak proizveo član $x^8$, rezultat
+se dodatno redukuje pomoću polinoma iz
+Jednačine~\eqref{eq:aes-mod-polynomial}.
+
+Na nivou implementacije ovo znači da se potrebna aritmetika može
+realizovati kombinacijom pomeranja i XOR operacija, bez potrebe za
+opštom aritmetikom nad velikim brojevima.
+
+Potpuna teorija konačnih polja nije neophodna za dalju analizu. Za
+razumevanje AES-a dovoljno je uočiti da $GF(2^8)$ omogućava
+determinističke i invertibilne bajtovske transformacije potrebne za
+nelinearnost i difuziju algoritma.
+
 
 \subsection{Transformacije runde}
-% TODO: Obraditi SubBytes, ShiftRows, MixColumns i AddRoundKey. Izdvojiti početni AddRoundKey i završnu rundu bez MixColumns.
+\label{subsec:aes_round}
+
+Jedna standardna AES runda sastoji se od četiri transformacije:
+
+\begin{enumerate}
+    \item \texttt{SubBytes};
+    \item \texttt{ShiftRows};
+    \item \texttt{MixColumns};
+    \item \texttt{AddRoundKey}.
+\end{enumerate}
+
+~\cite{fips197-2023}.
+
+Njihova kombinacija ostvaruje nelinearnost, difuziju i zavisnost
+rezultata od tajnog ključa.
+
+
+\subsubsection{SubBytes}
+
+\texttt{SubBytes} je nelinearna bajtovska transformacija. Svaki bajt
+State matrice nezavisno se zamenjuje drugim bajtom pomoću fiksne
+S-kutije:
+
+\begin{equation}
+s_{r,c}
+\leftarrow
+SBox[s_{r,c}].
+\end{equation}
+
+AES S-kutija nije proizvoljna tabela. Konstruisana je tako što se za
+nenulti bajt prvo izračunava multiplikativni inverz u $GF(2^8)$, nakon
+čega se primenjuje invertibilna afina transformacija nad bitovima.
+Nulta vrednost tretira se posebno pre afine transformacije.
+
+S-kutija predstavlja glavni nelinearni element AES-a. Njena uloga je
+da onemogući jednostavne linearne relacije između otvorenog teksta,
+ključa i šifrata i da doprinese otpornosti na diferencijalnu i linearnu
+kriptoanalizu.
+
+
+\subsubsection{ShiftRows}
+
+\texttt{ShiftRows} ciklično pomera bajtove svakog reda State matrice.
+Prvi red ostaje nepromenjen, dok se ostala tri reda pomeraju ulevo za
+jedan, dva i tri bajta:
+
+\begin{align}
+\text{red }0 &: 0,\\
+\text{red }1 &: 1,\\
+\text{red }2 &: 2,\\
+\text{red }3 &: 3.
+\end{align}
+
+Transformacija sama po sebi ne menja vrednosti bajtova, ali menja
+njihove pozicije. Njena najvažnija funkcija jeste da spreči da
+\texttt{MixColumns} u svakoj rundi ponovo obrađuje iste grupe bajtova.
+
+Na taj način promena jednog bajta postepeno se širi iz jedne kolone na
+više kolona tokom narednih rundi.
+
+
+\subsubsection{MixColumns}
+
+Kod transformacije \texttt{MixColumns} svaka kolona State matrice
+posmatra se kao četvorka elemenata iz $GF(2^8)$.
+
+Za jednu kolonu
+
+\begin{equation}
+\begin{bmatrix}
+s_{0,c}\\
+s_{1,c}\\
+s_{2,c}\\
+s_{3,c}
+\end{bmatrix}
+\end{equation}
+
+nova vrednost dobija se množenjem fiksnom matricom:
+
+\begin{equation}
+\begin{bmatrix}
+s'_{0,c}\\
+s'_{1,c}\\
+s'_{2,c}\\
+s'_{3,c}
+\end{bmatrix}
+=
+\begin{bmatrix}
+02 & 03 & 01 & 01\\
+01 & 02 & 03 & 01\\
+01 & 01 & 02 & 03\\
+03 & 01 & 01 & 02
+\end{bmatrix}
+\begin{bmatrix}
+s_{0,c}\\
+s_{1,c}\\
+s_{2,c}\\
+s_{3,c}
+\end{bmatrix},
+\label{eq:aes-mixcolumns}
+\end{equation}
+
+pri čemu se sabiranje i množenje izvršavaju u $GF(2^8)$.
+
+\texttt{MixColumns} ostvaruje snažnu difuziju unutar svake kolone.
+Pošto je prethodna transformacija \texttt{ShiftRows} premestila
+bajtove između kolona, njihova kombinacija omogućava da se uticaj
+jednog ulaznog bajta brzo proširi kroz State tokom više rundi.
+
+
+\subsubsection{AddRoundKey}
+
+\texttt{AddRoundKey} kombinuje trenutni State sa 128-bitnim potključem
+odgovarajuće runde:
+
+\begin{equation}
+S \leftarrow S \oplus K^{(i)}.
+\label{eq:aes-addroundkey}
+\end{equation}
+
+Pošto je operacija XOR sama sebi inverzna,
+
+\begin{equation}
+(S\oplus K^{(i)})\oplus K^{(i)} = S.
+\end{equation}
+
+\texttt{AddRoundKey} je jedina transformacija u osnovnoj AES rundi koja
+neposredno uključuje tajni ključ. Ostale transformacije su javno
+poznate i fiksirane standardom.
+
+Pre prve pune runde AES izvršava početni \texttt{AddRoundKey} sa
+potključem $K^{(0)}$. Zatim se izvršava $N_r-1$ standardnih rundi:
+
+\begin{equation}
+\texttt{SubBytes}
+\rightarrow
+\texttt{ShiftRows}
+\rightarrow
+\texttt{MixColumns}
+\rightarrow
+\texttt{AddRoundKey}.
+\end{equation}
+
+Završna runda izostavlja \texttt{MixColumns}:
+
+\begin{equation}
+\texttt{SubBytes}
+\rightarrow
+\texttt{ShiftRows}
+\rightarrow
+\texttt{AddRoundKey}.
+\end{equation}
+
+Ukupan tok prikazan je na Slici~\ref{fig:aes-runda}.
+
 
 \subsection{Proširenje ključa i dekripcija}
-% TODO: Objasniti key expansion za sve dužine ključa, potključeve i inverzne transformacije; ne pretpostaviti isti raspored ključa za sve varijante.
+\label{subsec:aes_key_expansion}
+
+AES ne koristi glavni ključ neposredno u svakoj rundi. Iz njega se
+procedurom \emph{Key Expansion} generiše raspored ključa
+(\emph{key schedule}), odnosno niz 32-bitnih reči iz kojih se formiraju
+128-bitni potključevi.
+
+Za varijantu sa $N_k$ reči ključa potrebno je generisati ukupno
+
+\begin{equation}
+N_b(N_r+1)=4(N_r+1)
+\end{equation}
+
+32-bitnih reči.
+
+Zato AES-128 generiše
+
+\begin{equation}
+4(10+1)=44
+\end{equation}
+
+reči, AES-192
+
+\begin{equation}
+4(12+1)=52,
+\end{equation}
+
+a AES-256
+
+\begin{equation}
+4(14+1)=60
+\end{equation}
+
+32-bitnih reči~\cite{fips197-2023}.
+
+Prvih $N_k$ reči predstavljaju originalni ključ. Preostale se izvode
+rekurzivno iz prethodnih reči.
+
+Kada je indeks nove reči deljiv sa $N_k$, nad prethodnom rečju
+primenjuju se operacije
+
+\begin{equation}
+\texttt{RotWord},
+\qquad
+\texttt{SubWord},
+\qquad
+\texttt{Rcon}.
+\end{equation}
+
+\texttt{RotWord} ciklično rotira četiri bajta reči, dok
+\texttt{SubWord} primenjuje AES S-kutiju na svaki bajt.
+\texttt{Rcon} dodaje konstantu zavisnu od broja iteracije.
+
+AES-256 ima dodatni korak koji ne postoji kod AES-128 i AES-192:
+kada je
+
+\begin{equation}
+i \bmod N_k = 4,
+\end{equation}
+
+na odgovarajuću reč primenjuje se još jedna
+\texttt{SubWord} transformacija~\cite{fips197-2023}.
+
+Zato raspored ključeva nije identičan za sve tri AES varijante i pri
+analizi AES-192 i AES-256 nije dovoljno samo povećati broj reči
+AES-128 rasporeda.
+
+
+\subsubsection{Dešifrovanje}
+
+AES dešifrovanje koristi inverzne transformacije:
+
+\begin{itemize}
+    \item \texttt{InvShiftRows};
+    \item \texttt{InvSubBytes};
+    \item \texttt{InvMixColumns};
+    \item \texttt{AddRoundKey}.
+\end{itemize}
+
+Dešifrovanje počinje korišćenjem poslednjeg potključa
+$K^{(N_r)}$, nakon čega se potključevi primenjuju obrnutim redosledom.
+
+Za razliku od Feistel konstrukcije DES-a, kod AES-a enkripcija i
+dekripcija nisu potpuno isti tok sa samo obrnutim rasporedom ključeva.
+Potrebne su eksplicitne inverzne verzije transformacija
+\texttt{SubBytes}, \texttt{ShiftRows} i \texttt{MixColumns}.
+
+FIPS~197 definiše i ekvivalentni inverzni oblik
+(\emph{Equivalent Inverse Cipher}) koji odgovarajućim transformisanjem
+potključeva omogućava strukturiranje dekripcionih rundi na način sličniji
+redosledu transformacija enkripcije~\cite{fips197-2023}.
+
 
 \subsection{Bezbednosna margina i teorijski napadi}
-% TODO: Za svaki rezultat navesti broj rundi, model single-key/related-key, podatke, vreme i memoriju. Istražiti biclique i redukovane runde; ne predstavljati ih kao praktičan potpuni break standardnog AES-a. Tvrdnje proveriti do datuma preseka.
+\label{subsec:aes_cryptanalysis}
+
+Od izbora Rijndaela do danas AES je bio predmet veoma intenzivne
+kriptoanalize. Pri tumačenju rezultata važno je razlikovati napade na
+redukovani broj rundi, napade pod standardnim pretpostavkama jednog
+nezavisnog tajnog ključa i napade koji zahtevaju jače modele, kao što
+su povezani ključevi (\emph{related keys}).
+
+Napad na AES sa manjim brojem rundi važan je zato što pokazuje koliko
+se sigurnosne rezerve nalazi između najboljeg poznatog napada i punog
+broja rundi, ali sam po sebi ne predstavlja napad na standardizovani
+AES.
+
+
+\subsubsection{Related-key rezultati}
+
+Posebno interesantni teorijski rezultati pojavili su se za AES-192 i
+AES-256 zbog strukture njihovog rasporeda ključeva.
+
+Biryukov i Khovratovich pokazali su 2009. godine napade na pune
+AES-192 i AES-256 u related-key modelu. Za AES-256 prikazan je
+key-recovery napad za sve ključeve sa deklarisanom vremenskom i
+podatkovnom složenošću približno
+
+\begin{equation}
+2^{99.5},
+\end{equation}
+
+kasnije poboljšanom na približno $2^{99}$
+~\cite{biryukov-khovratovich-2009}.
+
+Ovo je dramatično manje od $2^{256}$ operacija potrebnih za generičku
+iscrpnu pretragu, ali model napada zahteva pristup šifrovanju pod
+međusobno povezanim ključevima koje napadač može da kontroliše ili
+predvidi. Takav model nije isto što i uobičajena primena AES-a sa
+jednim slučajno generisanim, nezavisnim tajnim ključem.
+
+Zato related-key rezultati imaju veliki značaj za razumevanje
+sigurnosne margine i rasporeda ključeva, ali ne predstavljaju praktičan
+napad na normalno implementirani AES-256.
+
+
+\subsubsection{Biclique napad na puni AES}
+
+Bogdanov, Khovratovich i Rechberger su 2011. godine predstavili
+\emph{biclique} kriptoanalizu koja je omogućila prve key-recovery
+napade na sve tri pune AES varijante u single-key modelu sa teoretskom
+složenošću manjom od potpune iscrpne pretrage
+~\cite{bogdanov-biclique-2011}.
+
+Objavljene vremenske složenosti bile su približno
+
+\begin{align}
+\mathrm{AES\mbox{-}128}:&\quad 2^{126.1},\\
+\mathrm{AES\mbox{-}192}:&\quad 2^{189.7},\\
+\mathrm{AES\mbox{-}256}:&\quad 2^{254.4}.
+\end{align}
+
+Ovi rezultati imaju teorijski značaj zato što pokazuju da puna AES
+konstrukcija može biti napadnuta uz nešto manje rada od naivne pretrage
+čitavog prostora ključeva.
+
+Međutim, smanjenje je malo u odnosu na ukupnu veličinu prostora.
+Napad sa $2^{126.1}$ operacija i dalje je van praktičnog domašaja, kao
+što su još više i vrednosti $2^{189.7}$ i $2^{254.4}$.
+
+Zbog toga nije precizno rezultate biclique kriptoanalize opisivati kao
+``razbijanje AES-a'' u praktičnom smislu. Oni predstavljaju
+kriptoanalitičko poboljšanje u odnosu na idealizovanu iscrpnu pretragu,
+ali ne daju praktičan način pronalaženja AES ključeva.
+
+Kasniji radovi nastavili su da unapređuju kriptoanalizu redukovanih
+AES varijanti i određene specifične modele napada. Na primer, radovi
+objavljeni i tokom 2024. godine i dalje postižu nove rezultate nad
+šest ili sedam rundi određenih AES varijanti, a ne praktično
+key-recovery razbijanje punog standardnog AES-a
+~\cite{kara-aes-2024}.
+
+Za potrebe ovog rada zato će se razlikovati:
+
+\begin{enumerate}
+    \item praktična sigurnost punog AES-a sa nezavisnim ključem;
+    \item teorijski napadi čija je složenost manja od brute-force-a;
+    \item related-key i drugi jači modeli napada;
+    \item napadi na redukovan broj rundi.
+\end{enumerate}
+
+Ovakvo razdvajanje je neophodno da se teorijski napredak u
+kriptoanalizi ne predstavi kao praktično kompromitovanje standarda.
+
 
 \subsection{Bočni kanali i hardverska akceleracija}
-% TODO: Istražiti timing/cache napade, constant-time implementacije, AES-NI i ARM crypto extensions. Odvojiti bezbednost primitive, softvera, hardvera i protokola; AES-NI nije univerzalna zaštita od svih fizičkih napada.
+\label{subsec:aes_sidechannels}
+
+Otpornost same AES primitive na poznatu kriptoanalizu ne garantuje
+bezbednost konkretne implementacije. Implementacija može tokom rada
+otkrivati informacije o tajnom ključu preko vremena izvršavanja,
+memorijskih pristupa, keš memorije, potrošnje energije,
+elektromagnetnog zračenja ili namerno izazvanih grešaka.
+
+Ovakvi napadi nazivaju se napadima putem bočnih kanala
+(\emph{side-channel attacks}).
+
+
+\subsubsection{Timing i cache napadi}
+
+Rane softverske implementacije AES-a često su koristile unapred
+izračunate tabele kako bi više transformacija jedne runde spojile u
+efikasne table lookup operacije. Ovakve implementacije mogu biti veoma
+brze, ali adresa memorije kojoj se pristupa zavisi od podataka koji su
+posredno povezani sa tajnim ključem.
+
+Daniel Bernstein je 2005. godine demonstrirao praktičan timing napad
+kojim je AES ključ rekonstruisan na osnovu vremena odgovora udaljenog
+servera~\cite{bernstein-cache-timing-2005}. Rezultat nije predstavljao
+napad na matematičku AES konstrukciju, već na informaciju koju je
+softverska implementacija nenamerno otkrivala kroz zavisnost vremena
+izvršavanja od pristupa memoriji.
+
+Osvik, Shamir i Tromer dodatno su pokazali praktične cache napade koji
+koriste tragove nastale u procesorskoj keš memoriji pri data-dependent
+table lookup operacijama~\cite{osvik-shamir-tromer-2006}.
+
+Ovi rezultati doveli su do razvoja i šire primene implementacija koje
+nastoje da budu \emph{constant-time}, odnosno da tok instrukcija i
+memorijski pristupi ne zavise od tajnog ključa.
+
+
+\subsubsection{AES-NI}
+
+Veliku promenu u softverskoj implementaciji AES-a predstavljalo je
+uvođenje posebnih procesorskih instrukcija.
+
+Intel je od Westmere generacije procesora iz 2010. godine uveo
+Advanced Encryption Standard New Instructions (AES-NI)
+~\cite{intel-aes-ni}.
+
+Originalni AES-NI skup obuhvata šest instrukcija. Četiri neposredno
+podržavaju AES runde:
+
+\begin{itemize}
+    \item \texttt{AESENC};
+    \item \texttt{AESENCLAST};
+    \item \texttt{AESDEC};
+    \item \texttt{AESDECLAST},
+\end{itemize}
+
+dok
+
+\begin{itemize}
+    \item \texttt{AESKEYGENASSIST};
+    \item \texttt{AESIMC}
+\end{itemize}
+
+podržavaju generisanje i transformaciju potključeva
+~\cite{intel-aes-ni}.
+
+\texttt{AESENC}, na primer, u jednoj procesorskoj instrukciji
+realizuje većinu operacija standardne AES runde, dok
+\texttt{AESENCLAST} odgovara završnoj rundi bez
+\texttt{MixColumns}.
+
+Prednost ovih instrukcija nije samo u većoj brzini. Klasične
+T-table implementacije izvršavaju memorijske pristupe čija lokacija
+zavisi od tajnih podataka. AES-NI izvodi ključne AES transformacije
+direktno u procesoru i ne zahteva takve lookup tabele. Time se
+eliminiše važna klasa timing i cache curenja karakterističnih za
+tabelarne softverske implementacije~\cite{intel-aes-ni}.
+
+To, međutim, ne znači da AES-NI rešava svaki problem bočnih kanala.
+Fizički napadi zasnovani na potrošnji energije, elektromagnetnom
+zračenju, fault injection tehnikama ili curenjima na drugim nivoima
+sistema i dalje zahtevaju posebne protivmere.
+
+
+\subsubsection{ARM kriptografske ekstenzije}
+
+Sličan razvoj dogodio se i na ARM arhitekturama. Armv8 kriptografske
+ekstenzije uvode instrukcije namenjene ubrzanju AES-a, uključujući
+
+\begin{itemize}
+    \item \texttt{AESE};
+    \item \texttt{AESD};
+    \item \texttt{AESMC};
+    \item \texttt{AESIMC}.
+\end{itemize}
+
+~\cite{armv8-crypto}.
+
+Ovakva podrška je posebno značajna za mobilne, embedded i
+telekomunikacione uređaje zasnovane na ARM procesorima, jer omogućava
+visoke AES performanse bez implementiranja čitave šifre pomoću opštih
+procesorskih instrukcija.
+
+Razvoj AES-NI i ARM kriptografskih ekstenzija predstavlja važan deo
+retrospektive ovog rada. Rijndael je tokom AES procesa izabran između
+ostalog zbog dobrih performansi na tada postojećem opštem hardveru.
+Više od decenije kasnije tržišna zastupljenost AES-a dovela je do toga
+da sami procesori dobiju instrukcije specifično namenjene njegovom
+izvršavanju.
+
+Zato savremeni benchmark AES-a ne meri samo kvalitet originalnog
+algoritamskog dizajna. On često meri kombinaciju AES konstrukcije,
+kriptografske biblioteke, kompajlera, mikroarhitekture i specijalizovane
+procesorske podrške. Eksperimentalni deo ovog rada će zbog toga
+pokušati da razdvoji hardverski ubrzanu i softversku putanju izvršavanja
+AES-a na istoj platformi.
+
 
 \begin{figure}[htbp]
 \centering
-\fbox{\parbox[c][28mm][c]{0.85\linewidth}{\centering
-Planirana slika: tok jedne AES runde.\\
-Dijagram još nije izrađen.}}
-\caption{Mesto za autorski dijagram AES runde prema FIPS 197.}
+\begin{tikzpicture}[
+    node distance=5mm,
+    >=Latex,
+    every node/.style={font=\small},
+    block/.style={
+        draw,
+        rounded corners,
+        align=center,
+        minimum width=39mm,
+        minimum height=8mm,
+        inner sep=3pt
+    },
+    round/.style={
+        draw,
+        rounded corners,
+        align=center,
+        minimum width=46mm,
+        inner sep=4pt
+    }
+]
+
+\node[block] (input) {Ulazni blok\\128 bita};
+
+\node[block, below=of input] (state)
+    {Formiranje State matrice\\$4\times4$ bajta};
+
+\node[block, below=of state] (initial)
+    {\texttt{AddRoundKey}\\potključ $K^{(0)}$};
+
+\node[round, below=8mm of initial] (normal)
+    {\texttt{SubBytes}\\
+     $\downarrow$\\
+     \texttt{ShiftRows}\\
+     $\downarrow$\\
+     \texttt{MixColumns}\\
+     $\downarrow$\\
+     \texttt{AddRoundKey}};
+
+\node[right=6mm of normal, align=left] (repeat)
+    {$N_r-1$\\punih rundi};
+
+\node[round, below=8mm of normal] (final)
+    {\texttt{SubBytes}\\
+     $\downarrow$\\
+     \texttt{ShiftRows}\\
+     $\downarrow$\\
+     \texttt{AddRoundKey}\\
+     \textit{bez MixColumns}};
+
+\node[block, below=of final] (output)
+    {Izlazni blok\\128 bita};
+
+\draw[->] (input) -- (state);
+\draw[->] (state) -- (initial);
+\draw[->] (initial) -- (normal);
+\draw[->] (normal) -- (final);
+\draw[->] (final) -- (output);
+
+\draw[decorate, decoration={brace, amplitude=5pt},
+      thick]
+    ([xshift=3mm]normal.north east)
+    -- ([xshift=3mm]normal.south east);
+
+\end{tikzpicture}
+
+\caption{Tok AES šifrovanja. Nakon početnog \texttt{AddRoundKey}
+koraka izvršava se $N_r-1$ punih rundi, dok završna runda ne sadrži
+\texttt{MixColumns}. Broj rundi iznosi 10, 12 ili 14 za AES-128,
+AES-192 odnosno AES-256.}
 \label{fig:aes-runda}
 \end{figure}
-% TODO: Zameniti okvir sa \includegraphics[width=.85\linewidth]{aes_runda.pdf}.
-% TODO: Prikazati početnu i završnu fazu odvojeno; u tekstu koristiti sliku~\ref{fig:aes-runda}.

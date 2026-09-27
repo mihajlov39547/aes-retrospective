@@ -1,7 +1,8 @@
+% !TEX program = xelatex
 \documentclass[11pt,a4paper]{article}
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-\usepackage{lmodern}
+\usepackage{fontspec}
+\defaultfontfeatures{Ligatures=TeX}
+\setmainfont{Times New Roman}
 \usepackage[english,serbian]{babel}
 \usepackage[margin=25mm]{geometry}
 \usepackage{microtype}
@@ -15,6 +16,13 @@
 \addbibresource{references.bib}
 \usepackage[hidelinks]{hyperref}
 \usepackage[nameinlink,noabbrev]{cleveref}
+\usepackage{tikz}
+\usetikzlibrary{
+    arrows.meta,
+    positioning,
+    fit,
+    decorations.pathreplacing
+}
 \crefname{section}{odeljak}{odeljci}
 \crefname{figure}{slika}{slike}
 \crefname{table}{tabela}{tabele}
@@ -25,13 +33,14 @@
 \setcounter{tocdepth}{1}
 \newif\ifshowsummary
 \showsummarytrue % TODO: Isključiti sadržaj za kraću verziju prema pravilima časopisa.
-\title{Od DES-a do AES-a: više od dve decenije razvoja, primene i perspektive simetrične kriptografije u telekomunikacijama\\[1em]
-\large From DES to AES: More Than Two Decades of Evolution, Applications and Perspectives of Symmetric Cryptography in Telecommunications}
-\author{Ime i prezime autora / autora 2\\
-\small Naziv ustanove, grad, država\\
-\small \texttt{autor@example.org}}
-\date{Radna struktura, septembar 2026.}
-\hypersetup{pdftitle={Od DES-a do AES-a},pdfauthor={Autor: dopuniti}}
+\title{\fontsize{16pt}{20pt}\selectfont\bfseries
+Od DES-a do AES-a: više od dve decenije razvoja, primene i perspektive simetrične kriptografije u telekomunikacijama\\[0.8em]
+\normalfont\fontsize{12pt}{15pt}\selectfont
+From DES to AES: More Than Two Decades of Evolution, Applications and Perspectives of Symmetric Cryptography in Telecommunications}
+\author{\normalsize Marko Mihajlović}
+% TODO: Afilijaciju i kontakt dodati kada budu određeni za objavljivanje.
+\date{}
+\hypersetup{pdftitle={Od DES-a do AES-a},pdfauthor={Marko Mihajlović}}
 \begin{document}
 \maketitle
 \input{chapters/00_abstract}

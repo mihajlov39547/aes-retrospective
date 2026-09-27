@@ -1,24 +1,380 @@
 \section{Osnove simetrične kriptografije}
 \label{sec:osnove}
-% TODO: Razraditi poglavlje tek nakon provere izvora; ne unositi neproverene činjenice.
-Cilj poglavlja je uspostavljanje terminologije koja razdvaja blokovsku
-šifru, način rada i protokol. Istorijska upotreba šifara za poverljivost
-posmatraće se odvojeno od autentifikovane enkripcije~\cite{sp800-38a,sp800-38d}.
+
+Razumevanje razvoja od DES-a preko Triple DES-a do AES-a zahteva jasno
+razdvajanje nekoliko nivoa koji se u praktičnoj upotrebi često
+posmatraju zajedno. Blokovska šifra, kao što su DES ili AES, predstavlja
+kriptografsku primitivu koja transformiše blok podataka fiksne dužine
+pod kontrolom tajnog ključa. Način rada blokovske šifre određuje kako se
+ta primitiva primenjuje na poruke duže od jednog bloka, dok komunikacioni
+protokol definiše širi kontekst primene, uključujući format poruka,
+upravljanje ključevima, inicijalizacione vrednosti, autentifikaciju i
+obradu grešaka.
+
+Ovo razdvajanje je naročito važno pri poređenju istorijskih i savremenih
+sistema. Činjenica da je određeni protokol koristio DES, Triple DES ili
+AES ne opisuje sama po sebi njegov celokupan bezbednosni model. Ista
+blokovska šifra može se koristiti u različitim načinima rada sa značajno
+različitim osobinama. NIST SP~800-38A, na primer, standardizuje više
+načina rada blokovskih šifara namenjenih prvenstveno zaštiti
+poverljivosti, među kojima su ECB, CBC, CFB, OFB i CTR
+~\cite{sp800-38a}. Kasniji razvoj doveo je do šire upotrebe
+autentifikovane enkripcije, kod koje se uz poverljivost obezbeđuje i
+provera integriteta i autentičnosti podataka. Galois/Counter Mode (GCM)
+predstavlja jedan od najznačajnijih primera takvog pristupa
+~\cite{sp800-38d}.
+
 
 \subsection{Simetrična kriptografija, blok i ključ}
-% TODO: Definisati deljeni tajni ključ, blokovsku šifru kao familiju permutacija i E_K/D_K. Razlikovati dužinu bloka od prostora ključeva i upravljanje ključevima od algoritma.
+\label{subsec:simetricna_kriptografija}
+
+Kod simetrične kriptografije pošiljalac i primalac koriste isti tajni
+ključ, odnosno ključeve koji su neposredno povezani i iz kojih se može
+izvesti odgovarajuća operacija šifrovanja ili dešifrovanja. Bezbednost
+takvog sistema zato ne zavisi samo od svojstava algoritma, već i od
+načina generisanja, distribucije, skladištenja, zamene i uništavanja
+ključeva.
+
+Blokovska šifra može se posmatrati kao familija invertibilnih
+transformacija indeksiranih ključem. Ako je $K$ tajni ključ, operacija
+šifrovanja jednog bloka može se zapisati kao
+
+\begin{equation}
+    C = E_K(P),
+    \label{eq:block-encryption}
+\end{equation}
+
+gde je $P$ otvoreni tekst (\emph{plaintext}), $C$ šifrat
+(\emph{ciphertext}), a $E_K$ funkcija šifrovanja određena ključem $K$.
+Odgovarajuća funkcija dešifrovanja zadovoljava
+
+\begin{equation}
+    P = D_K(C),
+    \qquad
+    D_K(E_K(P)) = P.
+    \label{eq:block-decryption}
+\end{equation}
+
+Za blokovsku šifru veličina bloka i veličina ključa predstavljaju dva
+različita parametra. Veličina bloka određuje koliko bitova algoritam
+obrađuje u jednoj osnovnoj transformaciji, dok veličina ključa određuje
+broj mogućih ključeva koji se mogu izabrati. Ako je ključ dužine $k$
+bitova i svi ključevi su dozvoljeni, nominalni prostor ključeva sadrži
+
+\begin{equation}
+    2^k
+\end{equation}
+
+mogućnosti.
+
+Ova razlika biće posebno važna u nastavku rada. DES, na primer, koristi
+blok od 64 bita, ali ima efektivnu dužinu ključa od 56 bita. AES koristi
+blok od 128 bita, dok standard definiše ključeve dužine 128, 192 i
+256 bita. Veća dužina bloka ne znači automatski veći prostor ključeva,
+kao što ni veći ključ sam po sebi ne rešava ograničenja koja mogu
+proisteći iz male veličine bloka.
+
+Kod idealizovane iscrpne pretrage ključa, algoritam sa $k$ bitova
+efektivnog ključa zahteva najviše $2^k$ pokušaja, dok se pod
+pretpostavkom ravnomerne raspodele očekuje da odgovarajući ključ bude
+pronađen nakon približno polovine prostora, odnosno
+
+\begin{equation}
+    N_{\mathrm{avg}} \approx 2^{k-1}.
+    \label{eq:average-bruteforce}
+\end{equation}
+
+Ako sistem može da proveri $R$ kandidata u sekundi, idealizovano
+prosečno vreme iscrpne pretrage može se zapisati kao
+
+\begin{equation}
+    T_{\mathrm{avg}} = \frac{2^{k-1}}{R}.
+    \label{eq:bruteforce-time}
+\end{equation}
+
+Ovaj izraz će kasnije biti korišćen za ilustraciju razlike između
+prostora ključeva DES-a i AES-a. On ne predstavlja potpun model realnog
+napada, jer praktične performanse zavise od algoritma, hardvera,
+paralelizacije i načina na koji se proverava da li je kandidat za ključ
+ispravan.
+
 
 \subsection{Konfuzija i difuzija}
-% TODO: Objasniti pojmove i pronaći primarni istorijski izvor; odvojiti avalanche ilustraciju od dokaza sigurnosti.
+\label{subsec:konfuzija_difuzija}
+
+Dve klasične ideje u projektovanju simetričnih šifara jesu
+\emph{confusion} i \emph{diffusion}, pojmovi koje je Claude Shannon
+uveo u svom radu o teoriji komunikacionih sistema sa tajnošću
+~\cite{shannon-1949}.
+
+Konfuzija označava nastojanje da odnos između tajnog ključa i šifrata
+bude što složeniji. Napadač ne bi trebalo da može da iz jednostavnog
+odnosa između ulaznih i izlaznih bitova neposredno zaključuje bitove
+ključa. U savremenim blokovskim šiframa nelinearne supstitucije,
+najčešće realizovane pomoću S-kutija (\emph{S-box}), imaju centralnu
+ulogu u ostvarivanju ovog svojstva.
+
+Difuzija ima drugačiji cilj: statistička struktura otvorenog teksta
+treba da bude raspoređena kroz veliki broj bitova šifrata. Promena
+malog dela ulaza zato treba da utiče na veliki deo izlaza nakon
+dovoljnog broja rundi. Permutacije, linearne transformacije i mešanje
+kolona ili bitova predstavljaju tipične mehanizme kojima se ovo
+postiže.
+
+Sa ovim pojmovima povezan je \emph{avalanche} efekat: mala promena
+ulaza, na primer promena jednog bita otvorenog teksta ili ključa, treba
+da izazove veliku promenu rezultujućeg šifrata. U idealizovanom slučaju
+očekuje se promena približno polovine izlaznih bitova. U eksperimentalnom
+delu rada ovaj efekat će biti ilustrovan za posmatrane algoritme.
+
+Međutim, avalanche ponašanje nije dokaz kriptografske sigurnosti.
+Algoritam može pokazivati približno polovinu promenjenih izlaznih bitova
+i istovremeno posedovati ozbiljne strukturne slabosti. Zato se ova mera
+u radu koristi isključivo kao ilustracija difuzionog ponašanja, a ne kao
+samostalni bezbednosni kriterijum.
+
 
 \subsection{Feistel mreže i supstituciono-permutacione mreže}
-% TODO: Uporediti tok podataka, reverzibilnost i ulogu nelinearnosti; pripremiti jednostavne šeme.
+\label{subsec:feistel_spn}
+
+DES i AES pripadaju različitim konstruktivnim porodicama blokovskih
+šifara. DES je zasnovan na Feistel mreži, dok AES koristi
+supstituciono-permutacionu strukturu, odnosno SPN
+(\emph{Substitution--Permutation Network}).
+
+Kod Feistel konstrukcije ulazni blok se deli na dve polovine, $L_i$ i
+$R_i$. Jedna runda može se pojednostavljeno zapisati kao
+
+\begin{align}
+    L_{i+1} &= R_i, \\
+    R_{i+1} &= L_i \oplus F(R_i,K_i),
+    \label{eq:feistel-round}
+\end{align}
+
+gde je $F$ funkcija runde, a $K_i$ podključ odgovarajuće runde.
+
+Ključno svojstvo Feistel konstrukcije jeste da sama funkcija $F$ ne mora
+biti invertibilna da bi cela transformacija bila invertibilna. Struktura
+koja koristi zamenu polovina i XOR omogućava rekonstrukciju prethodnog
+stanja. Zbog toga se kod klasičnih Feistel šifara dešifrovanje može
+realizovati praktično istom strukturom kao šifrovanje, uz obrnut redosled
+podključeva.
+
+Ova osobina imala je poseban značaj u hardverskim implementacijama
+starijih šifara, uključujući DES.
+
+Supstituciono-permutaciona mreža koristi drugačiji pristup. Umesto
+podele bloka na dve polovine i Feistel funkcije, celo stanje prolazi
+kroz niz transformacija koje kombinuju nelinearnu supstituciju i
+linearno mešanje. Kod AES-a se to realizuje transformacijama
+\texttt{SubBytes}, \texttt{ShiftRows}, \texttt{MixColumns} i
+\texttt{AddRoundKey}, koje će detaljno biti predstavljene u
+Poglavlju~\ref{sec:aes}.
+
+I Feistel mreže i SPN konstrukcije nastoje da kroz više rundi ostvare
+snažnu nelinearnost i difuziju, ali to postižu različitom organizacijom
+transformacija. Ova razlika je važna za poređenje DES-a i AES-a jer
+njihova unutrašnja struktura utiče ne samo na način analize već i na
+implementaciju u softveru i hardveru.
+
 
 \subsection{Načini rada: ECB, CBC i CTR}
-% TODO: Objasniti nezavisne blokove ECB-a i otkrivanje obrazaca; ulančavanje CBC-a, IV i padding; brojač CTR-a i zabranu ponovne upotrebe nonce-a pod istim ključem. Razlikovati zahteve IV-a i nonce-a.
+\label{subsec:modovi_rada}
+
+Blokovska šifra neposredno transformiše samo jedan blok fiksne dužine.
+Za poruke proizvoljne dužine potreban je način rada
+(\emph{mode of operation}) koji definiše kako se niz blokova obrađuje.
+NIST SP~800-38A definiše pet klasičnih načina rada za zaštitu
+poverljivosti, uključujući ECB, CBC i CTR
+~\cite{sp800-38a}.
+
+\subsubsection{Electronic Codebook -- ECB}
+
+Electronic Codebook (ECB) predstavlja najjednostavniji način rada.
+Svaki blok otvorenog teksta šifruje se nezavisno:
+
+\begin{equation}
+    C_i = E_K(P_i).
+    \label{eq:ecb}
+\end{equation}
+
+Prednost ECB-a jeste jednostavnost i mogućnost nezavisne obrade
+blokova. Međutim, deterministička priroda ovog moda predstavlja
+ozbiljno ograničenje: dva identična bloka otvorenog teksta šifrovana
+istim ključem daju identične blokove šifrata. Zbog toga struktura i
+ponavljanja prisutna u podacima mogu ostati vidljiva na nivou
+šifrata.
+
+ECB zato nije pogodan kao opšti način zaštite strukturiranih poruka.
+Ovaj primer jasno pokazuje razliku između bezbednosti blokovske šifre i
+bezbednosti načina na koji je ona upotrebljena: snažna blokovska šifra
+ne uklanja slabosti neodgovarajućeg moda rada.
+
+
+\subsubsection{Cipher Block Chaining -- CBC}
+
+Kod Cipher Block Chaining (CBC) moda svaki blok otvorenog teksta pre
+šifrovanja kombinuje se sa prethodnim blokom šifrata:
+
+\begin{align}
+    C_1 &= E_K(P_1 \oplus IV), \\
+    C_i &= E_K(P_i \oplus C_{i-1}), \qquad i>1.
+    \label{eq:cbc}
+\end{align}
+
+Prvi blok koristi inicijalizacioni vektor $IV$.
+Ovakvo ulančavanje uklanja neposrednu determinističku vezu između
+jednakih blokova otvorenog teksta i jednakih blokova šifrata.
+
+Za CBC je pravilno generisanje inicijalizacionog vektora bitan deo
+bezbednosnih zahteva. SP~800-38A zahteva da IV za CBC bude nepredvidiv
+u trenutku kada se otvoreni tekst bira~\cite{sp800-38a}.
+IV ne mora biti tajan, ali mora biti pravilno generisan i zaštićen od
+nedozvoljenih promena u kontekstu u kojem se koristi.
+
+Pošto CBC radi nad blokovima fiksne dužine, poruke čija dužina nije
+celobrojni umnožak veličine bloka obično zahtevaju dopunu
+(\emph{padding}). Način na koji se padding proverava kasnije se pokazao
+kao važan implementacioni i protokolarni problem. Sama CBC konstrukcija
+obezbeđuje poverljivost, ali ne obezbeđuje autentičnost niti integritet
+poruke.
+
+
+\subsubsection{Counter Mode -- CTR}
+
+Counter mode (CTR) pretvara blokovsku šifru u konstrukciju koja po
+ponašanju podseća na protočnu šifru. Umesto neposrednog šifrovanja
+otvorenog teksta, blokovska šifra se primenjuje na niz vrednosti
+brojača, a dobijeni izlaz kombinuje se sa otvorenim tekstom pomoću XOR
+operacije:
+
+\begin{equation}
+    C_i = P_i \oplus E_K(T_i),
+    \label{eq:ctr}
+\end{equation}
+
+gde $T_i$ predstavlja jedinstvenu vrednost brojača za blok $i$.
+
+CTR ima nekoliko važnih implementacionih prednosti. Šifrovanje blokova
+brojača može se paralelizovati, blokovi se mogu obrađivati nezavisno, a
+padding nije potreban. Ista operacija koristi se za šifrovanje i
+dešifrovanje:
+
+\begin{equation}
+    P_i = C_i \oplus E_K(T_i).
+\end{equation}
+
+Ključni zahtev jeste da se ista vrednost brojača ne koristi više puta
+pod istim ključem. Ako se isti tok ključa upotrebi za dve poruke, XOR
+dva šifrata uklanja taj tok:
+
+\begin{equation}
+    C^{(1)} \oplus C^{(2)}
+      = P^{(1)} \oplus P^{(2)},
+\end{equation}
+
+čime se otkriva odnos između dva otvorena teksta.
+
+Zato se kod CTR-a jedinstvenost početne vrednosti brojača ili
+\emph{nonce}-a mora smatrati bezbednosnim zahtevom, a ne opcionim
+implementacionim detaljem.
+
 
 \subsection{GCM i autentifikovana enkripcija}
-% TODO: Razdvojiti AES, GCM, GMAC, AAD i tag; objasniti proveru taga pre prihvatanja poruke, jedinstvenost nonce-a i limite obima podataka.
+\label{subsec:gcm_aead}
+
+Klasični načini rada iz SP~800-38A prvenstveno rešavaju problem
+poverljivosti. Međutim, u komunikacionim sistemima napadač često nije
+ograničen na pasivno prisluškivanje, već može menjati, umetati, brisati
+ili ponavljati poruke. Poverljivost sama po sebi zato nije dovoljna.
+
+Autentifikovana enkripcija sa pridruženim podacima
+(\emph{Authenticated Encryption with Associated Data}, AEAD)
+kombinuje poverljivost šifrovanog dela poruke sa proverom integriteta i
+autentičnosti podataka.
+
+Galois/Counter Mode (GCM), standardizovan u NIST SP~800-38D, jedan je
+od najrasprostranjenijih AEAD načina rada zasnovanih na blokovskoj
+šifri~\cite{sp800-38d}. Kod AES-GCM, AES se koristi u CTR-sličnoj
+konstrukciji za šifrovanje, dok se autentifikaciona komponenta zasniva
+na univerzalnom hešovanju u konačnom polju.
+
+Pojednostavljeno, rezultat AEAD operacije može se posmatrati kao
+
+\begin{equation}
+    (C,T) =
+    \operatorname{Enc}_{K}(N,P,A),
+    \label{eq:aead-encryption}
+\end{equation}
+
+gde je $N$ nonce, $P$ otvoreni tekst, $A$ pridruženi autentifikovani
+podaci (\emph{Additional Authenticated Data}, AAD), $C$ šifrat, a $T$
+autentifikaciona oznaka (\emph{authentication tag}).
+
+AAD omogućava da određeni podaci ostanu nešifrovani, ali da ipak budu
+kriptografski zaštićeni od nedozvoljenih promena. Tipičan primer mogu
+biti zaglavlja komunikacionog protokola koja moraju ostati dostupna za
+obradu paketa, ali čiji integritet mora biti proveren.
+
+Pri dešifrovanju primalac ne treba da prihvati rezultat kao validan
+otvoreni tekst ukoliko provera autentifikacione oznake nije uspešna.
+Neuspešna provera taga znači da poruka ne može biti smatrana
+autentičnom i mora se odbaciti.
+
+Za GCM je posebno značajna jedinstvenost nonce-a. SP~800-38D naglašava
+da je poštovanje zahteva za jedinstvenost inicijalizacionih vrednosti
+ključno za bezbednost moda~\cite{sp800-38d}. Ponovna upotreba iste
+nonce vrednosti sa istim ključem može kompromitovati ne samo
+poverljivost već i autentifikaciona svojstva GCM-a.
+
+GCM takođe ilustruje zašto je neophodno razlikovati algoritam od načina
+rada. Izraz ``AES-GCM'' ne označava novu blokovsku šifru. AES predstavlja
+osnovnu kriptografsku primitivu, dok GCM određuje način na koji se AES
+koristi zajedno sa autentifikacionim mehanizmom.
+
 
 \subsection{Istorijska perspektiva i današnji AEAD}
-% TODO: Dokumentovati šta je bilo uobičajeno 2001--2003, a šta je preporuka odabranih savremenih protokola. CBC/CTR sami ne obezbeđuju integritet.
+\label{subsec:istorijska_aead}
+
+Početkom 2000-ih analiza blokovskih šifara bila je snažno usmerena na
+poverljivost i klasične načine rada kao što su CBC i CTR. NIST
+SP~800-38A iz 2001. godine upravo ove konstrukcije definiše kao načine
+rada namenjene zaštiti poverljivosti~\cite{sp800-38a}. Integritet i
+autentifikacija često su rešavani posebnim mehanizmima na drugim
+nivoima sistema ili kombinovanjem enkripcije sa kodovima za
+autentifikaciju poruka.
+
+Takva separacija nije sama po sebi pogrešna, ali zahteva veoma pažljivo
+projektovanje protokola. Kombinacija sigurne blokovske šifre i sigurnog
+MAC algoritma ne daje automatski siguran protokol ukoliko je njihov
+redosled i način povezivanja neodgovarajući. Iskustvo iz kasnijih
+godina dovelo je do sve šire upotrebe standardizovanih AEAD konstrukcija
+koje eksplicitno kombinuju poverljivost i autentifikaciju.
+
+GCM, standardizovan 2007. godine, predstavlja važnu tačku ove evolucije
+~\cite{sp800-38d}. Njegova pogodnost za paralelnu obradu omogućila je
+visoke performanse u softverskim i hardverskim implementacijama, što je
+posebno značajno za mrežne i telekomunikacione sisteme.
+
+Savremeni protokoli zato često ne propisuju samo ``AES'', već konkretan
+AEAD skup algoritama. Aktuelna specifikacija TLS~1.3, na primer,
+definiše skupove kao što su
+\texttt{TLS\_AES\_128\_GCM\_SHA256} i
+\texttt{TLS\_AES\_256\_GCM\_SHA384}
+~\cite{rfc9846}. U takvom nazivu AES označava blokovsku šifru, GCM
+način autentifikovane enkripcije, dok SHA komponenta učestvuje u
+drugim delovima TLS kriptografskog mehanizma, uključujući izvođenje
+ključeva i autentifikaciju transkripta.
+
+Promena fokusa sa same blokovske šifre na kompletnu autentifikovanu
+konstrukciju predstavlja jednu od najvažnijih razlika između
+kriptografskog okruženja iz perioda standardizacije AES-a i današnje
+prakse. AES je tokom tog perioda ostao ista osnovna primitiva, ali se
+način njegove bezbedne upotrebe značajno razvio.
+
+Ova razlika biće važna i u kasnijoj retrospektivnoj analizi. Pitanje
+da li je AES izdržao test vremena ne može se svesti samo na pitanje da
+li je njegova osnovna blokovska konstrukcija praktično razbijena.
+Potrebno je posmatrati i evoluciju načina rada, implementacione napade,
+upravljanje nonce vrednostima i ključevima, hardversku podršku i
+protokole u kojima se AES koristi.

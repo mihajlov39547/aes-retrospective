@@ -1,27 +1,449 @@
 \section{Data Encryption Standard (DES)}
 \label{sec:des}
-% TODO: Razraditi poglavlje tek nakon provere izvora; ne unositi neproverene činjenice.
-Poglavlje će povezati konstrukciju DES-a sa njegovim istorijskim uslovima
-primene i praktičnim ograničenjima. FIPS 46-3 koristi se kao istorijski
-izvor, uz dokument o njegovom povlačenju~\cite{fips46-3,des-withdrawal-2005}.
+
+Data Encryption Standard (DES) predstavlja jednu od najznačajnijih
+prekretnica u istoriji javno dostupne primenjene kriptografije. Tokom
+više decenija DES je bio široko korišćen kao standard za zaštitu
+podataka u računarskim i komunikacionim sistemima, a njegova struktura
+uticala je na veliki broj kasnijih blokovskih šifara. Istovremeno,
+njegova evolucija od široko prihvaćenog standarda do algoritma koji je
+formalno povučen predstavlja dobar primer načina na koji razvoj
+računarske tehnologije može promeniti praktičnu procenu bezbednosti
+kriptografskog sistema.
+
+DES je standardizovan kao FIPS~46 tokom 1977. godine. Kasnije revizije
+nisu menjale osnovni algoritam, već su prilagođavale tekst standarda,
+implementacione zahteve i njegovo mesto u širem sistemu kriptografskih
+preporuka. Poslednja verzija, FIPS~46-3 iz 1999. godine, obuhvatala je
+i DES i Triple Data Encryption Algorithm (TDEA)
+~\cite{fips46-3}. NIST je FIPS~46-3 povukao 19. maja 2005. godine
+nakon zaključka da DES više ne obezbeđuje nivo sigurnosti potreban za
+zaštitu federalnih informacija~\cite{des-withdrawal-2005}.
+
+Pri analizi DES-a važno je razlikovati dva pitanja. Prvo se odnosi na
+unutrašnju konstrukciju algoritma i njegovu otpornost na
+kriptoanalitičke napade. Drugo se odnosi na veličinu prostora ključeva.
+Iako su razvijene diferencijalna i linearna kriptoanaliza koje daju
+napade boljeg reda složenosti od naivne iscrpne pretrage u određenim
+modelima, centralni praktični problem DES-a postao je njegov efektivni
+56-bitni ključ. Razvoj specijalizovanog hardvera tokom devedesetih
+godina pokazao je da je takav prostor ključeva moguće pretražiti u
+praktičnom vremenu.
+
 
 \subsection{Istorijat i standardizacija}
-% TODO: Istražiti nastanak, prvo izdanje i revizije; razlikovati godinu prvog standarda od 1999. godine FIPS 46-3.
+\label{subsec:des_istorijat}
+
+Koreni DES-a nalaze se u istraživanjima kompanije IBM tokom prve
+polovine sedamdesetih godina. Algoritam koji je poslužio kao osnova za
+budući DES razvijen je na temelju IBM-ovih istraživanja blokovskih
+šifara, uključujući projekat Lucifer. National Bureau of Standards
+(NBS), prethodnik današnjeg NIST-a, pokrenuo je proces izbora
+kriptografskog standarda za zaštitu osetljivih, ali neklasifikovanih
+podataka u federalnim računarskim sistemima.
+
+NBS je 1975. godine objavio predlog algoritma radi javnog razmatranja,
+a nakon evaluacije i izmena standard je objavljen kao Federal
+Information Processing Standard Publication 46. FIPS~46 nosi datum
+15. januar 1977. godine, dok je standard postao efektivan tokom iste
+godine~\cite{fips46-1977,nist-des-history}. Standard je definisao
+algoritam namenjen implementaciji u elektronskim uređajima i upotrebi
+u računarskim sistemima i mrežama.
+
+DES je od početka bio predmet stručnih diskusija. Posebna pažnja bila
+je usmerena na smanjenje veličine ključa u odnosu na ranije IBM-ove
+konstrukcije i na izmene S-kutija izvršene tokom standardizacionog
+procesa. Efektivna dužina DES ključa od 56 bita izazivala je
+zabrinutost još tokom sedamdesetih godina, jer se očekivalo da će rast
+računarske moći vremenom omogućiti iscrpnu pretragu čitavog prostora
+ključeva~\cite{nist-des-history}.
+
+Standard je periodično preispitivan. Nakon prve potvrde tokom
+osamdesetih godina, objavljen je FIPS~46-1 1988. godine. FIPS~46-2 iz
+1993. godine zadržao je isti kriptografski algoritam, ali je proširio
+dozvoljene načine implementacije tako da obuhvate softver, firmware,
+hardver ili njihove kombinacije~\cite{fips46-2-history}. Poslednja
+verzija, FIPS~46-3, objavljena je 25. oktobra 1999. godine i zamenila
+FIPS~46-2~\cite{fips46-3}.
+
+FIPS~46-3 je značajan i zato što je, pored pojedinačnog DES-a,
+formalno obuhvatio Triple Data Encryption Algorithm kao način
+produženja upotrebljivosti DES tehnologije. U toj fazi DES je već bio
+pod ozbiljnim pritiskom zbog praktične izvodljivosti napada iscrpnom
+pretragom, dok je proces izbora njegovog dugoročnog naslednika, AES-a,
+već bio u toku.
+
+NIST je 2004. godine predložio povlačenje FIPS~46-3, uz obrazloženje
+da snaga DES algoritma više nije dovoljna za adekvatnu zaštitu
+federalnih informacija. Standard je formalno povučen 19. maja 2005.
+godine, a federalnim organizacijama preporučen je prelazak na AES
+~\cite{des-withdrawal-2005}. Time je završen gotovo tridesetogodišnji
+period u kojem je DES imao centralno mesto u standardizovanoj
+simetričnoj kriptografiji.
+
 
 \subsection{Blok, ključ i Feistel arhitektura}
-% TODO: Opisati 64-bitni blok, 64-bitni zapis ključa sa 8 bitova parnosti i 56 efektivnih bitova. Objasniti inicijalnu i završnu permutaciju, polovine bloka i 16 rundi.
+\label{subsec:des_arhitektura}
+
+DES je simetrična blokovska šifra koja obrađuje blokove od 64 bita.
+Standard koristi 64-bitni zapis ključa, ali se osam bitova koristi kao
+bitovi parnosti, po jedan za svaki oktet. Kriptografski efektivna
+dužina ključa zato iznosi 56 bita
+~\cite{fips46-3}.
+
+Za otvoreni tekst $P$ dužine 64 bita i ključ $K$, DES transformacija
+može se apstraktno zapisati kao
+
+\begin{equation}
+    C = \operatorname{DES}_{K}(P),
+\end{equation}
+
+gde je $C$ blok šifrata iste dužine.
+
+DES je zasnovan na Feistel arhitekturi. Pre početka rundi nad ulaznim
+blokom izvršava se inicijalna permutacija (\emph{Initial
+Permutation}, IP). Dobijeni 64-bitni rezultat deli se na dve
+32-bitne polovine,
+
+\begin{equation}
+    L_0 \parallel R_0.
+\end{equation}
+
+Nakon toga sledi 16 Feistel rundi. Za rundu $i$, gde je
+$i=1,\ldots,16$, transformacija se može zapisati kao
+
+\begin{align}
+    L_i &= R_{i-1}, \\
+    R_i &= L_{i-1} \oplus f(R_{i-1},K_i),
+    \label{eq:des-feistel}
+\end{align}
+
+gde je $K_i$ 48-bitni podključ odgovarajuće runde, a $f$ DES funkcija
+runde.
+
+Po završetku šesnaeste runde dve polovine se kombinuju obrnutim
+redosledom, nakon čega se primenjuje završna permutacija
+$IP^{-1}$, koja je inverzna inicijalnoj permutaciji. Rezultat je
+64-bitni blok šifrata.
+
+Inicijalna i završna permutacija same po sebi ne predstavljaju glavni
+izvor kriptografske sigurnosti DES-a. Ključna svojstva konstrukcije
+proizlaze iz ponovljene primene funkcije runde, nelinearnih S-kutija,
+XOR operacija i međusobnog mešanja bitova kroz više rundi.
+
 
 \subsection{Funkcija runde i S-kutije}
-% TODO: Razložiti ekspanziju, XOR sa potključem, S-box i permutaciju; dodati šemu sa proverom prema standardu.
+\label{subsec:des_round_function}
+
+Funkcija runde $f$ prima 32-bitnu desnu polovinu trenutnog stanja i
+48-bitni podključ:
+
+\begin{equation}
+    f : \{0,1\}^{32} \times \{0,1\}^{48}
+    \rightarrow \{0,1\}^{32}.
+\end{equation}
+
+Njena struktura može se razložiti na četiri osnovna koraka:
+
+\begin{enumerate}
+    \item ekspanziju 32-bitnog ulaza na 48 bita;
+    \item XOR sa 48-bitnim podključem;
+    \item nelinearnu transformaciju pomoću osam S-kutija;
+    \item završnu permutaciju 32-bitnog rezultata.
+\end{enumerate}
+
+Prvo se 32-bitna vrednost $R_{i-1}$ transformiše ekspanzionom
+permutacijom $E$:
+
+\begin{equation}
+    E(R_{i-1}) \in \{0,1\}^{48}.
+\end{equation}
+
+Ekspanzija ne predstavlja samo proširenje podataka dodavanjem novih
+bitova. Određeni ulazni bitovi se ponavljaju prema tabeli definisanoj
+standardom, čime se 32-bitni ulaz raspoređuje u osam grupa od po šest
+bitova.
+
+Rezultat se zatim kombinuje sa podključem:
+
+\begin{equation}
+    X = E(R_{i-1}) \oplus K_i.
+\end{equation}
+
+Dobijenih 48 bita deli se na osam grupa
+
+\begin{equation}
+    X = B_1 \parallel B_2 \parallel \cdots \parallel B_8,
+\end{equation}
+
+pri čemu svaki $B_j$ ima šest bitova.
+
+Svaka šestobitna grupa predstavlja ulaz jedne od osam različitih
+S-kutija $S_1,\ldots,S_8$. Svaka S-kutija preslikava šest ulaznih
+bitova u četiri izlazna bita:
+
+\begin{equation}
+    S_j : \{0,1\}^{6} \rightarrow \{0,1\}^{4}.
+\end{equation}
+
+Konkatenacijom izlaza svih osam S-kutija ponovo se dobija 32-bitna
+vrednost. Nad njom se zatim izvršava fiksna permutacija $P$:
+
+\begin{equation}
+    f(R_{i-1},K_i)
+    =
+    P\left(
+        S_1(B_1)\parallel
+        S_2(B_2)\parallel\cdots\parallel
+        S_8(B_8)
+    \right).
+    \label{eq:des-f}
+\end{equation}
+
+S-kutije predstavljaju nelinearni deo DES-a i imaju centralnu ulogu u
+otpornosti algoritma na kriptoanalitičke napade. Njihov dizajn bio je
+jedna od istorijski najdiskutovanijih osobina DES-a. Kasniji razvoj
+diferencijalne kriptoanalize pokazao je da struktura S-kutija ima
+važnu ulogu u otpornosti DES-a na ovu klasu napada
+~\cite{biham-shamir-1991,biham-shamir-full-des-1993}.
+
+Za konačnu verziju rada korisno je dodati autorsku šemu funkcije runde
+sa tokom
+
+\[
+R_{i-1}
+\rightarrow E
+\rightarrow \oplus K_i
+\rightarrow S_1,\ldots,S_8
+\rightarrow P
+\rightarrow f(R_{i-1},K_i),
+\]
+
+jer ova struktura omogućava direktno vizuelno poređenje sa kasnijom
+AES rundom.
+
 
 \subsection{Raspored ključeva i dekripcija}
-% TODO: Objasniti izbor bitova, rotacije, 48-bitne potključeve i obrnuti redosled pri dekripciji.
+\label{subsec:des_key_schedule}
+
+DES iz osnovnog ključa izvodi šesnaest podključeva
+$K_1,\ldots,K_{16}$, po jedan za svaku rundu. Svaki podključ ima
+48 bita.
+
+Početni 64-bitni zapis ključa sadrži osam bitova parnosti. Nakon
+njihovog uklanjanja ostaje 56 kriptografski relevantnih bitova.
+Permutovani izbor PC-1 (\emph{Permuted Choice 1}) raspoređuje tih
+56 bitova u dve polovine od po 28 bitova:
+
+\begin{equation}
+    C_0 \parallel D_0.
+\end{equation}
+
+Pre svake runde obe polovine ciklično se rotiraju ulevo za jedan ili
+dva bita, prema rasporedu definisanom standardom. Za rundu $i$ dobija
+se
+
+\begin{align}
+    C_i &= \operatorname{LS}_{s_i}(C_{i-1}),\\
+    D_i &= \operatorname{LS}_{s_i}(D_{i-1}),
+\end{align}
+
+gde $\operatorname{LS}_{s_i}$ označava cikličnu rotaciju ulevo za
+$s_i$ mesta.
+
+Raspored rotacija za 16 rundi iznosi
+
+\begin{equation}
+1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1.
+\end{equation}
+
+Nakon rotacije, permutovani izbor PC-2 iz ukupno 56 bitova bira 48
+bitova koji formiraju podključ:
+
+\begin{equation}
+    K_i = PC2(C_i\parallel D_i).
+\end{equation}
+
+Feistel struktura DES-a omogućava posebno jednostavnu dekripciju.
+Nije potreban drugi inverzni algoritam runde. Ista osnovna
+transformacija koristi se i za dešifrovanje, ali se podključevi
+primenjuju obrnutim redosledom:
+
+\begin{equation}
+    K_{16},K_{15},\ldots,K_1.
+\end{equation}
+
+Ovo svojstvo predstavljalo je važnu implementacionu prednost,
+posebno u hardverskim realizacijama za koje je DES prvobitno
+standardizovan.
+
 
 \subsection{Hardverska efikasnost i istorijska primena}
-% TODO: Uporediti projektne okolnosti i implementacije; ne preneti današnji Python throughput na tadašnji hardver.
+\label{subsec:des_hardware}
+
+DES je projektovan u tehnološkom okruženju sedamdesetih godina u
+kojem su specijalizovana elektronska kola imala mnogo značajniju ulogu
+u kriptografskim implementacijama nego univerzalni softver.
+Originalni FIPS~46 eksplicitno je opisivao algoritam koji treba
+implementirati u namenskim elektronskim uređajima
+~\cite{fips46-1977}.
+
+Ova istorijska činjenica utiče na samu strukturu DES-a. Permutacije,
+XOR operacije, relativno male S-kutije i Feistel organizacija veoma su
+pogodni za digitalna logička kola. Pored toga, mogućnost korišćenja
+iste strukture za šifrovanje i dešifrovanje, uz promenu redosleda
+podključeva, smanjivala je potrebu za dupliranjem hardverskih
+funkcionalnih celina.
+
+Kasnije revizije standarda pratile su razvoj računarske tehnologije.
+FIPS~46-2 je eksplicitno proširio mogućnosti implementacije na
+softver, firmware, hardver ili njihove kombinacije
+~\cite{fips46-2-history}. Ovo predstavlja važnu istorijsku promenu:
+algoritam projektovan pre svega sa hardverskom realizacijom na umu
+postao je široko korišćen i u opštim računarskim sistemima.
+
+DES je korišćen u različitim oblastima zaštite podataka, uključujući
+računarske mreže, finansijske transakcije i komunikacione sisteme.
+FIPS~81 iz 1980. definisao je DES načine rada ECB, CBC, CFB i OFB,
+čime je standard omogućio primenu DES-a nad tokovima podataka i
+porukama dužim od jednog bloka~\cite{fips81}. FIPS~74 je dodatno
+opisivao primenu DES-a u računarskim sistemima i mrežama, uključujući
+data communication aplikacije~\cite{fips74}.
+
+Zbog toga istorijsku efikasnost DES-a ne treba procenjivati današnjim
+benchmark rezultatima sa savremenih procesora. Performanse Python
+biblioteke ili optimizovane C implementacije na procesoru iz 2026.
+godine opisuju konkretnu modernu implementaciju, a ne projektne
+okolnosti u kojima je DES nastao. Eksperimentalni deo ovog rada zato
+će jasno razdvojiti istorijske tvrdnje od savremenih merenja.
+
 
 \subsection{Bezbednosna ograničenja i iscrpna pretraga}
-% TODO: Objasniti da mali ključ predstavlja centralni praktični problem, bez tvrdnje da je konstrukcija potpuno kriptoanalitički uništena. Uključiti granice 64-bitnog bloka i odvojiti diferencijalnu/linearnu kriptoanalizu od brute-force napada.
+\label{subsec:des_security}
+
+Najvažnije praktično ograničenje DES-a jeste efektivna dužina ključa
+od 56 bita. Prostor mogućih ključeva zato iznosi
+
+\begin{equation}
+    2^{56}
+    =
+    72\,057\,594\,037\,927\,936.
+\end{equation}
+
+Sa teorijske tačke gledišta ovaj broj je veoma veliki, ali bezbednost
+iscrpne pretrage zavisi od raspoložive računarske moći. Kako je
+pokazano u Jednačini~\eqref{eq:bruteforce-time}, za sistem koji može
+da proveri $R$ ključeva u sekundi očekivano vreme pronalaženja ključa
+iznosi približno
+
+\begin{equation}
+    T_{\mathrm{DES}}
+    \approx
+    \frac{2^{55}}{R}.
+    \label{eq:des-bruteforce}
+\end{equation}
+
+Zbog toga se ista veličina prostora ključeva može smatrati praktično
+nepremostivom u jednom tehnološkom periodu, a nedovoljnom nekoliko
+decenija kasnije.
+
+Važno je razlikovati iscrpnu pretragu od strukturne kriptoanalize
+DES-a. Diferencijalna kriptoanaliza proučava način na koji razlike
+između parova otvorenih tekstova utiču na razlike u odgovarajućim
+šifratima. Biham i Shamir su pokazali napad na puni 16-rundni DES sa
+složenošću manjom od potpune iscrpne pretrage u modelu velikog broja
+izabranih otvorenih tekstova~\cite{biham-shamir-full-des-1993}.
+
+Linearna kriptoanaliza koristi aproksimativne linearne relacije između
+bitova otvorenog teksta, šifrata i ključa. Matsui je početkom
+devedesetih razvio linearnu kriptoanalizu DES-a i pokazao napade koji
+su značajno unapredili razumevanje sigurnosne margine algoritma
+~\cite{matsui-linear-des-1993}.
+
+Postojanje ovih napada ne znači da je DES u praksi izgubio značaj
+isključivo zbog potpunog kriptoanalitičkog rušenja njegove unutrašnje
+strukture. Za široko primenljivog napadača centralni problem bio je
+mnogo jednostavniji: čitav prostor od $2^{56}$ ključeva postao je
+moguće sistematski pretražiti.
+
+Drugo ograničenje DES-a jeste veličina bloka od 64 bita. Za
+blokovsku šifru sa $n$-bitnim blokom, kolizije među blokovima postaju
+statistički značajne nakon približno reda
+
+\begin{equation}
+    2^{n/2}
+\end{equation}
+
+obrađenih blokova, prema birthday fenomenu. Za DES to daje red
+veličine
+
+\begin{equation}
+    2^{32}
+\end{equation}
+
+blokova. Ovo ograničenje postalo je naročito značajno mnogo kasnije
+kod dugotrajne upotrebe DES-a i Triple DES-a u visokopropusnim
+sistemima i biće detaljnije razmotreno u poglavlju o TDEA.
+
 
 \subsection{Istorijski projekti razbijanja DES-a}
-% TODO: Proveriti originalnu dokumentaciju EFF Deep Crack i distribuiranih izazova: datume, budžet, opremu i uslove. Ne unositi neproverene brzine.
+\label{subsec:des_cracking_projects}
+
+Kritike 56-bitnog ključa dugo su mogle da se posmatraju kao
+teorijsko pitanje procene buduće računarske moći. Tokom devedesetih
+godina pojavili su se praktični eksperimenti koji su pokazali da
+iscrpna pretraga DES ključa više nije samo teorijska mogućnost.
+
+Jedan od najznačajnijih projekata realizovala je Electronic Frontier
+Foundation (EFF). Organizacija je 1998. godine konstruisala namenski
+sistem za pretraživanje DES ključeva poznat kao \emph{DES Cracker} ili
+\emph{Deep Crack}. Prema EFF dokumentaciji, projekat je bio budžetiran
+na približno 210\,000 američkih dolara, pri čemu je oko 80\,000 dolara
+utrošeno na projektovanje, integraciju i testiranje, a približno
+130\,000 dolara na hardverske komponente. Konačni trošak ostao je
+ispod 250\,000 dolara~\cite{eff-des-cracker-1998}.
+
+Deep Crack je u RSA DES Challenge II-2 tokom jula 1998. pronašao
+traženi DES ključ za približno 56 časova. Sistem je bio projektovan
+da pretražuje prostor ključeva ogromnom brzinom, čime je praktično
+demonstrirano da 56-bitna sigurnost više nije dovoljna protiv
+relativno dobro finansiranog napadača
+~\cite{eff-des-cracker-1998}.
+
+Još upečatljiviji rezultat ostvaren je početkom 1999. godine u
+RSA DES Challenge III. U ovom eksperimentu kombinovani su
+specijalizovani EFF Deep Crack hardver i distribuirana računarska
+mreža projekta distributed.net. Izazov je počeo 18. januara 1999. u
+09:00 po pacifičkom vremenu, a ključ je pronađen 19. januara u 07:15,
+nakon
+
+\begin{equation}
+    22~\text{časa},\ 15~\text{minuta}
+\end{equation}
+
+rada~\cite{distributed-des-iii-1999}.
+
+Tokom tog eksperimenta pregledano je približno
+$1.6\times 10^{16}$ ključeva, odnosno oko 22,2\% ukupnog prostora
+ključeva, uz ukupnu prosečnu brzinu od približno
+$1.99\times10^{11}$ ključeva u sekundi
+~\cite{distributed-des-iii-1999}. Ključ je pronašao Deep Crack
+hardver, dok je distribuirana infrastruktura omogućila objedinjavanje
+rada specijalizovanog sistema i velikog broja računara povezanih preko
+Interneta.
+
+Ovi eksperimenti imali su značaj koji prevazilazi konkretno razbijanje
+pojedinačnih izazovnih poruka. Oni su pokazali da se bezbednosna
+margina zasnovana na kratkom prostoru ključeva smanjuje kako raste
+dostupna računarska moć i mogućnost paralelizacije. Drugim rečima,
+DES nije morao da bude potpuno strukturno razbijen da bi prestao da
+bude adekvatan standard: bilo je dovoljno da njegova osnovna
+pretpostavka o praktičnoj nedostižnosti prostora od $2^{56}$ ključeva
+više ne važi.
+
+Takvi rezultati predstavljali su neposredan istorijski kontekst u
+kojem je tokom druge polovine devedesetih godina pokrenut proces
+izbora Advanced Encryption Standarda. DES je time postao važna
+referentna tačka za novi standard: AES je morao da obezbedi znatno
+veći prostor ključeva, veću dugoročnu sigurnosnu rezervu i efikasnost
+pogodnu za nove generacije računarskih i komunikacionih sistema.

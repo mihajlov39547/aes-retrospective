@@ -1,24 +1,480 @@
 \section{Triple DES / TDEA kao tranziciono rešenje}
 \label{sec:tdea}
-% TODO: Razraditi poglavlje tek nakon provere izvora; ne unositi neproverene činjenice.
-Triple DES biće razmotren kao način produženja upotrebljivosti postojeće
-DES infrastrukture i kao prelaz ka novom standardu. Specifikacija i kasnija
-odluka o povlačenju čine odvojene vrste dokaza~\cite{sp800-67r2,tdea-withdrawal-2023}.
+
+Triple Data Encryption Algorithm (TDEA), često nazivan Triple DES ili
+3DES, nastao je kao način da se produži praktična upotrebljivost DES-a
+bez trenutnog napuštanja postojeće hardverske, softverske i protokolarne
+infrastrukture. Osnovna ideja bila je jednostavna: umesto razvoja potpuno
+nove blokovske šifre, DES transformacija se primenjuje tri puta sa više
+ključeva. Time je zadržana kompatibilnost sa postojećim DES sistemima,
+dok je prostor ključeva značajno povećan.
+
+Ovakav pristup bio je posebno važan u periodu kada je postalo jasno da
+56-bitni DES ključ više nije dovoljan, dok novi standard još nije bio
+široko implementiran. TDEA zato nije predstavljao potpuno novu
+kriptografsku generaciju, već pre svega evolutivno i tranziciono
+rešenje. NIST ga upravo tako opisuje: kao privremenu zamenu za Data
+Encryption Algorithm (DEA), odnosno DES, čiju je osnovnu kriptografsku
+transformaciju nastavio da koristi~\cite{sp800-67r2,tdea-withdrawal-2023}.
+
+Za razumevanje TDEA važno je razlikovati tri pojma koji se često
+neprecizno poistovećuju. Double DES označava dvostruku primenu DES-a
+sa dva ključa i nije postao standardno rešenje zbog
+\emph{meet-in-the-middle} napada. Two-key TDEA (2TDEA) koristi tri DES
+operacije, ali samo dve nezavisne komponente ključa. Three-key TDEA
+(3TDEA) takođe koristi tri DES operacije, ali sa tri različita DES
+ključa. Upravo poslednje dve konstrukcije predstavljaju varijante
+Triple DES-a.
+
 
 \subsection{Motivacija i ograničenje Double DES-a}
-% TODO: Kratko objasniti meet-in-the-middle za 2DES; ne tretirati ga kao četvrti glavni standard.
+\label{subsec:double_des}
+
+Prirodna ideja za povećanje sigurnosti DES-a bila bi njegova dvostruka
+primena sa dva nezavisna 56-bitna ključa:
+
+\begin{equation}
+    C = E_{K_2}\left(E_{K_1}(P)\right).
+    \label{eq:double-des}
+\end{equation}
+
+Na prvi pogled, dva nezavisna DES ključa daju ukupno $112$ bitova
+ključnog materijala, pa bi se moglo očekivati da iscrpna pretraga
+zahteva približno $2^{112}$ kombinacija. Međutim, struktura dvostrukog
+šifrovanja omogućava znatno efikasniji napad poznat kao
+\emph{meet-in-the-middle}.
+
+Ako napadač poseduje poznati par otvorenog teksta $P$ i odgovarajućeg
+šifrata $C$, može za svaki mogući ključ $K_1$ izračunati
+
+\begin{equation}
+    X_{K_1} = E_{K_1}(P)
+\end{equation}
+
+i sačuvati rezultate u tabeli. Postoji $2^{56}$ mogućih vrednosti
+$K_1$.
+
+Zatim se sa druge strane, za svaki mogući ključ $K_2$, izračunava
+
+\begin{equation}
+    Y_{K_2} = D_{K_2}(C).
+\end{equation}
+
+Za ispravnu kombinaciju ključeva mora važiti
+
+\begin{equation}
+    E_{K_1}(P) = D_{K_2}(C).
+\end{equation}
+
+Na taj način napadač ne mora da ispita svih
+
+\begin{equation}
+    2^{56}\cdot 2^{56}=2^{112}
+\end{equation}
+
+parova ključeva. Umesto toga, potrebne su približno dve pretrage prostora
+od $2^{56}$ ključeva, uz značajan memorijski zahtev za čuvanje
+međurezultata. Osnovni red računarske složenosti zato je približno
+
+\begin{equation}
+    2^{56}+2^{56}=2^{57}
+\end{equation}
+
+DES operacija, uz memoriju reda $2^{56}$ međuvrednosti.
+
+Ovo ne znači da je napad praktično identičan jednostavnom brute-force
+napadu na DES: memorijski zahtevi, pristup tabeli i potvrđivanje kandidata
+predstavljaju dodatne troškove. Međutim, njegova složenost je daleko
+ispod očekivanih $2^{112}$ operacija. Zbog toga Double DES nije pružio
+sigurnosno povećanje koje bi opravdalo njegovu upotrebu kao naslednika
+DES-a.
+
+Ograničenje Double DES-a predstavljalo je jedan od razloga za primenu
+tri DES operacije umesto dve. Triple DES otežava ovakav neposredni
+meet-in-the-middle pristup, iako ni kod njega nominalna količina
+ključnog materijala ne odgovara direktno efektivnoj sigurnosnoj snazi.
+
 
 \subsection{EDE konstrukcija i kompatibilnost}
-% TODO: Definisati E_K3(D_K2(E_K1(P))), DES-EDE i slučaj jednakih ključeva. Razlikovati dve nezavisne komponente (K3=K1) od tri.
+\label{subsec:tdea_ede}
+
+TDEA primenjuje DES transformaciju tri puta. Standardna konstrukcija
+koristi redosled šifrovanje--dešifrovanje--šifrovanje
+(\emph{Encrypt--Decrypt--Encrypt}, EDE):
+
+\begin{equation}
+    C =
+    E_{K_3}
+    \left(
+        D_{K_2}
+        \left(
+            E_{K_1}(P)
+        \right)
+    \right).
+    \label{eq:tdea-ede}
+\end{equation}
+
+Odgovarajuće dešifrovanje izvodi se obrnutim redosledom:
+
+\begin{equation}
+    P =
+    D_{K_1}
+    \left(
+        E_{K_2}
+        \left(
+            D_{K_3}(C)
+        \right)
+    \right).
+    \label{eq:tdea-ded}
+\end{equation}
+
+Na prvi pogled može izgledati neobično što je srednja operacija kod
+šifrovanja DES dešifrovanje, a ne još jedno šifrovanje. Razlog je
+kompatibilnost sa postojećim DES sistemima.
+
+Ako se postavi
+
+\begin{equation}
+    K_1 = K_2 = K_3 = K,
+\end{equation}
+
+tada zbog međusobne inverznosti DES operacija važi
+
+\begin{align}
+    C
+    &=
+    E_K\left(D_K\left(E_K(P)\right)\right)\\
+    &=
+    E_K(P).
+\end{align}
+
+TDEA se u tom posebnom slučaju svodi na običan DES. Ovo svojstvo
+omogućilo je sistemima projektovanim za EDE konstrukciju da zadrže
+interoperabilnost sa starijom DES opremom.
+
+Istorijski su se koristile dve glavne TDEA varijante.
+
+Kod three-key TDEA sva tri ključa su nezavisna:
+
+\begin{equation}
+    K_1 \neq K_2,\qquad
+    K_2 \neq K_3,\qquad
+    K_1 \neq K_3.
+\end{equation}
+
+Pošto svaki DES ključ sadrži 56 efektivnih bitova, ukupan
+kriptografski relevantan ključni materijal iznosi
+
+\begin{equation}
+    3 \times 56 = 168~\text{bita}.
+\end{equation}
+
+Kod two-key TDEA koriste se dva nezavisna ključa, uz
+
+\begin{equation}
+    K_3 = K_1,
+\end{equation}
+
+pa konstrukcija postaje
+
+\begin{equation}
+    C =
+    E_{K_1}
+    \left(
+        D_{K_2}
+        \left(
+            E_{K_1}(P)
+        \right)
+    \right).
+    \label{eq:2tdea}
+\end{equation}
+
+U tom slučaju postoje dva nezavisna 56-bitna DES ključa, odnosno
+112 bitova efektivnog ključnog materijala.
+
+Ako se računaju i DES bitovi parnosti, 3TDEA se često predstavlja
+kao 192-bitni zapis ključa, odnosno tri 64-bitna DES ključa, dok 2TDEA
+može biti zapisan sa 128 bita. Ove vrednosti ne treba mešati sa
+kriptografski efektivnim ključnim materijalom od 168 odnosno 112 bita,
+jer po osam bitova svake DES komponente predstavljaju paritet.
+
 
 \subsection{Veličina ključa i efektivna sigurnost}
-% TODO: Razdvojiti 112/168 efektivnih bitova materijala, zapis sa paritetom i sigurnost pod konkretnim napadom. Dokumentovati vremenske, memorijske i podatkovne uslove; ne sabirati naivno sigurnost DES instanci.
+\label{subsec:tdea_security_strength}
+
+Jedna od najvažnijih pouka TDEA konstrukcije jeste da količina ključnog
+materijala nije nužno jednaka efektivnoj sigurnosnoj snazi algoritma.
+
+Kod 3TDEA postoje tri nezavisna DES ključa i ukupno 168 efektivnih
+bitova ključnog materijala. Ipak, poznate kriptoanalitičke tehnike
+omogućavaju napade čija je složenost značajno manja od
+$2^{168}$. NIST zato 3TDEA ne klasifikuje kao algoritam sa 168 bita
+sigurnosti, već mu pripisuje maksimalnu uporedivu sigurnosnu snagu od
+
+\begin{equation}
+    112~\text{bita}.
+\end{equation}
+
+Ovo je eksplicitno navedeno u NIST preporukama za upravljanje
+ključevima, gde je 3TDEA svrstan u klasu od 112 bita sigurnosne snage
+~\cite{sp800-57pt1r5}.
+
+Razlika između ova dva broja mora biti jasno naglašena:
+
+\begin{itemize}
+    \item 168 bita predstavlja količinu nezavisnog DES ključnog
+    materijala kod 3TDEA;
+    \item 112 bita predstavlja procenu maksimalne efektivne sigurnosne
+    snage prema poznatim generičkim napadima.
+\end{itemize}
+
+Kod 2TDEA postoje samo dva nezavisna DES ključa, odnosno 112 bita
+ključnog materijala. Međutim, ni njegova sigurnost nije jednostavno
+jednaka 112 bita. NIST je tradicionalno procenjivao 2TDEA na najviše
+oko 80 bita sigurnosne snage u modelima gde napadač raspolaže velikim
+brojem odgovarajućih parova otvorenog teksta i šifrata
+~\cite{sp800-57pt1r5}.
+
+Zato nije korektno porediti algoritme samo na osnovu zbirne dužine
+njihovih ključeva. Sigurnosna snaga zavisi od najboljeg poznatog napada,
+njegove vremenske složenosti, potrebne količine memorije, raspoloživih
+podataka i modela u kojem napadač deluje.
+
+Ova razlika biće kasnije posebno značajna pri poređenju TDEA sa AES-om.
+AES-128 koristi 128 bita ključnog materijala i projektovan je za približno
+128-bitnu klasičnu sigurnosnu snagu protiv generičke iscrpne pretrage,
+dok 3TDEA koristi 168 bita ključnog materijala, ali mu je procenjena
+sigurnosna snaga ograničena na približno 112 bita.
+
 
 \subsection{Performanse i prednosti tranzicije}
-% TODO: Obraditi tri DES operacije, kompatibilnost, postojeći hardver i trošak migracije.
+\label{subsec:tdea_performanse}
+
+TDEA nije nastao kao optimalno rešenje za novu generaciju računarskih
+sistema, već kao praktičan način produženja životnog veka postojeće DES
+infrastrukture. Ova činjenica objašnjava istovremeno i njegove glavne
+prednosti i njegova ograničenja.
+
+Za obradu jednog 64-bitnog bloka TDEA izvodi tri kompletne DES
+transformacije:
+
+\begin{equation}
+    E_{K_1}
+    \rightarrow
+    D_{K_2}
+    \rightarrow
+    E_{K_3}.
+\end{equation}
+
+Ako se posmatra samo broj osnovnih DES operacija, jasno je da TDEA ima
+znatno veći računarski trošak od pojedinačnog DES-a. Realni odnos
+performansi zavisi od konkretne implementacije, procesora, hardverske
+podrške, načina rada i mogućnosti paralelizacije, pa se ne može
+univerzalno tvrditi da je TDEA ``tačno tri puta sporiji''. Ipak, tri
+sekvencijalne DES transformacije predstavljaju inherentno veće
+opterećenje od jedne DES operacije.
+
+Sa druge strane, upravo oslanjanje na DES predstavljalo je njegovu
+najvažniju praktičnu prednost. Postojeći sistemi mogli su da koriste
+poznatu DES logiku, hardverske blokove, implementacione procedure i
+operativno iskustvo. U okruženjima sa dugim životnim ciklusom opreme,
+kao što su finansijski i telekomunikacioni sistemi, migracija na
+potpuno novi algoritam može zahtevati zamenu uređaja, sertifikaciju,
+izmene protokola i testiranje interoperabilnosti.
+
+TDEA je zato omogućavao postupnu migraciju:
+
+\begin{enumerate}
+    \item zadržavana je DES osnovna transformacija;
+    \item povećavana je sigurnosna snaga u odnosu na single DES;
+    \item postojeća infrastruktura mogla je biti prilagođena bez
+    trenutnog prelaska na potpuno novu kriptografsku arhitekturu;
+    \item EDE konstrukcija omogućavala je kompatibilnost sa pojedinim
+    DES sistemima.
+\end{enumerate}
+
+Upravo u tom smislu TDEA treba posmatrati kao tranzicionu tehnologiju.
+Njegov cilj nije bio da reši sva ograničenja DES konstrukcije, već da
+obezbedi bezbedniji migracioni put dok se novi standard, AES, ne
+standardizuje i dovoljno široko implementira.
+
+Takav kompromis bio je opravdan tokom prelaznog perioda, ali je
+dugoročno značio da TDEA nasleđuje neke osnovne osobine DES-a koje
+povećanje broja ključeva ne može da promeni. Najvažnija među njima je
+veličina bloka od samo 64 bita.
+
 
 \subsection{Ograničenja bloka i Sweet32}
-% TODO: Istražiti birthday granice za 64-bitni blok i konkretne uslove Sweet32 napada; ne poistovećivati koliziju bloka sa pronalaženjem ključa.
+\label{subsec:tdea_sweet32}
+
+Povećavanje broja DES ključeva u TDEA rešava problem kratkog 56-bitnog
+ključa, ali ne menja veličinu osnovnog bloka. TDEA, kao i DES, obrađuje
+blokove od
+
+\begin{equation}
+    n = 64~\text{bita}.
+\end{equation}
+
+Ovo svojstvo predstavlja ograničenje nezavisno od dužine ključa.
+Kod blokovske šifre sa $n$-bitnim blokovima, zbog rođendanskog paradoksa
+(\emph{birthday paradox}), verovatnoća pojave kolizije između blokova
+postaje značajna nakon reda
+
+\begin{equation}
+    2^{n/2}
+\end{equation}
+
+obrađenih blokova.
+
+Za 64-bitni blok to iznosi približno
+
+\begin{equation}
+    2^{32}
+\end{equation}
+
+blokova.
+
+Pošto svaki TDEA blok sadrži osam bajtova, ovaj red veličine odgovara
+
+\begin{equation}
+    2^{32}\times8
+    =
+    2^{35}~\text{bajtova}
+    \approx 32~\text{GiB}.
+\end{equation}
+
+Važno je naglasiti šta ova granica znači, a šta ne znači.
+Pojava kolizije nakon približno $2^{32}$ blokova ne znači automatski
+pronalaženje TDEA ključa niti trenutno dešifrovanje kompletne
+komunikacije. Reč je o ograničenju određenih načina rada blokovskih
+šifara, kod kojih ponavljanje blokova može otkriti informacije o
+strukturi otvorenog teksta.
+
+Praktičan značaj ovog problema demonstriran je 2016. godine napadom
+poznatim kao \emph{Sweet32}. Bhargavan i Leurent pokazali su kako
+birthday kolizije kod 64-bitnih blokovskih šifara mogu biti iskorišćene
+u dugotrajnim TLS i VPN sesijama~\cite{sweet32-2016}.
+
+Napad ne predstavlja kriptoanalitičko razbijanje same 3DES primitive.
+Umesto toga, iskorišćava kombinaciju:
+
+\begin{itemize}
+    \item 64-bitne veličine bloka;
+    \item CBC načina rada;
+    \item velike količine podataka šifrovanih istim ključem;
+    \item poznatih ili predvidljivih delova otvorenog teksta;
+    \item tajne vrednosti koja se više puta pojavljuje u komunikaciji.
+\end{itemize}
+
+Autori Sweet32 rada demonstrirali su scenario u kojem se HTTP
+autentifikaciona ili sesijska tajna ponavlja u velikom broju zahteva.
+Posmatranjem dovoljne količine šifrovanog saobraćaja i pronalaženjem
+kolizija među CBC blokovima moguće je dobiti relacije između odgovarajućih
+blokova otvorenog teksta.
+
+U njihovom eksperimentalnom napadu na HTTPS sa 3DES-om bilo je potrebno
+reda stotina gigabajta saobraćaja pod odgovarajućim uslovima. Za
+konkretan demonstracioni scenario autori navode približno 785~GB
+saobraćaja i trajanje kraće od dva dana
+~\cite{sweet32-2016}.
+
+Sweet32 je važan za ovu retrospektivu jer pokazuje ograničenje koje
+povećanje dužine ključa sa DES-a na Triple DES nije moglo da reši.
+Čak i 3TDEA sa tri nezavisna ključa i 168 bita ključnog materijala
+zadržava 64-bitni blok. Napad zasnovan na birthday kolizijama zato je
+u velikoj meri nezavisan od toga koliko je teško iscrpno pretražiti
+ključ.
+
+NIST je 2017. godine upravo zbog sigurnosnih ograničenja vezanih za
+64-bitni blok dodatno smanjio dozvoljenu količinu podataka koja se može
+obraditi jednim 3TDEA key bundle-om. SP~800-67 Rev.~2 ograničio je
+primenu jednog 3TDEA key bundle-a na najviše
+
+\begin{equation}
+    2^{20}
+\end{equation}
+
+64-bitnih blokova~\cite{sp800-67r2}. Time je dozvoljeni obim bio
+postavljen značajno ispod teorijske birthday granice od približno
+$2^{32}$ blokova.
+
 
 \subsection{Povlačenje i preostale nasleđene primene}
-% TODO: Razdvojiti NIST zabranu primene nove zaštite od dozvoljene obrade ranije zaštićenih podataka, uz datume i opseg politike. Status standarda nije dokaz nestanka svih instalacija.
+\label{subsec:tdea_withdrawal}
+
+Povlačenje TDEA nije predstavljalo jedan trenutni događaj, već
+višegodišnji proces tokom kojeg su se preporuke postepeno pooštravale.
+
+Prvo je ograničena upotreba two-key TDEA. Revizija SP~800-67 iz 2017.
+više nije dozvoljavala 2TDEA za primenu nove kriptografske zaštite.
+Istovremeno je za 3TDEA smanjena maksimalna količina podataka koja se
+sme obraditi jednim key bundle-om na $2^{20}$ blokova
+~\cite{sp800-67r2}.
+
+NIST SP~800-131A Rev.~2 zatim je definisao završnu fazu tranzicije.
+Upotreba TDEA za primenu nove kriptografske zaštite --- uključujući
+šifrovanje, key wrapping i generisanje određenih MAC vrednosti --- bila
+je označena kao zastarela (\emph{deprecated}) do kraja 2023. godine.
+Nakon 31. decembra 2023. takva upotreba više nije dozvoljena u okviru
+NIST-ovih odobrenih federalnih algoritama
+~\cite{sp800-131ar2,tdea-withdrawal-2023}.
+
+SP~800-67 Rev.~2 formalno je povučen
+
+\begin{equation}
+    1.~\text{januara 2024. godine}.
+\end{equation}
+
+Važno je, međutim, precizno tumačiti ovu odluku. NIST nije zabranio
+svaku moguću obradu istorijskih podataka zaštićenih TDEA algoritmom.
+Nakon povlačenja TDEA ostaje dozvoljen za određene operacije nad
+\emph{već zaštićenim} podacima, kao što su:
+
+\begin{itemize}
+    \item dešifrovanje ranije šifrovanih podataka;
+    \item raspakivanje ključeva (\emph{key unwrapping});
+    \item verifikacija MAC vrednosti za ranije zaštićene podatke.
+\end{itemize}
+
+Drugim rečima, politika razlikuje:
+
+\begin{quote}
+primenu nove zaštite
+\end{quote}
+
+od
+
+\begin{quote}
+obrade prethodno zaštićenih podataka.
+\end{quote}
+
+Ova razlika je važna u sistemima sa dugoročnim arhivama i nasleđenom
+opremom, gde potpuno trenutno uklanjanje TDEA podrške može onemogućiti
+pristup istorijskim podacima.
+
+Povlačenje standarda takođe ne znači da je TDEA istog trenutka nestao
+iz svih realnih informacionih i telekomunikacionih sistema. Standardi,
+biblioteke, mrežna oprema, platni sistemi i druga nasleđena infrastruktura
+često zadržavaju podršku za starije algoritme radi interoperabilnosti.
+Normativni status zato treba razlikovati od stvarnog stepena prisutnosti
+algoritma u instaliranoj bazi opreme.
+
+Istorijski razvoj TDEA može se zato posmatrati kroz četiri faze:
+
+\begin{enumerate}
+    \item DES postaje nedovoljan zbog 56-bitnog ključa;
+    \item TDEA produžava upotrebljivost postojeće DES infrastrukture;
+    \item rast brzine komunikacionih sistema i analiza 64-bitnog bloka
+    otkrivaju dugoročna ograničenja konstrukcije;
+    \item AES postepeno preuzima ulogu glavnog standarda, nakon čega
+    se TDEA postepeno ograničava i konačno povlači za novu zaštitu.
+\end{enumerate}
+
+Upravo zbog ovakvog razvoja Triple DES predstavlja karakterističan
+primer tranzicione kriptografske tehnologije. Bio je dovoljno
+kompatibilan sa DES-om da omogući postepenu migraciju i dovoljno
+sigurniji da produži život postojećih sistema, ali je zadržao osnovna
+konstruktivna ograničenja prethodne generacije, naročito 64-bitnu
+veličinu bloka. Time je dugoročna potreba za novim algoritmom ostala,
+što je predstavljalo jedan od ključnih razloga za razvoj i
+standardizaciju AES-a.
