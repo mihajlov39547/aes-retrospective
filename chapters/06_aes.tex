@@ -428,14 +428,9 @@ AES-256 zbog strukture njihovog rasporeda ključeva.
 
 Biryukov i Khovratovich pokazali su 2009. godine napade na pune
 AES-192 i AES-256 u related-key modelu. Za AES-256 prikazan je
-key-recovery napad za sve ključeve sa deklarisanom vremenskom i
-podatkovnom složenošću približno
-
-\begin{equation}
-2^{99.5},
-\end{equation}
-
-kasnije poboljšanom na približno $2^{99}$
+key-recovery napad za sve ključeve sa vremenskom i podatkovnom složenošću od približno
+$2^{99.5}$ u related-key modelu; autori kasnije navode
+poboljšanje ukupne složenosti napada na približno $2^{99}$
 ~\cite{biryukov-khovratovich-2009}.
 
 Ovo je dramatično manje od $2^{256}$ operacija potrebnih za generičku
@@ -479,11 +474,7 @@ kriptoanalitičko poboljšanje u odnosu na idealizovanu iscrpnu pretragu,
 ali ne daju praktičan način pronalaženja AES ključeva.
 
 Kasniji radovi nastavili su da unapređuju kriptoanalizu redukovanih
-AES varijanti i određene specifične modele napada. Na primer, radovi
-objavljeni i tokom 2024. godine i dalje postižu nove rezultate nad
-šest ili sedam rundi određenih AES varijanti, a ne praktično
-key-recovery razbijanje punog standardnog AES-a
-~\cite{kara-aes-2024}.
+AES varijanti i određene specifične modele napada.
 
 Za potrebe ovog rada zato će se razlikovati:
 
@@ -572,9 +563,11 @@ realizuje većinu operacija standardne AES runde, dok
 Prednost ovih instrukcija nije samo u većoj brzini. Klasične
 T-table implementacije izvršavaju memorijske pristupe čija lokacija
 zavisi od tajnih podataka. AES-NI izvodi ključne AES transformacije
-direktno u procesoru i ne zahteva takve lookup tabele. Time se
-eliminiše važna klasa timing i cache curenja karakterističnih za
-tabelarne softverske implementacije~\cite{intel-aes-ni}.
+direktno u procesoru i ne zahteva takve lookup tabele.
+Time se izbegava važan izvor cache i timing curenja karakterističan
+za klasične T-table implementacije, jer izvršavanje AES transformacija
+više ne zahteva lookup tabele indeksirane vrednostima zavisnim od
+tajnih podataka~\cite{intel-aes-ni}.
 
 To, međutim, ne znači da AES-NI rešava svaki problem bočnih kanala.
 Fizički napadi zasnovani na potrošnji energije, elektromagnetnom

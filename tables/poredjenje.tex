@@ -9,7 +9,7 @@ materijala. Performanse zavise od konkretne implementacije i platforme.}
 \begin{tabular}{lccccccc}
 \toprule
 Standard &
-Prva standardizacija &
+Relevantna standardizacija &
 Blok &
 Ključni materijal &
 Proc. sigurnost &
@@ -19,7 +19,7 @@ Status 2026. \\
 \midrule
 
 DES &
-1977 &
+FIPS 46 (1977) &
 64 &
 56 &
 $\leq 56$ &
@@ -28,46 +28,46 @@ Feistel &
 Povučen \\
 
 2TDEA &
-1999\textsuperscript{a} &
+FIPS 46-3 (1999) &
 64 &
 112 &
-$\approx 80$\textsuperscript{b} &
+$\leq 80$\textsuperscript{a} &
 3$\times$DES EDE &
 3 DES prolaza &
 Nedozvoljen za novu zaštitu \\
 
 3TDEA &
-1999\textsuperscript{a} &
+FIPS 46-3 (1999) &
 64 &
 168 &
-$\approx 112$ &
+112 &
 3$\times$DES EDE &
 3 DES prolaza &
-Povučen za novu zaštitu \\
+Nedozvoljen za novu zaštitu \\
 
 AES-128 &
-2001 &
+FIPS 197 (2001) &
 128 &
 128 &
-$\approx 128$\textsuperscript{c} &
+$\approx 128$\textsuperscript{b} &
 SPN &
 10 rundi &
 Aktivan standard \\
 
 AES-192 &
-2001 &
+FIPS 197 (2001) &
 128 &
 192 &
-$\approx 192$\textsuperscript{c} &
+$\approx 192$\textsuperscript{b} &
 SPN &
 12 rundi &
 Aktivan standard \\
 
 AES-256 &
-2001 &
+FIPS 197 (2001) &
 128 &
 256 &
-$\approx 256$\textsuperscript{c} &
+$\approx 256$\textsuperscript{b} &
 SPN &
 14 rundi &
 Aktivan standard \\
@@ -79,12 +79,9 @@ Aktivan standard \\
 
 \begin{minipage}{0.98\textwidth}
 \footnotesize
-\textsuperscript{a} TDEA konstrukcija je starija od FIPS~46-3, ali je
-1999. ovde uzeta kao godina relevantne federalne standardizacije u
-okviru FIPS~46-3.\\
-\textsuperscript{b} NIST je 2TDEA tradicionalno procenjivao na oko
-80 bita sigurnosne snage u relevantnim modelima napada.\\
-\textsuperscript{c} Brojevi označavaju generičku klasičnu sigurnost
+\textsuperscript{a} NIST svrstava 2TDEA u kategoriju sigurnosne snage
+od najviše 80 bita~\cite{sp800-57pt1r5}.\\
+\textsuperscript{b} Brojevi označavaju generičku klasičnu sigurnost
 protiv iscrpne pretrage; poznati teorijski napadi na puni AES mogu
 formalno smanjiti složenost, ali ne do praktičnog nivoa.
 \end{minipage}

@@ -372,19 +372,37 @@ potrebno jasnije savremeno predstavljanje iste tehničke specifikacije.
 \subsection{Rijndael i standardizovani AES}
 \label{subsec:rijndael_vs_aes}
 
-Nazivi Rijndael i AES često se koriste kao sinonimi, ali tehnički nisu
-potpuno identični.
+Nazivi Rijndael i AES često se koriste kao sinonimi, ali tehnički
+ne označavaju potpuno isti skup parametara.
 
-Rijndael predstavlja širu familiju blokovskih šifara koju su definisali
-Daemen i Rijmen. Originalna konstrukcija i njena proširena specifikacija
-omogućavaju nezavisno biranje veličine ključa i veličine bloka između
-128 i 256 bita u koracima od 32 bita:
+Rijndael predstavlja familiju blokovskih šifara koju su razvili
+Joan Daemen i Vincent Rijmen. U dokumentu \emph{AES Proposal:
+Rijndael}, pripremljenom za završnu fazu AES konkursa, blok i ključ
+mogu se nezavisno birati između veličina 128, 192 i 256 bita
+~\cite{rijndael-proposal-1999}.
+
+Širi opisi Rijndael familije takođe obuhvataju međuvrednosti od
+160 i 224 bita. Pošto te dodatne veličine nisu deo standardizovanog
+AES-a, u ovom radu one nisu potrebne za opis AES konstrukcije.
+Najvažnija razlika je da FIPS~197 fiksira veličinu AES bloka na
 
 \begin{equation}
-    128,\ 160,\ 192,\ 224,\ 256~\text{bita}.
+    128~\text{bita},
 \end{equation}
 
-~\cite{rijndael-proposal-1999,rijndael-naming-2003}.
+dok dozvoljava tri veličine ključa:
+
+\begin{equation}
+    128,\qquad192,\qquad256~\text{bita}.
+\end{equation}
+
+AES zato predstavlja tri konkretne standardizovane parametrizacije
+Rijndael konstrukcije: AES-128, AES-192 i AES-256
+~\cite{fips197-2023}.
+
+Drugim rečima, svaki AES algoritam predstavlja određenu
+parametrizaciju Rijndaela, ali svaka dopuštena parametrizacija šire
+Rijndael familije nije AES.
 
 Broj rundi u opštoj Rijndael familiji može se izraziti kao
 
@@ -395,27 +413,6 @@ Broj rundi u opštoj Rijndael familiji može se izraziti kao
 gde $N_k$ predstavlja dužinu ključa izraženu brojem 32-bitnih reči,
 a $N_b$ veličinu bloka izraženu na isti način
 ~\cite{rijndael-proposal-1999}.
-
-AES predstavlja samo tri konkretna člana te šire familije. FIPS~197
-fiksira veličinu bloka na
-
-\begin{equation}
-    128~\text{bita},
-\end{equation}
-
-dok dozvoljava samo tri veličine ključa:
-
-\begin{equation}
-    128,\qquad192,\qquad256~\text{bita}.
-\end{equation}
-
-Zato važi:
-
-\begin{equation}
-    \text{AES} \subset \text{Rijndael},
-\end{equation}
-
-u smislu skupa dozvoljenih parametara.
 
 Na primer, Rijndael sa 256-bitnim blokom i 256-bitnim ključem pripada
 Rijndael familiji, ali nije AES-256. AES-256 koristi 256-bitni ključ

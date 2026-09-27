@@ -127,11 +127,12 @@ Zato se proces pojednostavljeno može predstaviti kao:
 AES-GCM nije algoritam za razmenu ključeva. Njegova uloga počinje tek
 nakon što odgovarajući simetrični ključevi budu uspostavljeni.
 
-Aktuelne IETF preporuke za IPsec dodatno potvrđuju prelazak ka AEAD
-konstrukcijama. RFC~8221 navodi AES-GCM kao jednu od preporučenih
-kombinacija za ESP, dok su starije konstrukcije zasnovane na odvojenom
-šifrovanju i autentifikaciji zadržane prvenstveno radi kompatibilnosti
-~\cite{rfc8221}.
+IETF smernice za implementaciju IPsec algoritama dodatno potvrđuju
+prelazak ka autentifikovanoj enkripciji. RFC~8221 navodi
+\texttt{ENCR\_AES\_GCM\_16} među obaveznim implementacionim opcijama
+za ESP za odgovarajuće veličine ključa, dok je dokument naknadno
+ažuriran RFC-om~9395 u okviru šireg povlačenja IKEv1 i zastarelih
+algoritama~\cite{rfc8221,rfc9395}.
 
 
 \subsection{TLS i transportni protokoli}
@@ -234,9 +235,11 @@ tajne~\cite{rfc7664,wifi-wpa3}.
 
 Važno je naglasiti da SAE nije algoritam za šifrovanje korisničkog
 saobraćaja. Njegova funkcija je autentifikacija i uspostavljanje
-kriptografske tajne. Nakon uspešne autentifikacije, podaci se štite
-odgovarajućim IEEE 802.11 mehanizmom kao što je CCMP ili GCMP,
-u zavisnosti od profila i mogućnosti uređaja.
+kriptografske tajne. Nakon uspešne SAE autentifikacije, zaštita korisničkih okvira
+ostaje zasebna funkcija IEEE~802.11 bezbednosnog sloja. Konkretan
+dozvoljeni cipher i zaštitni mehanizam zavise od WPA3/IEEE~802.11
+profila i mogućnosti uređaja. Time se SAE autentifikacija jasno
+razdvaja od AES-zasnovane zaštite korisničkog saobraćaja.
 
 Zato se WPA3 ne može pojednostavljeno opisati kao ``AES algoritam''.
 Njegov bezbednosni model obuhvata najmanje dve različite faze:
@@ -375,7 +378,7 @@ zastupljenosti zahtevala zasebne podatke iz konkretnih operatora,
 uređaja ili mrežnih merenja.
 
 
-\subsection{Infrastruktura, optičke mreže i mrežna oprema}
+\subsection{Mrežna infrastruktura i MACsec}
 \label{subsec:infrastruktura}
 
 AES se koristi i ispod IP nivoa u mrežnoj infrastrukturi. Jedan od
@@ -403,12 +406,10 @@ algoritamske brzine AES-a. Ako se takvi podaci koriste kao ilustracija
 realne implementacije, biće jasno označeni naziv uređaja, platforma i
 uslovi merenja.
 
-Sličan princip važi za optičke transportne sisteme. AES može biti
-implementiran u opremi koja štiti saobraćaj na Ethernet ili transportnim
-interfejsima preko optičke infrastrukture, ali sama činjenica da se
-prenos fizički odvija preko optičkog vlakna ne definiše poseban
-kriptografski algoritam. Kriptografska zaštita zavisi od konkretnog
-protokolskog i transportnog standarda iznad fizičkog medijuma.
+Kada se MACsec ili srodna link-layer zaštita koristi na Ethernet
+interfejsima koji se fizički prenose preko optičke infrastrukture,
+kriptografska svojstva određuje odgovarajući link-layer standard, a
+ne sam optički medijum prenosa.
 
 
 \subsection{Embedded i IoT uređaji}
@@ -424,11 +425,12 @@ jeste dostupnost veoma različitih implementacija: od kompaktnih
 softverskih verzija do hardverskih AES perifernih jedinica ugrađenih
 direktno u mikrokontrolere.
 
-IEEE 802.15.4, koji predstavlja osnovu više low-rate wireless
-tehnologija, definiše bezbednosne mehanizme zasnovane na AES-u sa
-128-bitnim ključem. U različitim bezbednosnim nivoima koriste se
-AES-CTR, AES-CBC-MAC i kombinovane CCM/CCM* konstrukcije
-~\cite{ieee802154}.
+IEEE~802.15.4 bezbednosni mehanizmi koriste AES sa 128-bitnim
+ključem kroz CCM* konstrukciju. CCM* proširuje CCM tako da podržava
+različite nivoe zaštite, uključujući samo poverljivost, samo
+autentifikaciju ili kombinaciju obe funkcije. Interno se oslanja na
+CTR komponentu za poverljivost i CBC-MAC komponentu za
+autentifikaciju~\cite{ieee802154}.
 
 Ovo je dobar primer kompromisa karakterističnog za IoT. Cilj nije samo
 maksimalni throughput, već:
@@ -508,8 +510,8 @@ Zaštita Wi-Fi okvira &
 IEEE 802.11 \\
 
 WPA3-Personal &
-AES-zasnovana zaštita &
-CCMP/GCMP &
+profil-zavisno &
+IEEE 802.11 zaštita okvira &
 Zaštita Wi-Fi okvira &
 SAE + 802.11 key management &
 WPA3 / IEEE 802.11 \\
@@ -551,7 +553,7 @@ IEEE 802.1AE \\
 
 IEEE 802.15.4 &
 AES-128 &
-CCM/CCM* &
+CCM* &
 Poverljivost + integritet &
 zavisi od višeg protokola &
 IEEE 802.15.4 \\
