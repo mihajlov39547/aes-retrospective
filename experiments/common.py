@@ -116,7 +116,8 @@ def metadata(args: argparse.Namespace, method: dict) -> dict:
             "git_commit": command_output(["git", "rev-parse", "HEAD"]),
             "git_status": command_output(["git", "status", "--short"]),
             "script_sha256": hashes, "argv": sys.argv, "arguments": vars(args),
-            "method": method, "hardware_execution_path": "not verified",
+            "method": method,
+            "hardware_execution_path": method.get("hardware_execution_path", "not verified"),
             "warning": "Educational synthetic experiment; DES/TDEA are legacy algorithms."}
 
 

@@ -18,6 +18,18 @@ rada; ovo poglavlje ne sadrži rezultate niti rangiranje algoritama.
 \subsection{Veličine uzorka, statistika i jedinice}
 % TODO: Koristiti 1 KiB, 1 MiB, 10 MiB, opciono 100 MiB; navesti tačne bajtove. Throughput MB/s je bytes/10^6/s. Sačuvati pojedinačna merenja, aritmetičku sredinu, medijanu i uzoračku standardnu devijaciju; bez uklanjanja odstupanja bez kriterijuma.
 
+\subsection{AES sa hardverskom akceleracijom i bez nje}
+\label{sec:aes-akceleracija}
+Planirano je upareno poređenje AES-128, AES-192 i AES-256 sa AES-NI putanjom
+i prenosivom softverskom implementacijom iste biblioteke, na istom procesoru.
+Ovaj eksperiment treba da poveže implementacione performanse sa retrospektivom
+u odeljku~\ref{sec:retrospektiva}; njegova softverska putanja ne predstavlja
+rekonstrukciju računara iz 2003. godine.
+% TODO: Pokrenuti experiments/aes_acceleration.py nakon kontrole okruženja. Potvrditi CPU podršku, učitanu biblioteku i izbor native putanje; ne zaključivati samo iz use_aesni=True ili odnosa brzina.
+% TODO: Za oba backend-a koristiti iste poruke, ključeve i IV u uparenom CBC poređenju, uz warmup i nasumičan redosled enkripcije/dekripcije i backend-a. Ponovna upotreba IV ovde je samo kontrolisano ponavljanje identičnog testa.
+% TODO: Prikazati vremena, MB/s, sredinu, medijanu, SD i faktor kao medijana softverskog vremena / medijana AES-NI vremena. Objasniti uticaj veličine bafera, CBC zavisnosti i keša; ne tumačiti SD kao interval poverenja.
+% TODO: Softverska putanja je kompajlirana implementacija bez AES-NI, ne čisti Python niti garantovano constant-time rešenje. ARM crypto extensions ostaju zaseban budući eksperiment.
+
 \subsection{Edukativna brute-force demonstracija}
 % TODO: Ograničiti promenljive bitove AES ključa; nikada ne pretraživati puni DES/AES prostor. Meriti pokušaje/s i ekstrapolirati 2^56, 2^112, 2^128, 2^192 i 2^256 u naučnoj notaciji. Razdvojiti celo i prosečno pretraživanje. Rezultati jedne AES petlje nisu brzine DES/3DES napada; ASIC/GPU/paralelizacija i MITM menjaju model.
 

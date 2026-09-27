@@ -15,6 +15,7 @@ Svi projektni izvori su prikazani; lokalno okruženje, Git baza i generisani bui
 .
 ├── .gitignore
 ├── main.tex
+├── build.ps1
 ├── references.bib
 ├── README.md
 ├── chapters/
@@ -42,6 +43,7 @@ Svi projektni izvori su prikazani; lokalno okruženje, Git baza i generisani bui
 │   ├── requirements.txt
 │   ├── common.py
 │   ├── benchmark.py
+│   ├── aes_acceleration.py
 │   ├── avalanche_test.py
 │   ├── brute_force_demo.py
 │   ├── export_results.py
@@ -70,7 +72,7 @@ Svi projektni izvori su prikazani; lokalno okruženje, Git baza i generisani bui
 | 06 | AES state, transformacije, GF aritmetika, dekripcija, kriptoanaliza i bočni kanali. |
 | 07 | Istorijsko i savremeno poređenje; centralna prazna tabela. |
 | 08 | IPsec/VPN, TLS, Wi-Fi, mobilni sistemi, infrastruktura i IoT. |
-| 09 | Benchmark, reproduktivnost, brute-force i avalanche; ograničenja. |
+| 09 | Benchmark, AES-NI naspram softvera, reproduktivnost, brute-force i avalanche. |
 | 10 | Očekivanja naspram ishoda, AEAD, performanse i kvantni model. |
 | 11 | Dizajnerska retrospektiva, AES-192, blok, implementacije, Ascon i future work. |
 | 12 | Struktura odgovora na centralno pitanje, bez konačne ocene. |
@@ -86,18 +88,21 @@ Planirana AES ilustracija ima označen okvir, pa nema nedostajućih slika.
 Iz korena projekta:
 
 ```powershell
-latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=build main.tex
+.\build.ps1
 ```
 
-Rezultat je `build/main.pdf`. Bibliografiju automatski obrađuje Biber.
+Rezultat je `build/aes20y.pdf`. Bibliografiju automatski obrađuje Biber.
+Skripta radi i kada se pozove punom putanjom iz drugog direktorijuma; pri grešci
+prekida rad i ne prijavljuje stari PDF kao uspešno izgrađen.
+Direktna komanda: `latexmk -pdf -interaction=nonstopmode -halt-on-error -jobname=aes20y -outdir=build main.tex`.
 Alternativa bez latexmk, takođe iz korena:
 
 ```powershell
 New-Item -ItemType Directory -Force build
-pdflatex -interaction=nonstopmode -halt-on-error -output-directory=build main.tex
-biber --input-directory=build --output-directory=build main
-pdflatex -interaction=nonstopmode -halt-on-error -output-directory=build main.tex
-pdflatex -interaction=nonstopmode -halt-on-error -output-directory=build main.tex
+pdflatex -interaction=nonstopmode -halt-on-error -jobname=aes20y -output-directory=build main.tex
+biber --input-directory=build --output-directory=build aes20y
+pdflatex -interaction=nonstopmode -halt-on-error -jobname=aes20y -output-directory=build main.tex
+pdflatex -interaction=nonstopmode -halt-on-error -jobname=aes20y -output-directory=build main.tex
 ```
 
 Za isključivanje sadržaja promeniti `\showsummarytrue` u `\showsummaryfalse`.
@@ -125,6 +130,7 @@ Bez `--run` skripte prikazuju plan bez merenja i kreiranja rezultata:
 
 ```powershell
 python experiments/benchmark.py
+python experiments/aes_acceleration.py
 python experiments/avalanche_test.py
 python experiments/brute_force_demo.py
 ```
@@ -133,6 +139,7 @@ Primeri budućeg pilot-pokretanja, nakon pregleda metodologije:
 
 ```powershell
 python experiments/benchmark.py --run --seed 2003 --repeats 10
+python experiments/aes_acceleration.py --run --seed 2003 --repeats 10
 python experiments/avalanche_test.py --run --seed 2003 --trials 1000
 python experiments/brute_force_demo.py --run --seed 2003 --bits 12 --repeats 3
 ```
@@ -144,6 +151,11 @@ JSON metapodaci i verzije okruženja. Namena je podrazumevano `pilot`.
 `python experiments/export_results.py experiments/results/benchmark-pilot-ID`
 iz postojećeg benchmark direktorijuma generiše `benchmark_table.tex`,
 `benchmark.png` i `benchmark.pdf`. Nema automatskog uvoza u članak.
+Isti exporter prihvata direktorijum `aes_acceleration-pilot-ID` i generiše
+`aes_acceleration_table.tex`, `aes_acceleration.png` i `aes_acceleration.pdf`.
+Ovaj eksperiment poredi AES-NI sa prenosivim kompajliranim AES-om iste biblioteke,
+uz proveru izbora putanje pre merenja. Bez AES-NI podrške prekida se sa objašnjenjem,
+bez lažnog hardverskog rezultata. Ne predstavlja rekonstrukciju performansi iz 2003.
 
 `python experiments/smoke_check.py` proverava male uzorke i izvoz.
 Izlazi su u `build/smoke/`, sa oznakom `smoke`, i nisu rezultati rada.

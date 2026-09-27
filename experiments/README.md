@@ -29,6 +29,49 @@ put. Zvanični API: https://www.pycryptodome.org/src/cipher/aes .
 Ako biblioteka ne podržava DES/TDEA, skripta završava sa greškom; nema neprimetne
 zamene ili preskakanja algoritma. Promenu biblioteke posebno dokumentovati.
 
+## AES-NI naspram softverske implementacije
+
+`aes_acceleration.py` je zaseban upareni CBC eksperiment za AES-128/192/256:
+
+```powershell
+python experiments/aes_acceleration.py
+python experiments/aes_acceleration.py --run --seed 2003 --repeats 10
+```
+
+Podrazumevane veličine su 1 KiB, 1 MiB i 10 MiB. Obe putanje dobijaju iste
+poruke, ključeve, IV i referentni šifrat po paru. Ovo ponavljanje IV-a je
+kontrolisani sintetički test identične poruke, ne primer produkcione upotrebe.
+Varijante i četiri posla (dva backend-a puta dve operacije) mešaju se u svakoj
+rundi. Referentna enkripcija, inicijalizacija, warmup i provere su van merenja.
+Prethodna obrada bafera može zagrejati keš; ovo nije cold-cache benchmark.
+
+`use_aesni=True` sam ne garantuje akceleraciju. Pre merenja proveravaju se
+CPU AES-NI podrška, dostupnost native modula i inicijalizacijski pozivi
+`AESNI_start_operation` naspram `AES_start_operation` za sva tri ključa.
+Privatni bibliotečki interfejsi posmatraju se samo tokom provere i vraćaju pre
+merenja. Ako provera ne uspe, eksperiment staje bez izvoza rezultata.
+Metapodaci čuvaju brojeve poziva, verziju i hash AES Python modula.
+Ovo potvrđuje izbor bibliotečke putanje, ne predstavlja instrukcijski trag CPU-a.
+
+Softverska putanja je prenosivi kompajlirani AES u istoj biblioteci, uz
+`use_aesni=False`; nije čista Python implementacija ni obećanje constant-time
+ponašanja. Trenutni eksperiment je za x86 AES-NI. ARM crypto extensions zahtevaju
+poseban backend i ostaju budući rad.
+
+Pored vremena i MB/s (sredina, medijana, SD), sažetak daje
+`speedup_vs_software_median = median(t_software) / median(t_backend)`.
+Softverska referenca ima faktor 1; AES-NI faktor ne mora biti veći od 1.
+Ne zaključivati iz vrlo malog uzorka niti prenositi CBC odnos na GCM/CTR.
+Ovo je poređenje današnjih implementacija na istom CPU-u, ne rekonstrukcija 2003.
+
+Izvoz: `python experiments/export_results.py experiments/results/aes_acceleration-pilot-ID`.
+Dobijaju se CSV/JSON pri merenju i LaTeX/PNG/PDF pri izvozu, sa jasno označenim
+putanjama. Rezultati ostaju izvan članka do analize.
+API i dispatch provereni su prema
+[zvaničnoj dokumentaciji](https://www.pycryptodome.org/src/cipher/aes) i
+[izvornom kodu verzije 3.23.0](https://github.com/Legrandin/pycryptodome/blob/v3.23.0/lib/Crypto/Cipher/AES.py).
+Promene privatnih interfejsa pri nadogradnji zahtevaju novu proveru.
+
 ## Avalanche
 
 `avalanche_test.py` obrađuje jedan blok u ECB modu radi izolovanja primitive.
@@ -71,7 +114,7 @@ radi, `requirements-lock.txt`. Za reprodukciju koristiti iste verzije i kod.
 Generisani direktorijumi su Git-ignored; odabrane konačne podatke kasnije
 eksplicitno arhivirati i verzionisati.
 
-`export_results.py <run_directory>` trenutno izvozi benchmark: `booktabs` tabelu
+`export_results.py <run_directory>` izvozi oba benchmark eksperimenta: `booktabs` tabelu
 za landscape prikaz i PNG/PDF grafikone sredina sa SD. Avalanche raspodele i
 brute-force log-grafikoni ostaju TODO. Nijedan eksport se ne dodaje u `main.tex`.
 
@@ -81,7 +124,7 @@ brute-force log-grafikoni ostaju TODO. Nijedan eksport se ne dodaje u `main.tex`
 - TODO: Definisati broj nezavisnih sesija, kontrolu opterećenja i veličinu uzorka.
 - TODO: Razmotriti encrypt/decrypt redosled, Python overhead, keš i temperaturu.
 - TODO: Odvojeno meriti setup i AEAD; ne mešati CBC i GCM.
-- TODO: Potvrditi izvršni put pre AES-NI on/off poređenja.
+- TODO: Za studiju pregledati zapis provere AES-NI dispatch-a; za jače tvrdnje dodati profilisanje instrukcija i ponoviti na više CPU modela.
 - TODO: Pripremiti grafikone raspodele i prikaz nesigurnosti.
 - TODO: Pregledati svaku tabelu pre uključivanja u članak.
 
