@@ -1,5 +1,10 @@
 # Eksperimentalni okvir
 
+Python skripte su premeštene u `../scripts/`. Pregled svakog fajla i osnovne
+komande nalaze se u [scripts/README.md](../scripts/README.md).
+Sve komande ispod pokreću se iz korena repozitorijuma. Ovaj direktorijum
+zadržava metodologiju, `requirements.txt`, CUDA izvor i `results/`.
+
 Status: početni izvršivi kostur, bez merenja za članak. Osnovne petlje i izvoz
 omogućavaju tehničku proveru; studija, publikacioni grafikoni i tumačenje ostaju
 za kasnije. Bez `--run` prikazuje se samo plan. DES/TDEA služe istorijskom poređenju.
@@ -34,8 +39,8 @@ zamene ili preskakanja algoritma. Promenu biblioteke posebno dokumentovati.
 `aes_acceleration.py` je zaseban upareni CBC eksperiment za AES-128/192/256:
 
 ```powershell
-python experiments/aes_acceleration.py
-python experiments/aes_acceleration.py --run --seed 2003 --repeats 10
+python scripts/aes_acceleration.py
+python scripts/aes_acceleration.py --run --seed 2003 --repeats 10
 ```
 
 Podrazumevane veličine su 1 KiB, 1 MiB i 10 MiB. Obe putanje dobijaju iste
@@ -64,7 +69,7 @@ Softverska referenca ima faktor 1; AES-NI faktor ne mora biti veći od 1.
 Ne zaključivati iz vrlo malog uzorka niti prenositi CBC odnos na GCM/CTR.
 Ovo je poređenje današnjih implementacija na istom CPU-u, ne rekonstrukcija 2003.
 
-Izvoz: `python experiments/export_results.py experiments/results/aes_acceleration-pilot-ID`.
+Izvoz: `python scripts/export_results.py experiments/results/aes_acceleration-pilot-ID`.
 Dobijaju se CSV/JSON pri merenju i LaTeX/PNG/PDF pri izvozu, sa jasno označenim
 putanjama. Rezultati ostaju izvan članka do analize.
 API i dispatch provereni su prema
@@ -120,7 +125,7 @@ brute-force log-grafikoni ostaju TODO. Nijedan eksport se ne dodaje u `main.tex`
 
 ## GPU CUDA okvir
 
-`aes_gpu.py` je pripremljen kontrolni okvir, a `aes_gpu_kernel.cu` **nije
+`scripts/aes_gpu.py` je pripremljen kontrolni okvir, a `experiments/aes_gpu_kernel.cu` **nije
 implementacija AES-a**: sadrži potpis funkcija, pravila indeksiranja i eksplicitnu
 kompilacionu blokadu. Nema GPU rezultata. Ostaje implementacija, pregled i
 validacija CUDA jezgra, zatim provera tajmera na stvarnom GPU-u. Okvir se ne
@@ -130,15 +135,7 @@ predstavlja kao production-ready biblioteka.
 experiments/
 |-- README.md
 |-- requirements.txt
-|-- common.py
-|-- benchmark.py
-|-- aes_acceleration.py
-|-- aes_gpu.py
 |-- aes_gpu_kernel.cu
-|-- avalanche_test.py
-|-- brute_force_demo.py
-|-- export_results.py
-|-- smoke_check.py
 |-- results/
     |-- README.md
 ```
@@ -148,7 +145,7 @@ experiments/
 ```powershell
 nvidia-smi
 nvcc --version
-python experiments/aes_gpu.py --check
+python scripts/aes_gpu.py --check
 ```
 
 Nedostatak `nvcc` ne dokazuje da nema runtime-a/NVRTC-a. Verzija CUDA koju
@@ -170,11 +167,11 @@ To nisu benchmark podaci i ne dokazuje se dostupnost CUDA runtime-a.
 ### Validaciona blokada
 
 ```powershell
-python experiments/aes_gpu.py
-python experiments/aes_gpu.py --check
+python scripts/aes_gpu.py
+python scripts/aes_gpu.py --check
 # Tek posle implementacije kernela i podešavanja CUDA okruženja:
-python experiments/aes_gpu.py --validate-only
-python experiments/aes_gpu.py --run --purpose pilot --repeats 10 --warmup 2
+python scripts/aes_gpu.py --validate-only
+python scripts/aes_gpu.py --run --purpose pilot --repeats 10 --warmup 2
 ```
 
 Plan/check ne mere performanse niti kreiraju rezultate. Run u sadašnjem stanju

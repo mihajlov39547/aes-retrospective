@@ -16,7 +16,7 @@ OUTPUT = ROOT / "build" / "smoke"
 
 
 def invoke(script, *arguments, success=True):
-    result = subprocess.run([sys.executable, str(ROOT / "experiments" / script),
+    result = subprocess.run([sys.executable, str(ROOT / "scripts" / script),
                              *map(str, arguments)], cwd=ROOT, capture_output=True, text=True)
     if (result.returncode == 0) != success:
         raise RuntimeError(f"{script}: unexpected exit {result.returncode}\n{result.stderr}")

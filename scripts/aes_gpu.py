@@ -14,7 +14,7 @@ from common import command_output, metadata, modules, parser, positive, print_pl
 
 SIZES = [1024, 16384, 1048576, 16777216, 104857600, 1073741824]
 BACKENDS = ("cpu_software", "cpu_aesni", "gpu_cuda")
-KERNEL_PATH = Path(__file__).with_name("aes_gpu_kernel.cu")
+KERNEL_PATH = Path(__file__).resolve().parents[1] / "experiments" / "aes_gpu_kernel.cu"
 NIST_SOURCE = "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf"
 # SP 800-38A, F.1.1 and F.5.1 (printed pages 24 and 55-56).
 KEY = bytes.fromhex("2b7e151628aed2a6abf7158809cf4f3c")

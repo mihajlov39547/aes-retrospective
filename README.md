@@ -39,18 +39,20 @@ Pregled projektnih izvora; lokalni direktorijumi navedeni su zasebno ispod.
 │   ├── poredjenje.tex
 │   ├── aes_cpu_gpu.tex
 │   └── prediction_vs_reality.tex
-├── experiments/
+├── scripts/
 │   ├── README.md
-│   ├── requirements.txt
 │   ├── common.py
 │   ├── benchmark.py
 │   ├── aes_acceleration.py
 │   ├── aes_gpu.py
-│   ├── aes_gpu_kernel.cu
 │   ├── avalanche_test.py
 │   ├── brute_force_demo.py
 │   ├── export_results.py
-│   ├── smoke_check.py
+│   └── smoke_check.py
+├── experiments/
+│   ├── README.md
+│   ├── requirements.txt
+│   ├── aes_gpu_kernel.cu
 │   └── results/
 │       └── README.md
 ├── bibliography/
@@ -127,17 +129,21 @@ Koristiti postojeće oznake `sec:`, `fig:` i `tab:` za cross-reference.
 
 ## Python
 
+Python skripte su u `scripts/`; opis svake i komande nalaze se u
+[scripts/README.md](scripts/README.md). Metodologija, zavisnosti, CUDA izvor i
+rezultati ostaju u `experiments/`.
+
 ### Novi CPU/GPU eksperiment
 
-Dodati su `experiments/aes_gpu.py`, `experiments/aes_gpu_kernel.cu` i
+Dodati su `scripts/aes_gpu.py`, `experiments/aes_gpu_kernel.cu` i
 `tables/aes_cpu_gpu.tex`. Poglavlje 9 sada obuhvata tri AES-128 putanje u
 ECB/CTR modu: CPU software, CPU AES-NI i NVIDIA CUDA. CBC ostaje odvojeni
 istorijski CPU eksperiment. Poglavlja 6 i 10 povezuju ovu metodologiju sa
 paralelizacijom i retrospektivom, bez unapred pretpostavljene prednosti GPU-a.
 
 ```powershell
-python experiments/aes_gpu.py
-python experiments/aes_gpu.py --check
+python scripts/aes_gpu.py
+python scripts/aes_gpu.py --check
 ```
 
 Prva komanda prikazuje plan, druga otkriva CPU/GPU okruženje bez merenja.
@@ -148,7 +154,7 @@ runtime-a, drajvera, platforme i Python verzije, prema uputstvu u
 [eksperimentalnom README-u](experiments/README.md#gpu-cuda-okvir).
 
 Izvoz je pripremljen za stvarne, validirane podatke:
-`python experiments/export_results.py experiments/results/aes_cpu_gpu-pilot-ID`.
+`python scripts/export_results.py experiments/results/aes_cpu_gpu-pilot-ID`.
 U poddirektorijumima `ECB/` i `CTR/` nastaju `throughput_vs_size.pdf`,
 `latency_vs_size.pdf`, `gpu_overhead_breakdown.pdf` i `speedup_vs_size.pdf`,
 uz PNG kopije i LaTeX tabelu. Bez validacije exporter odbija GPU grafikone.
@@ -172,26 +178,26 @@ Tačne instalirane verzije beleže se po izvršavanju u `requirements-lock.txt`.
 Bez `--run` skripte prikazuju plan bez merenja i kreiranja rezultata:
 
 ```powershell
-python experiments/benchmark.py
-python experiments/aes_acceleration.py
-python experiments/avalanche_test.py
-python experiments/brute_force_demo.py
+python scripts/benchmark.py
+python scripts/aes_acceleration.py
+python scripts/avalanche_test.py
+python scripts/brute_force_demo.py
 ```
 
 Primeri budućeg pilot-pokretanja, nakon pregleda metodologije:
 
 ```powershell
-python experiments/benchmark.py --run --seed 2003 --repeats 10
-python experiments/aes_acceleration.py --run --seed 2003 --repeats 10
-python experiments/avalanche_test.py --run --seed 2003 --trials 1000
-python experiments/brute_force_demo.py --run --seed 2003 --bits 12 --repeats 3
+python scripts/benchmark.py --run --seed 2003 --repeats 10
+python scripts/aes_acceleration.py --run --seed 2003 --repeats 10
+python scripts/avalanche_test.py --run --seed 2003 --trials 1000
+python scripts/brute_force_demo.py --run --seed 2003 --bits 12 --repeats 3
 ```
 
 Izlazi su u `experiments/results/<run-id>/`: pojedinačna merenja, sažetak,
 JSON metapodaci i verzije okruženja. Namena je podrazumevano `pilot`.
 `--purpose study` je samo oznaka, ne naučna validacija.
 
-`python experiments/export_results.py experiments/results/benchmark-pilot-ID`
+`python scripts/export_results.py experiments/results/benchmark-pilot-ID`
 iz postojećeg benchmark direktorijuma generiše `benchmark_table.tex`,
 `benchmark.png` i `benchmark.pdf`. Nema automatskog uvoza u članak.
 Isti exporter prihvata direktorijum `aes_acceleration-pilot-ID` i generiše
@@ -200,7 +206,7 @@ Ovaj eksperiment poredi AES-NI sa prenosivim kompajliranim AES-om iste bibliotek
 uz proveru izbora putanje pre merenja. Bez AES-NI podrške prekida se sa objašnjenjem,
 bez lažnog hardverskog rezultata. Ne predstavlja rekonstrukciju performansi iz 2003.
 
-`python experiments/smoke_check.py` proverava male uzorke i izvoz.
+`python scripts/smoke_check.py` proverava male uzorke i izvoz.
 Izlazi su u `build/smoke/`, sa oznakom `smoke`, i nisu rezultati rada.
 Metod i otvoreni zadaci su u [experiments/README.md](experiments/README.md).
 
