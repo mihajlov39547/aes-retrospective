@@ -369,8 +369,8 @@ memorijski plato. Relativno male razlike između sesijskih medijana podržavaju
 ponovljivost glavnih odnosa na posmatranoj platformi.
 
 \subsubsection{Efekat AES-NI hardverske akceleracije}
-Pet nezavisnih sesija pokazuje konzistentno približno 2.4--2.8 puta veće
-performanse AES-NI putanje za velike bafere, prema definisanom odnosu vremena.
+Pet nezavisnih sesija pokazuje konzistentno ubrzanje AES-NI putanje od
+približno 2.4--2.8 puta za velike bafere, prema definisanom odnosu vremena.
 Efekat je veći za AES-256 nego za AES-128 u korišćenoj implementaciji.
 Relativni pad propusnosti sa dužinom ključa manji je uz AES-NI nego u
 softverskoj putanji, pa hardverska podrška menja praktični trošak dodatnih
@@ -386,9 +386,10 @@ akceleracije treba razmatrati odvojeno.
 Posmatrano u kontekstu tranzicije DES/TDEA--AES, rezultati podržavaju
 praktični značaj efikasne implementacije: softverski AES i bez AES-NI
 ostvaruje znatno veću propusnost od TDEA na testiranoj platformi, a
-namenska akceleracija dodatno smanjuje cenu AES transformacije. Više od
-dve decenije nakon izbora AES-a, savremena hardverska podrška važan je
-deo njegove performansne prednosti. Ovaj nalaz dopunjuje retrospektivu
+namenska akceleracija dodatno smanjuje cenu AES transformacije. Više od dve
+decenije nakon izbora AES-a, savremena hardverska podrška
+dodatno pojačava njegovu praktičnu performansnu prednost na testiranoj
+platformi. Ovaj nalaz dopunjuje retrospektivu
 razloga za zamenu DES-a i TDEA, ali sam po sebi ne vrednuje sve kriterijume
 izbora standarda niti omogućava prenošenje CBC odnosa na druge režime.
 % TODO DISCUSSION: povezati GCM, CUDA, pretragu ključeva i avalanche sa

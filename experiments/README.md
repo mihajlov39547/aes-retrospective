@@ -1,13 +1,13 @@
 # Lista eksperimenata
 
-Eksperiment 1 — istorijski CPU benchmark: DES / TDEA / AES-128 / AES-192 / AES-256, CBC.
-Eksperiment 2 — AES software vs AES-NI: AES-128/192/256.
-Eksperiment 3 — AES-GCM: AES-128-GCM / AES-256-GCM, CPU AES-NI.
-Eksperiment 4 — CUDA AES-128 baseline: prvo ECB/CTR validacija, zatim baseline.
-Eksperiment 5 — CUDA optimizacija + finalno CPU/GPU poređenje.
-Eksperiment 6 — brute-force demonstracija.
-Eksperiment 7 — Double-DES MITM, ako ga zadržimo.
-Eksperiment 8 — avalanche efekat.
+1. CPU poređenje DES-a, TDEA i AES-a u CBC režimu — završeno.
+2. Uticaj AES-NI hardverske akceleracije — završeno.
+3. AES-GCM autentifikovana enkripcija — sledeće: AES-128-GCM i AES-256-GCM na CPU-u, sa potvrđenom AES-NI putanjom.
+4. Osnovna CUDA implementacija AES-128 — ECB/CTR funkcionalna validacija, zatim baseline performanse.
+5. Optimizacija CUDA AES-128 i finalno CPU–GPU poređenje — CPU software, CPU AES-NI, CUDA baseline/optimized, kernel-only i end-to-end.
+6. Demonstracija pretraživanja prostora ključeva — ograničeni keyspace + pažljivo označene ekstrapolacije.
+7. Double-DES meet-in-the-middle — opciono; odlučujemo nakon brute-force dela.
+8. Analiza avalanche efekta — promena jednog bita, Hamming distance i distribucije.
 
 # Eksperimentalni okvir
 
