@@ -18,7 +18,7 @@ build/
 *.toc
 
 # Generated experiment output
-experiments/results/*
+# experiments/results/*
 !experiments/results/README.md
 
 # Local tooling
@@ -39,3 +39,8 @@ experiments/cpu_cbc_pilot_review.md
 merge-analysis-files.txt
 merge-analysis-files.ps1
 merged-analysis-files.txt
+experiments/results/benchmark-study-*/source/benchmark.py
+experiments/results/benchmark-study-*/source/common.py
+experiments/results/benchmark-study-*/source/cpu_validation.py
+experiments/results/benchmark-study-*/source/export_results.py
+experiments/results/benchmark-study-*/requirements-lock.txt
