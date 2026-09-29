@@ -92,6 +92,112 @@ transformacije, naročito pri ulazima od 1~KiB i 1~MiB, pa se ono ne koristi za
 izračunavanje propusnosti niti za glavne zaključke.
 
 
+\subsection{Uticaj AES-NI hardverske akceleracije}
+\label{sec:aesni}
+
+Drugi eksperiment izoluje uticaj AES-NI instrukcija poređenjem dve putanje
+iste biblioteke PyCryptodome: prenosive native AES implementacije
+(\texttt{\_raw\_aes}, \texttt{use\_aesni=False}) i hardverski ubrzane
+AES-NI implementacije (\texttt{\_raw\_aesni}, \texttt{use\_aesni=True}).
+Poređene su varijante AES-128, AES-192 i AES-256 u CBC režimu.
+
+Pre svakog performansnog merenja proveravano je da procesor podržava AES-NI,
+da je odgovarajuća PyCryptodome native biblioteka dostupna i da zahtev za
+svaku putanju zaista aktivira očekivani backend. Ova provera potvrđuje
+bibliotečki dispatch, ali ne predstavlja trag izvršenih procesorskih
+instrukcija. Funkcionalna ispravnost obe putanje proverena je NIST
+SP~800-38A CBC test vektorima za AES-128, AES-192 i AES-256, pri čemu su
+proverene i enkripcija i dekripcija.
+
+Eksperiment je izveden kao upareno poređenje. Za odgovarajući par software i
+AES-NI merenja korišćeni su isti plaintext, ključ, IV i šifrat. Redosled
+algoritama, putanja i operacija reproduktivno je mešan kako jedna
+implementacija ne bi sistematski uvek bila izvršavana prva.
+
+Kao i u prethodnom eksperimentu, primarno vreme mereno je funkcijom
+\texttt{perf\_counter\_ns()}, dok su konstrukcija cipher objekta, key schedule,
+generisanje ulaza, inicijalizacionog vektora i validacija ostali van merenog
+intervala. Merena je jedna CBC transformacija zajedno sa alokacijom izlaznog
+bafera.
+
+Za svaku kombinaciju korišćene su tri warmup runde i 20 merenih ponavljanja.
+Merenja su izvođena u nezavisnim procesima sa različitim seedovima i
+rotiranim redosledom veličina ulaza. U trenutnom skupu rezultata dostupne su
+četiri kompletne studijske sesije, sa seedovima 2003--2006; konačna analiza
+će biti zaključana nakon pete unapred planirane sesije.
+
+Ubrzanje je definisano odnosom medijana zidnog vremena:
+\begin{equation}
+S =
+\frac{\widetilde{T}_{\mathrm{software}}}
+     {\widetilde{T}_{\mathrm{AES\mbox{-}NI}}},
+\end{equation}
+gde vrednost $S>1$ označava kraće vreme izvršavanja AES-NI putanje.
+
+Tabela~\ref{tab:aesni-rezultati} prikazuje medijanu medijana trenutno
+dostupnih nezavisnih sesija za veće ulaze, kod kojih fiksni overhead poziva
+ima relativno mali uticaj.
+
+\begin{table}[htbp]
+\centering
+\caption{Poređenje softverske AES i AES-NI putanje. Propusnost je izražena
+u decimalnim MB/s; faktor predstavlja ubrzanje AES-NI putanje u odnosu na
+softversku putanju. Prikazane su medijane medijana četiri trenutno dostupne
+nezavisne sesije.}
+\label{tab:aesni-rezultati}
+\begin{tabular}{llrrr}
+\toprule
+Algoritam & Operacija &
+Software MB/s & AES-NI MB/s & Ubrzanje \\
+\midrule
+\multicolumn{5}{c}{1 MiB} \\
+\midrule
+AES-128 & Enc. & 220.5 & 530.6 & 2.40$\times$ \\
+AES-128 & Dec. & 224.2 & 556.3 & 2.49$\times$ \\
+AES-192 & Enc. & 197.1 & 501.0 & 2.53$\times$ \\
+AES-192 & Dec. & 195.0 & 512.3 & 2.62$\times$ \\
+AES-256 & Enc. & 174.9 & 478.2 & 2.73$\times$ \\
+AES-256 & Dec. & 170.4 & 477.4 & 2.79$\times$ \\
+\midrule
+\multicolumn{5}{c}{10 MiB} \\
+\midrule
+AES-128 & Enc. & 225.2 & 534.5 & 2.38$\times$ \\
+AES-128 & Dec. & 224.6 & 557.8 & 2.48$\times$ \\
+AES-192 & Enc. & 198.8 & 504.4 & 2.53$\times$ \\
+AES-192 & Dec. & 195.8 & 519.4 & 2.65$\times$ \\
+AES-256 & Enc. & 175.0 & 475.9 & 2.71$\times$ \\
+AES-256 & Dec. & 172.0 & 480.5 & 2.79$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Rezultati pokazuju da AES-NI daje jasno i ponovljivo ubrzanje za sve tri
+dužine ključa. Na ulazu od 10~MiB AES-128 enkripcija ubrzana je približno
+2.38 puta, AES-192 približno 2.53 puta, a AES-256 približno 2.71 puta.
+Kod dekripcije odgovarajući faktori iznose približno 2.48, 2.65 i 2.79.
+
+Razlika između 1~MiB i 10~MiB je mala, što pokazuje da se za ove veličine
+merenja već nalaze u stabilnijem throughput režimu. Na primer, AES-128
+AES-NI enkripcija ostvaruje približno 531~MB/s na 1~MiB i 535~MB/s na
+10~MiB. Nasuprot tome, ulaz od 1~KiB pokazuje manji faktor ubrzanja,
+približno 1.7--2.0 puta, jer fiksni troškovi poziva i merenja čine znatno
+veći deo ukupnog vremena tako kratke transformacije.
+
+Uočljiv je i porast relativnog efekta AES-NI sa dužinom ključa. Softverska
+implementacija postaje sporija prelaskom sa AES-128 na AES-192 i AES-256,
+dok je razlika između AES-NI varijanti znatno manja. Posledica je da je
+izmereni faktor ubrzanja najveći kod AES-256. Ovaj rezultat treba tumačiti
+kao osobinu konkretne PyCryptodome implementacije i testiranog procesora,
+a ne kao univerzalni faktor ubrzanja za sve AES implementacije i sve
+procesorske arhitekture.
+
+Eksperiment takođe pokazuje zašto rezultate osnovnog softverskog poređenja
+i rezultate hardverske akceleracije treba posmatrati odvojeno. Uključivanje
+AES-NI menja implementacioni sloj i povećava propusnost sa približno
+170--225~MB/s na približno 476--558~MB/s za velike ulaze na korišćenoj
+platformi. Time hardverska podrška postaje značajan deo praktičnih
+performansi savremenog AES-a.
+
 \subsection{AES sa i bez CPU hardverske akceleracije}
 \label{sec:aes-akceleracija}
 CPU AES-NI koristi instrukcije namenjene AES transformacijama, dok
