@@ -1,5 +1,10 @@
 # Python skripte
 
+Eksperiment 2: [protokol AES software/AES-NI](../experiments/aes_acceleration_protocol.md).
+Izolovana provera je `python scripts/aes_acceleration_smoke_check.py` (samo AES CBC,
+1 KiB smoke). Obe putanje prolaze NIST KAT i dispatch pre wall/process tajmera;
+izvoz zahteva sacuvanu validaciju. Protokol sadrzi komandu za kasniji rucni pilot.
+
 Ovde se nalazi svih osam Python fajlova projekta. Eksperimentalna metodologija
 je u [experiments/README.md](../experiments/README.md); zavisnosti i CUDA izvor
 ostaju u `experiments/`, a rezultati u `experiments/results/`.

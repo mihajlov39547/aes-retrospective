@@ -118,6 +118,69 @@ def export_cpu_gpu(folder, metadata):
         (target / "aes_cpu_gpu_table.tex").write_text("\n".join(table) + "\n", encoding="utf-8")
 
 
+def verify_acceleration_export(folder, metadata):
+    """Reject missing, failed, incomplete or mismatched pre-measurement evidence."""
+    import hashlib
+    method = metadata.get("method", {})
+    path = folder / "validation.json"
+    if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != method.get("validation_sha256"):
+        raise ValueError("AES acceleration export requires intact validation.json.")
+    report = json.loads(path.read_text(encoding="utf-8"))
+    if (report != method.get("acceleration_validation") or report.get("passed") is not True
+            or report.get("backends_equal") is not True or report.get("mode") != "CBC"
+            or report.get("session_id") != method.get("session_id")
+            or report.get("purpose") != metadata.get("purpose")
+            or not report["completed_utc"] < method["measurement_started_utc"]):
+        raise ValueError("AES acceleration requires successful validation before measurement.")
+    expected = {(name, backend) for name in ("AES-128", "AES-192", "AES-256")
+                for backend in ("software", "aesni")}
+    vectors = report.get("vectors", [])
+    if (len(vectors) != 6 or {(v["algorithm"], v["backend"]) for v in vectors} != expected
+            or any(v.get("passed") is not True or v.get("encrypt_passed") is not True
+                   or v.get("decrypt_passed") is not True for v in vectors)):
+        raise ValueError("Incomplete AES CBC KAT validation.")
+    dispatch = report.get("dispatch", {})
+    if (not all(dispatch.get(k) is True for k in ("passed", "available", "cpu_aesni", "aesni_library_loaded"))
+            or dispatch.get("mode") != "CBC"
+            or dispatch.get("paths") != {"software": "_raw_aes", "aesni": "_raw_aesni"}):
+        raise ValueError("Unverified AES native dispatch.")
+    records = dispatch.get("preflight", [])
+    if (len(records) != 6 or {(r["key_bits"], r["requested"]) for r in records}
+            != {(bits, b) for bits in (128, 192, 256) for b in ("software", "aesni")}
+            or any(r["native_start_calls"] != {b: 2 if b == r["requested"] else 0
+                                               for b in ("software", "aesni")} for r in records)):
+        raise ValueError("Incomplete AES dispatch evidence.")
+
+
+def verify_acceleration_summary(rows, metadata):
+    groups = {}
+    for row in rows:
+        key = (row["algorithm"], int(row["bytes"]), row["operation"])
+        backend = row["backend"]
+        if (key[0] not in ("AES-128", "AES-192", "AES-256") or key[2] not in ("encrypt", "decrypt")
+                or row["mode"] != "CBC" or backend not in ("software", "aesni")
+                or row["session_id"] != metadata["method"]["session_id"]
+                or backend in groups.setdefault(key, {})):
+            raise ValueError("Invalid or duplicate AES summary group.")
+        groups[key][backend] = row
+        if int(row["seconds_count"]) != metadata["arguments"]["repeats"]:
+            raise ValueError("Incomplete AES summary repeat count.")
+        for field in ("seconds_median", "throughput_MB_s_mean", "throughput_MB_s_median",
+                      "speedup_vs_software_median"):
+            if not math.isfinite(float(row[field])) or float(row[field]) <= 0:
+                raise ValueError("Invalid AES timing/throughput/speedup.")
+    expected = {(name, size, op) for name in ("AES-128", "AES-192", "AES-256")
+                for size in metadata["arguments"]["sizes"] for op in ("encrypt", "decrypt")}
+    if set(groups) != expected or any(set(g) != {"software", "aesni"} for g in groups.values()):
+        raise ValueError("Incomplete paired AES summary.")
+    for group in groups.values():
+        baseline = float(group["software"]["seconds_median"])
+        for row in group.values():
+            if not math.isclose(float(row["speedup_vs_software_median"]),
+                                baseline / float(row["seconds_median"]), rel_tol=1e-12):
+                raise ValueError("AES speedup must use median wall times.")
+
+
 def main():
     cli = argparse.ArgumentParser(description=__doc__)
     cli.add_argument("run_directory", type=Path)
@@ -133,6 +196,11 @@ def main():
     if metadata["experiment"] not in ("benchmark", "aes_acceleration"):
         cli.error("Exporter supports benchmark and aes_acceleration runs.")
     acceleration = metadata["experiment"] == "aes_acceleration"
+    if acceleration:
+        try:
+            verify_acceleration_export(folder, metadata)
+        except (ValueError, KeyError, TypeError) as exc:
+            cli.error(str(exc))
     if not acceleration:
         import hashlib
         validation_path = folder / "validation.json"
@@ -145,6 +213,11 @@ def main():
         rows = list(csv.DictReader(source))
     if not rows:
         cli.error("No measured data to export.")
+    if acceleration:
+        try:
+            verify_acceleration_summary(rows, metadata)
+        except (ValueError, KeyError, TypeError) as exc:
+            cli.error(str(exc))
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -201,6 +274,26 @@ def main():
     for extension in ("png", "pdf"):
         figure.savefig(folder / f"{prefix}.{extension}", dpi=180)
     plt.close(figure)
+    if acceleration:
+        figure, axes = plt.subplots(1, 2, figsize=(11, 4), sharey=True)
+        for axis, operation in zip(axes, ("encrypt", "decrypt")):
+            for name in ("AES-128", "AES-192", "AES-256"):
+                selected = sorted([r for r in rows if r["algorithm"] == name
+                                   and r["operation"] == operation and r["backend"] == "aesni"],
+                                  key=lambda r: int(r["bytes"]))
+                axis.plot([int(r["bytes"]) for r in selected],
+                          [float(r["speedup_vs_software_median"]) for r in selected],
+                          marker="o", label=f"{name} AES-NI")
+            axis.axhline(1, color="black", linestyle="--", label="software baseline (1.0)")
+            axis.set(xscale="log", xlabel="Buffer size (bytes)", title=operation)
+            axis.grid(alpha=.2)
+        axes[0].set_ylabel("Speedup: median software wall time / median AES-NI wall time")
+        axes[1].legend(fontsize=8)
+        figure.suptitle(f'{metadata["purpose"]}: {metadata["run_id"]}', fontsize=8)
+        figure.tight_layout()
+        for extension in ("png", "pdf"):
+            figure.savefig(folder / f"aes_acceleration_speedup.{extension}", dpi=180)
+        plt.close(figure)
     # TODO: Add distribution plots for avalanche and log-scale brute-force illustrations.
     # TODO: Adapt typography and captions to the selected journal before inclusion.
 

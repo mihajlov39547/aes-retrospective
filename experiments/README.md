@@ -47,6 +47,11 @@ zamene ili preskakanja algoritma. Promenu biblioteke posebno dokumentovati.
 
 ## AES-NI naspram softverske implementacije
 
+Aktuelni review, obavezni NIST CBC KAT za obe putanje, wall/process instrumentacija,
+uparivanje i validirani izvoz opisani su u [aes_acceleration_protocol.md](aes_acceleration_protocol.md).
+Izolovana provera: `python scripts/aes_acceleration_smoke_check.py`.
+Pravi pilot i study pokrece korisnik kasnije; smoke nije performance rezultat rada.
+
 `aes_acceleration.py` je zaseban upareni CBC eksperiment za AES-128/192/256:
 
 ```powershell
