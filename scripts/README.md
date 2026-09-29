@@ -79,3 +79,11 @@ smoke provere, koja nema CLI parser. `common.py` se uvozi iz drugih skripti.
 - Postojeći rezultati se ne premeštaju i ne prepisuju. Izvoz dodaje tabele i grafikone u izabrani run direktorijum.
 - DES/TDEA i deterministički ključevi služe isključivo kontrolisanom istorijskom i edukativnom poređenju, ne produkcionoj zaštiti.
 - CBC CPU rezultate ne mešati sa ECB/CTR GPU rezultatima. CUDA kod nije produkciona kriptografska biblioteka.
+
+## Eksperiment 1: aktuelni protokol
+
+CBC validaciona prepreka je u `cpu_validation.py`, a izolovane provere su
+u `cpu_smoke_check.py`: `python scripts/cpu_smoke_check.py`. One ne pokrecu
+ostale eksperimente. Benchmark sada podrazumeva `software`, cuva min/max,
+session ID i pre-measurement validaciju; study+auto se odbija. Detalji su u
+[CPU CBC protokolu](../experiments/cpu_cbc_protocol.md).

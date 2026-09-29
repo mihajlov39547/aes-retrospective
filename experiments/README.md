@@ -293,3 +293,10 @@ reference su dodate u `references.bib`, bez preuzetih benchmark rezultata.
 `smoke_check.py` proverava tok na malim uzorcima, izvoz, broj zapisa, odbijanje
 neispravnih parametara i reproduktivnost netajmiranih avalanche rezultata.
 Izlazi su u `build/smoke/` i nisu rezultati rada.
+
+## Eksperiment 1: dopuna nakon review-a
+
+[CPU CBC protokol](cpu_cbc_protocol.md) opisuje aktuelnu validacionu prepreku,
+potvrdjeni software dispatch, min/max, session ID i pilot plan. Ova dopuna
+zamenjuje raniji TODO o validaciji osnovnog CBC benchmarka. Default je
+`software`; study+auto se odbija. Studija se ne pokrece pre pregleda pilota.

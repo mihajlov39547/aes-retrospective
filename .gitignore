@@ -35,3 +35,7 @@ experiments/results/*
 .idea/
 .DS_Store
 Thumbs.db
+experiments/cpu_cbc_pilot_review.md
+merge-analysis-files.txt
+merge-analysis-files.ps1
+merged-analysis-files.txt

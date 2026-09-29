@@ -133,6 +133,14 @@ def main():
     if metadata["experiment"] not in ("benchmark", "aes_acceleration"):
         cli.error("Exporter supports benchmark and aes_acceleration runs.")
     acceleration = metadata["experiment"] == "aes_acceleration"
+    if not acceleration:
+        import hashlib
+        validation_path = folder / "validation.json"
+        method = metadata.get("method", {})
+        if (method.get("cpu_validation", {}).get("passed") is not True
+                or not validation_path.is_file()
+                or hashlib.sha256(validation_path.read_bytes()).hexdigest() != method.get("validation_sha256")):
+            cli.error("CBC export requires recorded, intact pre-measurement validation.")
     with (folder / "summary.csv").open(encoding="utf-8", newline="") as source:
         rows = list(csv.DictReader(source))
     if not rows:
@@ -161,9 +169,9 @@ def main():
         speedup_cell = f' & {float(row["speedup_vs_software_median"]):.3f}' if acceleration else ""
         lines.append(
             f'{row["algorithm"]} & {backend_cell}{row["operation"]} & {int(row["bytes"])} & '
-            f'{float(row["throughput_MB_s_mean"]):.3f} & '
-            f'{float(row["throughput_MB_s_median"]):.3f} & '
-            f'{float(row["throughput_MB_s_stdev"]):.3f}' + speedup_cell + r" \\")
+            f'{float(row["throughput_MB_s_mean"]):.3g} & '
+            f'{float(row["throughput_MB_s_median"]):.3g} & '
+            f'{float(row["throughput_MB_s_stdev"]):.3g}' + speedup_cell + r" \\")
     lines.extend([r"\bottomrule", r"\end{tabular}"])
     prefix = "aes_acceleration" if acceleration else "benchmark"
     (folder / f"{prefix}_table.tex").write_text("\n".join(lines) + "\n", encoding="utf-8")

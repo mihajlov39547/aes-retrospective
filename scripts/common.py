@@ -62,7 +62,10 @@ def key_for(name: str, rng: random.Random) -> bytes:
         return rng.randbytes(size)
     while True:
         try:
-            return des3.adjust_key_parity(rng.randbytes(size))
+            key = des3.adjust_key_parity(rng.randbytes(size))
+            # adjust_key_parity rejects single DES, but permits K1 == K3.
+            if len({key[:8], key[8:16], key[16:]}) == 3:
+                return key
         except ValueError:
             continue
 
@@ -84,7 +87,8 @@ def cipher(name: str, key: bytes, mode: str, iv: bytes | None = None,
 def stats(values: list[float]) -> dict:
     return {"count": len(values), "mean": statistics.mean(values),
             "median": statistics.median(values),
-            "stdev": statistics.stdev(values) if len(values) > 1 else None}
+            "stdev": statistics.stdev(values) if len(values) > 1 else None,
+            "min": min(values), "max": max(values)}
 
 
 def command_output(arguments: list[str]) -> str | None:
