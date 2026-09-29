@@ -395,3 +395,14 @@ konkretnih DES, TDEA i AES softverskih implementacija kada se izvršavaju na
 istoj savremenoj platformi. Takođe, veća propusnost ne predstavlja meru
 kriptografske sigurnosti. DES i TDEA su uključeni zbog istorijskog i
 komparativnog značaja, a ne kao preporuka za savremene sisteme.
+
+\paragraph{Zaključak eksperimenta.}
+Pet nezavisnih studijskih sesija pokazalo je konzistentan efekat AES-NI
+akceleracije za sve tri AES varijante. Za ulaze od 1 i 10~MiB izmereno
+ubrzanje kreće se približno od 2.4 puta za AES-128 do 2.8 puta za
+AES-256. Rezultati takođe pokazuju da razlike između AES-128, AES-192 i
+AES-256 ne treba posmatrati nezavisno od implementacione platforme:
+hardverska podrška značajno menja praktičan trošak dodatnih AES rundi.
+Zbog toga rezultati ovog eksperimenta ne menjaju bezbednosne karakteristike
+algoritama, već pokazuju koliko savremena procesorska podrška utiče na
+njihove stvarne performanse.
