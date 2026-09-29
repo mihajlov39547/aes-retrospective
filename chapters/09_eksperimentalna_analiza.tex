@@ -1,9 +1,18 @@
-\section{Eksperimentalna analiza: plan i metodologija}
+\section{Eksperimentalna analiza}
 \label{sec:eksperimenti}
-Eksperimentalni deo obuhvata istorijsko CPU poređenje i zaseban eksperiment
-sa tri putanje AES-a na istoj platformi. Tekst definiše metodologiju;
-rezultati još nisu prikupljeni za rad.
-% TODO: Pre merenja usaglasiti protokol; tehničke smoke provere nisu rezultati članka.
+
+Eksperimentalni deo rada obuhvata više odvojenih ispitivanja performansi i
+osobina algoritama DES, TDEA i AES. Prvi završeni eksperiment predstavlja
+kontrolisano CPU poređenje DES-a, troključnog TDEA i AES-128/192/256 u CBC
+režimu. Ostali eksperimenti, uključujući poređenje softverske AES putanje sa
+AES-NI akceleracijom i CPU--GPU poređenje, razmatraju se zasebno kako se
+različiti izvori hardverskog ubrzanja ne bi mešali sa osnovnim poređenjem
+algoritama.
+
+Rezultati u ovom odeljku ne predstavljaju rekonstrukciju računarskog hardvera
+iz perioda standardizacije AES-a. Oni pokazuju ponašanje konkretnih
+bibliotečkih implementacija istorijskih i savremenih algoritama na istoj
+savremenoj platformi i pod istim eksperimentalnim uslovima.
 
 \subsection{Pitanja i obuhvat eksperimenata}
 Osnovni benchmark poredi DES, troključni TDEA i AES-128/192/256.
@@ -24,12 +33,64 @@ identifikator verzije koda i hash CUDA izvora čuvaju se beleške o opterećenju
 % TODO: Seedovani ključevi i ponovljeni test ulazi služe isključivo sintetičkom eksperimentu.
 
 \subsection{Osnovni CPU benchmark DES-a, TDEA i AES-a}
-Postojeći CBC benchmark ostaje istorijsko poređenje bibliotečkih
-implementacija. Vreme transformacije odvaja se od inicijalizacije šifre;
-povratna dekripcija proverava se izvan merenog intervala. DES i TDEA ovde
-nisu preporuke za novu zaštitu podataka.
-% TODO: Zadržati warmup, više ponavljanja, sredinu, medijanu i SD; ulazi 1 KiB, 1 MiB i 10 MiB, opciono 100 MiB.
-% TODO: Obeležiti da postojeći CPU benchmark koristi decimalne MB/s. Ne mešati njegove CBC rezultate sa novim ECB/CTR rezultatima u MiB/s.
+\label{sec:cpu-cbc-benchmark}
+
+Osnovni eksperiment poredi DES, troključni TDEA i AES sa ključevima dužine
+128, 192 i 256 bita u CBC režimu. Za AES je eksplicitno korišćena softverska
+putanja biblioteke PyCryptodome 3.23.0, odnosno
+\texttt{use\_aesni=False}, kako namensko AES-NI ubrzanje ne bi bilo uvedeno
+samo za jednu grupu algoritama. Ova putanja koristi kompajliranu
+\texttt{\_raw\_aes} implementaciju; zbog toga eksperiment predstavlja
+poređenje konkretnih softverskih implementacija na savremenom procesoru, a
+ne poređenje apstraktne složenosti algoritama.
+
+Pre svakog merenja izvršena je nezavisna funkcionalna validacija poznatim
+test vektorima. DES je proveravan prema FIPS~81, troključni TDEA prema NIST
+CBC-TDES primeru, a AES-128/192/256 prema NIST SP~800-38A testovima
+F.2.1--F.2.6. Za svaki algoritam proverene su i enkripcija poznatog otvorenog
+teksta i dekripcija unapred poznatog šifrata. Neuspešna validacija blokirala
+bi početak performansnog merenja.
+
+Merenja su izvedena na računaru sa procesorom Intel Core i5-10300H,
+četiri fizička i osam logičkih jezgara, 16~GB RAM-a i operativnim sistemom
+Windows 10. Korišćeni su Python 3.12.10 i PyCryptodome 3.23.0. Sve studijske
+sesije izvršene su sa istim verzijama relevantnih skripti.
+
+Merene su tri veličine ulaza:
+\begin{itemize}
+    \item 1~KiB,
+    \item 1~MiB,
+    \item 10~MiB.
+\end{itemize}
+
+Za svaku kombinaciju algoritma, veličine i operacije izvedene su tri warmup
+runde, koje nisu uključene u rezultate, i 20 merenih ponavljanja. Studija se
+sastojala od pet zasebno pokrenutih Python procesa sa seedovima od 2003 do
+2007. Redosled algoritama nasumično je, ali reproduktivno, menjan u svakoj
+rundi, dok je redosled veličina rotiran između nezavisnih sesija.
+
+Ključevi, inicijalizacioni vektori, konstrukcija cipher objekta i key schedule
+nalazili su se izvan merenog intervala. Mereno je jedno izvršavanje native CBC
+transformacije, uključujući alokaciju izlaznog bafera. Enkripcija je prethodila
+odgovarajućoj dekripciji, što predstavlja ograničenje eksperimentalnog dizajna
+zbog mogućih efekata keša.
+
+Primarna vremenska metrika bila je monotono zidno vreme dobijeno funkcijom
+\texttt{perf\_counter\_ns()}. Propusnost je računata u decimalnim MB/s:
+\begin{equation}
+R = \frac{N}{10^6 T},
+\end{equation}
+gde je $N$ broj obrađenih bajtova, a $T$ izmereno vreme u sekundama.
+Za svaku sesiju čuvani su srednja vrednost, medijana, uzoračka standardna
+devijacija, minimum i maksimum. Kao glavni rezultat između pet nezavisnih
+sesija koristi se medijana njihovih medijana.
+
+Dodatno je beleženo procesorsko vreme procesa pomoću
+\texttt{process\_time\_ns()}, ali samo kao dijagnostička metrika. Na korišćenoj
+Windows platformi njegova efektivna granularnost bila je nedovoljna za kratke
+transformacije, naročito pri ulazima od 1~KiB i 1~MiB, pa se ono ne koristi za
+izračunavanje propusnosti niti za glavne zaključke.
+
 
 \subsection{AES sa i bez CPU hardverske akceleracije}
 \label{sec:aes-akceleracija}
@@ -171,6 +232,72 @@ Odvojeni kernel-only i end-to-end odnosi prema CPU AES-NI.}}
 \label{fig:gpu-speedup}
 \end{figure}
 
-\subsection{Rezultati i diskusija}
-% TODO: Pisati tek nakon validacije i stvarnih merenja. Razlikovati funkcionalnu proveru, pilot i rezultate za rad.
-% TODO: Razmotriti ograničenja jednog računara, driver/WDDM overhead, prenos preko PCIe, efekte keša i memorijske kapacitete; ne tvrditi unapred da GPU pobeđuje.
+\subsection{Rezultati osnovnog CPU poređenja}
+\label{sec:rezultati-cpu-cbc}
+
+Tabela~\ref{tab:cpu-cbc-rezultati} prikazuje medijanu propusnosti dobijenu kao
+medijanu medijana pet nezavisnih studijskih sesija. Time unutarsesijska
+ponavljanja nisu tretirana kao nezavisni eksperimenti.
+
+\begin{table}[htbp]
+\centering
+\caption{Propusnost DES-a, troključnog TDEA i AES-a u CBC režimu.
+Prikazana je medijana medijana pet nezavisnih sesija, u decimalnim MB/s.}
+\label{tab:cpu-cbc-rezultati}
+\begin{tabular}{lrrrrrr}
+\toprule
+& \multicolumn{2}{c}{1 KiB}
+& \multicolumn{2}{c}{1 MiB}
+& \multicolumn{2}{c}{10 MiB} \\
+\cmidrule(lr){2-3}
+\cmidrule(lr){4-5}
+\cmidrule(lr){6-7}
+Algoritam &
+Enc. & Dec. &
+Enc. & Dec. &
+Enc. & Dec. \\
+\midrule
+DES     & 65.9  & 74.7  & 87.0  & 89.8  & 87.4  & 90.6 \\
+TDEA    & 28.2  & 29.4  & 32.7  & 33.0  & 32.6  & 33.0 \\
+AES-128 & 145.3 & 156.3 & 224.2 & 221.9 & 223.8 & 223.4 \\
+AES-192 & 134.8 & 141.2 & 197.4 & 192.5 & 198.9 & 195.2 \\
+AES-256 & 121.9 & 126.4 & 173.1 & 170.5 & 174.6 & 170.4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Rezultati pokazuju jasno razdvajanje tri grupe implementacija. Troključni
+TDEA ima najmanju propusnost u svim posmatranim veličinama. Za ulaz od
+10~MiB njegova medijana iznosi približno 32.6~MB/s za enkripciju i
+33.0~MB/s za dekripciju, dok DES ostvaruje približno 87.4 odnosno
+90.6~MB/s.
+
+Sve tri AES varijante ostvaruju veću propusnost od DES-a i TDEA na istoj
+platformi, iako je u ovom eksperimentu namensko AES-NI ubrzanje isključeno.
+Za ulaz od 10~MiB AES-128 ostvaruje približno 223.8~MB/s pri enkripciji,
+AES-192 približno 198.9~MB/s, a AES-256 približno 174.6~MB/s. Smanjenje
+propusnosti sa povećanjem dužine AES ključa u skladu je sa većim brojem
+rundi transformacije: AES-128 koristi 10, AES-192 12, a AES-256 14 rundi.
+
+Povećanje ulaza sa 1~KiB na 1~MiB značajno povećava efektivnu propusnost svih
+algoritama, jer fiksni troškovi Python poziva, bibliotečkog sloja i merenja
+imaju manji relativni uticaj. Između 1~MiB i 10~MiB vrednosti se zatim
+uglavnom stabilizuju. Na primer, AES-128 pri enkripciji prelazi sa približno
+224.2~MB/s na 1~MiB na 223.8~MB/s na 10~MiB, dok TDEA prelazi sa
+32.7 na 32.6~MB/s. Zbog toga se tačka od 1~KiB ne tumači kao čista
+propusnost kriptografske primitive, već kao kombinacija same transformacije
+i fiksnog overhead-a kratkog poziva.
+
+Stabilnost između nezavisnih sesija bila je dobra za veće ulaze. Za
+kombinacije na 1~MiB relativna standardna devijacija medijana pet sesija
+bila je približno između 1.1\% i 2.7\%, a za 10~MiB uglavnom između
+2.3\% i 4.1\%. To ukazuje da su glavni odnosi među algoritmima ponovljivi
+na posmatranoj platformi, iako pojedinačna merenja sadrže očekivane
+scheduler i sistemske varijacije.
+
+Ovi rezultati ne pokazuju performanse istorijskih procesora iz perioda
+usvajanja AES-a i ne treba ih tako tumačiti. Oni pokazuju relativno ponašanje
+konkretnih DES, TDEA i AES softverskih implementacija kada se izvršavaju na
+istoj savremenoj platformi. Takođe, veća propusnost ne predstavlja meru
+kriptografske sigurnosti. DES i TDEA su uključeni zbog istorijskog i
+komparativnog značaja, a ne kao preporuka za savremene sisteme.
