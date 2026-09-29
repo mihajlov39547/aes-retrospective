@@ -109,9 +109,10 @@ Nista nije ukljuceno u rad.
   Glavni prikaz: medijane sesija i njihov raspon/SD; ne objedinjavati ponavljanja
   kao nezavisne sesije i ne predstavljati SD kao interval poverenja.
 - AC, isti zabelezeni power plan, bez aktivnih korisnickih/background poslova.
-  Pre svakog procesa pet minuta mirovanja, zatim 60 s posmatranja opterecenja;
-  predlog uslova starta: prosecan CPU <5%, bez update/scan/backup posla.
-  Kriterijum proveriti u kontrolisanom pilotu; ne menjati ga gledanjem studijskih rezultata.
+  Ispravka posle review-a: korisnik rucno proverava priblizno idle stanje bez
+  namerno pokrenutog konkurentskog workload-a. Raniji predlog CPU <5% tokom
+  60 s je povucen. Ukupno CPU opterecenje je samo environment metadata,
+  ne performance rezultat niti automatski kriterijum validnosti run-a.
 - Power/turbo politika ista za sve sesije; hladjenje/ventilacija isti, bez
   promene profila usred rada. Zabeleziti temperaturu/takt ako postoji pouzdan
   senzor; inace eksplicitno ostaviti nepoznato i ne tvrditi da throttling ne postoji.

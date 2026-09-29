@@ -1,8 +1,10 @@
 """Experiment 1 checks only; no acceleration, CUDA, search or avalanche imports."""
 import csv
 import json
+import itertools
 from pathlib import Path
 import random
+import statistics
 import subprocess
 import sys
 import tempfile
@@ -35,14 +37,49 @@ class CPUChecks(unittest.TestCase):
                     argv = ["benchmark.py", "--run", "--purpose", "smoke", "--output", tmp]
                     with patch.object(sys, "argv", argv), patch.object(cpu_validation, "cipher", broken), \
                             patch.object(benchmark, "perf_counter_ns") as timer, \
+                            patch.object(benchmark, "process_time_ns") as cpu_timer, \
                             patch.object(benchmark, "save_run") as save:
                         with self.assertRaises(RuntimeError):
                             benchmark.main()
                         timer.assert_not_called()
+                        cpu_timer.assert_not_called()
                         save.assert_not_called()
                     files = list(Path(tmp).glob("*.json"))
                     self.assertEqual(len(files), 1)
                     self.assertFalse(json.loads(files[0].read_text())["passed"])
+
+    def test_timer_order_and_diagnostic_edge_cases(self):
+        # Deterministic instrumentation test, not a performance measurement.
+        with tempfile.TemporaryDirectory() as tmp:
+            folder = Path(tmp) / "run"
+            folder.mkdir()
+            events = []
+            wall_ticks = itertools.count(0, 100)
+            cpu_ticks = itertools.accumulate(itertools.cycle((0, 0, 0, 300)))
+
+            def clock(label, ticks):
+                files = list(Path(tmp).glob("cpu-validation-smoke-*.json"))
+                self.assertEqual(len(files), 1)
+                self.assertTrue(json.loads(files[0].read_text())["passed"])
+                events.append(label)
+                return next(ticks)
+
+            argv = ["benchmark.py", "--run", "--purpose", "smoke", "--output", tmp,
+                    "--sizes", "1024", "--warmup", "1", "--repeats", "2"]
+            with patch.object(sys, "argv", argv), \
+                    patch.object(benchmark, "environment_snapshot", return_value={"cpu_percent_1s": 99}), \
+                    patch.object(benchmark, "perf_counter_ns", side_effect=lambda: clock("wall", wall_ticks)), \
+                    patch.object(benchmark, "process_time_ns", side_effect=lambda: clock("process", cpu_ticks)), \
+                    patch.object(benchmark, "save_run", return_value=folder) as save:
+                benchmark.main()
+            self.assertEqual(events, ["wall"] + ["process", "wall", "wall", "process"] * 30 + ["wall"])
+            raw, summary = save.call_args.args[3:5]
+            self.assertEqual({r["process_to_wall_ratio"] for r in raw}, {0., 3.})
+            for row in raw:
+                self.assertEqual(row["wall_elapsed_ns"], 100)
+                self.assertEqual(row["seconds"], 100 / 1e9)
+                self.assertEqual(row["throughput_MB_s"], 1024 * 1000 / 100)
+            self.assertEqual(len(summary), 10)
 
     def test_tdea_rejects_two_key_case(self):
         k1 = bytes.fromhex("0123456789abcdef")
@@ -82,12 +119,36 @@ class CPUChecks(unittest.TestCase):
         meta = json.loads((folder / "metadata.json").read_text())
         self.assertLess(meta["method"]["cpu_validation"]["completed_utc"],
                         meta["method"]["measurement_started_utc"])
+        self.assertEqual(meta["method"]["wall_timer"], "perf_counter_ns")
+        self.assertEqual(meta["method"]["process_cpu_timer"], "process_time_ns")
+        for field in ("wall_timer_resolution_seconds", "process_cpu_timer_resolution_seconds"):
+            self.assertGreater(meta["method"][field], 0)
         with (folder / "raw.csv").open(newline="") as stream:
             rows = list(csv.DictReader(stream))
         self.assertEqual(len(rows), 20)
         for row in rows:
+            wall_ns = int(row["wall_elapsed_ns"])
+            cpu_ns = int(row["process_cpu_ns"])
+            self.assertGreater(wall_ns, 0)
+            self.assertGreaterEqual(cpu_ns, 0)
+            self.assertEqual(int(row["elapsed_ns"]), wall_ns)
+            self.assertEqual(float(row["seconds"]), wall_ns / 1e9)
+            self.assertAlmostEqual(float(row["throughput_MB_s"]), 1024 * 1000 / wall_ns)
+            self.assertAlmostEqual(float(row["process_to_wall_ratio"]), cpu_ns / wall_ns)
             self.assertGreater(float(row["seconds"]), 0)
             self.assertAlmostEqual(float(row["seconds"]) * float(row["throughput_MB_s"]), .001024)
+        with (folder / "summary.csv").open(newline="") as stream:
+            summary = list(csv.DictReader(stream))
+        self.assertEqual(len(summary), 10)
+        for row in summary:
+            selected = [r for r in rows if r["algorithm"] == row["algorithm"]
+                        and r["operation"] == row["operation"]]
+            for metric in ("seconds", "throughput_MB_s", "process_cpu_ns", "process_to_wall_ratio"):
+                values = [float(r[metric]) for r in selected]
+                self.assertEqual(int(row[f"{metric}_count"]), 2)
+                for name, function in (("mean", statistics.mean), ("median", statistics.median),
+                                       ("stdev", statistics.stdev), ("min", min), ("max", max)):
+                    self.assertAlmostEqual(float(row[f"{metric}_{name}"]), function(values))
         invoke("export_results.py", folder)
         for suffix in ("png", "pdf", "tex"):
             name = "benchmark_table.tex" if suffix == "tex" else f"benchmark.{suffix}"

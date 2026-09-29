@@ -38,6 +38,49 @@ results/README.md, requirements.txt i poglavlje 09. Poglavlje rada nije menjano.
   Run cuva i kopije cetiri relevantna izvora; commit sam ne opisuje dirty kod.
   Snapshot napajanja/opterecenja/RAM-a/afiniteta pre i posle nije kontinuiran nadzor.
 
+## Instrumentacija v3: performance, dijagnostika i okruzenje
+
+Primarna performance metrika je `time.perf_counter_ns()`: monotonic wall elapsed
+timer. `wall_elapsed_ns` meri proteklo vreme transformacije; postojece `elapsed_ns`
+ostaje identican WALL alias radi kompatibilnosti. `seconds = wall_elapsed_ns / 1e9`
+i `throughput_MB_s = bytes * 1000 / wall_elapsed_ns` ostaju osnova performance
+statistike i naucne tabele. Exporter i dalje koristi iskljucivo ove wall metrike.
+
+Dijagnosticka metrika je `time.process_time_ns()`: CPU vreme trenutnog procesa
+(Python i native rad), bez vremena kada proces nije izvrsavan. To nisu hardverski
+CPU ciklusi niti cycle counter. Raw cuva `process_cpu_ns` i
+`process_to_wall_ratio = process_cpu_ns / wall_elapsed_ns`. Odnos nije speedup,
+ne menja throughput i nije kriterijum validnosti. Nula i vrednosti >1 su dozvoljene,
+posebno kod kratkih 1 KiB poziva zbog granularnosti tajmera i razlicitih granica
+intervala. Dijagnostika pomaze razmatranju scheduler/background interference-a,
+ali sama ne utvrdjuje uzrok odstupanja niti identitet konkurentskog procesa.
+
+Za obe operacije redosled je: process start, wall start, transformacija,
+wall end, process end. Process pozivi su izvan postojeceg wall timed regiona;
+process interval zato ukljucuje i ocitavanje wall tajmera i pratece racunanje.
+Alokacija izlaza i encrypt -> decrypt redosled ostaju isti. Dodatna instrumentacija
+ipak ima overhead van wall intervala; v2 pilot nema ove dijagnosticke kolone.
+
+Summary odvojeno cuva count/mean/median/sample SD/min/max za `process_cpu_ns`
+(nanosekunde) i `process_to_wall_ratio` (bez jedinice), uz nepromenjene primarne
+statistike `seconds` i `throughput_MB_s`. Nema CPU-time throughput metrike.
+Metadata cuva oba imena tajmera i njihove rezolucije iz `get_clock_info` za
+`perf_counter` i `process_time`; nanosekundna jedinica nije obecanje ns rezolucije.
+
+Environment metadata obuhvata ukupno system CPU utilization pre/posle
+(`cpu_percent_1s`), RAM, napajanje, power plan i afinitet. To je kontekst,
+ne performance rezultat. Benchmark se rucno pokrece kada je sistem priblizno idle
+i bez namerno pokrenutog konkurentskog workload-a. Korisnik proverava ovo stanje.
+System CPU utilization nije automatski kriterijum validnosti; nema 60-sekundnog
+<5% gate-a, odbijanja na osnovu CPU praga niti kontrole/ubijanja drugih procesa.
+Raniji predlog takvog praga iz izvestaja o pilotu 1 povucen je.
+
+KAT i software dispatch moraju proci i biti sacuvani pre poziva oba merna tajmera,
+ukljucujuci warmup. Neuspeh validacije i dalje blokira performance merenje.
+
+Sledeci pilot korisnik pokrece rucno: software, 1 KiB/1 MiB/10 MiB,
+warmup 3, repeats 20, seed 2003. Dopuna instrumentacije ne pokrece taj pilot.
+
 ## Validacija i backend
 
 cpu_validation.py omogucava proveru bez benchmarka, preko istog common.cipher.
@@ -95,8 +138,10 @@ Cuvati sve raw vrednosti, statistike po sesiji i raspodelu medijana pet sesija.
 brisanja sporih uzoraka. Poznati prekid/promena napajanja: celu sesiju zadrzati
 kao oznacenu nevalidnu za protokol i ponoviti celu, uz razlog.
 
-AC napajanje, isti power plan, bez korisnickog rada, update-a i drugih poslova;
-pre sesije nekoliko minuta mirovanja i isti kriterijum stabilizacije.
+Benchmark se rucno pokrece kada je sistem priblizno idle i bez namerno pokrenutog
+konkurentskog workload-a. System CPU utilization belezi se kao kontekst, ali
+nije rezultat algoritamskog benchmarka niti automatski kriterijum validnosti.
+Skripta ne menja AC/power plan, afinitet, prioritet, turbo ili broj jezgara.
 Zabeleziti turbo/power postavke, afinitet, hladjenje i pocetno opterecenje.
 Temperatura/takt nisu trenutno nadzirani: ne tvrditi odsustvo throttling-a.
 Sesije ne predstavljaju vise hardverskih platformi ili implementacija.

@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 import random
 import shutil
-from time import perf_counter_ns, get_clock_info
+from time import perf_counter_ns, process_time_ns, get_clock_info
 from uuid import uuid4
 
 from common import (ALGORITHMS, block_size, cipher, key_for, parser, positive,
@@ -13,6 +13,7 @@ from cpu_validation import validate_cpu, utc_now
 
 
 def environment_snapshot():
+    """Environment context only; system utilization is not a validity gate."""
     import psutil
     from common import command_output
     battery = psutil.sensors_battery()
@@ -46,10 +47,21 @@ def main():
               "throughput_unit": "decimal MB/s = bytes / 1e6 / seconds",
               "aes_backend_request": args.aes_backend, "order": "seeded shuffle per round",
               "operation_order": "encrypt then decrypt; warm-cache sequential pair",
-              "size_order": "CLI order", "protocol_version": "cpu-cbc-v2",
+              "size_order": "CLI order", "protocol_version": "cpu-cbc-v3",
               "key_policy": "DES parity ignored; TDEA odd parity, three distinct effective keys",
               "allocation": "new output each call; previous outputs freed outside timing",
-              "timer_resolution_seconds": get_clock_info("perf_counter").resolution}
+              "timer_resolution_seconds": get_clock_info("perf_counter").resolution,
+              "wall_timer": "perf_counter_ns",
+              "wall_timer_resolution_seconds": get_clock_info("perf_counter").resolution,
+              "wall_timer_meaning": "monotonic wall elapsed time; primary performance metric",
+              "process_cpu_timer": "process_time_ns",
+              "process_cpu_timer_resolution_seconds": get_clock_info("process_time").resolution,
+              "process_cpu_timer_meaning": "current process CPU time, excluding time not executing; not CPU cycles",
+              "timer_order": "process start, wall start, transform, wall end, process end",
+              "process_cpu_scope": "diagnostic; outer interval also includes wall timer bookkeeping",
+              "elapsed_ns_alias": "elapsed_ns equals wall_elapsed_ns (compatibility)",
+              "process_to_wall_ratio": "process_cpu_ns / wall_elapsed_ns; diagnostic, not speedup; zero and >1 permitted",
+              "environment_cpu_policy": "system CPU utilization is context only, not a performance result or validity gate"}
     if print_plan("benchmark", args, method):
         return
     session_id = str(uuid4())
@@ -75,22 +87,31 @@ def main():
                 iv = rng.randbytes(block_size(name))
                 encryptor = cipher(name, keys[name], "CBC", iv, args.aes_backend)
                 decryptor = cipher(name, keys[name], "CBC", iv, args.aes_backend)
+                # Keep the wall interval unchanged; CPU reads bracket it externally.
+                process_start = process_time_ns()
                 start = perf_counter_ns()
                 ciphertext = encryptor.encrypt(plaintext)
                 enc_ns = perf_counter_ns() - start
+                enc_cpu_ns = process_time_ns() - process_start
+                process_start = process_time_ns()
                 start = perf_counter_ns()
                 recovered = decryptor.decrypt(ciphertext)
                 dec_ns = perf_counter_ns() - start
+                dec_cpu_ns = process_time_ns() - process_start
                 if recovered != plaintext:
                     raise RuntimeError(f"Round-trip failed: {name}")
                 if repeat >= 0:
-                    for operation, duration in (("encrypt", enc_ns), ("decrypt", dec_ns)):
+                    for operation, duration, cpu_ns in (("encrypt", enc_ns, enc_cpu_ns),
+                                                       ("decrypt", dec_ns, dec_cpu_ns)):
                         if duration <= 0:
                             raise RuntimeError("Timer resolution insufficient.")
                         raw.append({"session_id": session_id, "algorithm": name,
                                     "mode": "CBC", "bytes": size, "order_index": order_index,
                                     "repeat": repeat, "operation": operation,
                                     "elapsed_ns": duration,
+                                    "wall_elapsed_ns": duration,
+                                    "process_cpu_ns": cpu_ns,
+                                    "process_to_wall_ratio": cpu_ns / duration,
                                     "seconds": duration / 1e9,
                                     "throughput_MB_s": size * 1000 / duration})
                 # Avoid freeing the preceding large bytes object inside the next timer.
@@ -107,7 +128,8 @@ def main():
                             and row["bytes"] == size and row["operation"] == operation]
                 row = {"session_id": session_id, "algorithm": name, "mode": "CBC",
                        "bytes": size, "operation": operation}
-                for metric in ("seconds", "throughput_MB_s"):
+                for metric in ("seconds", "throughput_MB_s", "process_cpu_ns",
+                               "process_to_wall_ratio"):
                     row.update({f"{metric}_{key}": value
                                 for key, value in stats([x[metric] for x in selected]).items()})
                 summary.append(row)
