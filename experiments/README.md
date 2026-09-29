@@ -1,3 +1,14 @@
+# Lista eksperimenata
+
+Eksperiment 1 — istorijski CPU benchmark: DES / TDEA / AES-128 / AES-192 / AES-256, CBC.
+Eksperiment 2 — AES software vs AES-NI: AES-128/192/256.
+Eksperiment 3 — AES-GCM: AES-128-GCM / AES-256-GCM, CPU AES-NI.
+Eksperiment 4 — CUDA AES-128 baseline: prvo ECB/CTR validacija, zatim baseline.
+Eksperiment 5 — CUDA optimizacija + finalno CPU/GPU poređenje.
+Eksperiment 6 — brute-force demonstracija.
+Eksperiment 7 — Double-DES MITM, ako ga zadržimo.
+Eksperiment 8 — avalanche efekat.
+
 # Eksperimentalni okvir
 
 Python skripte su premeštene u `../scripts/`. Pregled svakog fajla i osnovne
