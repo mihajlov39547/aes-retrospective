@@ -1,0 +1,170 @@
+{
+  "passed": true,
+  "session_id": "9ae2a3e3-0828-401c-9afe-f7382d995b84",
+  "purpose": "study",
+  "mode": "GCM",
+  "started_utc": "2026-09-30T13:36:29.236755+00:00",
+  "vectors": [
+    {
+      "algorithm": "AES-128-GCM",
+      "section": "GCM-AES128 Example #5, pp. 7-9",
+      "key": "feffe9928665731c6d6a8f9467308308",
+      "ciphertext": "42831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e091",
+      "tag": "f07c2528eea2fca1211f905e1b6a881b",
+      "source": "https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/AES_GCM.pdf",
+      "nonce": "cafebabefacedbaddecaf888",
+      "aad": "3ad77bb40d7a3660a89ecaf32466ef97f5d3d585",
+      "plaintext": "d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39",
+      "backend": "aesni",
+      "passed": true,
+      "ciphertext_passed": true,
+      "tag_passed": true,
+      "decrypt_verify_passed": true,
+      "modified_tag_rejected": true,
+      "modified_ciphertext_rejected": true,
+      "modified_aad_rejected": true
+    },
+    {
+      "algorithm": "AES-128-GCM",
+      "section": "GCM-AES128 Example #5, pp. 7-9",
+      "key": "feffe9928665731c6d6a8f9467308308",
+      "ciphertext": "42831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e091",
+      "tag": "f07c2528eea2fca1211f905e1b6a881b",
+      "source": "https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/AES_GCM.pdf",
+      "nonce": "cafebabefacedbaddecaf888",
+      "aad": "3ad77bb40d7a3660a89ecaf32466ef97f5d3d585",
+      "plaintext": "d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39",
+      "backend": "software",
+      "passed": true,
+      "ciphertext_passed": true,
+      "tag_passed": true,
+      "decrypt_verify_passed": true,
+      "modified_tag_rejected": true,
+      "modified_ciphertext_rejected": true,
+      "modified_aad_rejected": true
+    },
+    {
+      "algorithm": "AES-256-GCM",
+      "section": "GCM-AES256 Example #5, pp. 27-29",
+      "key": "feffe9928665731c6d6a8f9467308308feffe9928665731c6d6a8f9467308308",
+      "ciphertext": "522dc1f099567d07f47f37a32a84427d643a8cdcbfe5c0c97598a2bd2555d1aa8cb08e48590dbb3da7b08b1056828838c5f61e6393ba7a0abcc9f662",
+      "tag": "e097195f4532da895fb917a5a55c6aa0",
+      "source": "https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/AES_GCM.pdf",
+      "nonce": "cafebabefacedbaddecaf888",
+      "aad": "3ad77bb40d7a3660a89ecaf32466ef97f5d3d585",
+      "plaintext": "d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39",
+      "backend": "aesni",
+      "passed": true,
+      "ciphertext_passed": true,
+      "tag_passed": true,
+      "decrypt_verify_passed": true,
+      "modified_tag_rejected": true,
+      "modified_ciphertext_rejected": true,
+      "modified_aad_rejected": true
+    },
+    {
+      "algorithm": "AES-256-GCM",
+      "section": "GCM-AES256 Example #5, pp. 27-29",
+      "key": "feffe9928665731c6d6a8f9467308308feffe9928665731c6d6a8f9467308308",
+      "ciphertext": "522dc1f099567d07f47f37a32a84427d643a8cdcbfe5c0c97598a2bd2555d1aa8cb08e48590dbb3da7b08b1056828838c5f61e6393ba7a0abcc9f662",
+      "tag": "e097195f4532da895fb917a5a55c6aa0",
+      "source": "https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/AES_GCM.pdf",
+      "nonce": "cafebabefacedbaddecaf888",
+      "aad": "3ad77bb40d7a3660a89ecaf32466ef97f5d3d585",
+      "plaintext": "d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39",
+      "backend": "software",
+      "passed": true,
+      "ciphertext_passed": true,
+      "tag_passed": true,
+      "decrypt_verify_passed": true,
+      "modified_tag_rejected": true,
+      "modified_ciphertext_rejected": true,
+      "modified_aad_rejected": true
+    }
+  ],
+  "dispatch": {
+    "cpu_aesni": true,
+    "aesni_library_loaded": true,
+    "available": true,
+    "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+    "passed": true,
+    "records": [
+      {
+        "algorithm": "AES-128-GCM",
+        "backend": "aesni",
+        "operation": "encrypt",
+        "native_start_calls": {
+          "software": 0,
+          "aesni": 3
+        }
+      },
+      {
+        "algorithm": "AES-128-GCM",
+        "backend": "aesni",
+        "operation": "decrypt",
+        "native_start_calls": {
+          "software": 0,
+          "aesni": 3
+        }
+      },
+      {
+        "algorithm": "AES-128-GCM",
+        "backend": "software",
+        "operation": "encrypt",
+        "native_start_calls": {
+          "software": 3,
+          "aesni": 0
+        }
+      },
+      {
+        "algorithm": "AES-128-GCM",
+        "backend": "software",
+        "operation": "decrypt",
+        "native_start_calls": {
+          "software": 3,
+          "aesni": 0
+        }
+      },
+      {
+        "algorithm": "AES-256-GCM",
+        "backend": "aesni",
+        "operation": "encrypt",
+        "native_start_calls": {
+          "software": 0,
+          "aesni": 3
+        }
+      },
+      {
+        "algorithm": "AES-256-GCM",
+        "backend": "aesni",
+        "operation": "decrypt",
+        "native_start_calls": {
+          "software": 0,
+          "aesni": 3
+        }
+      },
+      {
+        "algorithm": "AES-256-GCM",
+        "backend": "software",
+        "operation": "encrypt",
+        "native_start_calls": {
+          "software": 3,
+          "aesni": 0
+        }
+      },
+      {
+        "algorithm": "AES-256-GCM",
+        "backend": "software",
+        "operation": "decrypt",
+        "native_start_calls": {
+          "software": 3,
+          "aesni": 0
+        }
+      }
+    ],
+    "gcm_module_sha256": "113176fe53453c3e932e18abfeecf654a0f87e19995da8d84beb0e1a85bc3027",
+    "scope": "AES primitive native backend dispatch verified as AES-NI; complete GCM also includes authentication/GHASH processing.",
+    "limit": "Library dispatch observation, not CPU instruction trace; GHASH hardware path not verified"
+  },
+  "completed_utc": "2026-09-30T13:36:29.252420+00:00"
+}

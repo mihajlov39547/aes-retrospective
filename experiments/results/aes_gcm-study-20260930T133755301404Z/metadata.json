@@ -1,0 +1,328 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-09-30T13:37:55.216030+00:00",
+  "purpose": "study",
+  "seed": 2007,
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "executable": "C:\\Projects\\aes\\.venv\\Scripts\\python.exe",
+  "os": "Windows-10-10.0.19045-SP0",
+  "machine": "AMD64",
+  "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+  "logical_cpus": 8,
+  "physical_cpus": 4,
+  "ram_bytes": 16940544000,
+  "library_versions": {
+    "pycryptodome": "3.23.0",
+    "matplotlib": "3.11.2",
+    "psutil": "7.2.2"
+  },
+  "git_commit": "c7948da660ab127eb7611a1339c107a44c04f19b",
+  "git_status": "M .gitignore\n?? experiments/results/aes_gcm-study-20260930T133450175803Z/\n?? experiments/results/aes_gcm-study-20260930T133535301450Z/\n?? experiments/results/aes_gcm-study-20260930T133621550097Z/\n?? experiments/results/aes_gcm-study-20260930T133710504206Z/\n?? experiments/results/gcm-validation-study-0f8847a6-d533-4d40-a30a-4a3d41a8eda3.json\n?? experiments/results/gcm-validation-study-2a3990ab-4094-4db3-8a3e-05cf454e0d0e.json\n?? experiments/results/gcm-validation-study-37c01a84-6362-498c-8638-1350fda41bb8.json\n?? experiments/results/gcm-validation-study-508353c9-09c1-4985-bd3e-ef0e1b0afe0c.json\n?? experiments/results/gcm-validation-study-9ae2a3e3-0828-401c-9afe-f7382d995b84.json",
+  "script_sha256": {
+    "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+    "aes_acceleration_smoke_check.py": "aa8625c8aedc612a48ceb30252e2e4785e26cbfaf7f7a4b4c0971109901931d3",
+    "aes_gcm_benchmark.py": "9b89bbc1ddf1c27cfae41314595e5ef2caeb8bbb3086d857c670d5e842680cbf",
+    "aes_gcm_smoke_check.py": "2e96fd3cc6823c5494ed010ce4fcb127a8ccd82c1c405d1268d83ea97b67a018",
+    "aes_gpu.py": "336de03e3880efd3de49da22a8f93947dd7021ae9c1b2d78b1076b3d813e5b44",
+    "avalanche_test.py": "d4622ce7581c936cca049d6756c76363b9a37716d0d4373ea3e5825147e133da",
+    "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+    "brute_force_demo.py": "9d3b15bb0cd440bc7e0a53b4349a10e07784c04997adae117becf3768db11db6",
+    "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+    "cpu_smoke_check.py": "28beee7607d9ddb09fb6af4b856368b1a130668b43e11d43d3787f64c433ab2a",
+    "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866",
+    "export_results.py": "337937d4d2276a4c256e2d2ebbc4fd1566b4c12a90cadc036b10288d835f3172",
+    "smoke_check.py": "502ca8dcad120da5b5356770e9bc0ba417ccd5fbba9fa1c4cccef4d587e788bc"
+  },
+  "argv": [
+    "scripts/aes_gcm_benchmark.py",
+    "--run",
+    "--purpose",
+    "study",
+    "--sizes",
+    "104857600",
+    "1024",
+    "16384",
+    "1048576",
+    "16777216",
+    "--warmup",
+    "3",
+    "--repeats",
+    "20",
+    "--seed",
+    "2007"
+  ],
+  "arguments": {
+    "run": true,
+    "seed": 2007,
+    "output": "C:\\Projects\\aes\\experiments\\results",
+    "purpose": "study",
+    "notes": "",
+    "sizes": [
+      104857600,
+      1024,
+      16384,
+      1048576,
+      16777216
+    ],
+    "warmup": 3,
+    "repeats": 20
+  },
+  "method": {
+    "protocol_version": "aes-gcm-v1",
+    "study_protocol": "not locked; manual pilot first",
+    "mode": "GCM",
+    "backend": "aesni",
+    "padding": "none",
+    "nonce_bytes": 12,
+    "tag_bytes": 16,
+    "aad_bytes": 16,
+    "aad_hex": "4145532d47434d2d62656e63682d7631",
+    "aad_policy": "fixed 16-byte ASCII AES-GCM-bench-v1",
+    "warmup": 3,
+    "repeats": 20,
+    "timed": "fresh-object AEAD transform: update(AAD), encrypt_and_digest OR decrypt_and_verify, output allocation",
+    "excluded": "GCM construction incl. H/key schedules/GHASH setup, input generation, reference preparation, validation, comparisons, disposal and exports",
+    "timing_scope": "setup-excluded authenticated payload processing, not setup-inclusive message latency",
+    "decrypt_verification": "full PyCryptodome verify included, including its internal random-secret/BLAKE2s comparison",
+    "reference": "untimed use_aesni=False GCM, separately KAT validated; same key/nonce/plaintext/AAD",
+    "nonce_policy": "96 bits = size uint64 big-endian || message_index uint32 big-endian; index spans warmup and repeats per size",
+    "key_policy": "Random('aes-gcm-v1:key:{seed}:{bits}').randbytes(bits/8), synthetic only",
+    "plaintext_policy": "Random('aes-gcm-v1:payload:{seed}:{size}').randbytes(size), fixed per size",
+    "replay_policy": "reference and timed operations replay identical logical message; same seed replays same dataset, not production nonce management",
+    "order": "Random(seed) shuffles variants per round and encrypt/decrypt per variant; sizes follow CLI order",
+    "wall_timer": "perf_counter_ns",
+    "wall_timer_meaning": "monotonic wall elapsed time; primary metric",
+    "wall_timer_resolution_seconds": 1e-07,
+    "process_cpu_timer": "process_time_ns",
+    "process_cpu_timer_resolution_seconds": 1e-07,
+    "process_cpu_timer_meaning": "current process CPU time, excluding time not executing; not CPU cycles",
+    "timer_order": "process start, wall start, AEAD operation, wall end, process end",
+    "process_to_wall_ratio": "diagnostic only; outer process interval includes wall bookkeeping; zero and >1 permitted",
+    "throughput_definition": "payload bytes / 1e6 / wall seconds; ciphertext length equals plaintext length; excludes AAD/tag from numerator",
+    "ghash_policy": "PyCryptodome default; hardware GHASH dispatch not measured or verified",
+    "environment_policy": "before/after context only; no CPU utilization gate or system setting changes",
+    "session_id": "508353c9-09c1-4985-bd3e-ef0e1b0afe0c",
+    "gcm_validation": {
+      "passed": true,
+      "session_id": "508353c9-09c1-4985-bd3e-ef0e1b0afe0c",
+      "purpose": "study",
+      "mode": "GCM",
+      "started_utc": "2026-09-30T13:37:13.938615+00:00",
+      "vectors": [
+        {
+          "algorithm": "AES-128-GCM",
+          "section": "GCM-AES128 Example #5, pp. 7-9",
+          "key": "feffe9928665731c6d6a8f9467308308",
+          "ciphertext": "42831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e091",
+          "tag": "f07c2528eea2fca1211f905e1b6a881b",
+          "source": "https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/AES_GCM.pdf",
+          "nonce": "cafebabefacedbaddecaf888",
+          "aad": "3ad77bb40d7a3660a89ecaf32466ef97f5d3d585",
+          "plaintext": "d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39",
+          "backend": "aesni",
+          "passed": true,
+          "ciphertext_passed": true,
+          "tag_passed": true,
+          "decrypt_verify_passed": true,
+          "modified_tag_rejected": true,
+          "modified_ciphertext_rejected": true,
+          "modified_aad_rejected": true
+        },
+        {
+          "algorithm": "AES-128-GCM",
+          "section": "GCM-AES128 Example #5, pp. 7-9",
+          "key": "feffe9928665731c6d6a8f9467308308",
+          "ciphertext": "42831ec2217774244b7221b784d0d49ce3aa212f2c02a4e035c17e2329aca12e21d514b25466931c7d8f6a5aac84aa051ba30b396a0aac973d58e091",
+          "tag": "f07c2528eea2fca1211f905e1b6a881b",
+          "source": "https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/AES_GCM.pdf",
+          "nonce": "cafebabefacedbaddecaf888",
+          "aad": "3ad77bb40d7a3660a89ecaf32466ef97f5d3d585",
+          "plaintext": "d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39",
+          "backend": "software",
+          "passed": true,
+          "ciphertext_passed": true,
+          "tag_passed": true,
+          "decrypt_verify_passed": true,
+          "modified_tag_rejected": true,
+          "modified_ciphertext_rejected": true,
+          "modified_aad_rejected": true
+        },
+        {
+          "algorithm": "AES-256-GCM",
+          "section": "GCM-AES256 Example #5, pp. 27-29",
+          "key": "feffe9928665731c6d6a8f9467308308feffe9928665731c6d6a8f9467308308",
+          "ciphertext": "522dc1f099567d07f47f37a32a84427d643a8cdcbfe5c0c97598a2bd2555d1aa8cb08e48590dbb3da7b08b1056828838c5f61e6393ba7a0abcc9f662",
+          "tag": "e097195f4532da895fb917a5a55c6aa0",
+          "source": "https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/AES_GCM.pdf",
+          "nonce": "cafebabefacedbaddecaf888",
+          "aad": "3ad77bb40d7a3660a89ecaf32466ef97f5d3d585",
+          "plaintext": "d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39",
+          "backend": "aesni",
+          "passed": true,
+          "ciphertext_passed": true,
+          "tag_passed": true,
+          "decrypt_verify_passed": true,
+          "modified_tag_rejected": true,
+          "modified_ciphertext_rejected": true,
+          "modified_aad_rejected": true
+        },
+        {
+          "algorithm": "AES-256-GCM",
+          "section": "GCM-AES256 Example #5, pp. 27-29",
+          "key": "feffe9928665731c6d6a8f9467308308feffe9928665731c6d6a8f9467308308",
+          "ciphertext": "522dc1f099567d07f47f37a32a84427d643a8cdcbfe5c0c97598a2bd2555d1aa8cb08e48590dbb3da7b08b1056828838c5f61e6393ba7a0abcc9f662",
+          "tag": "e097195f4532da895fb917a5a55c6aa0",
+          "source": "https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/AES_GCM.pdf",
+          "nonce": "cafebabefacedbaddecaf888",
+          "aad": "3ad77bb40d7a3660a89ecaf32466ef97f5d3d585",
+          "plaintext": "d9313225f88406e5a55909c5aff5269a86a7a9531534f7da2e4c303d8a318a721c3c0c95956809532fcf0e2449a6b525b16aedf5aa0de657ba637b39",
+          "backend": "software",
+          "passed": true,
+          "ciphertext_passed": true,
+          "tag_passed": true,
+          "decrypt_verify_passed": true,
+          "modified_tag_rejected": true,
+          "modified_ciphertext_rejected": true,
+          "modified_aad_rejected": true
+        }
+      ],
+      "dispatch": {
+        "cpu_aesni": true,
+        "aesni_library_loaded": true,
+        "available": true,
+        "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+        "passed": true,
+        "records": [
+          {
+            "algorithm": "AES-128-GCM",
+            "backend": "aesni",
+            "operation": "encrypt",
+            "native_start_calls": {
+              "software": 0,
+              "aesni": 3
+            }
+          },
+          {
+            "algorithm": "AES-128-GCM",
+            "backend": "aesni",
+            "operation": "decrypt",
+            "native_start_calls": {
+              "software": 0,
+              "aesni": 3
+            }
+          },
+          {
+            "algorithm": "AES-128-GCM",
+            "backend": "software",
+            "operation": "encrypt",
+            "native_start_calls": {
+              "software": 3,
+              "aesni": 0
+            }
+          },
+          {
+            "algorithm": "AES-128-GCM",
+            "backend": "software",
+            "operation": "decrypt",
+            "native_start_calls": {
+              "software": 3,
+              "aesni": 0
+            }
+          },
+          {
+            "algorithm": "AES-256-GCM",
+            "backend": "aesni",
+            "operation": "encrypt",
+            "native_start_calls": {
+              "software": 0,
+              "aesni": 3
+            }
+          },
+          {
+            "algorithm": "AES-256-GCM",
+            "backend": "aesni",
+            "operation": "decrypt",
+            "native_start_calls": {
+              "software": 0,
+              "aesni": 3
+            }
+          },
+          {
+            "algorithm": "AES-256-GCM",
+            "backend": "software",
+            "operation": "encrypt",
+            "native_start_calls": {
+              "software": 3,
+              "aesni": 0
+            }
+          },
+          {
+            "algorithm": "AES-256-GCM",
+            "backend": "software",
+            "operation": "decrypt",
+            "native_start_calls": {
+              "software": 3,
+              "aesni": 0
+            }
+          }
+        ],
+        "gcm_module_sha256": "113176fe53453c3e932e18abfeecf654a0f87e19995da8d84beb0e1a85bc3027",
+        "scope": "AES primitive native backend dispatch verified as AES-NI; complete GCM also includes authentication/GHASH processing.",
+        "limit": "Library dispatch observation, not CPU instruction trace; GHASH hardware path not verified"
+      },
+      "completed_utc": "2026-09-30T13:37:13.969865+00:00"
+    },
+    "validation_file": "C:\\Projects\\aes\\experiments\\results\\gcm-validation-study-508353c9-09c1-4985-bd3e-ef0e1b0afe0c.json",
+    "validation_sha256": "9c5d72e0cce1d236eaa793c212f358177798e46c42b0ea4a55bca3be34e5e5c8",
+    "hardware_execution_path": "AES primitive native backend dispatch verified as AES-NI; complete GCM also includes authentication/GHASH processing.",
+    "environment_before": {
+      "utc": "2026-09-30T13:37:13.985492+00:00",
+      "cpu_percent_1s": 17.4,
+      "available_ram_bytes": 5984174080,
+      "process_rss_bytes": 31596544,
+      "cpu_affinity": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "power_plugged": true,
+      "power_scheme": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)",
+      "temperature": null,
+      "temperature_note": "Not monitored",
+      "clock_note": "Dynamic CPU clocks not controlled or sampled"
+    },
+    "measurement_started_utc": "2026-09-30T13:37:15.008339+00:00",
+    "measurement_finished_utc": "2026-09-30T13:37:54.102854+00:00",
+    "environment_after": {
+      "utc": "2026-09-30T13:37:54.102854+00:00",
+      "cpu_percent_1s": 16.3,
+      "available_ram_bytes": 6023073792,
+      "process_rss_bytes": 32542720,
+      "cpu_affinity": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "power_plugged": true,
+      "power_scheme": "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)",
+      "temperature": null,
+      "temperature_note": "Not monitored",
+      "clock_note": "Dynamic CPU clocks not controlled or sampled"
+    }
+  },
+  "hardware_execution_path": "AES primitive native backend dispatch verified as AES-NI; complete GCM also includes authentication/GHASH processing.",
+  "warning": "Educational synthetic experiment; DES/TDEA are legacy algorithms.",
+  "run_id": "aes_gcm-study-20260930T133755301404Z",
+  "experiment": "aes_gcm",
+  "session_id": "508353c9-09c1-4985-bd3e-ef0e1b0afe0c"
+}
