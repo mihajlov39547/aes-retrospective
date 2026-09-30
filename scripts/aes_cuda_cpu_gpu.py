@@ -15,14 +15,22 @@ from aes_acceleration import verify_dispatch
 from common import parser, positive, print_plan, save_run
 
 OPTIMIZED = base.ROOT / 'experiments' / 'aes_cuda_optimized.cu'
+TTABLE = base.ROOT / 'experiments' / 'aes_cuda_ttable.cu'
+PROFILES = ('baseline', 'optimized', 'ttable')
+KERNELS = {'baseline':base.KERNEL, 'optimized':OPTIMIZED, 'ttable':TTABLE}
+BACKENDS = {'baseline':'cuda_baseline', 'optimized':'cuda_optimized_v1', 'ttable':'cuda_ttable'}
+BACKEND_PROFILE = {v:k for k,v in BACKENDS.items()}
 PROTOCOL = base.ROOT / 'experiments' / 'cuda_optimized_cpu_gpu_protocol.md'
 METRICS = (*base.METRICS, 'wall_elapsed_ns', 'seconds', 'throughput_MB_s',
            'process_cpu_ns', 'process_to_wall_ratio', 'resident_batch_ns')
 
 
 def method(args):
-    return dict(protocol='cuda-paired-v1', profiles=args.profile, modes=args.modes,
-                hardware_execution_path='Explicit CPU software/AES-NI native dispatch and both CUDA kernels; '
+    return dict(protocol='cuda-paired-v2-ttable', profiles=args.profile, modes=args.modes,
+                profile_backend_map=BACKENDS,
+                ttable='v2: 4x32-bit state; one 1 KiB Te0 constant table plus rotations; final S-box round. '
+                'No shared memory or overlap; divergent constant reads may serialize. Candidate, not proven faster.',
+                hardware_execution_path='Explicit CPU software/AES-NI native dispatch and all three CUDA kernels; '
                 'verified by persisted premeasurement validation for each run.',
                 measurements=args.measurements, host_memory='pinned',
                 pairing='Same data/key/counter for all jobs of mode/size/repeat; pair hash records identity.',
@@ -51,14 +59,14 @@ def method(args):
 
 class GPU(base.GPU):
     def __init__(self, profile):
-        if profile not in ('baseline', 'optimized'):
-            raise ValueError('Explicit baseline/optimized required')
+        if profile not in PROFILES:
+            raise ValueError('Explicit baseline/optimized/ttable required')
         super().__init__()
         self.profile = profile
-        if profile == 'optimized':
-            self.module = self.cp.RawModule(code=OPTIMIZED.read_text(encoding='utf-8'), options=('--std=c++11',))
+        if profile != 'baseline':
+            self.module = self.cp.RawModule(code=KERNELS[profile].read_text(encoding='utf-8'), options=('--std=c++11',))
             self.expand = self.module.get_function('expand_key')
-            self.kernels = {m:self.module.get_function('aes_' + m.lower() + '_optimized') for m in base.EXPECTED}
+            self.kernels = {m:self.module.get_function('aes_' + m.lower() + '_' + profile) for m in base.EXPECTED}
 
 
 class CPU:
@@ -81,10 +89,12 @@ def validate(gpus, session, purpose):
     report = dict(session_id=session, purpose=purpose, passed=False,
                   started_utc=datetime.now(timezone.utc).isoformat(), paths={}, dispatch={})
     try:
+        if set(gpus) != set(PROFILES):
+            raise RuntimeError('All three CUDA candidates must pass the gate')
         for mode in ('ECB','CTR'):
             report['dispatch'][mode] = verify_dispatch(mode)
         paths = {'cpu_software':CPU('software'), 'cpu_aesni':CPU('aesni'),
-                 **{'cuda_'+k:v for k,v in gpus.items()}}
+                 **{BACKENDS[k]:v for k,v in gpus.items()}}
         # Reuse the exact 18 KAT/differential cases on every encryption path.
         # Legacy validator calls its tested-path flag "cuda_passed", even for adapters.
         for name, path in paths.items():
@@ -152,8 +162,8 @@ def summarize(raw):
 
 
 def run(args, gpus=None, validator=validate):
-    # Both kernels are always validated even when only one profile is timed.
-    gpus = {p:GPU(p) for p in ('baseline','optimized')} if gpus is None else gpus
+    # All kernels are validated even when only a subset is timed.
+    gpus = {p:GPU(p) for p in PROFILES} if gpus is None else gpus
     session=str(uuid.uuid4())
     gate=args.output.resolve()/('aes_cuda_cpu_gpu-validation-'+session)
     gate.mkdir(parents=True,exist_ok=False)
@@ -173,14 +183,14 @@ def run(args, gpus=None, validator=validate):
                 pair_id=f'{size}:{mode}:{repeat}'
                 pair_hash=hashlib.sha256(key+counter+data).hexdigest()
                 jobs=[('cpu_software','transform'),('cpu_aesni','transform')]
-                jobs += [('cuda_'+p,m) for p in args.profile for m in args.measurements]
+                jobs += [(BACKENDS[p],m) for p in args.profile for m in args.measurements]
                 order.shuffle(jobs)
                 for job_order,(backend,measurement) in enumerate(jobs):
                     timing=dict.fromkeys(METRICS)
                     if backend.startswith('cpu_'):
                         output,measured=cpu_measure(CPU(backend[4:]),mode,key,counter,data)
                     else:
-                        gpu=gpus[backend[5:]]
+                        gpu=gpus[BACKEND_PROFILE[backend]]
                         job=gpu.prepare(mode,key,counter,data)
                         measured=gpu.measure_diagnostic(job,measurement,args.resident_iterations)
                         output=job[2].tobytes()
@@ -189,7 +199,7 @@ def run(args, gpus=None, validator=validate):
                     if repeat>=0:
                         timing.update(measured)
                         raw.append(dict(session_id=session,seed=args.seed,algorithm='AES-128',operation='encrypt',
-                                        backend=backend,profile=backend[5:] if backend.startswith('cuda_') else backend[4:],
+                                        backend=backend,profile=BACKEND_PROFILE[backend] if backend.startswith('cuda_') else backend[4:],
                                         measurement=measurement,host_memory='pinned' if backend.startswith('cuda_') else 'bytes',
                                         mode=mode,bytes=size,repeat=repeat,pair_id=pair_id,pair_sha256=pair_hash,
                                         job_order=job_order,global_order=len(raw),validation_checked=True,
@@ -202,7 +212,7 @@ def run(args, gpus=None, validator=validate):
     directory=save_run('aes_cuda_cpu_gpu',args,method(args),raw,summarize(raw))
     shutil.copy2(gate/'validation.json',directory/'validation.json')
     source=directory/'source'; source.mkdir()
-    paths=[Path(__file__),Path(__file__).with_name('aes_cuda_cpu_gpu_smoke_check.py'),base.KERNEL,OPTIMIZED,PROTOCOL]
+    paths=[Path(__file__),Path(__file__).with_name('aes_cuda_cpu_gpu_smoke_check.py'),base.KERNEL,OPTIMIZED,TTABLE,PROTOCOL]
     # Include local transitive imports needed to replay the archived harness.
     paths += [Path(__file__).with_name(n) for n in ('aes_cuda_baseline.py','aes_acceleration.py',
                                                   'common.py','cpu_validation.py','benchmark.py')]
@@ -210,9 +220,9 @@ def run(args, gpus=None, validator=validate):
     for path in paths:
         shutil.copy2(path,source/path.name); hashes[path.name]=base.digest(source/path.name)
     meta=json.loads((directory/'metadata.json').read_text())
-    meta.update(schema_version=1,session_id=session,gpu=gpus['baseline'].info,
+    meta.update(schema_version=2,session_id=session,gpu=gpus['baseline'].info,
                 validation_passed=True, cpu_dispatch=report.get('dispatch'),
-                source_sha256=hashes,kernel_sha256={p:hashes['aes_cuda_'+p+'.cu'] for p in ('baseline','optimized')},
+                source_sha256=hashes,kernel_sha256={p:hashes[KERNELS[p].name] for p in PROFILES},
                 validation_sha256=base.digest(directory/'validation.json'),validation_file='validation.json',
                 environment_before=before,environment_after=after,backends=sorted({r['backend'] for r in raw}))
     base.write_json(directory/'metadata.json',meta)
@@ -221,7 +231,7 @@ def run(args, gpus=None, validator=validate):
 
 def arguments(argv=None):
     p=parser(__doc__)
-    p.add_argument('--profile',nargs='+',choices=['baseline','optimized'],default=['baseline','optimized'])
+    p.add_argument('--profile',nargs='+',choices=PROFILES,default=list(PROFILES))
     p.add_argument('--measurements',nargs='+',choices=['pipeline','resident'],default=['pipeline','resident'])
     p.add_argument('--host-memory',choices=['pinned'],default='pinned')
     p.add_argument('--modes',nargs='+',choices=['ECB','CTR'],default=['ECB','CTR'])

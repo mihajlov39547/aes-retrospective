@@ -21,7 +21,47 @@ block-size search, chunking or multi-stream overlap is introduced in v1.
 Compiler code generation may already perform similar unrolling; the name
 optimized identifies a candidate, not a verified speed advantage. Register
 pressure or code size may offset any benefit. No performance conclusion precedes
-pilot analysis.
+pilot analysis. The reported pilot `aes_cuda_cpu_gpu-pilot-20260930T202051083522Z`
+did not show consistent v1 gains, so v1 is preserved as a comparison candidate,
+not selected as the final optimized implementation.
+
+## T-table candidate v2
+
+`aes_cuda_ttable.cu` adds the separate `ttable` profile. It uses four big-endian
+32-bit state words. In rounds 1--9, table lookups combine SubBytes and MixColumns;
+cross-word byte selection performs ShiftRows. A single 256-entry `uint32` Te0
+table occupies 1024 bytes of constant memory. Its entries are generated from
+the standard AES S-box: `Te0[x] = (2*S[x], S[x], S[x], 3*S[x])`, with products
+in GF(2^8) and big-endian byte packing. Rotations by 8/16/24 bits derive the
+other column contributions, trading rotation instructions for a smaller table.
+The tenth round uses the separate 256-byte constant S-box and omits MixColumns.
+Key expansion keeps the baseline byte schedule and 176-byte layout; round words
+are loaded explicitly big-endian. ECB and CTR have separate kernel entry points.
+
+This is the conventional table-based AES approach discussed in
+[Harrison and Waldron, USENIX Security 2008](https://www.usenix.org/legacy/event/sec08/tech/full_papers/harrison/harrison_html/),
+which evaluates 1 KiB and four-table designs and GPU memory placement.
+The implementation here is derived from AES arithmetic, not a copy of their code.
+Constant memory is the first placement candidate, not an assertion of best placement:
+[NVIDIA documents serialization of different constant addresses within a warp](https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#constant-memory).
+Shared memory was considered but deferred: naive tables have data-dependent bank
+conflicts, while replicated/bank-controlled layouts add resource tradeoffs and
+validation complexity. No claim of bank-conflict-free, constant-time or side-channel
+resistance is made for v2. No new memory-placement tuning or block-size search was
+performed. Large-buffer variance may persist even if the arithmetic kernel improves.
+
+The default remains 128 threads per CUDA block, one thread per AES block, with
+unchanged full 128-bit big-endian CTR carry, wrap rejection and partial-tail
+handling. There is no multi-stream overlap, chunking or pipeline optimization.
+Pinned pipeline and resident timer scopes remain identical across all candidates.
+
+CLI `optimized` still means v1 and its kernel file is unchanged. New output uses
+schema 2 and explicit backend labels `cuda_baseline`, `cuda_optimized_v1`, and
+`cuda_ttable` (v2). Historical output label `cuda_optimized` denotes v1 and is
+not renamed on disk. Metadata records the profile/backend mapping and all three
+kernel hashes. Default profiles now include all three; `--profile baseline optimized`
+still selects only the two old GPU candidates for timing. Prior pilot artifacts
+and completed baseline tables/diagnostics are never edited or pooled into v2.
 
 ## Pairing and validation
 
@@ -35,13 +75,13 @@ audit equality without storing keys. There is no reuse across different plaintex
 messages by design; these seeded inputs are exclusively synthetic test material.
 
 Before warmup or any timer, the gate validates CPU software, CPU AES-NI, baseline
-CUDA and optimized CUDA using the same 18 NIST SP 800-38A F.1.1/F.5.1 and
+CUDA, optimized v1 and T-table v2 using the same 18 NIST SP 800-38A F.1.1/F.5.1 and
 differential tests: one/multiple blocks, launch boundaries, partial CTR tails,
 and counter carry through 8/32/64/120 bits. Full wrap rejection is tested on all
-four factories; all output hashes must agree across paths. Any failure saves a
+five factories; all output hashes must agree across paths. Any failure saves a
 failed validation record without raw/summary output. Each timed output is checked
-outside timers. A deliberately corrupted optimized path is rejected by smoke.
-Both kernels are validated even if only one profile is selected for timing.
+outside timers. Deliberately corrupted v1 and v2 paths are rejected by smoke.
+All three kernels are validated even if only one profile is selected for timing.
 NIST source: https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf
 
 ## Timing and metrics
@@ -62,7 +102,7 @@ NIST source: https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication8
   batch/N as kernel time; do not pool with single-launch data. Host submission gaps
   can appear in event intervals. Resident has null transfer/end-to-end metrics.
 
-Each pair produces two CPU rows and, with both profiles/measurements, four GPU
+Each pair produces two CPU rows and, with all three profiles/both measurements, six GPU
 rows. Pipeline rows additionally contain their own kernel-event component, kept
 distinct from separately prepared resident measurements. Throughput is decimal
 payload MB/s. Summary groups backend/profile, mode, size and measurement, storing
@@ -86,7 +126,7 @@ numerators or denominators. Modes, timed regions and inputs differ from CBC/GCM.
 
 Output is exclusively `aes_cuda_cpu_gpu-<purpose>-<timestamp>/`. Metadata records
 arguments, seed, CPU/GPU/runtime, git state, source snapshots/hashes (including
-both kernels and local transitive imports), validation hash, clock definitions,
+all three kernels and local transitive imports), validation hash, clock definitions,
 and before/after GPU telemetry. Raw rows identify backend, profile, measurement,
 memory policy, mode/size, seed, pair identity and execution order. Unsupported
 telemetry stays null and never gates validity. CPU load is manually controlled;
@@ -113,12 +153,12 @@ Plan-only (does not initialize CUDA):
 Proposed controlled pilot, to be run manually, not during preparation:
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\aes_cuda_cpu_gpu.py --run --purpose pilot --profile baseline optimized --measurements resident pipeline --resident-iterations 1 --host-memory pinned --modes ECB CTR --sizes 1024 16384 1048576 16777216 33554432 --warmup 5 --repeats 10 --seed 2003
+.\.venv\Scripts\python.exe scripts\aes_cuda_cpu_gpu.py --run --purpose pilot --profile baseline optimized ttable --measurements resident pipeline --resident-iterations 1 --host-memory pinned --modes ECB CTR --sizes 1024 16384 1048576 16777216 33554432 --warmup 5 --repeats 10 --seed 2003
 ```
 
 Ten repeats reduce pilot cost while still revealing timing dispersion and paired
 anomalies across all five sizes; five warmups exercise each job. Full pilot has
-600 raw rows / 60 summary rows. Review correctness first, then dispersion and
+800 raw rows / 80 summary rows. Review correctness first, then dispersion and
 order effects, before choosing the final protocol. Proposed eventual study is
 five independent processes, seeds 2003--2007, warmup5/repeats20, fixed ascending
 size order; not approved or executed here. CLI supports those parameters, but
