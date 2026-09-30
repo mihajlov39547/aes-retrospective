@@ -29,10 +29,9 @@ niti runtime dostupan CuPy-ju.
 % Izvori: metadata.json CPU studija; experiments/README.md (2026-09-27).
 % Lokalna dijagnostika 2026-09-29: nvidia-smi potvrđuje GPU, VRAM,
 % driver/KMD 610.62, WDDM i CUDA UMD 13.3.
-% Compute capability navesti samo ako je potvrđen kroz CUDA/CuPy runtime.
-% TODO CUDA: CuPy nije pronađen u projektnom .venv; nvcc nije u PATH-u.
-% Uneti potvrđene verzije CuPy-ja, učitanog CUDA runtime-a i NVRTC/Toolkit-a
-% iz konfiguracije korišćene za GPU merenja; odsustvo nvcc nije dokaz odsustva Toolkit-a.
+CUDA baseline merenja koriste CuPy~13.6.0 i učitani CUDA runtime~12.9,
+potvrđene kroz metapodatke prihvaćenih sesija. Svih pet sesija koristi
+isti GPU/runtime i identične arhivirane izvore skripti i kernela.
 
 \subsubsection{Validacija implementacija}
 Funkcionalna validacija prethodi merenju performansi svake implementacione
@@ -83,7 +82,7 @@ veličina između sesija. Zbirna propusnost predstavlja medijanu pet
 sesijskih medijana; ponavljanja unutar procesa ne tretiraju se kao
 nezavisne sesije. Agregiranje faktora ubrzanja opisano je uz AES-NI
 poređenje.
-% TODO CUDA: potvrditi broj zagrevanja, ponavljanja i nezavisnih sesija.
+% CUDA baseline koristi zaseban protokol opisan u nastavku.
 
 Sirovi podaci, statistički sažeci, metapodaci i validacioni zapisi povezani
 su identifikatorom izvršavanja. Uz njih se čuvaju seed, argumenti, verzije
@@ -187,76 +186,100 @@ AES-128-GCM nije referentna putanja za računanje faktora ubrzanja AES-256-GCM.
 Pošto GCM uključuje autentifikaciju, njegova propusnost ne predstavlja
 istu funkciju kao CBC transformacija.
 
-\subsubsection{CUDA implementacija AES-128 i CPU--GPU poređenje}
+\subsubsection{Osnovna CUDA implementacija AES-128}
 \label{sec:aes-gpu}
-\label{sec:cpu-gpu-poredjenje}
-CUDA postupak razdvaja osnovnu, čitljivu implementaciju AES-128 od njene
-optimizacije. Obe putanje podležu istim funkcionalnim proverama, koje se
-ponavljaju posle svake izmene. CUDA C i CuPy \texttt{RawKernel} omogućavaju
-raspoređivanje nezavisnih blokova na paralelne niti u SIMT modelu, uz
-upravljački kod u Python-u i eksplicitnu konfiguraciju mreže i blokova
-niti~\cite{nvidia-cuda-model,nvidia-cuda-python,cupy-rawkernel}.
+Osnovna CUDA implementacija (\emph{baseline}) obuhvata AES-128 enkripciju
+u ECB i CTR režimima. Implementacija je namerno čitljiva i bajtovski
+orijentisana: jedna CUDA nit obrađuje jedan 16-bajtni AES blok, uz 128 niti
+po CUDA bloku. Nisu primenjene T-table, shared-memory ili fused optimizacije.
+CUDA C kernelima upravlja Python preko CuPy-ja; nezavisni blokovi raspoređuju
+se na paralelne niti~\cite{nvidia-cuda-model,nvidia-cuda-python,cupy-rawkernel}.
+Ovo je metodološka polazna tačka, a ne procena maksimalnog GPU potencijala.
 
-ECB služi samo merenju nezavisnih blokova kriptografske primitive i nije
-preporuka za zaštitu podataka. Glavni paralelizabilni režim je CTR:
+ECB služi samo kao mikrobenchmark nezavisnih blokova i nije preporuka za
+zaštitu stvarnih podataka. CTR daje paralelizabilnu transformaciju:
 \begin{equation}
 C_i = P_i \oplus E_K(T_i).
 \label{eq:eksperiment-ctr}
 \end{equation}
-Blokovi brojača $T_i$ obrađuju se nezavisno. Nasuprot tome, CBC enkripcija
+Koristi se ceo 128-bitni big-endian brojač, bez zasebnog nonce prefiksa;
+početnom brojaču dodaje se indeks bloka uz prenos kroz svih 16 bajtova.
+Preliv prostora brojača se odbija, a nepotpun završni blok koristi samo
+potrebne bajtove izlaza AES-a. CTR sam ne obezbeđuje autentifikaciju.
+Nasuprot nezavisnoj obradi ECB/CTR blokova, CBC enkripcija
 \begin{equation}
 C_i = E_K(P_i \oplus C_{i-1})
 \label{eq:eksperiment-cbc}
 \end{equation}
-sadrži zavisnost između susednih blokova, pa nije osnovni režim za GPU
-poređenje~\cite{sp800-38a}. CTR sam ne obezbeđuje autentifikaciju.
+sadrži zavisnost između susednih blokova, pa nije osnovni paralelni GPU
+benchmark~\cite{sp800-38a}.
 
-Validacija AES-128 ECB i CTR putanja obuhvata NIST SP~800-38A vektore
-F.1.1 i F.5.1 i poređenje sa referentnom CPU implementacijom za jedan i
-više blokova. Za CTR se proveravaju prenos brojača preko granica bajtova
-i nepotpun završni blok, uz isti ključ, poruku i početni brojač.
-% TODO CUDA: implementirati i validirati kernel (postojeći izvor je kostur);
-% evidentirati poreklo i hash osnovne i optimizovane implementacije.
+Pre svakog merenja primenjena je validaciona prepreka: NIST SP~800-38A
+ECB F.1.1 i CTR F.5.1 poznati test vektori i diferencijalno poređenje sa
+PyCryptodome softverskom CPU referencom. Provere obuhvataju jedan i više
+blokova, granice CUDA raspoređivanja, CTR prenos preko 8, 32, 64 i 120
+bitova i nepotpune završne blokove. Svih pet prihvaćenih sesija prošlo je
+svih 18 testova; hash validacije i izvora sačuvan je uz rezultate.
+Izlaz svake merene transformacije dodatno se poredi sa CPU referencom
+izvan tajmera. CPU referenca ovde služi samo proveri ispravnosti.
 
-CPU softverska i CPU AES-NI putanja ponovo se mere u istim ECB/CTR režimima,
-na istim ulazima i u istom protokolu kao GPU. CBC rezultati iz
-tabela~\ref{tab:cpu-cbc-rezultati} i~\ref{tab:aesni-rezultati} nisu direktna
-CPU referenca za GPU poređenje. Uporedivost zahteva isti ključ, otvoreni
-tekst, režim, veličinu ulaza, CTR početni brojač i broj ponavljanja.
-Redosled putanja reproduktivno se meša, a rezultati razdvajaju po režimima.
-% TODO CUDA: potvrditi optimizacije, veličine ulaza i parametre ponavljanja.
-% Radni skup veličina: 1 KiB, 16 KiB, 1 MiB, 16 MiB, 100 MiB i 1 GiB.
-% Izostavljanje veličine zbog RAM/VRAM ograničenja dokumentovati bez nulte propusnosti.
+Meren je \texttt{baseline/pipeline/pinned} scenario sa unapred alociranim
+page-locked host ulaznim i izlaznim baferima. H2D i D2H mere se zasebnim
+host intervalima funkcije \texttt{perf\_counter\_ns()} oko sinhronog
+kopiranja, uz potvrdu završetka. Kernel se meri CUDA događajima uz
+sinhronizaciju~\cite{cupy-performance}. End-to-end interval obuhvata
+H2D $\rightarrow$ kernel $\rightarrow$ D2H, uključujući troškove pokretanja,
+događaja i sinhronizacije. Nema preklapanja transfera i izvršavanja.
+End-to-end propusnost je glavni praktični rezultat ove pripremljene putanje;
+propusnost kernela prikazuje se kao zasebna komponenta.
 
-GPU metrike razdvajaju vreme kernela (\emph{kernel-only}), prenos sa
-host-a na uređaj (H2D), prenos sa uređaja na host (D2H), ukupan transfer
-i ukupno izvršavanje (\emph{end-to-end}). Vreme kernela meri se CUDA
-događajima uz eksplicitnu sinhronizaciju, dok se transferi i end-to-end
-interval mere zidnim tajmerom~\cite{cupy-performance}. End-to-end interval
-obuhvata prenose, kernel i završnu sinhronizaciju; propusnost samog kernela
-prikazuje se odvojeno od ukupne propusnosti.
+Kompilacija, alokacija i pinning bafera, kopiranje ulaza u pripremljeni
+host bafer, proširenje i priprema ključa na GPU-u, prenos ključa i brojača,
+CPU referenca, validacija, poređenja i izvoz isključeni su iz tajmera.
+End-to-end zato nije latencija prve poruke sa kompletnom inicijalizacijom.
+Ukupan transfer je zbir H2D i D2H vremena u pojedinačnom ponavljanju.
 
-JIT kompilacija, priprema GPU ključa i unapred izvršene alokacije izuzete
-su iz intervala; \texttt{RawKernel} podržava keširanje prevedenog
-koda~\cite{cupy-rawkernel}. CPU merenje zasebno obuhvata transformaciju i
-ukupno vreme inicijalizacije šifre sa transformacijom i alokacijom izlaza.
-GPU end-to-end zato ne predstavlja latenciju prvog pokretanja, a razlika
-u obuhvatu pripreme i alokacija deo je tumačenja poređenja.
+Standardne veličine su 1~KiB, 16~KiB, 1~MiB, 16~MiB i 32~MiB
+($33\,554\,432$ bajta). Finalni skup čine pet nezavisnih procesa sa
+seed vrednostima 2003--2007, po pet rundi zagrevanja i 20 merenih
+ponavljanja po režimu i veličini. Svaka sesija ima 200 raw i 10 summary
+redova. Veličine se izvršavaju fiksnim rastućim redosledom, dok se redosled
+ECB/CTR reproduktivno meša po ponavljanju. Od devet postojećih study sesija
+prihvaćeni su prvi fiksni run za seed 2003 i poslednja četiri fiksna run-a
+za 2004--2007. Četiri rotirane sesije su sačuvane, ali nisu deo finalne
+tabele; to nije tvrdnja o njihovoj kriptografskoj neispravnosti.
+% Poreklo: experiments/results/aes_cuda_baseline-fixed-order-aggregate/aggregate.json
+% Prihvaćeni timestamp-i: 20260930T192042160435Z, 20260930T192923097888Z,
+% 20260930T192947822337Z, 20260930T193012721398Z, 20260930T193037735239Z.
 
-Praktični faktor ubrzanja definisan je odnosom medijana ukupnih vremena:
+Svaka finalna vrednost predstavlja medijanu pet sesijskih medijana za
+datu metriku. Summary medijane proverene su iz svih raw podataka, bez
+filtriranja outlier-a i bez objedinjavanja sirovih raspodela iz pet procesa.
+Propusnost se agregira nezavisno od vremena, ne preračunava se iz zbirne
+medijane vremena. Medijana transfera takođe se agregira nezavisno i ne
+mora biti zbir agregiranih H2D i D2H medijana. Fiksni redosled može povezati
+veličinu sa progresijom sesije i termalnim stanjem; prihvaćeni skup ne
+dokazuje apsolutnu stabilnost. Ulaz od 32~MiB zadržan je u standardnom
+skupu, dok 64 i 100~MiB ostaju dijagnostički materijal.
+
+\subsubsection{Planirano optimizovanje CUDA putanje i CPU--GPU poređenje}
+\label{sec:cpu-gpu-poredjenje}
+Optimizovana implementacija biće zasebno validirana i merena. Buduće
+CPU--GPU poređenje zahteva ponovna uparena merenja CPU softverske i AES-NI
+putanje u istim ECB/CTR režimima, sa istim ključem, porukom, početnim
+brojačem, veličinama i protokolom kao GPU. Prethodni CPU CBC i AES-GCM
+rezultati nisu direktna referenca zbog različitih operacija i granica
+merenja. Planirani odnos vremena je
 \begin{equation}
 S_{\mathrm{GPU/CPU}} =
 \frac{\widetilde{T}_{\mathrm{CPU,AES\mbox{-}NI}}}
      {\widetilde{T}_{\mathrm{GPU,end\mbox{-}to\mbox{-}end}}}.
 \label{eq:gpu-cpu-ubrzanje}
 \end{equation}
-Brojilac je CPU zidno vreme inicijalizacije i transformacije, a imenilac
-GPU zidno vreme prenosa, kernela i sinhronizacije. Razlika ukupnog vremena
-i zbira vremena transfera i kernela predstavlja procenu preostalog
-režijskog troška, a ne izolovano vreme pokretanja kernela. Različiti
-časovnici mogu dati i mali negativan ostatak.
-% TODO CUDA: proveriti granice intervala prema konačnoj implementaciji.
-% Rezidentni scenario prikazati zasebno samo uz odgovarajuća merenja.
+Brojilac i imenilac biće zidna vremena uporedivih operacija; obuhvat
+inicijalizacije i alokacije mora biti zaključen pre te studije.
+Kernel-only i rezidentni scenario ostaju zasebne metrike.
+% TODO CUDA OPTIMIZACIJA: potvrditi implementaciju i upareni CPU/GPU protokol.
 
 \subsubsection{Demonstracija pretraživanja prostora ključeva}
 Demonstracija koristi redukovani edukativni prostor ključeva i meri broj
@@ -427,7 +450,56 @@ zaokružene vrednosti velikih ulaza, a ne intervale poverenja. Razlika
 između enkripcije i dekripcije postaje mala, iako dekripcija uključuje
 verifikaciju autentifikacionog taga, a ne samo dobijanje otvorenog teksta.
 
-% TODO RESULTS CUDA: odvojiti osnovnu i optimizovanu putanju, ECB/CTR i GPU metrike.
+\subsubsection{Performanse osnovne CUDA implementacije AES-128}
+\label{sec:rezultati-cuda-baseline}
+Tabela~\ref{tab:cuda-baseline-results} prikazuje medijanu pet sesijskih
+medijana za svaku metriku, bez uklanjanja sirovih merenja ili outlier-a.
+Propusnost je u decimalnim MB/s; sekunde su pretvorene u milisekunde,
+a nanosekunde transfera podeljene sa $10^6$. Zbirna vremena i propusnosti
+agregirani su nezavisno iz prihvaćenog pinned pipeline skupa.
+
+\begin{table}[htbp]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\caption{Rezultati CUDA AES-128 baseline implementacije sa pinned
+host--device putanjom. Prikazane su medijane pet sesijskih medijana.
+E2E označava end-to-end, a transfer zbir H2D i D2H u svakom ponavljanju.}
+\label{tab:cuda-baseline-results}
+\begin{tabular}{llrrrrr}
+\toprule
+Režim & Veličina & Kernel & E2E & Kernel & E2E & Transfer \\
+ & & MB/s & MB/s & ms & ms & ms \\
+\midrule
+ECB & 1 KiB & 20.19 & 5.66 & 0.0507 & 0.1808 & 0.0822 \\
+ECB & 16 KiB & 293.27 & 78.67 & 0.0559 & 0.2083 & 0.0934 \\
+ECB & 1 MiB & 4420.05 & 1242.99 & 0.2372 & 0.8437 & 0.5095 \\
+ECB & 16 MiB & 8024.96 & 2183.10 & 2.0906 & 7.6851 & 5.4697 \\
+ECB & 32 MiB & 2129.40 & 588.70 & 15.7577 & 56.9980 & 41.0785 \\
+\midrule
+CTR & 1 KiB & 19.66 & 5.55 & 0.0521 & 0.1844 & 0.0821 \\
+CTR & 16 KiB & 279.88 & 77.72 & 0.0585 & 0.2108 & 0.0975 \\
+CTR & 1 MiB & 4345.03 & 1241.43 & 0.2413 & 0.8447 & 0.5120 \\
+CTR & 16 MiB & 7780.94 & 2166.19 & 2.1562 & 7.7451 & 5.4870 \\
+CTR & 32 MiB & 2071.07 & 584.13 & 16.2015 & 57.4432 & 41.0866 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Za male ulaze end-to-end propusnost iznosi oko 5.6~MB/s na 1~KiB i
+78~MB/s na 16~KiB. Na 1~MiB oba režima dostižu oko 1.24~GB/s end-to-end,
+uz kernel propusnost od oko 4.3--4.4~GB/s. Najviše vrednosti među pet
+standardnih veličina zabeležene su na 16~MiB: ECB ostvaruje 8.02~GB/s
+kernel i 2.18~GB/s end-to-end, a CTR 7.78 i 2.17~GB/s.
+
+Ulaz od 32~MiB ostaje u tabeli i pokazuje izrazit pad: kernel propusnost
+iznosi oko 2.13~GB/s za ECB i 2.07~GB/s za CTR, dok end-to-end pada na
+oko 589 i 584~MB/s. Vreme transfera raste sa približno 5.47--5.49~ms
+na 16~MiB na oko 41.08--41.09~ms na 32~MiB; raste i kernel vreme.
+Ovaj nalaz nije uklonjen niti zamenjen povoljnijim dijagnostičkim rezultatom.
+
+% TODO RESULTS CUDA OPTIMIZACIJA: zasebna tabela nakon nove validirane studije.
+
 % TODO RESULTS BRUTE FORCE
 % TODO RESULTS MITM: samo ako demonstracija ostane u radu.
 % TODO RESULTS AVALANCHE
@@ -502,7 +574,50 @@ potvrđenim AES-NI dispatch-om za AES primitivu, a ne instrukcijski profil
 celog GCM algoritma. Nalaz se odnosi na testirani CPU, Windows okruženje
 i PyCryptodome~3.23.0.
 
-% TODO DISCUSSION: povezati CUDA, pretragu ključeva i avalanche sa
+\subsubsection{Kernel propusnost i cena CUDA pipeline-a}
+Kod 1~KiB i 16~KiB veliki relativni uticaj pokretanja kernela, transfera
+i sinhronizacije ograničava praktičnu propusnost. Kernel-only broj ne
+predstavlja ukupnu cenu obrade kratke poruke. Na 1~MiB razlika između
+4.3--4.4~GB/s za kernel i oko 1.24~GB/s end-to-end pokazuje da transferi
+i upravljački troškovi ostaju značajni i kada sam AES kernel postaje efikasan.
+
+Na 16~MiB ostvareni su najbolji standardni baseline rezultati. Bliske
+ECB i CTR vrednosti saglasne su sa nezavisnom paralelnom obradom blokova
+u oba režima, uz dodatno formiranje brojača i XOR u CTR-u. Ipak, benchmark
+ne izoluje cenu svakog od tih koraka. Razlika kernel i end-to-end
+propusnosti ostaje velika, pa visoka propusnost samog kernela ne uklanja
+cenu sinhronog host--device pipeline-a.
+
+Na 32~MiB nastupa drugačiji praktični režim ove konfiguracije: opadaju
+i kernel i end-to-end propusnost, uprkos istom validiranom AES kodu.
+Veličina ostaje deo finalnog fiksnog skupa i ne označava se kao greška
+implementacije. Nalaz je saglasan sa promenom ponašanja baseline kernela
+i pinned sinhrone putanje u Windows/WDDM okruženju na GTX~1650~Ti.
+Duža H2D/D2H kopiranja, raspoređivanje drajvera, WDDM, dinamička snaga
+i temperatura, memorijski pritisak i odsustvo preklapanja mogu doprineti
+ovakvom obrascu. Ovim merenjima nije izdvojen niti dokazan pojedinačan uzrok.
+
+Dijagnostika većih bafera zadržana je izvan glavne tabele: na 64~MiB
+transfer-only scenario bio je stabilniji od pipeline/resident scenarija,
+a na 100~MiB izražena varijabilnost postojala je i bez AES kernela u
+transfer-only proveri. Rotirane sesije ukazale su na mogući uticaj
+redosleda veličina na kasnija merenja. Zato finalna tabela koristi
+isključivo pet sesija sa fiksnim rastućim redosledom; preostale četiri
+sesije ostaju sačuvane i nisu proglašene funkcionalno neispravnim.
+Ova odluka ograničava heterogenost protokola, ali ne otklanja moguće
+mešanje efekta veličine sa progresijom sesije.
+
+Direktan faktor ubrzanja prema prethodnim CPU CBC ili AES-GCM rezultatima
+nije opravdan: režimi, funkcije i granice merenja nisu isti. Buduće
+poređenje zahteva poseban upareni ECB/CTR protokol. U retrospektivi
+savremenih AES implementacija ovi nalazi izdvajaju razliku između
+paralelizacije kriptografske primitive i troška prenosa podataka.
+Validirani baseline pokazuje visok protok kernela na 16~MiB, ali i da
+veći ulaz ne garantuje monoton rast propusnosti. Time se motiviše zaseban
+korak optimizacije CUDA implementacije i/ili drugačije organizacije
+merenja, uz jasno odvajanje tih rezultata od sadašnjeg baseline-a.
+
+% TODO DISCUSSION: povezati pretragu ključeva i avalanche sa
 % retrospektivom tek na osnovu odgovarajućih rezultata; MITM ako ostane u radu.
 
 \subsubsection{Ograničenja}
@@ -522,8 +637,12 @@ CBC poređenju DES-a, TDEA i AES-a enkripcija prethodi dekripciji, pa keš
 i redosled ostaju ograničenja tumačenja. Granularnost procesorskog tajmera
 na korišćenoj Windows platformi bila je nedovoljna za kratke transformacije,
 naročito za 1~KiB i 1~MiB; taj tajmer nije osnova zaključaka o performansama.
-% TODO CUDA: dopuniti ograničenja nalazima o transferima, sinhronizaciji,
-% memoriji i WDDM raspoređivanju nakon analize GPU podataka.
+CUDA rezultati opisuju jednu neoptimizovanu implementaciju i pinned
+sinhroni pipeline bez preklapanja. Izuzeti setup i alokacije ograničavaju
+tumačenje end-to-end latencije. Izbor fiksnog redosleda i isključivanje
+dijagnostičkih 64/100~MiB iz glavne tabele moraju se uzeti u obzir pri
+generalizaciji; agregat sam po sebi nije dokaz stabilnosti ili uzroka
+pada na 32~MiB.
 
 GCM objekat konstruiše se van merenog intervala, pa rezultati opisuju
 obradu payload-a sa izuzetom inicijalizacijom, a ne latenciju pojedinačne
