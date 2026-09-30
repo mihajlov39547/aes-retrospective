@@ -82,7 +82,7 @@ veličina između sesija. Zbirna propusnost predstavlja medijanu pet
 sesijskih medijana; ponavljanja unutar procesa ne tretiraju se kao
 nezavisne sesije. Agregiranje faktora ubrzanja opisano je uz AES-NI
 poređenje.
-% TODO GCM/CUDA: potvrditi broj zagrevanja, ponavljanja i nezavisnih sesija.
+% TODO CUDA: potvrditi broj zagrevanja, ponavljanja i nezavisnih sesija.
 
 Sirovi podaci, statistički sažeci, metapodaci i validacioni zapisi povezani
 su identifikatorom izvršavanja. Uz njih se čuvaju seed, argumenti, verzije
@@ -139,17 +139,52 @@ Ona se ne računa deljenjem zaokruženih zbirnih propusnosti, niti iz srednjih
 propusnosti; zato količnik dve prikazane kolone ne mora dati isti faktor.
 
 \subsubsection{AES-GCM autentifikovana enkripcija}
-AES-128-GCM i AES-256-GCM ispituju cenu autentifikovane enkripcije uz
-potvrđenu CPU AES-NI putanju~\cite{sp800-38d}. Merena AEAD enkripcija
-obuhvata stvaranje šifrata i generisanje autentifikacionog taga.
-Autentifikacija je deo merene operacije, pa GCM propusnost ne predstavlja
-istu vrstu rada kao sama CBC ili ECB transformacija.
-% TODO GCM: nakon pripreme merenja uneti konačne nonce/AAD/tag parametre,
-% veličine ulaza, broj ponavljanja i granice inicijalizacije u AEAD intervalu.
-% Radni skup veličina: 1 KiB, 16 KiB, 1 MiB, 16 MiB i 100 MiB.
-% TODO GCM: dokumentovati validacione vektore i proveru odbacivanja neispravnog taga.
-% TODO GCM: potvrditi uključivanje dekripcije; njen interval mora obuhvatiti
-% i verifikaciju taga, a ne samo dobijanje otvorenog teksta.
+\label{sec:aes-gcm-metodologija}
+AES-128-GCM i AES-256-GCM ispitani su na CPU putanji sa potvrđenim AES-NI
+dispatch-om za AES primitivu~\cite{sp800-38d}. Korišćeni su 96-bitni nonce
+(12 bajtova), 128-bitni autentifikacioni tag (16 bajtova) i fiksni AAD od
+16 bajtova, ASCII \texttt{AES-GCM-bench-v1}. Veličine payload-a bile su
+1~KiB, 16~KiB, 1~MiB, 16~MiB i 100~MiB. Studija je izvedena u pet
+nezavisnih Python procesa sa seed vrednostima 2003--2007, po tri warmup
+runde i 20 merenih ponavljanja za svaku kombinaciju algoritma, veličine
+i operacije. Svaka sesija sadrži 400 sirovih merenja i 20 zbirnih redova;
+hash skripte \texttt{aes\_gcm\_benchmark.py} isti je u svih pet sesija.
+
+Pre merenja izvršena je funkcionalna validacija prema NIST primerima
+GCM-AES128 Example~\#5 i GCM-AES256 Example~\#5. Provereni su očekivani
+šifrat, autentifikacioni tag, dekripcija i verifikacija taga. Negativni
+testovi potvrdili su odbijanje poruka sa izmenjenim tagom, šifratom ili
+AAD-om. Potvrđena je native backend putanja AES primitive kao AES-NI;
+to nije trag izvršenih procesorskih instrukcija, niti je posebno
+verifikovana GHASH hardverska putanja.
+% Izvor KAT: NIST AES_GCM.pdf, GCM-AES128/AES256 Example #5;
+% https://csrc.nist.gov/CSRC/media/Projects/Cryptographic-Standards-and-Guidelines/documents/examples/AES_GCM.pdf
+
+Meri se kompletna AEAD transformacija, ali bez konstrukcije GCM objekta.
+Enkripcioni interval uključuje \texttt{update(AAD)} i
+\texttt{encrypt\_and\_digest()}, odnosno obradu AAD-a, generisanje šifrata
+i taga i alokaciju izlaza. Dekripcioni interval uključuje
+\texttt{update(AAD)} i \texttt{decrypt\_and\_verify()}, odnosno dekripciju,
+verifikaciju taga i alokaciju izlaza. Van tajmera ostaju generisanje ulaza,
+ključa i nonce-a, priprema reference, konstrukcija svežeg GCM objekta za
+svaku operaciju, validacija, poređenje izlaza i zapisivanje rezultata.
+Rezultat predstavlja \emph{setup-excluded authenticated payload processing},
+a ne \emph{setup-inclusive message latency}.
+
+Nonce se deterministički formira iz veličine i indeksa poruke, uključujući
+warmup, bez ponavljanja za različite poruke pod istim ključem u sesiji.
+Referentna i merena putanja koriste isti ključ, nonce, plaintext i AAD;
+ponavljanje se odnosi samo na identičnu logičku poruku. Redosled AES
+varijanti i enkripcionih/dekripcionih poslova reproduktivno se meša.
+
+Propusnost je broj payload bajtova podeljen sa $10^6$ i zidnim vremenom
+u sekundama, prema jednačini~\eqref{eq:eksperiment-propusnost}. AAD i tag
+ne dodaju se u brojilac; dužina šifrata jednaka je dužini otvorenog teksta.
+Prikazane vrednosti predstavljaju medijanu medijana pet nezavisnih study
+sesija, bez objedinjavanja svih sirovih ponavljanja u jednu distribuciju.
+AES-128-GCM nije referentna putanja za računanje faktora ubrzanja AES-256-GCM.
+Pošto GCM uključuje autentifikaciju, njegova propusnost ne predstavlja
+istu funkciju kao CBC transformacija.
 
 \subsubsection{CUDA implementacija AES-128 i CPU--GPU poređenje}
 \label{sec:aes-gpu}
@@ -344,7 +379,53 @@ AES-128 AES-NI enkripcija ostvaruje 524.4~MB/s na 1~MiB i 531.6~MB/s
 na 10~MiB. Za 1~KiB, koji nije prikazan u ovoj tabeli, zabeleženi faktori
 su približno 1.7--2.0.
 
-% TODO RESULTS GCM
+\subsubsection{Performanse AES-GCM autentifikovane enkripcije}
+\label{sec:rezultati-aes-gcm}
+Tabela~\ref{tab:aes-gcm-rezultati} prikazuje propusnost AES-128-GCM i
+AES-256-GCM operacija na CPU putanji sa potvrđenim AES-NI dispatch-om za
+AES primitivu. Prikazane vrednosti predstavljaju medijanu medijana pet
+nezavisnih study sesija. Merena AEAD transformacija uključuje generisanje
+šifrata i taga pri enkripciji, odnosno dekripciju i verifikaciju taga,
+uz izuzetu konstrukciju objekta.
+
+\begin{table}[htbp]
+\centering
+\caption{Propusnost AES-GCM autentifikovane enkripcije na CPU AES-NI putanji.
+Prikazane su medijane medijana pet nezavisnih study sesija. Propusnost je
+izražena u decimalnim MB/s i odnosi se na payload throughput kompletne AEAD
+transformacije bez konstrukcije objekta, bez dodavanja AAD-a i taga u brojilac.}
+\label{tab:aes-gcm-rezultati}
+\begin{tabular}{llrr}
+\toprule
+Veličina & Algoritam & Enkripcija MB/s & Dekripcija MB/s \\
+\midrule
+1 KiB   & AES-128-GCM & 70.6   & 38.1 \\
+1 KiB   & AES-256-GCM & 70.1   & 38.0 \\
+16 KiB  & AES-128-GCM & 706.2  & 457.7 \\
+16 KiB  & AES-256-GCM & 678.4  & 445.2 \\
+1 MiB   & AES-128-GCM & 1148.2 & 1131.4 \\
+1 MiB   & AES-256-GCM & 1059.3 & 1059.8 \\
+16 MiB  & AES-128-GCM & 1146.6 & 1160.6 \\
+16 MiB  & AES-256-GCM & 1078.5 & 1065.7 \\
+100 MiB & AES-128-GCM & 1179.7 & 1189.3 \\
+100 MiB & AES-256-GCM & 1100.4 & 1080.4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Kod najmanjeg ulaza od 1~KiB dve AES-GCM varijante daju gotovo iste
+vrednosti: oko 70~MB/s za enkripciju i 38~MB/s za dekripciju sa
+verifikacijom taga. Ovaj slučaj je snažno pod uticajem fiksnih troškova
+poziva i GCM obrade. Na 16~KiB propusnost značajno raste, ali razlika
+između enkripcije i dekripcije ostaje izražena.
+
+Za ulaze od 1~MiB i veće rezultati prelaze u stabilniji režim propusnosti.
+AES-128-GCM ostvaruje približno 1.13--1.19~GB/s, dok AES-256-GCM ostvaruje
+približno 1.06--1.10~GB/s, uz decimalnu jedinicu GB/s. Ovi rasponi sažimaju
+zaokružene vrednosti velikih ulaza, a ne intervale poverenja. Razlika
+između enkripcije i dekripcije postaje mala, iako dekripcija uključuje
+verifikaciju autentifikacionog taga, a ne samo dobijanje otvorenog teksta.
+
 % TODO RESULTS CUDA: odvojiti osnovnu i optimizovanu putanju, ECB/CTR i GPU metrike.
 % TODO RESULTS BRUTE FORCE
 % TODO RESULTS MITM: samo ako demonstracija ostane u radu.
@@ -392,7 +473,35 @@ dodatno pojačava njegovu praktičnu performansnu prednost na testiranoj
 platformi. Ovaj nalaz dopunjuje retrospektivu
 razloga za zamenu DES-a i TDEA, ali sam po sebi ne vrednuje sve kriterijume
 izbora standarda niti omogućava prenošenje CBC odnosa na druge režime.
-% TODO DISCUSSION: povezati GCM, CUDA, pretragu ključeva i avalanche sa
+\subsubsection{Trošak autentifikovane enkripcije}
+AES-GCM rezultati proširuju retrospektivu DES/TDEA--AES na autentifikovanu
+enkripciju, važnu za savremene protokolske sisteme. CBC merenja obuhvataju
+blok-šifarsku transformaciju, dok GCM dodaje autentifikacioni rad:
+generisanje taga pri enkripciji i njegovu verifikaciju pri dekripciji.
+Zato se njihove brojčane propusnosti ne mogu direktno tumačiti kao
+poređenje iste funkcije niti koristiti za izolovanje cene autentifikacije.
+
+Obe GCM varijante za velike payload-e prelaze približno 1~GB/s na
+testiranoj platformi. Nalaz pokazuje visok praktični protok savremene AES
+upotrebe koja obuhvata i autentifikaciju, a ne samo brzo šifrovanje.
+Time se dopunjuje slika praktične efikasnosti AES-a u odnosu na istorijski
+fokus na samu blok-šifarsku transformaciju; bez uporedivog AEAD protokola
+za nasleđene algoritme ne izvodi se direktan faktor prednosti nad njima.
+
+AES-256-GCM na velikim ulazima ima približno 6--9\% manju propusnost od
+AES-128-GCM, zavisno od operacije i veličine. To je opis relativne razlike
+izmerenih propusnosti, ne faktor ubrzanja niti univerzalno pravilo.
+Kod 1~KiB dominantan relativni uticaj fiksnih troškova GCM operacije i
+prelaska između Python i native sloja onemogućava tumačenje rezultata kao
+sirove algoritamske propusnosti.
+
+GHASH putanja nije posebno verifikovana. Rezultat predstavlja performanse
+kompletne PyCryptodome GCM transformacije bez konstrukcije objekta, sa
+potvrđenim AES-NI dispatch-om za AES primitivu, a ne instrukcijski profil
+celog GCM algoritma. Nalaz se odnosi na testirani CPU, Windows okruženje
+i PyCryptodome~3.23.0.
+
+% TODO DISCUSSION: povezati CUDA, pretragu ključeva i avalanche sa
 % retrospektivom tek na osnovu odgovarajućih rezultata; MITM ako ostane u radu.
 
 \subsubsection{Ograničenja}
@@ -414,6 +523,12 @@ na korišćenoj Windows platformi bila je nedovoljna za kratke transformacije,
 naročito za 1~KiB i 1~MiB; taj tajmer nije osnova zaključaka o performansama.
 % TODO CUDA: dopuniti ograničenja nalazima o transferima, sinhronizaciji,
 % memoriji i WDDM raspoređivanju nakon analize GPU podataka.
+
+GCM objekat konstruiše se van merenog intervala, pa rezultati opisuju
+obradu payload-a sa izuzetom inicijalizacijom, a ne latenciju pojedinačne
+kratke poruke sa kompletnom pripremom. Ovo je naročito važno za 1~KiB
+pozive osetljive na fiksne troškove. Potvrda AES-NI putanje AES primitive
+ne predstavlja potvrdu hardverske putanje GHASH-a.
 
 Propusnost nije mera kriptografske sigurnosti. DES i TDEA uključeni su
 zbog istorijskog i komparativnog značaja, a ne kao preporuka za savremenu

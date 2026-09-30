@@ -44,3 +44,4 @@ experiments/results/*/source/common.py
 experiments/results/*/source/cpu_validation.py
 experiments/results/*/source/export_results.py
 experiments/results/*/requirements-lock.txt
+experiments/results/**/*.py
