@@ -19,7 +19,7 @@ from pathlib import Path
 from common import ROOT, parser, positive, print_plan, save_run, stats
 
 KERNEL = ROOT / 'experiments' / 'aes_cuda_baseline.cu'
-SIZES = [1024, 16384, 1048576, 16777216]
+SIZES = [1024, 16384, 1048576, 16777216, 33554432]
 SOURCE = 'https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf'
 KEY = bytes.fromhex('2b7e151628aed2a6abf7158809cf4f3c')
 COUNTER = bytes.fromhex('f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff')
@@ -37,10 +37,10 @@ METHOD = {
     'ECB': 'Independent-block validation/primitive benchmark, not recommended data protection.',
     'CTR': 'No separate nonce; full 128-bit big-endian initial counter plus block index; reject wrap; partial final block supported.',
     'kernel_timer': 'CUDA events, elapsed milliseconds converted to ns; conversion does not imply ns resolution.',
-    'transfer_timer': 'perf_counter_ns around synchronous pageable host H2D/D2H copies, including synchronization.',
+    'transfer_timer': 'perf_counter_ns around synchronous pinned host H2D/D2H copies, including synchronization.',
     'end_to_end_timer': 'perf_counter_ns from H2D start through completed D2H; includes launch, events and synchronization overhead.',
     'excluded': 'Compilation, allocation, key expansion/upload, counter upload, CPU reference, validation, result checks and export.',
-    'allocation': 'Preallocated device input/output and pageable host output; CUDA default stream; no overlap.',
+    'allocation': 'Preallocated device input/output and pinned host input/output; CUDA default stream; no overlap.',
     'throughput': 'Payload bytes / 1e6 / seconds, decimal MB/s; kernel and end-to-end separate.',
     'design': 'Seeded data/key/counter and shuffled modes per size/repetition; new key per message; warmups excluded.',
     'study_protocol': 'Not locked; controlled pilot first. No CPU timing or speedup.',
@@ -156,7 +156,7 @@ class GPU:
                          runtime_version=cp.cuda.runtime.runtimeGetVersion(), cupy_version=cp.__version__)
         self.info['cuda_path'] = cp.cuda.get_cuda_path()
         self.info['pci_bus_id'] = device.pci_bus_id
-        self.host_memory = 'pageable'
+        self.host_memory = 'pinned'
 
     def prepare(self, mode, key, counter, data):
         check_input(mode, key, counter, len(data))
@@ -365,16 +365,16 @@ def arguments(argv=None):
     p.add_argument('--repeats', type=positive, default=10)
     p.add_argument('--profile', choices=['baseline','diagnostic'], default='baseline')
     p.add_argument('--measurement', choices=['pipeline','resident','transfer-only'], default='pipeline')
-    p.add_argument('--host-memory', choices=['pageable','pinned'], default='pageable')
+    p.add_argument('--host-memory', choices=['pageable','pinned'], default='pinned')
     p.add_argument('--resident-iterations', type=positive, default=10)
     args = p.parse_args(argv)
     if args.warmup < 0 or len(set(args.sizes)) != len(args.sizes) or len(set(args.modes)) != len(args.modes):
         p.error('Warmup must be nonnegative; sizes and modes must be unique.')
     if 'ECB' in args.modes and any(n%16 for n in args.sizes):
         p.error('ECB requires aligned sizes. For partial blocks use --modes CTR separately.')
-    if args.profile=='baseline' and (args.measurement!='pipeline' or args.host_memory!='pageable'
-                                    or max(args.sizes)>16777216 or args.resident_iterations!=10):
-        p.error('Large buffers, pinned memory and alternate measurements require --profile diagnostic.')
+    if args.profile=='baseline' and (args.measurement!='pipeline' or args.host_memory!='pinned'
+                                    or max(args.sizes)>33554432 or args.resident_iterations!=10):
+        p.error('Baseline requires pipeline+pinned and sizes <=32 MiB. Other scenarios require --profile diagnostic.')
     if args.profile=='diagnostic' and args.purpose=='study':
         p.error('Diagnostic runs allow only smoke or pilot, not study.')
     return args

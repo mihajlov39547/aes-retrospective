@@ -31,7 +31,9 @@ are exported if any comparison fails.
 
 ## Timing and outputs
 
-Standard baseline: default CUDA stream, synchronous phases, no overlap or explicitly pinned memory:
+Standard baseline: `--profile baseline --measurement pipeline --host-memory pinned`.
+These are also the CLI defaults. The default CUDA stream uses synchronous phases
+and preallocated pinned host input/output, with no overlap:
 
 - H2D and D2H: host `perf_counter_ns`, including completion synchronization.
 - Kernel: CUDA events enclosing only the encryption kernel. Milliseconds are
@@ -41,8 +43,8 @@ Standard baseline: default CUDA stream, synchronous phases, no overlap or explic
   launch/event/synchronization overhead. It is not the sum of mixed-clock fields.
 
 Compilation, allocation, key expansion/upload, counter upload, reference output,
-validation, comparisons and serialization are excluded. Device buffers and pageable
-host output are preallocated. Thus end-to-end means the prepared-message
+validation, comparisons and serialization are excluded. Device buffers and pinned
+host input/output are preallocated; pinning and input staging copies are excluded. Thus end-to-end means the prepared-message
 H2D/kernel/D2H path, not full application latency including setup.
 Decimal payload MB/s is bytes / 1e6 / seconds, separately for kernel and end-to-end.
 Summary groups mode and size and retains count, mean, median, sample SD, min, max,
@@ -83,17 +85,42 @@ sizes; use `--modes CTR` separately for arbitrary lengths.
 Manual controlled pilot (not executed during preparation):
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\aes_cuda_baseline.py --run --purpose pilot --modes ECB CTR --sizes 1024 16384 1048576 16777216 --warmup 2 --repeats 10 --seed 2003
+.\.venv\Scripts\python.exe scripts\aes_cuda_baseline.py --run --purpose pilot --profile baseline --measurement pipeline --host-memory pinned --modes ECB CTR --sizes 1024 16384 1048576 16777216 33554432 --warmup 5 --repeats 20 --seed 2003
 ```
 
 ## Large-buffer diagnostics (separate from standard study)
 
-Following unstable 100 MiB pilot measurements, the standard baseline default
-sizes are 1 KiB, 16 KiB, 1 MiB and 16 MiB. Larger sizes require the diagnostic
-profile. This is an explicit scope decision before study, not removal of selected
-samples. Previous 100 MiB pilot files remain unchanged. Their variability does not
-establish WDDM, transfers, scheduling or temperature as the cause; kernel times
-also varied, so transfer-only attribution would be premature.
+The standard baseline sizes are now **1 KiB, 16 KiB, 1 MiB, 16 MiB and 32 MiB**
+(1024, 16384, 1048576, 16777216, 33554432 bytes). All rows in the final baseline
+table must use pinned pipeline measurements, including the smaller inputs.
+Earlier pageable results must not be pooled into this table. The CLI rejects
+pageable baseline runs and baseline sizes above 32 MiB.
+
+This scope follows the diagnostic findings supplied by the researcher:
+
+- 32 MiB is included because pinned pipeline and pinned transfer-only were stable:
+  pipeline end-to-end CV was about 0.55%; transfer-only CV was about 1.37% for CTR
+  and 1.58% for ECB.
+- 64 MiB remains diagnostic: transfer-only CV was about 1%, but pipeline/resident
+  kernel and end-to-end variation was too high for the standard table.
+- 100 MiB remains diagnostic: even transfer-only was unstable, with transfer CV
+  about 34--39% and broad ranges.
+
+These are prior pilot observations, not new measurements or universal thresholds.
+Diagnostic results inform limitations and discussion, not the main baseline table.
+The decision is made before study and does not remove raw observations from any
+existing run. Prior results are unchanged. The cause of instability is not proven;
+transfer-only stability at 64 MiB rules out attributing all variation to transfers.
+
+A later single study session with seed 2003 can be launched explicitly as follows
+(after review of the controlled pilot; this command was not executed):
+
+```powershell
+.\.venv\Scripts\python.exe scripts\aes_cuda_baseline.py --run --purpose study --profile baseline --measurement pipeline --host-memory pinned --modes ECB CTR --sizes 1024 16384 1048576 16777216 33554432 --warmup 5 --repeats 20 --seed 2003
+```
+
+The commands use 5 warmups and 20 repeats explicitly; the small CLI defaults
+remain 2/10. This does not prescribe the number of independent study sessions.
 
 New options:
 
@@ -101,7 +128,7 @@ New options:
   `aes_cuda_baseline_diagnostic-<purpose>-<timestamp>` and explicit profile fields.
   Diagnostic study is rejected; only smoke/pilot is allowed.
 - `--measurement pipeline|resident|transfer-only` (default pipeline).
-- `--host-memory pageable|pinned` (default pageable). Pinned and alternative
+- `--host-memory pageable|pinned` (default pinned). Pageable and alternative
   measurements require diagnostic profile; the AES kernel is unchanged.
 - `--resident-iterations N` (default 10, positive). Only resident measurement
   uses this number; raw rows record it and the total batch event duration.
@@ -139,7 +166,7 @@ Manual 100 MiB diagnostic pilot examples (not executed during preparation):
 
 ```powershell
 # Resident kernel batches, pageable staging outside the event interval
-.\.venv\Scripts\python.exe scripts\aes_cuda_baseline.py --run --purpose pilot --profile diagnostic --measurement resident --resident-iterations 10 --modes ECB CTR --sizes 104857600 --warmup 5 --repeats 20 --seed 2004
+.\.venv\Scripts\python.exe scripts\aes_cuda_baseline.py --run --purpose pilot --profile diagnostic --measurement resident --host-memory pageable --resident-iterations 10 --modes ECB CTR --sizes 104857600 --warmup 5 --repeats 20 --seed 2004
 
 # Comparable transfer-only and pipeline diagnostics, separate output directories
 foreach ($memory in @('pageable', 'pinned')) {
@@ -156,3 +183,7 @@ scenario order in later controlled pilots. Small smoke tests cover all six
 measurement/memory combinations, pinned allocation identity, null metrics,
 batch scaling, copy-only kernel exclusion and diagnostic CLI isolation.
 AES optimization and final CPU/GPU comparison remain deferred.
+
+Smoke asserts the five baseline defaults and pinned pipeline validation on small
+buffers. Acceptance of 64/100 MiB in all diagnostic scenarios is checked by CLI
+parsing only; smoke never measures these large sizes.

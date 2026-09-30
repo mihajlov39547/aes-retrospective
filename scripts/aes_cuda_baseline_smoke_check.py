@@ -19,10 +19,20 @@ def main():
         proc = subprocess.run([sys.executable, str(Path(b.__file__)), '--output', str(root)],
                               capture_output=True, text=True)
         assert proc.returncode == 0 and json.loads(proc.stdout)['status']=='plan_only'
+        defaults = json.loads(proc.stdout)['arguments']
+        assert defaults['sizes']==[1024,16384,1048576,16777216,33554432]
+        assert (defaults['profile'],defaults['measurement'],defaults['host_memory'])==('baseline','pipeline','pinned')
+        b.arguments(['--profile','baseline','--measurement','pipeline','--host-memory','pinned','--sizes','33554432'])
+        # CLI-only checks: never allocate or measure these large buffers in smoke.
+        for size in (67108864,104857600):
+            for measurement in ('pipeline','resident','transfer-only'):
+                for memory in ('pageable','pinned'):
+                    b.arguments(['--profile','diagnostic','--measurement',measurement,
+                                 '--host-memory',memory,'--sizes',str(size)])
         assert not list(root.iterdir())
         for options in (['--sizes','0'], ['--sizes','16','16'], ['--warmup','-1'],
                         ['--repeats','0'], ['--modes','ECB','ECB'], ['--sizes','1025'],
-                        ['--sizes','104857600'], ['--host-memory','pinned'],
+                        ['--sizes','104857600'], ['--sizes','67108864'], ['--host-memory','pageable'],
                         ['--measurement','resident'], ['--profile','diagnostic','--purpose','study'],
                         ['--profile','diagnostic','--resident-iterations','0']):
             with contextlib.redirect_stderr(io.StringIO()):
@@ -79,6 +89,9 @@ def main():
         print('PASS: deliberately corrupted GPU output rejected before timing/export')
         original_measure = gpu.measure
         def audited_measure(job):
+            assert gpu.host_memory=='pinned'
+            assert isinstance(job[1].base.obj, gpu.cp.cuda.PinnedMemoryPointer)
+            assert isinstance(job[2].base.obj, gpu.cp.cuda.PinnedMemoryPointer)
             reports = [json.loads(p.read_text()) for p in root.glob('aes_cuda_baseline-validation-*/validation.json')]
             assert any(r.get('passed') is True and r.get('purpose')=='smoke' for r in reports)
             return original_measure(job)
@@ -94,6 +107,7 @@ def main():
                 with (directory/filename).open(newline='',encoding='utf-8') as handle:
                     assert len(list(csv.DictReader(handle)))==count
             for row in raw:
+                assert (row['profile'],row['measurement'],row['host_memory'])==('baseline','pipeline','pinned')
                 assert row['validation_checked'] and row['kernel_ns']>0 and row['end_to_end_ns']>0
                 assert row['kernel_seconds']==row['kernel_ns']/1e9
                 assert row['end_to_end_seconds']==row['end_to_end_ns']/1e9
