@@ -1,0 +1,346 @@
+{
+  "schema_version": 2,
+  "created_utc": "2026-09-30T20:59:50.309798+00:00",
+  "purpose": "study",
+  "seed": 2007,
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "executable": "C:\\Projects\\aes\\.venv\\Scripts\\python.exe",
+  "os": "Windows-10-10.0.19045-SP0",
+  "machine": "AMD64",
+  "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+  "logical_cpus": 8,
+  "physical_cpus": 4,
+  "ram_bytes": 16940544000,
+  "library_versions": {
+    "pycryptodome": "3.23.0",
+    "matplotlib": "3.11.2",
+    "psutil": "7.2.2"
+  },
+  "git_commit": "cd6b18f46414ac2e2f9d5ae61d848867b17361f9",
+  "git_status": "A  experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/source/cuda_optimized_cpu_gpu_protocol.md\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/metadata.json\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/raw.csv\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/results.json\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/summary.csv\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/validation.json\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/\n?? experiments/results/aes_cuda_cpu_gpu-validation-0e63ef0f-78d2-4dca-98d8-8f74edad751a/\n?? experiments/results/aes_cuda_cpu_gpu-validation-1a68b061-2098-4352-95ab-257dbc02c55a/\n?? experiments/results/aes_cuda_cpu_gpu-validation-3360d814-a7e0-4cb6-90e9-6baac00bb485/\n?? experiments/results/aes_cuda_cpu_gpu-validation-41fe6b46-d014-4944-8798-d1f805277064/\n?? experiments/results/aes_cuda_cpu_gpu-validation-efc8908b-b014-4804-ab95-33de26614148/",
+  "script_sha256": {
+    "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+    "aes_acceleration_smoke_check.py": "aa8625c8aedc612a48ceb30252e2e4785e26cbfaf7f7a4b4c0971109901931d3",
+    "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+    "aes_cuda_baseline_smoke_check.py": "326268dd51f6c2bde64ac153e70b59647837a9f54682506099dbdf83d905bb0a",
+    "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+    "aes_cuda_cpu_gpu_smoke_check.py": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917",
+    "aes_gcm_benchmark.py": "9b89bbc1ddf1c27cfae41314595e5ef2caeb8bbb3086d857c670d5e842680cbf",
+    "aes_gcm_smoke_check.py": "2e96fd3cc6823c5494ed010ce4fcb127a8ccd82c1c405d1268d83ea97b67a018",
+    "aes_gpu.py": "336de03e3880efd3de49da22a8f93947dd7021ae9c1b2d78b1076b3d813e5b44",
+    "avalanche_test.py": "d4622ce7581c936cca049d6756c76363b9a37716d0d4373ea3e5825147e133da",
+    "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+    "brute_force_demo.py": "9d3b15bb0cd440bc7e0a53b4349a10e07784c04997adae117becf3768db11db6",
+    "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+    "cpu_smoke_check.py": "28beee7607d9ddb09fb6af4b856368b1a130668b43e11d43d3787f64c433ab2a",
+    "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866",
+    "export_results.py": "337937d4d2276a4c256e2d2ebbc4fd1566b4c12a90cadc036b10288d835f3172",
+    "smoke_check.py": "502ca8dcad120da5b5356770e9bc0ba417ccd5fbba9fa1c4cccef4d587e788bc"
+  },
+  "argv": [
+    "scripts\\aes_cuda_cpu_gpu.py",
+    "--run",
+    "--purpose",
+    "study",
+    "--profile",
+    "baseline",
+    "optimized",
+    "--measurements",
+    "resident",
+    "pipeline",
+    "--resident-iterations",
+    "1",
+    "--host-memory",
+    "pinned",
+    "--modes",
+    "ECB",
+    "CTR",
+    "--sizes",
+    "1024",
+    "16384",
+    "1048576",
+    "16777216",
+    "33554432",
+    "--warmup",
+    "5",
+    "--repeats",
+    "20",
+    "--seed",
+    "2007"
+  ],
+  "arguments": {
+    "run": true,
+    "seed": 2007,
+    "output": "C:\\Projects\\aes\\experiments\\results",
+    "purpose": "study",
+    "notes": "",
+    "profile": [
+      "baseline",
+      "optimized"
+    ],
+    "measurements": [
+      "resident",
+      "pipeline"
+    ],
+    "host_memory": "pinned",
+    "modes": [
+      "ECB",
+      "CTR"
+    ],
+    "sizes": [
+      1024,
+      16384,
+      1048576,
+      16777216,
+      33554432
+    ],
+    "warmup": 5,
+    "repeats": 20,
+    "resident_iterations": 1
+  },
+  "method": {
+    "protocol": "cuda-paired-v2-ttable",
+    "profiles": [
+      "baseline",
+      "optimized"
+    ],
+    "modes": [
+      "ECB",
+      "CTR"
+    ],
+    "profile_backend_map": {
+      "baseline": "cuda_baseline",
+      "optimized": "cuda_optimized_v1",
+      "ttable": "cuda_ttable"
+    },
+    "ttable": "v2: 4x32-bit state; one 1 KiB Te0 constant table plus rotations; final S-box round. No shared memory or overlap; divergent constant reads may serialize. Candidate, not proven faster.",
+    "hardware_execution_path": "Explicit CPU software/AES-NI native dispatch and all three CUDA kernels; verified by persisted premeasurement validation for each run.",
+    "measurements": [
+      "resident",
+      "pipeline"
+    ],
+    "host_memory": "pinned",
+    "pairing": "Same data/key/counter for all jobs of mode/size/repeat; pair hash records identity.",
+    "order": "Size CLI order; modes and backend/measurement jobs seeded-shuffled per repeat.",
+    "cpu": "Explicit use_aesni False/True; dispatch verified separately for ECB/CTR, not instruction trace.",
+    "cpu_timing": "process start, wall start, encrypt(data), wall end, process end. New output allocation included; construction/key schedule outside; process time is diagnostic, not cycles.",
+    "gpu_pipeline": "perf_counter_ns from H2D start through completed D2H; includes launch, events and synchronization overhead.",
+    "gpu_kernel_timer": "CUDA events, elapsed milliseconds converted to ns; conversion does not imply ns resolution.",
+    "gpu_resident": "H2D before event interval; N launches over unchanged device input; event duration/N. N=1 single launch, N>1 batch average. D2H/check after events.",
+    "resident_iterations": 1,
+    "gpu_excluded": "Compilation, allocation/pinning/staging, key expansion/upload, counter, reference and checks.",
+    "allocation_asymmetry": "CPU output allocated in transform; GPU host/device buffers preallocated. Practical comparison includes GPU H2D/D2H but excludes setup on both sides.",
+    "throughput": "Payload bytes/1e6/seconds; decimal MB/s. GPU kernel and end-to-end separate.",
+    "speedup": "CPU transform-only median / GPU median: resident kernel for isolated; pipeline end-to-end for practical. AES-NI is primary CPU reference, software secondary. No speedup from mean throughput.",
+    "statistics": "Per session mean/median/sample SD/min/max/IQR/CV; no outlier removal. Future study: median of five session medians; speedup median of five session ratios.",
+    "study": "Pending pilot review and user approval; proposed seeds 2003-2007, warmup5 repeats20.",
+    "scope": "Encryption only. ECB primitive benchmark, not secure data protection. CTR full 128-bit big-endian counter, reject wrap, partial tail supported; no authentication.",
+    "wall_clock": {
+      "implementation": "QueryPerformanceCounter()",
+      "monotonic": true,
+      "adjustable": false,
+      "resolution": 1e-07
+    },
+    "process_clock": {
+      "implementation": "GetProcessTimes()",
+      "monotonic": true,
+      "adjustable": false,
+      "resolution": 1e-07
+    }
+  },
+  "hardware_execution_path": "Explicit CPU software/AES-NI native dispatch and all three CUDA kernels; verified by persisted premeasurement validation for each run.",
+  "warning": "Educational synthetic experiment; DES/TDEA are legacy algorithms.",
+  "run_id": "aes_cuda_cpu_gpu-study-20260930T205950403576Z",
+  "experiment": "aes_cuda_cpu_gpu",
+  "session_id": "0e63ef0f-78d2-4dca-98d8-8f74edad751a",
+  "gpu": {
+    "device_id": 0,
+    "gpu_name": "NVIDIA GeForce GTX 1650 Ti",
+    "vram_bytes": 4294639616,
+    "compute_capability": "75",
+    "driver_version": 13030,
+    "runtime_version": 12090,
+    "cupy_version": "13.6.0",
+    "cuda_path": "C:\\Projects\\aes\\.venv\\Lib\\site-packages\\nvidia\\cuda_runtime",
+    "pci_bus_id": "0000:01:00.0"
+  },
+  "validation_passed": true,
+  "cpu_dispatch": {
+    "ECB": {
+      "cpu_aesni": true,
+      "aesni_library_loaded": true,
+      "available": true,
+      "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+      "passed": true,
+      "mode": "ECB",
+      "preflight": [
+        {
+          "key_bits": 128,
+          "requested": "aesni",
+          "native_start_calls": {
+            "software": 0,
+            "aesni": 2
+          }
+        },
+        {
+          "key_bits": 128,
+          "requested": "software",
+          "native_start_calls": {
+            "software": 2,
+            "aesni": 0
+          }
+        },
+        {
+          "key_bits": 192,
+          "requested": "aesni",
+          "native_start_calls": {
+            "software": 0,
+            "aesni": 2
+          }
+        },
+        {
+          "key_bits": 192,
+          "requested": "software",
+          "native_start_calls": {
+            "software": 2,
+            "aesni": 0
+          }
+        },
+        {
+          "key_bits": 256,
+          "requested": "aesni",
+          "native_start_calls": {
+            "software": 0,
+            "aesni": 2
+          }
+        },
+        {
+          "key_bits": 256,
+          "requested": "software",
+          "native_start_calls": {
+            "software": 2,
+            "aesni": 0
+          }
+        }
+      ],
+      "paths": {
+        "software": "_raw_aes",
+        "aesni": "_raw_aesni"
+      },
+      "scope": "Native backend initialization observed; not a CPU instruction trace."
+    },
+    "CTR": {
+      "cpu_aesni": true,
+      "aesni_library_loaded": true,
+      "available": true,
+      "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+      "passed": true,
+      "mode": "CTR",
+      "preflight": [
+        {
+          "key_bits": 128,
+          "requested": "aesni",
+          "native_start_calls": {
+            "software": 0,
+            "aesni": 2
+          }
+        },
+        {
+          "key_bits": 128,
+          "requested": "software",
+          "native_start_calls": {
+            "software": 2,
+            "aesni": 0
+          }
+        },
+        {
+          "key_bits": 192,
+          "requested": "aesni",
+          "native_start_calls": {
+            "software": 0,
+            "aesni": 2
+          }
+        },
+        {
+          "key_bits": 192,
+          "requested": "software",
+          "native_start_calls": {
+            "software": 2,
+            "aesni": 0
+          }
+        },
+        {
+          "key_bits": 256,
+          "requested": "aesni",
+          "native_start_calls": {
+            "software": 0,
+            "aesni": 2
+          }
+        },
+        {
+          "key_bits": 256,
+          "requested": "software",
+          "native_start_calls": {
+            "software": 2,
+            "aesni": 0
+          }
+        }
+      ],
+      "paths": {
+        "software": "_raw_aes",
+        "aesni": "_raw_aesni"
+      },
+      "scope": "Native backend initialization observed; not a CPU instruction trace."
+    }
+  },
+  "source_sha256": {
+    "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+    "aes_cuda_cpu_gpu_smoke_check.py": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917",
+    "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+    "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+    "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+    "cuda_optimized_cpu_gpu_protocol.md": "73beb98afcefeb45ca13e741ff4fc4654f032047b36140a8346af57dd3834848",
+    "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+    "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+    "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+    "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866",
+    "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393"
+  },
+  "kernel_sha256": {
+    "baseline": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+    "optimized": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+    "ttable": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998"
+  },
+  "validation_sha256": "a72e1c7e8a18924e4379069d04de87017392ac34fa93ecb33d35a6d885d97497",
+  "validation_file": "validation.json",
+  "environment_before": {
+    "timestamp": "2026-09-30T20:59:02.149531+00:00",
+    "source": "nvidia-smi",
+    "units": "temperature C, power W, memory MiB",
+    "values": {
+      "temperature.gpu": "56",
+      "power.draw": "12.33",
+      "memory.used": "55",
+      "memory.total": "4096",
+      "pstate": "P0"
+    }
+  },
+  "environment_after": {
+    "timestamp": "2026-09-30T20:59:50.183223+00:00",
+    "source": "nvidia-smi",
+    "units": "temperature C, power W, memory MiB",
+    "values": {
+      "temperature.gpu": "51",
+      "power.draw": "7.55",
+      "memory.used": "153",
+      "memory.total": "4096",
+      "pstate": "P5"
+    }
+  },
+  "backends": [
+    "cpu_aesni",
+    "cpu_software",
+    "cuda_baseline",
+    "cuda_optimized_v1"
+  ]
+}
