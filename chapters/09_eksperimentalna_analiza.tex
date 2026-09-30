@@ -27,8 +27,9 @@ GPU drajver/KMD je verzije 610.62 i radi u WDDM režimu. Oznaka
 odnosi se na drajversko okruženje i ne identifikuje instalirani CUDA Toolkit
 niti runtime dostupan CuPy-ju.
 % Izvori: metadata.json CPU studija; experiments/README.md (2026-09-27).
-% Lokalna dijagnostika 2026-09-29: nvidia-smi potvrđuje GPU, VRAM, CC 7.5,
-% driver/KMD 610.62, WDDM i CUDA UMD 13.3; Python/PyCryptodome potvrđeni u .venv.
+% Lokalna dijagnostika 2026-09-29: nvidia-smi potvrđuje GPU, VRAM,
+% driver/KMD 610.62, WDDM i CUDA UMD 13.3.
+% Compute capability navesti samo ako je potvrđen kroz CUDA/CuPy runtime.
 % TODO CUDA: CuPy nije pronađen u projektnom .venv; nvcc nije u PATH-u.
 % Uneti potvrđene verzije CuPy-ja, učitanog CUDA runtime-a i NVRTC/Toolkit-a
 % iz konfiguracije korišćene za GPU merenja; odsustvo nvcc nije dokaz odsustva Toolkit-a.
