@@ -22,8 +22,9 @@ Compiler code generation may already perform similar unrolling; the name
 optimized identifies a candidate, not a verified speed advantage. Register
 pressure or code size may offset any benefit. No performance conclusion precedes
 pilot analysis. The reported pilot `aes_cuda_cpu_gpu-pilot-20260930T202051083522Z`
-did not show consistent v1 gains, so v1 is preserved as a comparison candidate,
-not selected as the final optimized implementation.
+did not show consistent v1 gains. The subsequent selection retains v1 as the
+optimized comparison candidate in the final paired study, without claiming
+that it is consistently faster or represents the best possible GPU AES.
 
 ## T-table candidate v2
 
@@ -62,6 +63,25 @@ not renamed on disk. Metadata records the profile/backend mapping and all three
 kernel hashes. Default profiles now include all three; `--profile baseline optimized`
 still selects only the two old GPU candidates for timing. Prior pilot artifacts
 and completed baseline tables/diagnostics are never edited or pooled into v2.
+
+### Post-pilot selection
+
+According to the reviewed three-profile pilot, v2 `ttable` passed functional
+validation but did not improve performance. Its constant-memory T-table path
+was weaker than baseline/v1 in the key resident and pipeline measurements.
+It is therefore **not selected for the final paired study** and is retained as
+a negative pilot candidate. Its kernel, archived sources and pilot results are
+preserved; no observations are deleted. This finding applies to this candidate
+and platform, not to every T-table implementation.
+
+The final timed GPU profiles are explicitly `baseline optimized` (v1).
+Advanced shared-memory bank-conflict-free T-tables and bitsliced/PTX
+optimizations remain future work; no new kernel optimization precedes this study.
+The existing harness still validates and archives all three kernels before
+timing. Thus `ttable` may appear in validation/source metadata, but with the
+final commands below it produces no timed raw/summary rows and contributes no
+final performance or speedup values. Do not omit `--profile baseline optimized`:
+the unchanged CLI defaults still include `ttable`.
 
 ## Pairing and validation
 
@@ -150,16 +170,31 @@ Plan-only (does not initialize CUDA):
 .\.venv\Scripts\python.exe scripts\aes_cuda_cpu_gpu.py
 ```
 
-Proposed controlled pilot, to be run manually, not during preparation:
+Historical three-profile pilot command (retained for provenance, not the final study):
 
 ```powershell
 .\.venv\Scripts\python.exe scripts\aes_cuda_cpu_gpu.py --run --purpose pilot --profile baseline optimized ttable --measurements resident pipeline --resident-iterations 1 --host-memory pinned --modes ECB CTR --sizes 1024 16384 1048576 16777216 33554432 --warmup 5 --repeats 10 --seed 2003
 ```
 
-Ten repeats reduce pilot cost while still revealing timing dispersion and paired
-anomalies across all five sizes; five warmups exercise each job. Full pilot has
-800 raw rows / 80 summary rows. Review correctness first, then dispersion and
-order effects, before choosing the final protocol. Proposed eventual study is
-five independent processes, seeds 2003--2007, warmup5/repeats20, fixed ascending
-size order; not approved or executed here. CLI supports those parameters, but
-study must wait for explicit human approval after pilot review. No LaTeX change.
+The three-profile pilot uses ten repeats and produces 800 raw / 80 summary rows.
+It is distinct from the selected final protocol below.
+
+## Final paired study commands (manual execution only)
+
+Five independent Python processes, seeds 2003--2007, five warmups and twenty
+measured repeats; fixed ascending size order, pinned memory, ECB/CTR, resident
+single-launch and pipeline measurements. CPU software and CPU AES-NI are included
+automatically. Each session should contain 1200 raw rows and 60 summary rows:
+five sizes x two modes x (two CPU jobs + four GPU jobs) x twenty repeats.
+No outliers are removed. Existing baseline studies and diagnostic 64/100 MiB
+results remain untouched and are not substituted into this newly paired dataset.
+
+The loop below launches one process per seed and stops on failure. It was
+prepared as text only; no study was launched during this documentation update.
+
+```powershell
+foreach ($studySeed in 2003..2007) {
+    .\.venv\Scripts\python.exe scripts\aes_cuda_cpu_gpu.py --run --purpose study --profile baseline optimized --measurements resident pipeline --resident-iterations 1 --host-memory pinned --modes ECB CTR --sizes 1024 16384 1048576 16777216 33554432 --warmup 5 --repeats 20 --seed $studySeed
+    if ($LASTEXITCODE -ne 0) { throw "Paired study failed for seed $studySeed" }
+}
+```
