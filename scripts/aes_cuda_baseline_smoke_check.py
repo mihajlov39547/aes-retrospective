@@ -21,7 +21,10 @@ def main():
         assert proc.returncode == 0 and json.loads(proc.stdout)['status']=='plan_only'
         assert not list(root.iterdir())
         for options in (['--sizes','0'], ['--sizes','16','16'], ['--warmup','-1'],
-                        ['--repeats','0'], ['--modes','ECB','ECB'], ['--sizes','1025']):
+                        ['--repeats','0'], ['--modes','ECB','ECB'], ['--sizes','1025'],
+                        ['--sizes','104857600'], ['--host-memory','pinned'],
+                        ['--measurement','resident'], ['--profile','diagnostic','--purpose','study'],
+                        ['--profile','diagnostic','--resident-iterations','0']):
             with contextlib.redirect_stderr(io.StringIO()):
                 try:
                     b.arguments(options)
@@ -111,6 +114,41 @@ def main():
                 assert b.digest(directory/'source'/name)==sha
             assert meta['kernel_sha256']==b.digest(b.KERNEL)
         print('PASS: validation-before-timing, raw/summary counts, formulas, sample statistics, source hashes')
+        example = b.extended_stats([1,2,3,4,100])
+        assert example['iqr']==2 and example['outlier_count']==1 and example['outlier_flag']
+        assert example['coefficient_of_variation']==statistics.stdev([1,2,3,4,100])/22
+        assert b.extended_stats([5])['coefficient_of_variation'] is None
+        for memory in ('pageable','pinned'):
+            for measurement in ('pipeline','resident','transfer-only'):
+                args = b.arguments(['--run','--purpose','smoke','--output',str(root),
+                                    '--profile','diagnostic','--measurement',measurement,
+                                    '--host-memory',memory,'--resident-iterations','3',
+                                    '--sizes','1024','--warmup','1','--repeats','2'])
+                directory = b.run(args,gpu)
+                assert directory.name.startswith('aes_cuda_baseline_diagnostic-smoke-')
+                data = json.loads((directory/'results.json').read_text())
+                assert len(data['raw'])==4 and len(data['summary'])==2
+                for row in data['raw']:
+                    assert row['profile']=='diagnostic' and row['host_memory']==memory
+                    if measurement=='resident':
+                        assert row['kernel_ns']==row['resident_batch_ns']/3
+                        assert row['end_to_end_ns'] is None and row['transfer_ns'] is None
+                    elif measurement=='transfer-only':
+                        assert row['kernel_ns'] is None and row['end_to_end_ns'] is None
+                        assert row['transfer_ns']==row['h2d_ns']+row['d2h_ns']
+                        assert row['operation']=='copy'
+                meta=json.loads((directory/'metadata.json').read_text())
+                assert 'environment_before' in meta and 'environment_after' in meta
+                # Directly assert transfer-only never launches AES in its timed path.
+                job=gpu.prepare('CTR',b.KEY,b.COUNTER,b.PLAIN[:17])
+                if memory=='pinned':
+                    assert isinstance(job[1].base.obj, gpu.cp.cuda.PinnedMemoryPointer)
+                    assert isinstance(job[2].base.obj, gpu.cp.cuda.PinnedMemoryPointer)
+                if measurement=='transfer-only':
+                    with patch.object(gpu,'launch',side_effect=AssertionError('AES in copy-only')):
+                        gpu.measure_diagnostic(job,measurement,3)
+                    assert job[2].tobytes()==b.PLAIN[:17]
+        print('PASS: diagnostic isolation, pinned/pageable paths, resident batches, transfer-only, IQR/CV/outliers')
     print('PASS: isolated CUDA baseline smoke (temporary artifacts only; no pilot/study)')
 
 

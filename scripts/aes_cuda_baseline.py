@@ -6,6 +6,9 @@ import json
 import os
 import importlib.metadata
 import ctypes
+import csv
+import statistics
+import subprocess
 import random
 import shutil
 import time
@@ -16,7 +19,7 @@ from pathlib import Path
 from common import ROOT, parser, positive, print_plan, save_run, stats
 
 KERNEL = ROOT / 'experiments' / 'aes_cuda_baseline.cu'
-SIZES = [1024, 16384, 1048576, 16777216, 104857600]
+SIZES = [1024, 16384, 1048576, 16777216]
 SOURCE = 'https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf'
 KEY = bytes.fromhex('2b7e151628aed2a6abf7158809cf4f3c')
 COUNTER = bytes.fromhex('f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff')
@@ -51,6 +54,52 @@ def digest(path):
 
 def write_json(path, obj):
     Path(path).write_text(json.dumps(obj, indent=2, default=str, allow_nan=False) + '\n', encoding='utf-8')
+
+
+def telemetry(gpu):
+    fields = ['temperature.gpu', 'power.draw', 'memory.used', 'memory.total', 'pstate']
+    result = dict(timestamp=datetime.now(timezone.utc).isoformat(), source='nvidia-smi',
+                  units='temperature C, power W, memory MiB', values=dict.fromkeys(fields))
+    try:
+        output = subprocess.check_output(['nvidia-smi', '-i', gpu.info['pci_bus_id'],
+                    '--query-gpu=' + ','.join(fields), '--format=csv,noheader,nounits'],
+                    text=True, stderr=subprocess.DEVNULL, timeout=5)
+        values = next(csv.reader(output.splitlines()))
+        result['values'] = {k: None if 'N/A' in v or 'Not Supported' in v else v.strip()
+                            for k, v in zip(fields, values)}
+    except (OSError, subprocess.SubprocessError, KeyError, StopIteration) as exc:
+        result['unavailable_reason'] = str(exc)
+    return result
+
+
+def extended_stats(values):
+    if not values:
+        return dict.fromkeys(['count','mean','median','stdev','min','max','q1','q3','iqr',
+                              'coefficient_of_variation','outlier_count','outlier_flag'])
+    result = stats(values)
+    # Inclusive quartiles: linear interpolation at (n-1)*p, including endpoints.
+    q1, _, q3 = statistics.quantiles(values, n=4, method='inclusive') if len(values)>1 else [values[0]]*3
+    iqr = q3-q1
+    count = sum(x < q1-1.5*iqr or x > q3+1.5*iqr for x in values)
+    result.update(q1=q1, q3=q3, iqr=iqr,
+                  coefficient_of_variation=result['stdev']/result['mean']
+                  if result['stdev'] is not None and result['mean'] else None,
+                  outlier_count=count, outlier_flag=count>0)
+    return result
+
+
+def method_for(args):
+    return dict(METHOD, profile=args.profile, measurement=args.measurement, host_memory=args.host_memory,
+                resident_iterations=args.resident_iterations,
+                diagnostic_scope='resident: batch CUDA event time / iterations; no transfers inside batch. '
+                'transfer-only: input H2D and same data D2H, no AES kernel; pipeline: original boundaries.',
+                allocation=f'Preallocated {args.host_memory} host input/output; default stream; no overlap. '
+                'Pinned allocation/copy into staging buffers excluded; no fallback on allocation failure.',
+                transfer_timer=f'perf_counter_ns around synchronous {args.host_memory} H2D/D2H copies.',
+                statistics='Inclusive Q1/Q3; IQR=Q3-Q1; CV=sample SD/mean (fraction). '
+                'Tukey 1.5 IQR flags are descriptive only; no samples removed.',
+                resident_scope='Each repeat is one batch on an unchanged message/key/counter. '
+                'Upload once before batch; download/check final output after batch. Not independent messages.')
 
 
 def check_input(mode, key, counter, size):
@@ -106,6 +155,8 @@ class GPU:
                          driver_version=cp.cuda.runtime.driverGetVersion(),
                          runtime_version=cp.cuda.runtime.runtimeGetVersion(), cupy_version=cp.__version__)
         self.info['cuda_path'] = cp.cuda.get_cuda_path()
+        self.info['pci_bus_id'] = device.pci_bus_id
+        self.host_memory = 'pageable'
 
     def prepare(self, mode, key, counter, data):
         check_input(mode, key, counter, len(data))
@@ -117,7 +168,13 @@ class GPU:
             rk = cp.empty(176, dtype=cp.uint8)
             self.expand((1,), (1,), (dk, rk))
             self.stream.synchronize()
-        return mode, np.frombuffer(data, dtype=np.uint8), np.empty(len(data), dtype=np.uint8), src, dst, rk, dc
+        host, out = np.frombuffer(data, dtype=np.uint8), np.empty(len(data), dtype=np.uint8)
+        if self.host_memory == 'pinned':
+            # NumPy retains each allocation as its base for the entire job lifetime.
+            host = np.frombuffer(cp.cuda.alloc_pinned_memory(len(data)), dtype=np.uint8, count=len(data))
+            out = np.frombuffer(cp.cuda.alloc_pinned_memory(len(data)), dtype=np.uint8, count=len(data))
+            host[:] = np.frombuffer(data, dtype=np.uint8)
+        return mode, host, out, src, dst, rk, dc
 
     def launch(self, job):
         mode, host, out, src, dst, rk, counter = job
@@ -153,6 +210,37 @@ class GPU:
                     end_to_end_ns=elapsed, kernel_seconds=kernel/1e9, end_to_end_seconds=elapsed/1e9,
                     kernel_throughput_MB_s=job[1].size*1e3/kernel,
                     end_to_end_throughput_MB_s=job[1].size*1e3/elapsed)
+
+    def measure_diagnostic(self, job, measurement, iterations):
+        if measurement == 'pipeline':
+            return self.measure(job)
+        result = dict.fromkeys(METRICS)
+        with self.stream:
+            self.stream.synchronize()
+            if measurement == 'resident':
+                job[3].set(job[1]); self.stream.synchronize()
+                start, stop = self.cp.cuda.Event(), self.cp.cuda.Event()
+                start.record()
+                for _ in range(iterations):
+                    self.launch(job)
+                stop.record(); stop.synchronize()
+                batch = float(self.cp.cuda.get_elapsed_time(start, stop))*1e6
+                if batch <= 0:
+                    raise RuntimeError('Nonpositive resident timer.')
+                kernel = batch/iterations
+                job[4].get(out=job[2], blocking=True); self.stream.synchronize()
+                result.update(kernel_ns=kernel, kernel_seconds=kernel/1e9,
+                              kernel_throughput_MB_s=job[1].size*1e3/kernel,
+                              resident_batch_ns=batch)
+            else:
+                begin = time.perf_counter_ns()
+                job[3].set(job[1]); self.stream.synchronize()
+                middle = time.perf_counter_ns()
+                # Copy the input back, without invoking any AES kernel.
+                job[3].get(out=job[2], blocking=True); self.stream.synchronize()
+                end = time.perf_counter_ns()
+                result.update(h2d_ns=middle-begin, d2h_ns=end-middle, transfer_ns=end-begin)
+        return result
 
 
 def validate(gpu, session, purpose):
@@ -191,15 +279,19 @@ def summarize(raw):
     rows = []
     for mode, size in sorted({(r['mode'], r['bytes']) for r in raw}):
         group = [r for r in raw if (r['mode'], r['bytes'])==(mode,size)]
-        row = dict(session_id=group[0]['session_id'], algorithm='AES-128', backend='cuda', mode=mode, bytes=size, operation='encrypt')
+        row = {k:group[0][k] for k in ('session_id','algorithm','backend','operation','profile',
+                                     'measurement','host_memory','resident_iterations')}
+        row.update(mode=mode, bytes=size)
         for metric in METRICS:
-            row.update({metric+'_'+k:v for k,v in stats([r[metric] for r in group]).items()})
+            row.update({metric+'_'+k:v for k,v in extended_stats([r[metric] for r in group if r[metric] is not None]).items()})
+        row['outlier_flag'] = any(row[m+'_outlier_flag'] for m in METRICS)
         rows.append(row)
     return rows
 
 
 def run(args, gpu=None, validator=validate):
     gpu = GPU() if gpu is None else gpu
+    gpu.host_memory = args.host_memory
     session = str(uuid.uuid4())
     report = validator(gpu, session, args.purpose)
     # Durable gate precedes all performance measurement. Failure has no raw/summary.
@@ -208,6 +300,7 @@ def run(args, gpu=None, validator=validate):
     write_json(gate/'validation.json', report)
     if report.get('passed') is not True:
         raise RuntimeError(f'CUDA validation failed; report: {gate}')
+    before = telemetry(gpu)
     rng, order_rng = random.Random(args.seed), random.Random(args.seed)
     raw, job_order = [], 0
     for size in args.sizes:
@@ -218,7 +311,13 @@ def run(args, gpu=None, validator=validate):
                 # High 64 bits randomized, low 64 zero: ample room for every message.
                 counter = rng.randbytes(8) + bytes(8)
                 expected = reference(mode, key, counter, data)
-                if repeat < 0:
+                if args.profile == 'diagnostic':
+                    job = gpu.prepare(mode, key, counter, data)
+                    timing = gpu.measure_diagnostic(job, args.measurement, args.resident_iterations)
+                    actual = job[2].tobytes()
+                    if args.measurement == 'transfer-only':
+                        expected = data
+                elif repeat < 0:
                     actual = gpu.encrypt(mode, key, counter, data)
                 else:
                     job = gpu.prepare(mode, key, counter, data)
@@ -227,13 +326,20 @@ def run(args, gpu=None, validator=validate):
                 if actual != expected:
                     raise RuntimeError('Post-transform correctness check failed; no benchmark output exported.')
                 if repeat >= 0:
+                    timing.setdefault('resident_batch_ns', None)
                     raw.append(dict(session_id=session, mode=mode, algorithm='AES-128', backend='cuda', bytes=size,
-                                    repeat=repeat, operation='encrypt', **timing, validation_checked=True,
+                                    repeat=repeat, operation='copy' if args.measurement=='transfer-only' else 'encrypt',
+                                    **timing,
+                                    profile=args.profile, measurement=args.measurement, host_memory=args.host_memory,
+                                    resident_iterations=args.resident_iterations if args.measurement=='resident' else None,
+                                    validation_checked=True,
                                     variant_order=variant_order, job_order=job_order,
                                     nonce_bytes=0, counter_bits=128 if mode=='CTR' else None,
                                     initial_counter=counter.hex() if mode=='CTR' else None))
                     job_order += 1
-    directory = save_run('aes_cuda_baseline', args, METHOD, raw, summarize(raw))
+    after = telemetry(gpu)
+    name = 'aes_cuda_baseline' + ('_diagnostic' if args.profile=='diagnostic' else '')
+    directory = save_run(name, args, method_for(args), raw, summarize(raw))
     shutil.copy2(gate/'validation.json', directory/'validation.json')
     source = directory/'source'; source.mkdir()
     hashes = {}
@@ -241,7 +347,9 @@ def run(args, gpu=None, validator=validate):
                  Path(__file__).with_name('aes_cuda_baseline_smoke_check.py'), KERNEL):
         shutil.copy2(path, source/path.name); hashes[path.name] = digest(source/path.name)
     manifest = json.loads((directory/'metadata.json').read_text(encoding='utf-8'))
-    manifest.update(session_id=session, gpu=gpu.info, validation_sha256=digest(directory/'validation.json'),
+    manifest.update(schema_version=2, session_id=session, gpu=gpu.info,
+                    profile=args.profile, environment_before=before, environment_after=after,
+                    validation_sha256=digest(directory/'validation.json'),
                     validation_file='validation.json', validation_pre_measurement_file=str(gate/'validation.json'),
                     source_sha256=hashes, kernel_sha256=hashes[KERNEL.name],
                     wall_clock_info=vars(time.get_clock_info('perf_counter')))
@@ -255,17 +363,26 @@ def arguments(argv=None):
     p.add_argument('--sizes', nargs='+', type=positive, default=SIZES)
     p.add_argument('--warmup', type=int, default=2)
     p.add_argument('--repeats', type=positive, default=10)
+    p.add_argument('--profile', choices=['baseline','diagnostic'], default='baseline')
+    p.add_argument('--measurement', choices=['pipeline','resident','transfer-only'], default='pipeline')
+    p.add_argument('--host-memory', choices=['pageable','pinned'], default='pageable')
+    p.add_argument('--resident-iterations', type=positive, default=10)
     args = p.parse_args(argv)
     if args.warmup < 0 or len(set(args.sizes)) != len(args.sizes) or len(set(args.modes)) != len(args.modes):
         p.error('Warmup must be nonnegative; sizes and modes must be unique.')
     if 'ECB' in args.modes and any(n%16 for n in args.sizes):
         p.error('ECB requires aligned sizes. For partial blocks use --modes CTR separately.')
+    if args.profile=='baseline' and (args.measurement!='pipeline' or args.host_memory!='pageable'
+                                    or max(args.sizes)>16777216 or args.resident_iterations!=10):
+        p.error('Large buffers, pinned memory and alternate measurements require --profile diagnostic.')
+    if args.profile=='diagnostic' and args.purpose=='study':
+        p.error('Diagnostic runs allow only smoke or pilot, not study.')
     return args
 
 
 def main():
     args = arguments()
-    if not print_plan('aes_cuda_baseline', args, METHOD):
+    if not print_plan('aes_cuda_baseline', args, method_for(args)):
         run(args)
 
 

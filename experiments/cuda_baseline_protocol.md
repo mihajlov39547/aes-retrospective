@@ -31,7 +31,7 @@ are exported if any comparison fails.
 
 ## Timing and outputs
 
-Default CUDA stream, synchronous phases, no overlap or explicitly pinned memory:
+Standard baseline: default CUDA stream, synchronous phases, no overlap or explicitly pinned memory:
 
 - H2D and D2H: host `perf_counter_ns`, including completion synchronization.
 - Kernel: CUDA events enclosing only the encryption kernel. Milliseconds are
@@ -45,7 +45,14 @@ validation, comparisons and serialization are excluded. Device buffers and pagea
 host output are preallocated. Thus end-to-end means the prepared-message
 H2D/kernel/D2H path, not full application latency including setup.
 Decimal payload MB/s is bytes / 1e6 / seconds, separately for kernel and end-to-end.
-Summary groups mode and size and retains count, mean, median, sample SD, min, max.
+Summary groups mode and size and retains count, mean, median, sample SD, min, max,
+inclusive Q1/Q3, IQR, coefficient of variation (sample SD / mean, a fraction),
+and per-metric outlier count/flag plus a combined summary flag. Quartiles use
+linear interpolation at `(n-1)*p`. Values outside `[Q1-1.5*IQR,Q3+1.5*IQR]` are
+flagged; no raw measurements are removed. With one observation CV is null;
+with zero IQR values unequal to the quartile are flagged. Flags do not establish
+invalidity or diagnose a cause, particularly for small samples. Unmeasured
+metrics and their statistics are null, never artificial zero measurements.
 Warmups are discarded; mode order is seed-shuffled per repetition. Input-size order
 is the explicit CLI order. Defaults are preparation defaults, not a locked study.
 
@@ -76,7 +83,76 @@ sizes; use `--modes CTR` separately for arbitrary lengths.
 Manual controlled pilot (not executed during preparation):
 
 ```powershell
-.\.venv\Scripts\python.exe scripts\aes_cuda_baseline.py --run --purpose pilot --modes ECB CTR --sizes 1024 16384 1048576 16777216 104857600 --warmup 2 --repeats 10 --seed 2003
+.\.venv\Scripts\python.exe scripts\aes_cuda_baseline.py --run --purpose pilot --modes ECB CTR --sizes 1024 16384 1048576 16777216 --warmup 2 --repeats 10 --seed 2003
 ```
 
-Optimization, resident-data measurements and final CPU/GPU comparison are deferred.
+## Large-buffer diagnostics (separate from standard study)
+
+Following unstable 100 MiB pilot measurements, the standard baseline default
+sizes are 1 KiB, 16 KiB, 1 MiB and 16 MiB. Larger sizes require the diagnostic
+profile. This is an explicit scope decision before study, not removal of selected
+samples. Previous 100 MiB pilot files remain unchanged. Their variability does not
+establish WDDM, transfers, scheduling or temperature as the cause; kernel times
+also varied, so transfer-only attribution would be premature.
+
+New options:
+
+- `--profile baseline|diagnostic` (default baseline). Diagnostic output uses
+  `aes_cuda_baseline_diagnostic-<purpose>-<timestamp>` and explicit profile fields.
+  Diagnostic study is rejected; only smoke/pilot is allowed.
+- `--measurement pipeline|resident|transfer-only` (default pipeline).
+- `--host-memory pageable|pinned` (default pageable). Pinned and alternative
+  measurements require diagnostic profile; the AES kernel is unchanged.
+- `--resident-iterations N` (default 10, positive). Only resident measurement
+  uses this number; raw rows record it and the total batch event duration.
+
+Pipeline retains the original H2D/kernel/D2H boundaries. Pinned input and output
+are allocated by `cupy.cuda.alloc_pinned_memory`; allocation and input staging
+copies are excluded, buffers remain alive through synchronization, and failure
+stops the run rather than falling back to pageable memory. This measures transfer
+behavior with prepared pinned buffers, not the cost of pinning an application
+message. The same KAT gate runs using the chosen host-memory type.
+
+Resident uploads each job once, then encloses N launches of the unchanged AES
+kernel in one pair of CUDA events without H2D/D2H between launches. One raw repeat
+records batch duration / N as `kernel_ns`; throughput uses this per-launch average.
+Input, output, expanded keys and counter are resident for that batch. Each launch
+overwrites output from the same input, not from the previous ciphertext. The final
+output is downloaded and verified outside events. This is repeated processing of
+one synthetic message, not distinct CTR messages reusing a counter. Warmup batches
+use the same selected measurement but are not exported. CV/IQR describe variation
+between batch averages, not individual launches. Event time can include GPU idle
+gaps between host submissions; this is not instruction-cycle timing. Resident
+transfer/end-to-end columns are null and must not be interpreted as zero costs.
+
+Transfer-only times H2D then D2H of that input with synchronization and no AES
+kernel. Returned bytes are checked against input outside timing. `operation=copy`;
+kernel and AEAD/encryption end-to-end fields are null. H2D, D2H and their sum are
+reported as times; no misleading encryption throughput is assigned to this path.
+
+Each run records timestamped nvidia-smi temperature, power, memory and P-state
+snapshots before/after the measurement loop, selected by GPU PCI bus ID. Unsupported
+readings are null; probe failures are recorded and do not block measurements.
+These are endpoint context, not continuous monitoring or evidence of causality.
+
+Manual 100 MiB diagnostic pilot examples (not executed during preparation):
+
+```powershell
+# Resident kernel batches, pageable staging outside the event interval
+.\.venv\Scripts\python.exe scripts\aes_cuda_baseline.py --run --purpose pilot --profile diagnostic --measurement resident --resident-iterations 10 --modes ECB CTR --sizes 104857600 --warmup 5 --repeats 20 --seed 2004
+
+# Comparable transfer-only and pipeline diagnostics, separate output directories
+foreach ($memory in @('pageable', 'pinned')) {
+    foreach ($measurement in @('transfer-only', 'pipeline')) {
+        .\.venv\Scripts\python.exe scripts\aes_cuda_baseline.py --run --purpose pilot --profile diagnostic --measurement $measurement --host-memory $memory --modes ECB CTR --sizes 104857600 --warmup 5 --repeats 20 --seed 2004
+        if ($LASTEXITCODE -ne 0) { throw 'Diagnostic pilot failed' }
+    }
+}
+```
+
+Review these as separate scenarios; do not merge with baseline study or infer
+causality from one sequential pageable/pinned pair. If needed, repeat in reversed
+scenario order in later controlled pilots. Small smoke tests cover all six
+measurement/memory combinations, pinned allocation identity, null metrics,
+batch scaling, copy-only kernel exclusion and diagnostic CLI isolation.
+AES optimization and final CPU/GPU comparison remain deferred.
