@@ -233,6 +233,17 @@ događaja i sinhronizacije. Nema preklapanja transfera i izvršavanja.
 End-to-end propusnost je glavni praktični rezultat ove pripremljene putanje;
 propusnost kernela prikazuje se kao zasebna komponenta.
 
+Pinned memorija izabrana je u skladu sa NVIDIA preporukom za ostvarivanje
+veće propusnosti host--device transfera korišćenjem page-locked
+bafera~\cite{nvidia-cuda-best-practices}. Sam izbor pinned memorije ne
+znači preklapanje transfera i računanja. Baseline koristi podrazumevani
+CUDA stream i sinhronizuje uzastopne faze; ne organizuje asinhronu memcpy
+putanju niti koristi non-default streamove. Ovo opisuje protokol na
+nivou CuPy poziva, a ne tvrdi koji interni memcpy API biblioteka koristi.
+Za planirano preklapanje preko više streamova potrebni su asinhroni API,
+odvojeni non-default streamovi i hardverska podrška za istovremeno kopiranje
+i izvršavanje~\cite{nvidia-cuda-best-practices}.
+
 Kompilacija, alokacija i pinning bafera, kopiranje ulaza u pripremljeni
 host bafer, proširenje i priprema ključa na GPU-u, prenos ključa i brojača,
 CPU referenca, validacija, poređenja i izvoz isključeni su iz tajmera.
@@ -617,6 +628,14 @@ veći ulaz ne garantuje monoton rast propusnosti. Time se motiviše zaseban
 korak optimizacije CUDA implementacije i/ili drugačije organizacije
 merenja, uz jasno odvajanje tih rezultata od sadašnjeg baseline-a.
 
+Optimizovani CUDA AES treba zato vrednovati zasebno. Mogući pravci na
+nivou kernela obuhvataju smanjenje broja instrukcija po AES bloku i bolji
+raspored lookup tabela u memoriji. Na nivou pipeline-a mogu se ispitati
+asinhrona kopiranja, non-default streamovi, obrada ulaza u segmentima
+(\emph{chunking}) i preklapanje H2D prenosa, kernela i D2H prenosa.
+Ove optimizacije namerno su izostavljene iz baseline-a; njihov efekat
+zahteva novu validaciju i zasebno merenje, a nije rezultat ove studije.
+
 % TODO DISCUSSION: povezati pretragu ključeva i avalanche sa
 % retrospektivom tek na osnovu odgovarajućih rezultata; MITM ako ostane u radu.
 
@@ -643,6 +662,17 @@ tumačenje end-to-end latencije. Izbor fiksnog redosleda i isključivanje
 dijagnostičkih 64/100~MiB iz glavne tabele moraju se uzeti u obzir pri
 generalizaciji; agregat sam po sebi nije dokaz stabilnosti ili uzroka
 pada na 32~MiB.
+
+Dodatna merenja od 64 i 100~MiB zadržana su kao dijagnostička opažanja
+platforme, a ne kao osnova glavnih zaključaka o skaliranju AES propusnosti.
+U Windows/WDDM okruženju GPU rad podleže upravljanom raspoređivanju,
+predaji i grupisanju komandi (\emph{submission/batching}), uz mogućnost
+preotimanja izvršavanja (\emph{preemption})~\cite{microsoft-wddm-scheduling,microsoft-gpu-preemption}.
+Dokumentovani troškovi ovih mehanizama predstavljaju moguće objašnjenje
+varijabilnosti u sinhronom pinned pipeline-u, ali njihovi pojedinačni
+uticaji nisu eksperimentalno izolovani. Zato se ni pad propusnosti ni
+varijansa ne pripisuju dokazano WDDM-u, a iz ovih opažanja ne sledi da
+su veliki CUDA baferi generalno nestabilni.
 
 GCM objekat konstruiše se van merenog intervala, pa rezultati opisuju
 obradu payload-a sa izuzetom inicijalizacijom, a ne latenciju pojedinačne
