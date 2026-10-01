@@ -273,24 +273,65 @@ veličinu sa progresijom sesije i termalnim stanjem; prihvaćeni skup ne
 dokazuje apsolutnu stabilnost. Ulaz od 32~MiB zadržan je u standardnom
 skupu, dok 64 i 100~MiB ostaju dijagnostički materijal.
 
-\subsubsection{Planirano optimizovanje CUDA putanje i CPU--GPU poređenje}
+\subsubsection{Optimizacija CUDA AES-128 i finalno CPU--GPU poređenje}
 \label{sec:cpu-gpu-poredjenje}
-Optimizovana implementacija biće zasebno validirana i merena. Buduće
-CPU--GPU poređenje zahteva ponovna uparena merenja CPU softverske i AES-NI
-putanje u istim ECB/CTR režimima, sa istim ključem, porukom, početnim
-brojačem, veličinama i protokolom kao GPU. Prethodni CPU CBC i AES-GCM
-rezultati nisu direktna referenca zbog različitih operacija i granica
-merenja. Planirani odnos vremena je
+Finalna uparena studija zasebno meri CPU software, CPU AES-NI, čitljivi
+CUDA baseline i kandidat v1 sa eksplicitnim inlining-om i razvijanjem
+petlji (\emph{lightweight optimized candidate}). V1 zadržava bajtovsku
+AES-128 strukturu, ECB/CTR semantiku, jednu nit po AES bloku i 128 niti
+po CUDA bloku; oznaka optimized ne podrazumeva unapred potvrđeno ubrzanje.
+Ova studija nije nastavak agregiranja prethodnog samostalnog CUDA skupa:
+baseline je ponovo izmeren u istom uparenom protokolu kao ostale putanje.
+
+Za svaki režim, veličinu i ponavljanje sve putanje dobijaju isti otvoreni
+tekst, AES-128 ključ i početni CTR brojač. Identifikatori i hash-evi parova
+omogućavaju proveru uparivanja. Redosled režima i poslova reproduktivno
+je izmešan. Pet nezavisnih procesa koristi seed vrednosti 2003--2007,
+pet warmup rundi i 20 merenih ponavljanja. Veličine 1~KiB, 16~KiB,
+1~MiB, 16~MiB i 32~MiB izvršavaju se fiksnim rastućim redosledom.
+Svaka sesija ima 1200 raw i 60 summary redova, bez uklanjanja outlier-a.
+Izvori i GPU/runtime isti su kroz prihvaćene sesije.
+
+Pre merenja prošla je zajednička validaciona prepreka: NIST ECB/CTR vektori,
+diferencijalno poređenje svih putanja, prenos brojača, nepotpun završni
+blok i odbijanje preliva brojača. CPU software koristi
+\texttt{use\_aesni=False}, a AES-NI \texttt{use\_aesni=True}; izbor
+\texttt{\_raw\_aes} i \texttt{\_raw\_aesni} potvrđen je za ECB i CTR
+posmatranjem native inicijalizacije, a ne tragom procesorskih instrukcija.
+
+CPU meri jedan enkripcioni transformacioni poziv zidnim tajmerom,
+uključujući alokaciju izlaza, uz konstrukciju cipher objekta izvan tajmera.
+GPU resident meri CUDA događajima jedan kernel poziv nad pripremljenim
+device podacima (\texttt{resident\_iterations=1}); H2D i D2H su izvan
+tog intervala. To nije prosek više uzastopnih kernel poziva. GPU pipeline
+meri zidno vreme pinned H2D $\rightarrow$ kernel $\rightarrow$ D2H putanje,
+bez preklapanja. Kompilacija, alokacija, pinning, priprema/proširenje i
+prenos ključa, brojač, CPU referenca, validacija i poređenje izlaza ostaju
+izvan GPU tajmera. GPU koristi prealokovane host/device bafere, dok je
+CPU alokacija izlaza uključena; ova asimetrija je deo definisanog poređenja,
+a ne potpuna aplikaciona latencija sa inicijalizacijom.
+
+U svakoj sesiji računaju se dva odvojena odnosa prema primarnoj CPU
+AES-NI referenci:
 \begin{equation}
-S_{\mathrm{GPU/CPU}} =
-\frac{\widetilde{T}_{\mathrm{CPU,AES\mbox{-}NI}}}
+\begin{aligned}
+S_{\mathrm{isolated}} & =
+\frac{\widetilde{T}_{\mathrm{CPU,AES\mbox{-}NI,transform}}}
+     {\widetilde{T}_{\mathrm{GPU,resident}}}, \\
+S_{\mathrm{pipeline}} & =
+\frac{\widetilde{T}_{\mathrm{CPU,AES\mbox{-}NI,transform}}}
      {\widetilde{T}_{\mathrm{GPU,end\mbox{-}to\mbox{-}end}}}.
+\end{aligned}
 \label{eq:gpu-cpu-ubrzanje}
 \end{equation}
-Brojilac i imenilac biće zidna vremena uporedivih operacija; obuhvat
-inicijalizacije i alokacije mora biti zaključen pre te studije.
-Kernel-only i rezidentni scenario ostaju zasebne metrike.
-% TODO CUDA OPTIMIZACIJA: potvrditi implementaciju i upareni CPU/GPU protokol.
+Vrednost iznad jedan označava kraće GPU vreme u navedenom obuhvatu.
+Zbirna vremena i propusnosti su medijane pet sesijskih medijana, a zbirni
+faktori medijane pet sesijskih odnosa vremena. Faktori se ne izvode iz
+srednjih propusnosti niti količnika zaokruženih zbirnih vrednosti.
+Resident merenje razlikuje se od kernel komponente unutar pipeline poziva.
+CPU software je sekundarna referenca; prethodni CPU CBC i AES-GCM rezultati
+nisu korišćeni kao referenca zbog različitih režima i granica merenja.
+% Poreklo: experiments/results/aes_cuda_cpu_gpu-final-aggregate/aggregate.json
 
 \subsubsection{Demonstracija pretraživanja prostora ključeva}
 Demonstracija koristi redukovani edukativni prostor ključeva i meri broj
@@ -509,7 +550,95 @@ oko 589 i 584~MB/s. Vreme transfera raste sa približno 5.47--5.49~ms
 na 16~MiB na oko 41.08--41.09~ms na 32~MiB; raste i kernel vreme.
 Ovaj nalaz nije uklonjen niti zamenjen povoljnijim dijagnostičkim rezultatom.
 
-% TODO RESULTS CUDA OPTIMIZACIJA: zasebna tabela nakon nove validirane studije.
+\subsubsection{Finalno upareno AES-128 CPU--GPU poređenje}
+\label{sec:rezultati-cpu-gpu-final}
+Tabela~\ref{tab:cpu-gpu-final-comparison} razdvaja CPU transformaciju,
+GPU resident kernel i praktičnu pinned pipeline putanju. Prikazane su
+medijane pet sesijskih medijana, u decimalnim MB/s. Rezultati su ponovo
+izračunati iz pet study CSV sažetaka, uz proveru medijana iz svih raw
+ponavljanja. Tabela~\ref{tab:cuda-baseline-results} ostaje zaseban rezultat
+ranijeg samostalnog baseline protokola i nije izvor vrednosti ove tabele.
+
+\begin{table}[htbp]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\caption{Finalno upareno AES-128 CPU--GPU poređenje, u decimalnim MB/s.
+K označava resident kernel-only, E2E pinned end-to-end putanju; v1 je
+kandidat lake optimizacije. Prikazane su medijane pet sesijskih medijana.}
+\label{tab:cpu-gpu-final-comparison}
+\begin{tabular}{llrrrrrr}
+\toprule
+ & & \multicolumn{2}{c}{CPU} & \multicolumn{2}{c}{CUDA baseline} & \multicolumn{2}{c}{CUDA v1} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+Režim & Veličina & Software & AES-NI & K & E2E & K & E2E \\
+\midrule
+ECB & 1 KiB & 117.0 & 189.6 & 19.9 & 5.6 & 20.7 & 5.7 \\
+ECB & 16 KiB & 283.5 & 1894.2 & 319.6 & 88.6 & 314.8 & 87.7 \\
+ECB & 1 MiB & 275.7 & 1793.5 & 4901.1 & 1339.1 & 5149.3 & 1320.1 \\
+ECB & 16 MiB & 280.5 & 1904.8 & 3667.5 & 1080.0 & 3424.4 & 866.2 \\
+ECB & 32 MiB & 282.1 & 1909.9 & 4753.5 & 1202.0 & 4792.6 & 1214.5 \\
+\midrule
+CTR & 1 KiB & 117.7 & 170.7 & 19.7 & 5.5 & 20.0 & 5.7 \\
+CTR & 16 KiB & 265.3 & 1359.7 & 315.7 & 87.0 & 312.2 & 87.6 \\
+CTR & 1 MiB & 257.4 & 1381.7 & 5017.1 & 1313.1 & 4853.9 & 1291.0 \\
+CTR & 16 MiB & 264.3 & 1446.5 & 3655.6 & 1103.1 & 3576.2 & 1074.0 \\
+CTR & 32 MiB & 266.3 & 1455.8 & 4800.6 & 1204.5 & 4877.7 & 1209.1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Na ulazima od 1 do 32~MiB CPU AES-NI ostvaruje približno
+1.38--1.46~GB/s za CTR i 1.79--1.91~GB/s za ECB, dok software putanja
+ostaje oko 257--266 odnosno 276--282~MB/s. Resident CUDA baseline u tom
+rasponu ostvaruje oko 3.66--5.02~GB/s, ali njegova end-to-end propusnost
+iznosi oko 1.08--1.34~GB/s. V1 menja te vrednosti u oba smera: na ECB
+1~MiB resident raste sa 4901.1 na 5149.3~MB/s, dok na ECB 16~MiB
+pipeline opada sa 1080.0 na 866.2~MB/s. Nema konzistentnog poboljšanja.
+
+Za ECB na 32~MiB zbirno CPU AES-NI vreme je 17.5690~ms,
+resident baseline vreme 7.0589~ms, a pipeline vreme 27.9160~ms.
+Za CTR na 32~MiB zbirno CPU AES-NI vreme je 23.0481~ms,
+resident baseline vreme 7.0053~ms, a pipeline vreme 27.8588~ms.
+
+Vremena su agregirana zasebno, pa njihove zbirne vrednosti nisu osnova
+za ponovno računanje faktora iz tabele~\ref{tab:cpu-gpu-final-speedup}.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Faktori prema CPU AES-NI: medijane pet sesijskih odnosa vremena.
+I označava isolated/resident, P practical/pipeline; vrednost veća od jedan
+označava kraće GPU vreme.}
+\label{tab:cpu-gpu-final-speedup}
+\begin{tabular}{llrrrr}
+\toprule
+Režim & Veličina & Baseline I & v1 I & Baseline P & v1 P \\
+\midrule
+ECB & 1 KiB & 0.11 & 0.11 & 0.03 & 0.03 \\
+ECB & 16 KiB & 0.17 & 0.17 & 0.05 & 0.05 \\
+ECB & 1 MiB & 2.65 & 2.91 & 0.75 & 0.77 \\
+ECB & 16 MiB & 1.89 & 1.77 & 0.58 & 0.42 \\
+ECB & 32 MiB & 2.50 & 2.52 & 0.63 & 0.64 \\
+\midrule
+CTR & 1 KiB & 0.12 & 0.11 & 0.03 & 0.03 \\
+CTR & 16 KiB & 0.23 & 0.23 & 0.06 & 0.06 \\
+CTR & 1 MiB & 3.66 & 3.54 & 0.95 & 0.91 \\
+CTR & 16 MiB & 2.58 & 2.51 & 0.75 & 0.74 \\
+CTR & 32 MiB & 3.30 & 3.40 & 0.82 & 0.83 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Na velikim ulazima resident baseline faktori prema AES-NI iznose
+3.66, 2.58 i 3.30 za CTR, odnosno 2.65, 1.89 i 2.50 za ECB na
+1, 16 i 32~MiB. Svi zbirni pipeline faktori ostaju ispod jedan.
+Najbliži slučaj je CTR baseline na 1~MiB sa faktorom 0.95.
+Na 32~MiB CTR pipeline faktori su 0.82--0.83, a ECB 0.63--0.64.
+U odnosu na software-only CPU, GPU pipeline je na velikim ulazima
+nekoliko puta brži, ali to nije glavna savremena referenca.
+
+
 
 % TODO RESULTS BRUTE FORCE
 % TODO RESULTS MITM: samo ako demonstracija ostane u radu.
@@ -619,8 +748,8 @@ Ova odluka ograničava heterogenost protokola, ali ne otklanja moguće
 mešanje efekta veličine sa progresijom sesije.
 
 Direktan faktor ubrzanja prema prethodnim CPU CBC ili AES-GCM rezultatima
-nije opravdan: režimi, funkcije i granice merenja nisu isti. Buduće
-poređenje zahteva poseban upareni ECB/CTR protokol. U retrospektivi
+nije opravdan: režimi, funkcije i granice merenja nisu isti. Zato je
+finalno poređenje izvedeno zasebnim uparenim ECB/CTR protokolom. U retrospektivi
 savremenih AES implementacija ovi nalazi izdvajaju razliku između
 paralelizacije kriptografske primitive i troška prenosa podataka.
 Validirani baseline pokazuje visok protok kernela na 16~MiB, ali i da
@@ -633,8 +762,39 @@ nivou kernela obuhvataju smanjenje broja instrukcija po AES bloku i bolji
 raspored lookup tabela u memoriji. Na nivou pipeline-a mogu se ispitati
 asinhrona kopiranja, non-default streamovi, obrada ulaza u segmentima
 (\emph{chunking}) i preklapanje H2D prenosa, kernela i D2H prenosa.
-Ove optimizacije namerno su izostavljene iz baseline-a; njihov efekat
-zahteva novu validaciju i zasebno merenje, a nije rezultat ove studije.
+Ove optimizacije namerno su izostavljene iz samostalnog baseline-a.
+Uparena studija u nastavku ispituje samo laki inlining/unrolling kandidat;
+naprednije kernel i pipeline promene ostaju za zasebnu validaciju i merenje.
+
+\subsubsection{Izolovano GPU računanje i praktično CPU--GPU poređenje}
+Finalni upareni rezultati razdvajaju tri nivoa: software CPU, namenski
+ubrzan CPU AES-NI i GPU računanje sa ili bez host--device transfera.
+AES-NI je snažna primarna CPU referenca; poređenje samo sa software
+putanjom precenilo bi praktičnu prednost GPU-a za savremenu platformu.
+Na 1~KiB i 16~KiB GPU ne nadmašuje AES-NI ni u resident scenariju,
+što je saglasno sa visokim relativnim troškovima kratkih GPU poziva.
+
+Za 1--32~MiB resident rezultati pokazuju visok potencijal paralelnog
+računanja nad podacima na uređaju. Međutim, kada se meri cela pinned
+H2D--kernel--D2H putanja, AES-NI ima kraće agregirano vreme za sve ispitane
+veličine i režime. Transferi, sinhronizacija i host upravljanje zajedno
+poništavaju resident prednost u ovom protokolu; to nije izolovana procena
+troška svake komponente. Razlika potvrđuje potrebu da se device-resident
+propusnost razdvoji od praktične host-driven enkripcije.
+
+Laka optimizacija v1 nije donela konzistentno poboljšanje. Većina promena
+je mala, ali postoje i izraženiji nepovoljni slučajevi, naročito ECB
+16~MiB pipeline. Zato se v1 tumači kao kontrolisan pokušaj optimizacije,
+a ne kao dokaz superiorne ili state-of-the-art CUDA AES implementacije.
+Inlining i razvijanje petlji u ovoj konfiguraciji nisu dovoljni da uklone
+transferne i runtime troškove; ni resident dobitak nije dosledan.
+Ne izvodi se tvrdnja o statističkoj značajnosti bez posebne analize.
+
+Ovi nalazi važe za testirani CPU, GTX~1650~Ti i sinhroni pinned protokol.
+Ne znače da GPU generalno ne može nadmašiti AES-NI, niti su neposredno
+uporedivi sa RTX/Tesla kernel-only rekordima iz literature. Bank-conflict-free
+shared-memory T-tabele, bitslicing/PTX i overlap preko streamova ostaju
+budući rad. Prethodni CPU CBC i AES-GCM rezultati nisu speedup referenca.
 
 % TODO DISCUSSION: povezati pretragu ključeva i avalanche sa
 % retrospektivom tek na osnovu odgovarajućih rezultata; MITM ako ostane u radu.
@@ -656,7 +816,7 @@ CBC poređenju DES-a, TDEA i AES-a enkripcija prethodi dekripciji, pa keš
 i redosled ostaju ograničenja tumačenja. Granularnost procesorskog tajmera
 na korišćenoj Windows platformi bila je nedovoljna za kratke transformacije,
 naročito za 1~KiB i 1~MiB; taj tajmer nije osnova zaključaka o performansama.
-CUDA rezultati opisuju jednu neoptimizovanu implementaciju i pinned
+Samostalni CUDA baseline rezultati opisuju neoptimizovanu implementaciju i pinned
 sinhroni pipeline bez preklapanja. Izuzeti setup i alokacije ograničavaju
 tumačenje end-to-end latencije. Izbor fiksnog redosleda i isključivanje
 dijagnostičkih 64/100~MiB iz glavne tabele moraju se uzeti u obzir pri
@@ -673,6 +833,16 @@ varijabilnosti u sinhronom pinned pipeline-u, ali njihovi pojedinačni
 uticaji nisu eksperimentalno izolovani. Zato se ni pad propusnosti ni
 varijansa ne pripisuju dokazano WDDM-u, a iz ovih opažanja ne sledi da
 su veliki CUDA baferi generalno nestabilni.
+
+Upareno CPU--GPU poređenje dodatno ograničava asimetrija alokacije:
+CPU transform uključuje novi izlazni bafer, a GPU koristi prealokovane
+host/device bafere. Fiksni redosled veličina, dinamički taktovi i
+varijabilnost GPU merenja ostaju prisutni i posle agregiranja pet sesija.
+Nijedan pojedinačan uzrok, uključujući WDDM, nije eksperimentalno dokazan.
+Constant-memory \texttt{ttable} kandidat prošao je validaciju i sačuvan
+je u harness-u, ali pilot nije pokazao poboljšanje, pa nije uključen u
+finalna performansna merenja. Njegovo prisustvo u validacionim zapisima
+ne znači da učestvuje u finalnoj tabeli.
 
 GCM objekat konstruiše se van merenog intervala, pa rezultati opisuju
 obradu payload-a sa izuzetom inicijalizacijom, a ne latenciju pojedinačne
