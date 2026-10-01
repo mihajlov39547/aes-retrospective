@@ -1,0 +1,376 @@
+{
+  "aggregation_rule": "Median of five session medians, separately for each metric; no raw pooling or outlier removal",
+  "selected_sessions": [
+    {
+      "directory": "brute_force_demo-study-20261001T060310082847Z",
+      "seed": 2003,
+      "session_id": "6efa0fad-e196-4e61-a6ba-5e1ea0c0ddac",
+      "validation_passed": true,
+      "raw_rows": 12,
+      "summary_rows": 4,
+      "source_sha256": {
+        "brute_force_demo.py": "42b3a093e5dcb0949eeac940a0f197059b1845725554a5a3af321178c17076e3",
+        "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+        "brute_force_demo_smoke_check.py": "07bef73d4f8e4ab0ab2c83ef7499f7e2ca50533cb25b8af4db7263d4aae306ea"
+      },
+      "file_sha256": {
+        "metadata.json": "b97df80ee406ac678657779df8f009c807cbd4d2833c01a9abeda17912e3a462",
+        "validation.json": "e21d66ef61e5b8fc87bfd9a519d45ad5e6f4b5b36fab1dc1145fa3472aca3ea5",
+        "raw.csv": "27d1bc825d31d175a3f6485acd6dca5a594a8208d08b6a42c86fb9c1b54d6b2c",
+        "summary.csv": "2b8772124202edc1e5efefce2711d1dc320d9ff6b8580214bdff9ceed248c02e"
+      }
+    },
+    {
+      "directory": "brute_force_demo-study-20261001T061333155317Z",
+      "seed": 2004,
+      "session_id": "6346e4de-8184-4984-946d-6a3af7853138",
+      "validation_passed": true,
+      "raw_rows": 12,
+      "summary_rows": 4,
+      "source_sha256": {
+        "brute_force_demo.py": "42b3a093e5dcb0949eeac940a0f197059b1845725554a5a3af321178c17076e3",
+        "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+        "brute_force_demo_smoke_check.py": "07bef73d4f8e4ab0ab2c83ef7499f7e2ca50533cb25b8af4db7263d4aae306ea"
+      },
+      "file_sha256": {
+        "metadata.json": "71632a200cca8866140434c96b5c0116311d16ab63b8d5bd581249feab556157",
+        "validation.json": "762e94f0421c0269a78dd2d8d187c237c80e114beedc018a3e76b62e3fa2be25",
+        "raw.csv": "082a5036ba43520c5c9a9bcfba117692a9a7682b34b95112463c2a16c3717335",
+        "summary.csv": "e11a16a71a9b36c81bf288febd60c66f0ce615154bcc1b61774df3742cb28dc7"
+      }
+    },
+    {
+      "directory": "brute_force_demo-study-20261001T062340379137Z",
+      "seed": 2005,
+      "session_id": "b843b364-2e5a-4f49-8ec8-00bb10157359",
+      "validation_passed": true,
+      "raw_rows": 12,
+      "summary_rows": 4,
+      "source_sha256": {
+        "brute_force_demo.py": "42b3a093e5dcb0949eeac940a0f197059b1845725554a5a3af321178c17076e3",
+        "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+        "brute_force_demo_smoke_check.py": "07bef73d4f8e4ab0ab2c83ef7499f7e2ca50533cb25b8af4db7263d4aae306ea"
+      },
+      "file_sha256": {
+        "metadata.json": "bced9990b83f1f35d097c1b73f0d4b467aa611d7f15a8aa37543df1764effa20",
+        "validation.json": "1f5a7e24a28bde45dd5769445c055c32cf02781511d47d3a7121b341c228270f",
+        "raw.csv": "5287c393e3b33a046b8975ebb99231c5a9d0908b5f7ec405dc89e7b45ecafc1c",
+        "summary.csv": "28e0ca20da8e71cc0f1e102aebb88b1a1fc34df7584be3db57a0f7f6e41905c4"
+      }
+    },
+    {
+      "directory": "brute_force_demo-study-20261001T063343478046Z",
+      "seed": 2006,
+      "session_id": "1e404504-be86-4fcd-95d2-62a7206c110a",
+      "validation_passed": true,
+      "raw_rows": 12,
+      "summary_rows": 4,
+      "source_sha256": {
+        "brute_force_demo.py": "42b3a093e5dcb0949eeac940a0f197059b1845725554a5a3af321178c17076e3",
+        "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+        "brute_force_demo_smoke_check.py": "07bef73d4f8e4ab0ab2c83ef7499f7e2ca50533cb25b8af4db7263d4aae306ea"
+      },
+      "file_sha256": {
+        "metadata.json": "7038135bdb9e206c09349c6db89cbaad4c10162f5f52b19618465a88e743b582",
+        "validation.json": "6b52f6513a6d2a526f877c8ac8eb07fe699f393c885e2bf1591a2967001eea63",
+        "raw.csv": "1af6943b96f300c0e652629bc8fd9e588f2a348cabb39241a86fcb0f592e6047",
+        "summary.csv": "cc99ee45ca0d67c0f4651640403abf139c441a1ab897893ee21efd291ef68048"
+      }
+    },
+    {
+      "directory": "brute_force_demo-study-20261001T064427326224Z",
+      "seed": 2007,
+      "session_id": "3a6bd5f7-53ff-410d-ad78-1369d8193483",
+      "validation_passed": true,
+      "raw_rows": 12,
+      "summary_rows": 4,
+      "source_sha256": {
+        "brute_force_demo.py": "42b3a093e5dcb0949eeac940a0f197059b1845725554a5a3af321178c17076e3",
+        "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+        "brute_force_demo_smoke_check.py": "07bef73d4f8e4ab0ab2c83ef7499f7e2ca50533cb25b8af4db7263d4aae306ea"
+      },
+      "file_sha256": {
+        "metadata.json": "ee3539bc37a222ca4766852eddba97cdcbc4ef566a24e12ad1e1b2ecfe9974d8",
+        "validation.json": "c902246e5a48593fc27301716fee78b3211d5f6c319434436d4b2a42e7b02a55",
+        "raw.csv": "e4a2f76ded8b01a099b472b45e841c419bac9ddd2c77f0df1d1825e252ef7a94",
+        "summary.csv": "efde8c5be58d2280a77d0f61aab51d90253022616e6f7c357535582fced187f4"
+      }
+    }
+  ],
+  "aggregate": [
+    {
+      "scenario": "start",
+      "reduced_key_bits": 24,
+      "keyspace_size": 16777216,
+      "session_count": 5,
+      "candidates_checked_median": 1.0,
+      "elapsed_seconds_median": 8.8e-06,
+      "candidates_per_second_median": 113636.36363636363,
+      "expected_full_scan_time_median": 147.6395008,
+      "expected_half_scan_time_median": 73.8197504,
+      "expected_uniform_hit_time_median": 73.8197548
+    },
+    {
+      "scenario": "middle",
+      "reduced_key_bits": 24,
+      "keyspace_size": 16777216,
+      "session_count": 5,
+      "candidates_checked_median": 8388609.0,
+      "elapsed_seconds_median": 54.3785826,
+      "candidates_per_second_median": 154263.10504827317,
+      "expected_full_scan_time_median": 108.75715223513716,
+      "expected_half_scan_time_median": 54.37857611756858,
+      "expected_uniform_hit_time_median": 54.37857935878429
+    },
+    {
+      "scenario": "end",
+      "reduced_key_bits": 24,
+      "keyspace_size": 16777216,
+      "session_count": 5,
+      "candidates_checked_median": 16777216.0,
+      "elapsed_seconds_median": 109.0113657,
+      "candidates_per_second_median": 153903.36495894392,
+      "expected_full_scan_time_median": 109.0113657,
+      "expected_half_scan_time_median": 54.50568285,
+      "expected_uniform_hit_time_median": 54.50568609879186
+    },
+    {
+      "scenario": "random",
+      "reduced_key_bits": 24,
+      "keyspace_size": 16777216,
+      "session_count": 5,
+      "candidates_checked_median": 6800733.0,
+      "elapsed_seconds_median": 43.0032438,
+      "candidates_per_second_median": 154078.59357258125,
+      "expected_full_scan_time_median": 108.88739059067811,
+      "expected_half_scan_time_median": 54.443695295339054,
+      "expected_uniform_hit_time_median": 54.44369854043617
+    }
+  ],
+  "extrapolation_rate": 153903.36495894392,
+  "extrapolation_basis": "end only",
+  "extrapolations": [
+    {
+      "space": "DES",
+      "keyspace_bits": 56,
+      "extent": "full",
+      "candidate_count": "72057594037927936",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "4.682002505738E+11",
+      "days": "5.418984381641E+6",
+      "years": "1.483637065473E+4",
+      "note": "DES not measured; parity excluded.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    },
+    {
+      "space": "DES",
+      "keyspace_bits": 56,
+      "extent": "half",
+      "candidate_count": "36028797018963968",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "2.341001252869E+11",
+      "days": "2.709492190821E+6",
+      "years": "7.418185327366E+3",
+      "note": "DES not measured; parity excluded.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    },
+    {
+      "space": "DES",
+      "keyspace_bits": 56,
+      "extent": "uniform_expected",
+      "candidate_count": "36028797018963968.5",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "2.341001252869E+11",
+      "days": "2.709492190821E+6",
+      "years": "7.418185327366E+3",
+      "note": "DES not measured; parity excluded.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    },
+    {
+      "space": "Double-DES nominal",
+      "keyspace_bits": 112,
+      "extent": "full",
+      "candidate_count": "5192296858534827628530496329220096",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "3.373738358430E+28",
+      "days": "3.904789766702E+23",
+      "years": "1.069073173635E+21",
+      "note": "Nominal space; meet-in-the-middle changes the attack model.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    },
+    {
+      "space": "Double-DES nominal",
+      "keyspace_bits": 112,
+      "extent": "half",
+      "candidate_count": "2596148429267413814265248164610048",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "1.686869179215E+28",
+      "days": "1.952394883351E+23",
+      "years": "5.345365868175E+20",
+      "note": "Nominal space; meet-in-the-middle changes the attack model.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    },
+    {
+      "space": "Double-DES nominal",
+      "keyspace_bits": 112,
+      "extent": "uniform_expected",
+      "candidate_count": "2596148429267413814265248164610048.5",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "1.686869179215E+28",
+      "days": "1.952394883351E+23",
+      "years": "5.345365868175E+20",
+      "note": "Nominal space; meet-in-the-middle changes the attack model.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    },
+    {
+      "space": "Three-key TDEA nominal",
+      "keyspace_bits": 168,
+      "extent": "full",
+      "candidate_count": "374144419156711147060143317175368453031918731001856",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "2.431034690220E+45",
+      "days": "2.813697558124E+40",
+      "years": "7.703484074263E+37",
+      "note": "Nominal space is not security strength; TDEA not measured.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    },
+    {
+      "space": "Three-key TDEA nominal",
+      "keyspace_bits": 168,
+      "extent": "half",
+      "candidate_count": "187072209578355573530071658587684226515959365500928",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "1.215517345110E+45",
+      "days": "1.406848779062E+40",
+      "years": "3.851742037131E+37",
+      "note": "Nominal space is not security strength; TDEA not measured.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    },
+    {
+      "space": "Three-key TDEA nominal",
+      "keyspace_bits": 168,
+      "extent": "uniform_expected",
+      "candidate_count": "187072209578355573530071658587684226515959365500928.5",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "1.215517345110E+45",
+      "days": "1.406848779062E+40",
+      "years": "3.851742037131E+37",
+      "note": "Nominal space is not security strength; TDEA not measured.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    },
+    {
+      "space": "AES-128",
+      "keyspace_bits": 128,
+      "extent": "full",
+      "candidate_count": "340282366920938463463374607431768211456",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "2.211013170581E+33",
+      "days": "2.559043021506E+28",
+      "years": "7.006277950734E+25",
+      "note": "Only reduced 24-bit space measured.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    },
+    {
+      "space": "AES-128",
+      "keyspace_bits": 128,
+      "extent": "half",
+      "candidate_count": "170141183460469231731687303715884105728",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "1.105506585290E+33",
+      "days": "1.279521510753E+28",
+      "years": "3.503138975367E+25",
+      "note": "Only reduced 24-bit space measured.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    },
+    {
+      "space": "AES-128",
+      "keyspace_bits": 128,
+      "extent": "uniform_expected",
+      "candidate_count": "170141183460469231731687303715884105728.5",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "1.105506585290E+33",
+      "days": "1.279521510753E+28",
+      "years": "3.503138975367E+25",
+      "note": "Only reduced 24-bit space measured.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    },
+    {
+      "space": "AES-192",
+      "keyspace_bits": 192,
+      "extent": "full",
+      "candidate_count": "6277101735386680763835789423207666416102355444464034512896",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "4.078599410131E+52",
+      "days": "4.720601169133E+47",
+      "years": "1.292430162665E+45",
+      "note": "Not measured; different key schedule and round count.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    },
+    {
+      "space": "AES-192",
+      "keyspace_bits": 192,
+      "extent": "half",
+      "candidate_count": "3138550867693340381917894711603833208051177722232017256448",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "2.039299705065E+52",
+      "days": "2.360300584566E+47",
+      "years": "6.462150813323E+44",
+      "note": "Not measured; different key schedule and round count.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    },
+    {
+      "space": "AES-192",
+      "keyspace_bits": 192,
+      "extent": "uniform_expected",
+      "candidate_count": "3138550867693340381917894711603833208051177722232017256448.5",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "2.039299705065E+52",
+      "days": "2.360300584566E+47",
+      "years": "6.462150813323E+44",
+      "note": "Not measured; different key schedule and round count.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    },
+    {
+      "space": "AES-256",
+      "keyspace_bits": 256,
+      "extent": "full",
+      "candidate_count": "115792089237316195423570985008687907853269984665640564039457584007913129639936",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "7.523687949786E+71",
+      "days": "8.707972164104E+66",
+      "years": "2.384112844382E+64",
+      "note": "Not measured; different key schedule and round count.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    },
+    {
+      "space": "AES-256",
+      "keyspace_bits": 256,
+      "extent": "half",
+      "candidate_count": "57896044618658097711785492504343953926634992332820282019728792003956564819968",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "3.761843974893E+71",
+      "days": "4.353986082052E+66",
+      "years": "1.192056422191E+64",
+      "note": "Not measured; different key schedule and round count.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    },
+    {
+      "space": "AES-256",
+      "keyspace_bits": 256,
+      "extent": "uniform_expected",
+      "candidate_count": "57896044618658097711785492504343953926634992332820282019728792003956564819968.5",
+      "assumed_candidates_per_second": "153903.36495894392",
+      "seconds": "3.761843974893E+71",
+      "days": "4.353986082052E+66",
+      "years": "1.192056422191E+64",
+      "note": "Not measured; different key schedule and round count.",
+      "scope": "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate."
+    }
+  ],
+  "notes": [
+    "Linear mathematical illustration under fixed-rate assumption; not full-space search or evaluation of all cryptanalytic attacks. AES/Python rate is not DES/TDEA/GPU search rate.",
+    "Full=N/r; half=N/(2r); exact uniform=(N+1)/(2r); year=365.25 days.",
+    "Random count, time and rate medians are independent; their ratio need not reproduce the rate median.",
+    "Source snapshots identical; validation hashes and all summary medians checked against raw."
+  ]
+}

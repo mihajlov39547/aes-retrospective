@@ -343,7 +343,39 @@ i očekivana pretraga približno polovine prostora za uniformno izabran
 cilj. TDEA zahteva poseban model napada; GPU propusnost obrade poruke sa
 jednim ključem ne može se neposredno tumačiti kao stopa pretraživanja
 različitih ključeva.
-% TODO BRUTE FORCE: uneti redukovani prostor, proveru kandidata i parametre merenja.
+U izvedenoj demonstraciji AES-128 ECB služi isključivo kao konstrukcija
+za proveru kandidata na CPU-u, uz softversku putanju
+\texttt{use\_aesni=False}. Fiksni otvoreni tekst sadrži dva bloka i
+poznat je odgovarajući šifrat. Menjaju se samo donja 24 bita ključa,
+dok su gornji bitovi nula: indeks $i$ mapira se u 16-bajtni big-endian
+ključ. Prostor ima $N=2^{24}=16\,777\,216$ kandidata koji se obilaze
+rastućim redosledom do prvog poklapanja oba bloka.
+
+Mereni wall-clock interval obuhvata obilazak i formiranje kandidata,
+konstrukciju cipher objekta i rasporeda ključa za svaki kandidat,
+šifrovanje dva bloka, alokaciju izlaza, poređenje i kontrolu prekida
+pri poklapanju. Konstrukcija cilja, validacija, naknadne provere i izvoz
+nalaze se van tajmera. Funkcionalna validacija pre merenja proverava
+NIST SP 800-38A ECB F.1.1 vektor, mapiranje ključa, granice i tačan broj
+provera, pogrešan šifrat bez pogotka, determinističnost seed-a i formule.
+Svih pet sesija prošlo je validaciju; arhivirani izvori su identični.
+
+Svaki od pet nezavisnih procesa, sa seedovima 2003--2007, sadrži tri
+ponavljanja četiri scenarija: \texttt{start} koristi indeks 0 i ispituje
+jednu proveru i latenciju; \texttt{middle} koristi indeks $N/2$;
+\texttt{end} koristi indeks $N-1$ i obilazi ceo redukovani prostor;
+\texttt{random} koristi seedovanu uniformnu poziciju cilja. Redosled
+scenarija je start, middle, end, random u svakom ponavljanju.
+Prikazuje se medijana pet sesijskih medijana zasebno za svaku metriku,
+bez objedinjavanja raw raspodela ili uklanjanja odstupajućih merenja.
+
+Samo agregirana stopa $r$ scenarija \texttt{end} koristi se kao osnova
+ekstrapolacija. Za prostor veličine $N$ ceo obilazak traje $N/r$,
+približna polovina $N/(2r)$, a tačno očekivanje uspešne pretrage
+uniformnog cilja, uključujući proveru pogotka, iznosi $(N+1)/(2r)$.
+Ovo nije GPU merenje: CUDA MB/s za mnogo blokova sa jednim ključem nije
+stopa provere mnogo različitih ključeva sa zasebnim rasporedima ključa.
+% Poreklo: experiments/results/brute_force_demo-final-aggregate/aggregate.json
 
 % TODO MITM: uključiti metodološku podsekciju o Double-DES meet-in-the-middle
 % demonstraciji samo ako ostane u konačnom radu. Koristiti redukovani prostor,
@@ -640,7 +672,71 @@ nekoliko puta brži, ali to nije glavna savremena referenca.
 
 
 
-% TODO RESULTS BRUTE FORCE
+\subsubsection{Rezultati pretraživanja redukovanog prostora ključeva}
+
+Tabela~\ref{tab:brute-force-reduced-keyspace} prikazuje medijane medijana
+pet nezavisnih sesija, sa tri ponavljanja po scenariju u svakoj sesiji.
+Broj kandidata, vreme i stopa agregirani su nezavisno; naročito za
+\texttt{random}, količnik prikazanog broja kandidata i vremena ne mora
+biti jednak prikazanoj medijani stope.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{CPU demonstracija pretraživanja redukovanog 24-bitnog prostora
+AES-128 ključeva. Stopa za start nije održiva propusnost pretrage.}
+\label{tab:brute-force-reduced-keyspace}
+\begin{tabular}{lrrrl}
+\toprule
+Scenario & Kandidati & Vreme (s) & Kandidata/s & Tumačenje \\
+\midrule
+start  & 1              & 0.0000088 & 113\,636 & Jedna provera \\
+middle & 8\,388\,609   & 54.38     & 154\,263 & Oko pola prostora \\
+end    & 16\,777\,216  & 109.01    & 153\,903 & Ceo prostor \\
+random & 6\,800\,733   & 43.00     & 154\,079 & Slučajan cilj \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Scenario end proverava svih 16\,777\,216 kandidata za približno 109~s,
+uz održivu stopu oko 153.9 hiljada kandidata/s. Middle zahteva približno
+polovinu kandidata i vremena. Kod random scenarija broj provera zavisi
+od pozicije cilja. Start traje svega 8.8~mikrosekundi i obuhvata jednu
+proveru; njegova stopa nije osnova za ekstrapolacije. Iz end stope
+projektovana polovina redukovanog prostora i tačno uniformno očekivanje
+iznose približno 54.5~s; razlika njihovih formula sačuvana je u agregatu.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Linearne ilustracije vremena punih prostora pri fiksnoj
+izmerenoj AES-128 stopi scenarija end. Vrednosti su u godinama od
+365.25 dana; nijedna pretraga navedenih punih prostora nije izvedena.}
+\label{tab:brute-force-extrapolations}
+\begin{tabular}{lrrrl}
+\toprule
+Prostor & Bitovi & Ceo prostor & Polovina & Napomena \\
+\midrule
+DES & 56 & $1.48\times10^{4}$ & $7.42\times10^{3}$ & Nije meren \\
+Double-DES & 112 & $1.07\times10^{21}$ & $5.35\times10^{20}$ & Nominalno; MITM \\
+Troključni TDEA & 168 & $7.70\times10^{37}$ & $3.85\times10^{37}$ & Nominalno \\
+AES-128 & 128 & $7.01\times10^{25}$ & $3.50\times10^{25}$ & Redukovana pretraga \\
+AES-192 & 192 & $1.29\times10^{45}$ & $6.46\times10^{44}$ & Nije meren \\
+AES-256 & 256 & $2.38\times10^{64}$ & $1.19\times10^{64}$ & Nije meren \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Tabela~\ref{tab:brute-force-extrapolations} koristi isključivo agregiranu
+end stopu. Tačno uniformno očekivanje i približna polovina jednaki su
+na prikazanoj preciznosti; oba su odvojeno sačuvana u agregatu.
+DES projekcija celog prostora iznosi oko $4.68\times10^{11}$~s, a
+AES-128 oko $2.21\times10^{33}$~s. To su matematičke ilustracije pod
+pretpostavkom iste stope, a ne procene svih poznatih napada. DES i TDEA
+nisu mereni; AES/Python stopa nije DES/TDEA/GPU stopa pretrage.
+Double-DES ima meet-in-the-middle model napada, dok nominalnih 168 bita
+TDEA prostora nije tvrdnja o efektivnoj sigurnosnoj jačini. AES-192 i
+AES-256 nisu mereni i imaju drugačiji raspored ključa i broj rundi.
 % TODO RESULTS MITM: samo ako demonstracija ostane u radu.
 % TODO RESULTS AVALANCHE
 
@@ -796,8 +892,27 @@ uporedivi sa RTX/Tesla kernel-only rekordima iz literature. Bank-conflict-free
 shared-memory T-tabele, bitslicing/PTX i overlap preko streamova ostaju
 budući rad. Prethodni CPU CBC i AES-GCM rezultati nisu speedup referenca.
 
-% TODO DISCUSSION: povezati pretragu ključeva i avalanche sa
+% TODO DISCUSSION: povezati avalanche sa
 % retrospektivom tek na osnovu odgovarajućih rezultata; MITM ako ostane u radu.
+
+\subsubsection{Veličina prostora ključeva i cena provere kandidata}
+Bliske stope middle, end i random scenarija saglasne su sa približno
+linearnom vezom broja proverenih kandidata i vremena u redukovanom
+prostoru. End je osnova održive stope jer u svakom ponavljanju obilazi
+ceo prostor. Jedna provera u start scenariju korisna je za validaciju i
+latenciju, ali ne karakteriše dugu pretragu. Random pokazuje zavisnost
+trajanja od pozicije cilja; uniformni cilj zahteva u očekivanju približno
+polovinu prostora, što ne znači da medijana malog uzorka ciljeva mora
+biti tačno polovina.
+
+Linearna projekcija pri fiksnoj stopi ilustruje eksponencijalni rast
+troška sa brojem promenljivih bitova. Vremena za puni AES-128 i veće
+prostore postaju praktično nedostižna u tom modelu; demonstracija ne
+ocenjuje otpornost algoritama na sve poznate kriptoanalitičke napade.
+U retrospektivi DES/TDEA--AES time se razdvaja veličina prostora od
+performansi obrade poruka: prethodni GPU throughput koristi jedan ključ
+za mnogo blokova, dok ova pretraga konstruiše mnogo ključeva i njihovih
+rasporeda. Te dve stope ne mogu se neposredno prevoditi jedna u drugu.
 
 \subsubsection{Ograničenja}
 \label{sec:eksperimentalna-ogranicenja}
@@ -849,6 +964,15 @@ obradu payload-a sa izuzetom inicijalizacijom, a ne latenciju pojedinačne
 kratke poruke sa kompletnom pripremom. Ovo je naročito važno za 1~KiB
 pozive osetljive na fiksne troškove. Potvrda AES-NI putanje AES primitive
 ne predstavlja potvrdu hardverske putanje GHASH-a.
+
+Demonstracija pretrage meri CPU/Python/native-library workload, a ne
+optimizovani C ili GPU pretraživač. Koristi AES-128 ECB, dva poznata
+bloka i samo 24 promenljiva bita sa gornjim bitovima fiksiranim na nulu,
+ne puni AES prostor. \texttt{use\_aesni=False} isključuje tumačenje ove
+stope kao AES-NI pretrage. Ekstrapolacije ne modeluju paralelizaciju,
+hardverske farme, ASIC/FPGA/GPU implementacije ili specifične napade;
+Double-DES i TDEA zahtevaju posebne modele. Konstrukcija nije preporuka
+za ECB u zaštiti podataka.
 
 Propusnost nije mera kriptografske sigurnosti. DES i TDEA uključeni su
 zbog istorijskog i komparativnog značaja, a ne kao preporuka za savremenu
