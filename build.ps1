@@ -9,7 +9,10 @@ foreach ($tool in @('latexmk', 'xelatex', 'biber', 'pdftotext')) {
 }
 
 Push-Location -LiteralPath $PSScriptRoot
+$previousLocale = $env:LC_ALL
 try {
+    # Windows Perl does not support the Unix C.UTF-8 locale inherited by some terminals.
+    $env:LC_ALL = 'C'
     & latexmk -xelatex -interaction=nonstopmode -halt-on-error -jobname=aes20y -outdir=build main.tex
     if ($LASTEXITCODE -ne 0) {
         throw "PDF build failed (exit $LASTEXITCODE). See build/aes20y.log."
@@ -32,5 +35,6 @@ try {
     Write-Host "TXT: $txtPath"
 }
 finally {
+    $env:LC_ALL = $previousLocale
     Pop-Location
 }

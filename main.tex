@@ -3,7 +3,8 @@
 \usepackage{fontspec}
 \defaultfontfeatures{Ligatures=TeX}
 \setmainfont{Times New Roman}
-\usepackage[english,serbian]{babel}
+\usepackage[english]{babel}
+\babelprovide[import=sr-Latn,main]{serbian}
 \usepackage[margin=25mm]{geometry}
 \usepackage{microtype}
 \usepackage{graphicx}
@@ -13,6 +14,7 @@
 \usepackage{siunitx}
 \usepackage{csquotes}
 \usepackage[backend=biber,style=numeric,sorting=none,autolang=other]{biblatex}
+\DeclareBibliographyAlias{standard}{report}
 \addbibresource{references.bib}
 \usepackage[hidelinks]{hyperref}
 \usepackage[nameinlink,noabbrev]{cleveref}
@@ -57,5 +59,8 @@ From DES to AES: More Than Two Decades of Evolution, Applications and Perspectiv
 \input{chapters/10_prediction_vs_reality}
 \input{chapters/11_savremeni_izazovi_i_future_work}
 \input{chapters/12_zakljucak}
+\begingroup
+\raggedright
 \printbibliography[heading=bibintoc,title={Literatura}]
+\endgroup
 \end{document}
