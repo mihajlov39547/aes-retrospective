@@ -1,39 +1,298 @@
 \section{Očekivanja i stvarnost: od 2003. do 2026. godine}
 \label{sec:retrospektiva}
-% TODO: Razraditi poglavlje tek nakon provere izvora; ne unositi neproverene činjenice.
-Retrospektiva će povezati dokumentovano očekivanje iz perioda 2001--2003.
-sa proverljivim kasnijim ishodom. Tabela~\ref{tab:retrospektiva} sadrži
-istraživačka pitanja, ne unapred utvrđene zaključke. Ocena će biti opisna,
-bez subjektivnog numeričkog rangiranja.
+
+Izbor Rijndaela za Advanced Encryption Standard (AES) završen je 2000.
+godine, a standard FIPS~197 objavljen je 2001. godine. Zbog toga se
+dokumentovana osnova za rekonstrukciju početnih očekivanja nalazi pretežno
+u izvorima iz perioda 1997--2001, dok period od približno 2003. do 2026.
+predstavlja vremenski okvir u kome se može posmatrati šta se sa tim
+očekivanjima dogodilo u praksi. NIST-ov izveštaj o razvoju AES-a pokazuje
+da izbor nije bio zasnovan na jednoj metričkoj funkciji ili numeričkom
+rangiranju, već na kombinaciji bezbednosti, troška implementacije,
+softverskih i hardverskih karakteristika i fleksibilnosti
+\cite{nechvatal2001aes}. FIPS~197 je zatim standardizovao AES-128,
+AES-192 i AES-256, sa zajedničkom veličinom bloka od 128 bita
+\cite{nist_fips197_2001,nist_fips197_2023}.
+
+Retrospektiva zato ne pokušava da proglasi originalna predviđanja
+``tačnim'' ili ``pogrešnim'' u apsolutnom smislu. Umesto toga, porede se
+dokumentovana očekivanja i kriterijumi iz procesa standardizacije sa
+kasnijim proverljivim ishodima. Posebno se razdvajaju svojstva same
+kriptografske primitive, svojstva konkretne implementacije i svojstva
+protokola koji primitivu koristi. Isto razdvajanje bilo je ključno i u
+eksperimentalnom delu ovog rada: performanse softverske AES implementacije,
+AES-NI putanje, CUDA kernela i kompletne CPU--GPU putanje ne predstavljaju
+istu veličinu, kao što ni otpornost AES primitive ne garantuje ispravnu
+upotrebu režima rada ili protokola.
 
 \subsection{Rekonstrukcija očekivanja}
-% TODO: Koristiti tadašnje izvore, a ne kasnija sećanja kao jedini dokaz; dokumentovati stranicu i kontekst očekivanja iz AES procesa.
+
+NIST je proces razvoja AES-a započeo 1997. godine sa ciljem izbora
+simetričnog algoritma koji bi zamenio DES i ostao upotrebljiv tokom
+dugog vremenskog perioda. Zahtevan je najmanje 128-bitni blok i podrška
+za ključeve od 128, 192 i 256 bita, a kandidati su ocenjivani po
+bezbednosti, trošku i karakteristikama algoritma i implementacije
+\cite{nechvatal2001aes}. Bezbednost je imala najveću težinu, ali NIST
+nije posmatrao samo broj rundi ili veličinu ključa: razmatrani su poznati
+napadi, bezbednosna margina, jednostavnost strukture, statističko
+ponašanje, softverske i hardverske performanse, memorijski zahtevi i
+pogodnost za različite platforme.
+
+Rijndael je u tom poređenju imao veoma dobre softverske performanse na
+tadašnjim 8-, 32- i 64-bitnim arhitekturama, nizak memorijski zahtev i
+dobru pogodnost za implementacije na ograničenim uređajima
+\cite{nechvatal2001aes,daemen2002rijndael}. NIST je istovremeno
+Rijndaelovu bezbednosnu marginu smatrao adekvatnom, ali je dokumentovao i
+kritike da je ona kod pojedinih varijanti manja nego kod nekih drugih
+finalista. Važna karakteristika procesa je upravo to što takve primedbe
+nisu skrivene: pretpostavljalo se da će kriptoanaliza napredovati i da će
+se standard periodično preispitivati \cite{nechvatal2001aes}.
+
+Iz današnje perspektive posebno je važno šta tadašnja dokumentacija
+\emph{nije} predviđala. Efikasnost Rijndaela odnosila se na tada dostupne
+softverske i hardverske platforme i na osobine dizajna koje su omogućavale
+efikasnu realizaciju. Iz toga ne sledi da je AES proces predvideo buduće
+namenske CPU instrukcije, poput AES-NI, niti GPU/SIMT izvršavanje,
+savremene višestepene memorijske hijerarhije ili PCIe troškove.
+Originalna procena može zato da podrži tvrdnju da je Rijndael izabran kao
+algoritam sa dobrim implementacionim osobinama, ali ne i retroaktivnu
+tvrdnju da su konkretni mehanizmi ubrzanja iz 2010-ih i 2020-ih bili deo
+originalnog očekivanja.
+
+FIPS~197 je konačno standardizovao tri člana Rijndael porodice:
+AES-128, AES-192 i AES-256. Sva tri koriste blok od 128 bita, dok sufiks
+označava dužinu ključa \cite{nist_fips197_2001}. Urednička revizija
+FIPS~197 iz 2023. godine nije promenila algoritam niti ovaj skup
+parametara, što je samo po sebi značajan pokazatelj dugovečnosti osnovne
+primitive \cite{nist_fips197_2023}.
 
 \subsection{Migracija, zastupljenost i trajanje standarda}
-% TODO: Istražiti povlačenje DES-a, produženu primenu 3DES-a i dominaciju AES-a; razlikovati podršku u standardu od merenja primene i zastupljenost AES-128/192/256.
+
+Prelazak sa DES-a na AES nije bio trenutni događaj. Povlačenje DES-a
+pokazuje koliko se životni ciklus kriptografskog standarda razlikuje od
+datuma objavljivanja njegovog naslednika. FIPS~46-3 i povezani standardi
+formalno su povučeni 19. maja 2005. godine, jer NIST više nije smatrao da
+DES pruža odgovarajuću zaštitu za federalne informacije. U istoj objavi
+federalnim organizacijama preporučena je upotreba AES-a, dok je TDEA
+ostavljen kao prelazna mogućnost za određene primene
+\cite{federalregister2005des}.
+
+TDEA je opstao znatno duže. Njegov životni ciklus ilustrativan je jer
+pokazuje da povlačenje algoritma ne zavisi samo od pojave boljeg
+standarda, već i od instalirane baze sistema, interoperabilnosti i
+troška migracije. NIST SP~800-67 je TDEA još godinama definisao kao
+dozvoljenu blokovsku šifru, uz postepeno pooštravanje ograničenja nad
+količinom podataka koja se može obraditi jednim ključem
+\cite{nist_sp80067r2}. NIST SP~800-131A Rev.~2 je zatim utvrdio završnu
+tranziciju: primena TDEA za novu kriptografsku zaštitu bila je označena
+kao zastarela do kraja 2023, a nakon 31. decembra 2023. postala je
+nedozvoljena, uz zadržavanje ograničenih operacija nad ranije zaštićenim
+podacima \cite{nist_sp800131ar2}. SP~800-67 Rev.~2 formalno je povučen
+1. januara 2024. godine \cite{nist_tdea_withdrawal_2023}.
+
+Ovakav sled događaja potvrđuje dve različite stvari. Prvo, AES je
+uspešno preuzeo ulogu savremenog NIST standarda za simetričnu blokovsku
+enkripciju. Drugo, tranzicija nije izbrisala prethodne algoritme preko
+noći: TDEA je imao višedecenijski period kompatibilnosti i nasleđene
+upotrebe. Zbog toga se u ovom radu razlikuju izrazi
+\emph{standardizovan}, \emph{dozvoljen}, \emph{zastareo},
+\emph{nedozvoljen} i \emph{zastupljen u praksi}. Standardizacija sama
+po sebi nije merenje tržišnog ili mrežnog udela.
+
+Slična razlika je važna i za AES-128, AES-192 i AES-256. Sva tri su i
+2026. deo FIPS~197 \cite{nist_fips197_2023}, ali to ne znači da imaju
+jednaku zastupljenost u svim protokolima i sistemima. TLS~1.3, na primer,
+zahteva implementaciju skupa \texttt{TLS\_AES\_128\_GCM\_SHA256}, dok
+su \texttt{TLS\_AES\_256\_GCM\_SHA384} i ChaCha20-Poly1305 među
+preporučenim dodatnim skupovima \cite{rfc8446}. Ovo je dokaz
+standardizacione i protokolarne uloge AES-a, ali ne predstavlja samo po
+sebi globalnu telemetriju o relativnom udelu AES-128, AES-192 i AES-256.
 
 \subsection{Bezbednost, performanse i promena fokusa}
-% TODO: Povezati kriptoanalitičke nalaze, AES-NI, bočne kanale i prelazak na AEAD/GCM; za svaku tvrdnju odvojiti primitivu, implementaciju i protokol.
-% TODO: Povezati proverene istorijske kriterijume softverske/hardverske efikasnosti sa eksperimentom iz odeljka o AES akceleraciji. Izmereni faktor ubrzanja ne dokazuje da je konkretna buduća CPU instrukcija bila predviđena 2003.
-Eksperimentalnu vezu sa ovom temom pružiće poređenje iz
-odeljka~\ref{sec:aes-akceleracija}. Tumačenje će odvojiti doprinos savremenih
-procesorskih instrukcija od svojstava same šifre.
+
+Više od dve decenije kriptoanalize značajno je produbilo razumevanje
+AES-a, ali nije poništilo osnovnu bezbednosnu pretpostavku na kojoj je
+standardizacija zasnovana. NIST je 2021. objavio formalni pregled
+FIPS~197 i dosadašnje analize AES-a \cite{nist_ir8319}. Istovremeno,
+akademska literatura sadrži važne rezultate nad punim brojem rundi.
+Biryukov, Khovratovich i Nikolić pokazali su 2009. napad na puni
+AES-256 u specijalizovanom related-key modelu
+\cite{biryukov2009aes256}, dok su Bogdanov, Khovratovich i Rechberger
+2011. predstavili biclique kriptoanalizu punog AES-a, sa složenošću
+nešto manjom od iscrpne pretrage za sve tri dužine ključa
+\cite{bogdanov2011biclique}. Ovi rezultati su kriptoanalitički značajni,
+ali ne predstavljaju praktičan oporavak ključa u uobičajenom modelu
+primene AES-a.
+
+Retrospektivno je zato korisnije govoriti o promeni fokusa nego o tome da
+je analiza primitive prestala. Dok je matematička analiza AES-a
+nastavljena, praktična bezbednost sve više je zavisila od načina na koji
+se algoritam implementira i uključuje u protokole. Tabelarne
+implementacije AES-a na procesorima koriste memorijske pristupe čiji
+obrasci mogu zavisiti od tajnih podataka. Intel je pri uvođenju AES-NI
+eksplicitno naveo da namenske instrukcije izvršavaju AES bez takvih
+lookup tabela i sa vremenom koje ne zavisi od podataka, čime se pored
+ubrzanja uklanja važna klasa timing i cache napada karakterističnih za
+tabelarne implementacije \cite{gueron2012aesni}. To ipak nije dokaz da
+su AES-NI implementacije imune na sve bočne kanale, fault napade ili
+greške višeg nivoa.
+
+Eksperimentalnu vezu sa ovom promenom pruža poređenje iz
+odeljka~\ref{sec:aes-akceleracija}. Softverska i AES-NI putanja tamo
+izvršavaju istu AES primitivu, dok razlika u vremenu pokazuje doprinos
+kasnije uvedenih procesorskih instrukcija. Izmereni faktor ubrzanja zato
+nije retroaktivna potvrda da je NIST 2001. predvideo AES-NI. On pokazuje
+da se performanse istog standardizovanog algoritma mogu radikalno
+promeniti promenom implementacione putanje.
+
+Promena fokusa vidljiva je i na nivou režima rada. NIST je 2007.
+standardizovao GCM kao režim autentifikovane enkripcije sa pridruženim
+podacima, kombinujući poverljivost i autentifikaciju
+\cite{nist_sp80038d}. TLS~1.3 zatim je uklonio ranije ne-AEAD skupove
+šifara i definisao AEAD skupove, pri čemu je
+\texttt{TLS\_AES\_128\_GCM\_SHA256} obavezan za implementaciju
+\cite{rfc8446}. Savremeni IETF BCP dodatno ograničava upotrebu CBC
+skupova u TLS~1.2 i preporučuje savremenije režime i verzije protokola
+\cite{rfc9325}.
+
+Ovaj razvoj ne treba tumačiti kao tvrdnju da je GCM ``bezbedniji AES''.
+AES je blokovska primitiva, a GCM način njenog korišćenja koji dodaje
+autentifikaciju i sopstvene uslove bezbedne primene. Posebno je važna
+jedinstvenost inicijalizacionog vektora: SP~800-38D naglašava da je
+poštovanje uslova o IV/nonce vrednostima ključno za bezbednost GCM-a
+\cite{nist_sp80038d}. Dakle, kasniji razvoj nije zamenio problem
+kriptografske bezbednosti problemom implementacije, već je pokazao da
+se ukupna bezbednost sistema ne može svesti na kvalitet jedne primitive.
 
 \subsection{Kako se ostvaruju AES performanse: 2001--2003. i 2026.}
-Retrospektiva će razlikovati efikasnost originalnog dizajna Rijndaela,
-optimizacije softverskih implementacija, SIMD mogućnosti, namenske CPU
-AES instrukcije i masovno paralelno GPU izvršavanje. CPU--GPU poređenje iz
-odeljka~\ref{sec:cpu-gpu-poredjenje} povezaće ovu temu sa veličinom poruke,
-troškovima prenosa i položajem podataka u memoriji.
-GPU deo predstavlja savremeni razvoj koji se posmatra retrospektivno;
-ne pripisuje se originalnim očekivanjima AES procesa.
-% TODO: Za očekivanja 2001--2003. koristiti tadašnje izvore; razdvojiti SIMD i SIMT, namenske AES instrukcije i opštu paralelizaciju.
-% TODO: Tek posle validacije i merenja diskutovati eventualni prag prednosti GPU-a. Softverski režim današnjeg CPU-a nije istorijski računar.
+
+Tokom AES procesa performanse su razmatrane kao osobina algoritma na
+različitim tadašnjim platformama. Rijndael je pokazivao dobre rezultate
+u softveru, na procesorima različite širine reči i na ograničenim
+uređajima \cite{nechvatal2001aes}. Efikasne softverske realizacije mogle
+su kombinovati više operacija AES runde u unapred izračunate tabele,
+čime se smanjivao broj aritmetičkih operacija po bloku
+\cite{daemen2002rijndael}. Takav način izvršavanja predstavlja jedan
+istorijski sloj performansi, ali ne i konačni oblik u kome se AES
+izvršava na savremenim procesorima.
+
+Sledeći sloj čine arhitekturske i vektorske optimizacije, a zatim
+namenske instrukcije. Intel AES-NI, dostupan počev od Westmere generacije
+procesora, uvodi šest instrukcija koje hardverski podržavaju AES runde i
+raspored ključa. Intel ih opisuje kao mehanizam koji istovremeno donosi
+značajno ubrzanje i izbegava lookup tabele sa podackovno zavisnim
+pristupima memoriji \cite{gueron2012aesni}. Zbog toga današnja
+performansa AES-a nije samo posledica elegantnosti originalnog Rijndael
+dizajna, već kombinacija dizajna i dve decenije razvoja procesorskih
+arhitektura i softverskih biblioteka.
+
+Treći sloj je paralelno izvršavanje na GPU uređajima. CUDA/SIMT model
+omogućava da veliki broj nezavisnih blokova bude obrađen istovremeno.
+Literatura pokazuje da visoko optimizovani GPU AES kerneli mogu ostvariti
+vrlo visoku propusnost, ali takvi rezultati zavise od implementacije,
+memorijske hijerarhije i tačno definisanog obuhvata merenja
+\cite{tezcan2021gpu}. Kernel-only rezultat nije isto što i propusnost
+kompletne aplikacione putanje.
+
+Ta razlika je direktno vidljiva u eksperimentu iz
+odeljka~\ref{sec:cpu-gpu-poredjenje}. U njemu se odvojeno mere
+\emph{resident} izvršavanje, gde su podaci već na GPU-u, i praktična
+pinned host--device putanja koja uključuje H2D transfer, kernel,
+sinhronizaciju i D2H transfer. Rezultati pokazuju da CUDA kernel za veće
+bafer-e može nadmašiti CPU AES-NI kada se posmatra izolovano računanje,
+dok kompletna testirana pipeline putanja ne ostvaruje prednost nad
+AES-NI. Time se dobija važna retrospektivna pouka: originalna osobina
+algoritma da se može efikasno implementirati opstala je, ali konkretan
+izvor performansi 2026. godine često leži izvan same primitive.
+
+AES-GCM eksperiment dodatno pokazuje četvrti sloj. Savremena
+kriptografska performansa nije samo brzina blokovske šifre, jer GCM uz
+AES-CTR obradu uključuje i autentifikacionu komponentu. Zato CBC, čisti
+AES kernel i AES-GCM ne predstavljaju iste operacije i njihove MB/s
+vrednosti ne treba koristiti kao da mere isti posao. Ovo je u skladu sa
+širim pomeranjem od pitanja ``koliko je brza blokovska šifra'' ka
+pitanju ``koliko košta kompletna autentifikovana obrada podataka''.
 
 \subsection{Dužina bloka i retrospektivna pitanja}
-% TODO: Ispitati dovoljan obim podataka pod jednim ključem i zavisnost od moda, tagova i broja korisnika; 128-bitni blok nije neograničena bezbednost.
+
+Jedna od trajnih razlika između DES/TDEA i AES familije je veličina
+bloka. DES i TDEA rade sa blokovima od 64 bita, dok FIPS~197 definiše
+128-bitne blokove za sve tri AES varijante
+\cite{nist_fips197_2023}. Veličina bloka postaje važna kada se velika
+količina podataka obrađuje istim ključem, jer se verovatnoća kolizije
+povećava približavanjem birthday granici od reda $2^{n/2}$ blokova za
+$n$-bitnu blokovsku šifru.
+
+Praktičnu važnost tog problema pokazao je Sweet32. Za blok od 64 bita,
+birthday granica je reda $2^{32}$ blokova, odnosno približno 32~GB
+podataka, što je dovoljno malo da postane relevantno za dugotrajne
+mrežne sesije. Bhargavan i Leurent su pokazali praktične kolizione
+napade na 64-bitne blokovske šifre u TLS-u i OpenVPN-u
+\cite{bhargavan2016sweet32}. AES sa blokom od 128 bita pomera
+analogni generički birthday obim na približno $2^{64}$ blokova, pa je
+specifični problem koji je pogodio TDEA pomeren daleko izvan uobičajenih
+količina podataka.
+
+To, međutim, ne znači da AES ima neograničen dozvoljeni obim pod jednim
+ključem. Granice zavise od režima rada. SP~800-38D, na primer, ograničava
+dužinu jednog GCM plaintext-a i postavlja posebne uslove za konstrukciju
+i broj nonce/IV vrednosti; za slučajno generisane IV vrednosti broj
+invokacija pod jednim ključem ograničen je na $2^{32}$
+\cite{nist_sp80038d}. To je režimsko ograničenje, a ne ``lom'' AES
+primitive.
+
+Zanimljivo je da se ovo pitanje ponovo otvorilo upravo pred kraj
+posmatranog perioda. NIST je 2024. pokrenuo proces razmatranja
+Rijndael-256, varijante sa 256-bitnim blokom, navodeći da 128-bitni AES
+blok ostaje dovoljan za mnoge primene, ali da veoma veliki obimi podataka
+mogu opravdati širi blok \cite{nist_sp800197_predraft}. Tokom 2026.
+NIST je u okviru revizije SP~800-38D zatražio komentare i o predloženom
+wGCM režimu zasnovanom na blokovskoj šifri sa 256-bitnim blokom
+\cite{nist_wgcm_2026}. Ovi predlozi nisu deo FIPS~197 AES standarda
+2026. godine, ali pokazuju da pitanje dozvoljenog obima podataka ostaje
+aktuelno čak i nakon četvrt veka primene AES-a.
+
+Retrospektivni zaključak zato nije da je 128-bitni blok ``rešio'' problem
+zauvek, već da je pružio znatno veći prostor od DES/TDEA blokova i
+izbegao praktičnu Sweet32 klasu problema, dok savremeni režimi i
+visokopropusni sistemi i dalje zahtevaju eksplicitno upravljanje
+količinom podataka, nonce vrednostima i promenom ključa.
 
 \subsection{Kvantna perspektiva bez senzacionalizma}
-% TODO: Objasniti Groverovu kvadratnu prednost u idealizovanom query modelu, dubinu/širinu kola, korekciju grešaka i cenu oracle-a. Razlikovati asimptotiku od dostupnog fault-tolerant hardvera i pažljivo uporediti AES-128/256.
 
-\input{tables/prediction_vs_reality}
+Kvantna analiza AES-a zahteva posebno pažljivo razdvajanje asimptotskog
+rezultata od praktičnog napada. Groverov algoritam omogućava pretragu
+neuređenog prostora veličine $N$ sa reda $\sqrt{N}$ kvantnih upita,
+pa se za idealizovanu iscrpnu pretragu $k$-bitnog ključa često navodi
+red veličine $2^{k/2}$ oracle poziva \cite{grover1996}. Iz toga potiče
+popularna skraćenica da AES-128 ima ``64-bitnu kvantnu složenost'', ali
+ona opisuje samo idealizovani broj upita i nije potpuna procena resursa
+realnog kriptoanalitičkog sistema.
+
+AES oracle mora biti realizovan kao reverzibilno kvantno kolo, uz
+konkretan broj logičkih kubita, vrata i dubinu kola. Grassl i saradnici
+su dali rane konkretne procene resursa za Groverovu pretragu AES ključa
+\cite{grassl2016grover}, a kasniji rad Jaquesa i saradnika dodatno je
+analizirao konkretan trošak AES oracle-a pod ograničenjima dubine
+\cite{jaques2020grover}. Takve procene pokazuju zašto samo zamena
+$2^k$ sa $2^{k/2}$ nije dovoljna za procenu praktičnog napada: relevantni
+su serijska dubina, broj kvantnih vrata, broj logičkih i fizičkih kubita,
+korekcija grešaka i mogućnost paralelizacije.
+
+Aktuelna NIST interpretacija dodatno ublažava senzacionalističko
+tumačenje Grovera. NIST navodi da puna kvadratna prednost zahteva veliki
+broj serijskih koraka i da masovna paralelizacija, neophodna za praktične
+napade, smanjuje relativnu kvantnu prednost. NIST zato ne preporučuje
+automatsko udvostručavanje simetričkih ključeva samo zbog Groverovog
+algoritma i eksplicitno navodi da trenutne aplikacije mogu nastaviti da
+koriste AES sa ključevima od 128, 192 ili 256 bita
+\cite{nist_pqc_faq}.
+
+AES-256 ipak pruža veći prostor ključeva i time veću rezervu i u
+klasičnom i u idealizovanom kvantnom modelu. To nije isto što i tvrdnja
+da je AES-128 danas nebezbedan, niti da AES-256 ``rešava'' sve
+postkvantne probleme. Najveći uticaj poznatih kvantnih algoritama na
+savremenu kriptografsku tranziciju odnosi se na asimetrične primitive
+pogođene Shorovim algoritmom, dok za AES nema odgovarajućeg eksponencijalnog
+kvantnog ubrzanja. Kvantna perspektiva zato predstavlja dodatni faktor u
+izboru bezbednosne margine, a ne dokaz zastarelosti AES-a.

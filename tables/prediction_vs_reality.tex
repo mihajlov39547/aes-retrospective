@@ -1,24 +1,121 @@
-% TODO: Svaki red povezati sa izvorom iz 2001--2003. i izvorom za kasniji ishod.
-% TODO: Ako očekivanje nije pronađeno, označiti to; ne rekonstruisati ga kao činjenicu.
 \begin{table}[htbp]
-\centering\small
-\begin{tabularx}{\linewidth}{@{}XXX@{}}
-\toprule
-Očekivanje oko 2001--2003. & Stanje do 2026. & Ocena/objašnjenje \\
-\midrule
-Povlačenje DES-a iz nove upotrebe: istražiti & Proveriti izvore & Ocena nije formulisana \\
-Trajanje tranzicione uloge 3DES-a: istražiti & Proveriti izvore & Ocena nije formulisana \\
-Zastupljenost AES-a i njegovih varijanti: istražiti & Proveriti izvore & Ocena nije formulisana \\
-Praktična kriptoanaliza punog AES-a: istražiti & Proveriti izvore & Ocena nije formulisana \\
-Performanse i AES-NI: istražiti & Proveriti izvore & Ocena nije formulisana \\
-Bočni kanali i način implementacije: istražiti & Proveriti izvore & Ocena nije formulisana \\
-AEAD, GCM i promena prakse: istražiti & Proveriti izvore & Ocena nije formulisana \\
-Dovoljnost 128-bitnog bloka: istražiti & Proveriti izvore & Ocena nije formulisana \\
-Mogući drugačiji dizajnerski izbori: istražiti & Proveriti izvore & Ocena nije formulisana \\
-Kvantni model i AES-128/256: istražiti & Proveriti izvore & Ocena nije formulisana \\
-\bottomrule
-\end{tabularx}
-\caption{Istraživačka matrica očekivanja i ishoda; formulacije u prvoj koloni
-su teme za proveru, a ne utvrđena istorijska očekivanja.}
+\centering
+\small
+\caption{Dokumentovana očekivanja iz perioda standardizacije AES-a i
+proverljivi ishodi do 2026. godine. Ocena je opisna i ne predstavlja
+numeričko rangiranje.}
 \label{tab:retrospektiva}
+\begin{tabular}{p{0.16\textwidth} p{0.27\textwidth} p{0.36\textwidth} p{0.15\textwidth}}
+\toprule
+Tema &
+Dokumentovano očekivanje / kriterijum &
+Ishod do 2026. &
+Retrospektivna ocena \\
+\midrule
+
+Bezbednost primitive &
+AES proces daje najveću težinu bezbednosti i procenjuje da Rijndael ima
+adekvatnu marginu, uz očekivanje daljeg napretka kriptoanalize
+\cite{nechvatal2001aes}. &
+Related-key i biclique radovi proširili su teorijsku analizu punog AES-a,
+ali nisu doveli do praktičnog oporavka ključa u standardnom modelu primene
+\cite{biryukov2009aes256,bogdanov2011biclique,nist_ir8319}. &
+U skladu sa očekivanjem, uz ogradu. \\
+
+\addlinespace
+Softverska efikasnost &
+Rijndael je ocenjen kao veoma efikasan na različitim tadašnjim
+softverskim platformama i ograničenim uređajima
+\cite{nechvatal2001aes}. &
+Savremeni softverski AES koristi arhitekturske optimizacije i često
+namenske instrukcije; brzina 2026. nije posledica samo generičke
+softverske implementacije. &
+Delimično u skladu; kontekst promenjen. \\
+
+\addlinespace
+Hardverska efikasnost &
+Hardverska realizacija i mogućnost paralelnog/pipeline izvršavanja bili
+su deo kriterijuma AES procesa \cite{nechvatal2001aes}. &
+AES je dobio namensku CPU podršku poput AES-NI i efikasne GPU
+implementacije \cite{gueron2012aesni,tezcan2021gpu}. &
+U skladu na opštem nivou; mehanizmi su kasniji. \\
+
+\addlinespace
+Namenske AES instrukcije &
+AES-NI i slične buduće CPU instrukcije nisu bile dokumentovano
+predviđanje AES procesa. &
+Intel je od Westmere generacije uveo šest AES instrukcija sa
+performansnim i implementaciono-bezbednosnim prednostima
+\cite{gueron2012aesni}. &
+Izvan originalnog obuhvata očekivanja. \\
+
+\addlinespace
+Dužine ključa &
+Standard mora podržati 128-, 192- i 256-bitne ključeve
+\cite{nechvatal2001aes,nist_fips197_2001}. &
+Sve tri varijante ostaju deo FIPS~197 i posle ažuriranja iz 2023.
+\cite{nist_fips197_2023}. &
+U skladu sa kasnijim ishodom. \\
+
+\addlinespace
+DES migracija &
+AES je razvijen kao naslednik zastarelog DES-a. &
+FIPS~46-3 povučen je 19.\ maja 2005, uz preporuku prelaska na AES ili,
+za prelazne primene, TDEA \cite{federalregister2005des}. &
+U skladu sa kasnijim ishodom. \\
+
+\addlinespace
+TDEA kao prelazno rešenje &
+TDEA je zadržan kao odobrena prelazna alternativa nakon pojave AES-a. &
+Nova primena TDEA zaštite nedozvoljena je posle 31.\ decembra 2023, a
+SP~800-67 Rev.~2 povučen je 1.\ januara 2024.
+\cite{nist_sp800131ar2,nist_tdea_withdrawal_2023}. &
+Duga tranzicija; konačno povučen. \\
+
+\addlinespace
+Veličina bloka &
+AES standardizuje blok od 128 bita, nasuprot 64-bitnom DES/TDEA bloku
+\cite{nist_fips197_2001}. &
+Sweet32 je praktično pokazao ograničenja 64-bitnog bloka pri velikom
+obimu podataka; NIST 2024--2026 istražuje i šire 256-bitne blokove za
+buduće visokopropusne primene
+\cite{bhargavan2016sweet32,nist_sp800197_predraft,nist_wgcm_2026}. &
+128 bita je dobro ostarilo, ali nije bez granica. \\
+
+\addlinespace
+Implementaciona bezbednost &
+AES proces je razmatrao implementacione karakteristike i bočne kanale,
+ali u kontekstu tadašnjeg hardvera \cite{nechvatal2001aes}. &
+Cache/timing rizici tabelarnih implementacija postali su važan praktičan
+problem; AES-NI uklanja lookup tabele i podatkovno zavisno vreme za tu
+klasu implementacije \cite{gueron2012aesni}. &
+Promenjen implementacioni kontekst. \\
+
+\addlinespace
+AEAD i GCM &
+GCM nije bio deo originalnog izbora AES primitive; režimi rada
+standardizovani su odvojeno. &
+SP~800-38D definiše GCM kao AEAD, a TLS~1.3 zahteva implementaciju
+AES-128-GCM skupa \cite{nist_sp80038d,rfc8446}. &
+Izvan originalnog obuhvata; protokolarni razvoj. \\
+
+\addlinespace
+GPU/SIMT izvršavanje &
+Savremeni GPU compute model nije bio dokumentovano očekivanje AES procesa. &
+AES ima efikasne GPU realizacije, ali kernel propusnost i kompletna
+host--device putanja predstavljaju različite metrike
+\cite{tezcan2021gpu}. &
+Izvan originalnog obuhvata. \\
+
+\addlinespace
+Kvantna pretraga &
+AES proces je primarno procenjivao klasičnu iscrpnu pretragu i poznatu
+klasičnu kriptoanalizu. &
+Grover daje kvadratno ubrzanje u idealizovanom modelu, ali konkretni
+resursi, serijska dubina i paralelizacija znatno komplikuju praktičnu
+procenu \cite{grassl2016grover,jaques2020grover,nist_pqc_faq}. &
+Izvan originalnog obuhvata; zahteva ogradu. \\
+
+\bottomrule
+\end{tabular}
 \end{table}
