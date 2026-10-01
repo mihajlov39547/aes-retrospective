@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-01T07:17:27.676311+00:00",
+  "purpose": "study",
+  "seed": 2005,
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "executable": "C:\\Projects\\aes\\.venv\\Scripts\\python.exe",
+  "os": "Windows-10-10.0.19045-SP0",
+  "machine": "AMD64",
+  "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+  "logical_cpus": 8,
+  "physical_cpus": 4,
+  "ram_bytes": 16940544000,
+  "library_versions": {
+    "pycryptodome": "3.23.0",
+    "matplotlib": "3.11.2",
+    "psutil": "7.2.2"
+  },
+  "git_commit": "3619ce8464f9d52266306ce68fc853df56ffd8ea",
+  "git_status": "?? experiments/results/avalanche-study-20261001T071723053646Z/\n?? experiments/results/avalanche-study-20261001T071725373676Z/\n?? experiments/results/avalanche-validation-8015a6ea-b3e3-4268-aafb-0b1a2802a5cb/\n?? experiments/results/avalanche-validation-e585bcab-5d7b-46c0-82ff-74f5585590a6/\n?? experiments/results/avalanche-validation-f6be609c-0d26-4040-971e-4f0d226145aa/",
+  "script_sha256": {
+    "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+    "aes_acceleration_smoke_check.py": "aa8625c8aedc612a48ceb30252e2e4785e26cbfaf7f7a4b4c0971109901931d3",
+    "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+    "aes_cuda_baseline_smoke_check.py": "326268dd51f6c2bde64ac153e70b59647837a9f54682506099dbdf83d905bb0a",
+    "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+    "aes_cuda_cpu_gpu_smoke_check.py": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917",
+    "aes_gcm_benchmark.py": "9b89bbc1ddf1c27cfae41314595e5ef2caeb8bbb3086d857c670d5e842680cbf",
+    "aes_gcm_smoke_check.py": "2e96fd3cc6823c5494ed010ce4fcb127a8ccd82c1c405d1268d83ea97b67a018",
+    "aes_gpu.py": "336de03e3880efd3de49da22a8f93947dd7021ae9c1b2d78b1076b3d813e5b44",
+    "avalanche_smoke_check.py": "a05c11abd62349b2035cc82a63f01ef8535e8d80d207cc5648aa15645bc077b4",
+    "avalanche_test.py": "be564652c3bcbbaa0a0b700bd666d80a7e7ec3e586c473ef88cde44609c05112",
+    "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+    "brute_force_demo.py": "42b3a093e5dcb0949eeac940a0f197059b1845725554a5a3af321178c17076e3",
+    "brute_force_demo_smoke_check.py": "07bef73d4f8e4ab0ab2c83ef7499f7e2ca50533cb25b8af4db7263d4aae306ea",
+    "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+    "cpu_smoke_check.py": "28beee7607d9ddb09fb6af4b856368b1a130668b43e11d43d3787f64c433ab2a",
+    "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866",
+    "export_results.py": "337937d4d2276a4c256e2d2ebbc4fd1566b4c12a90cadc036b10288d835f3172",
+    "smoke_check.py": "502ca8dcad120da5b5356770e9bc0ba417ccd5fbba9fa1c4cccef4d587e788bc"
+  },
+  "argv": [
+    "scripts\\avalanche_test.py",
+    "--run",
+    "--profile",
+    "study",
+    "--purpose",
+    "study",
+    "--algorithms",
+    "DES",
+    "TDEA",
+    "AES-128",
+    "AES-192",
+    "AES-256",
+    "--variants",
+    "plaintext",
+    "key",
+    "--samples-per-group",
+    "2000",
+    "--seed",
+    "2005"
+  ],
+  "arguments": {
+    "run": true,
+    "seed": 2005,
+    "output": "C:\\Projects\\aes\\experiments\\results",
+    "purpose": "study",
+    "notes": "",
+    "profile": "study",
+    "algorithms": [
+      "DES",
+      "TDEA",
+      "AES-128",
+      "AES-192",
+      "AES-256"
+    ],
+    "variants": [
+      "plaintext",
+      "key"
+    ],
+    "samples_per_group": 2000
+  },
+  "method": {
+    "mode": "ECB single block, no padding",
+    "aes_backend": "software; use_aesni=False",
+    "bit_numbering": "LSB-first within bytes; flipped_bit_index is physical representation index",
+    "key_policy": "DES/TDEA odd parity restored after one effective-bit flip; TDEA requires three distinct effective components",
+    "sampling": "New random key/plaintext per sample; same pair for both variants; uniform bit selection with rejection for invalid TDEA changes",
+    "quantiles": "Linear interpolation at (n-1)*p (type 7)",
+    "warning": "Diffusion indicator, normalized by block size; not a proof of cryptographic security or a complete SAC test.",
+    "tdea_candidates": {
+      "generated": 4000,
+      "rejected": 0,
+      "accepted": 4000,
+      "rejections": []
+    }
+  },
+  "hardware_execution_path": "not verified",
+  "warning": "Educational synthetic experiment; DES/TDEA are legacy algorithms.",
+  "run_id": "avalanche-study-20261001T071727768343Z",
+  "experiment": "avalanche",
+  "session_id": "f6be609c-0d26-4040-971e-4f0d226145aa",
+  "validation_passed": true,
+  "validation_sha256": "93d955bf6a6a39583afb6750b5a5efb9e3132d077aa6bf86db8137ec537bb264",
+  "source_sha256": {
+    "avalanche_test.py": "be564652c3bcbbaa0a0b700bd666d80a7e7ec3e586c473ef88cde44609c05112",
+    "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+    "avalanche_smoke_check.py": "a05c11abd62349b2035cc82a63f01ef8535e8d80d207cc5648aa15645bc077b4"
+  }
+}
