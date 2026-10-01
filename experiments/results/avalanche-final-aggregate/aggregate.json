@@ -1,0 +1,456 @@
+{
+  "aggregation_rule": "Median across five session summaries separately for each statistic: session means, medians, sample SDs and type-7 quantiles. No raw pooling or outlier removal.",
+  "selected_sessions": [
+    {
+      "directory": "avalanche-study-20261001T071723053646Z",
+      "seed": 2003,
+      "session_id": "e585bcab-5d7b-46c0-82ff-74f5585590a6",
+      "validation_passed": true,
+      "raw_rows": 20000,
+      "summary_groups": 10,
+      "source_sha256": {
+        "avalanche_test.py": "be564652c3bcbbaa0a0b700bd666d80a7e7ec3e586c473ef88cde44609c05112",
+        "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+        "avalanche_smoke_check.py": "a05c11abd62349b2035cc82a63f01ef8535e8d80d207cc5648aa15645bc077b4"
+      },
+      "tdea_audit": {
+        "generated": 4000,
+        "rejected": 0,
+        "accepted": 4000,
+        "rejections": []
+      },
+      "file_sha256": {
+        "raw.csv": "101ed9bffde8749b2d0af3c95df765741ff82a2937b7142f6733b3cf087a9538",
+        "summary.csv": "993325c1b020071297a62c995431cc30f0f3028a92566e19ac186014f25b38b6",
+        "metadata.json": "5975087254f7243393fdd0c7bfb2b6515f384bb235a6a75170265794d42ffabd",
+        "validation.json": "2c628b76cc313d2e1536e32b12af54b32d42b0eb9f38400646922544ec82225c",
+        "report.md": "3996a1f1fe449f3ccf8034b97fc96a99a1272307e6b9f78cc05ba047242d506a"
+      }
+    },
+    {
+      "directory": "avalanche-study-20261001T071725373676Z",
+      "seed": 2004,
+      "session_id": "8015a6ea-b3e3-4268-aafb-0b1a2802a5cb",
+      "validation_passed": true,
+      "raw_rows": 20000,
+      "summary_groups": 10,
+      "source_sha256": {
+        "avalanche_test.py": "be564652c3bcbbaa0a0b700bd666d80a7e7ec3e586c473ef88cde44609c05112",
+        "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+        "avalanche_smoke_check.py": "a05c11abd62349b2035cc82a63f01ef8535e8d80d207cc5648aa15645bc077b4"
+      },
+      "tdea_audit": {
+        "generated": 4000,
+        "rejected": 0,
+        "accepted": 4000,
+        "rejections": []
+      },
+      "file_sha256": {
+        "raw.csv": "a9fe0a41c95477d0b39eaff503d2be7e259c0ac1e9527ad7662431033c82dbf2",
+        "summary.csv": "df75453c45b710a0a3d120a3545fd4d39c41413e1b564bea571c8644307a19bc",
+        "metadata.json": "27751649fb8b7e5f6f975d747bbc7ce4163594f66f19dfef32186628c4208846",
+        "validation.json": "0754e9f6d22e668cde758ac4164326436d95198d0be1973f97457f18e8fd7527",
+        "report.md": "77873d9c3e48b8105bbfbeb76b94a6bad43cfb790e1411d1b46b54cd7497c258"
+      }
+    },
+    {
+      "directory": "avalanche-study-20261001T071727768343Z",
+      "seed": 2005,
+      "session_id": "f6be609c-0d26-4040-971e-4f0d226145aa",
+      "validation_passed": true,
+      "raw_rows": 20000,
+      "summary_groups": 10,
+      "source_sha256": {
+        "avalanche_test.py": "be564652c3bcbbaa0a0b700bd666d80a7e7ec3e586c473ef88cde44609c05112",
+        "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+        "avalanche_smoke_check.py": "a05c11abd62349b2035cc82a63f01ef8535e8d80d207cc5648aa15645bc077b4"
+      },
+      "tdea_audit": {
+        "generated": 4000,
+        "rejected": 0,
+        "accepted": 4000,
+        "rejections": []
+      },
+      "file_sha256": {
+        "raw.csv": "d1ea319b23d7919b0bee45fc8a89199b93079d2ac221e72810a42c576d51d7ff",
+        "summary.csv": "35b191d496aa4f085e9cb60f2319aa1fb08d10da37d0d1afb2b4f557be37683a",
+        "metadata.json": "8485d15bf5aa3ae686067d1787c17568097d8e337677d1c08b9b70e50c2cf0e3",
+        "validation.json": "93d955bf6a6a39583afb6750b5a5efb9e3132d077aa6bf86db8137ec537bb264",
+        "report.md": "54b7d14223c63600b162be63102289a4495b6b15ca8aa53e3bff93ab8f4e5717"
+      }
+    },
+    {
+      "directory": "avalanche-study-20261001T071730229310Z",
+      "seed": 2006,
+      "session_id": "3e573709-a5c2-4f35-b4d7-1d24d6f61fc2",
+      "validation_passed": true,
+      "raw_rows": 20000,
+      "summary_groups": 10,
+      "source_sha256": {
+        "avalanche_test.py": "be564652c3bcbbaa0a0b700bd666d80a7e7ec3e586c473ef88cde44609c05112",
+        "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+        "avalanche_smoke_check.py": "a05c11abd62349b2035cc82a63f01ef8535e8d80d207cc5648aa15645bc077b4"
+      },
+      "tdea_audit": {
+        "generated": 4000,
+        "rejected": 0,
+        "accepted": 4000,
+        "rejections": []
+      },
+      "file_sha256": {
+        "raw.csv": "94be33165fe7e08605c6b1933e955be6ae90f20f21720a17b19feb67ae3e041d",
+        "summary.csv": "423911269f288b32d459f5075df8245e720cf462e0f0940cf57f9884f4c98d64",
+        "metadata.json": "3304403740d463e6244776f381ac763629f3f7996d6f879313409027fd2b6c7e",
+        "validation.json": "ff45ff3c19e35b71e3266609d6722f175808dd3e8f14acea0436f19d602f2238",
+        "report.md": "1fe796343bf7ada5d13f49b91dc4aa9ff8b77d9aa2b143c12543b8ae1bbc608f"
+      }
+    },
+    {
+      "directory": "avalanche-study-20261001T071732623353Z",
+      "seed": 2007,
+      "session_id": "6e8a94b6-26ab-4acf-a7e9-8d5dd0dce288",
+      "validation_passed": true,
+      "raw_rows": 20000,
+      "summary_groups": 10,
+      "source_sha256": {
+        "avalanche_test.py": "be564652c3bcbbaa0a0b700bd666d80a7e7ec3e586c473ef88cde44609c05112",
+        "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+        "avalanche_smoke_check.py": "a05c11abd62349b2035cc82a63f01ef8535e8d80d207cc5648aa15645bc077b4"
+      },
+      "tdea_audit": {
+        "generated": 4000,
+        "rejected": 0,
+        "accepted": 4000,
+        "rejections": []
+      },
+      "file_sha256": {
+        "raw.csv": "9dd6c23b85998cdad01226fc8cc7976fe4dacbe3f9a306c40e10c6a2c6fa623a",
+        "summary.csv": "c6eee6adb74e74e485cb3f386471a77b4bdd038d8341992ee8f6836c2969765a",
+        "metadata.json": "0afd29141f45a9e57669f5e7083d7edd31a26ca4786353ddf0830c29db27bb09",
+        "validation.json": "0ce29bf1bb7ec60144617f9e372bdc6a36531077800e7a36825c768cc1f9dfbc",
+        "report.md": "57f72cdfe9ba8ea5799cda9352127a616cc1cd46f7cb325510ae375d335ee377"
+      }
+    }
+  ],
+  "total_raw_observations": 100000,
+  "source_snapshots_consistent": true,
+  "tdea_audit_total": {
+    "generated": 20000,
+    "accepted": 20000,
+    "rejected": 0
+  },
+  "aggregate": [
+    {
+      "algorithm": "DES",
+      "variant": "plaintext_bit_flip",
+      "block_bits": 64,
+      "effective_key_bits": 56,
+      "session_count": 5,
+      "samples_per_session": 2000,
+      "total_raw_samples": 10000,
+      "median_of_session_mean_bits": 32.0185,
+      "median_of_session_median_bits": 32.0,
+      "median_of_session_stdev_bits": 4.020830422766462,
+      "median_q05": 25.0,
+      "median_q25": 29.0,
+      "median_q75": 35.0,
+      "median_q95": 39.0,
+      "median_mean_normalized": 0.5002890625,
+      "median_median_normalized": 0.5,
+      "median_stdev_normalized": 0.06282547535572597,
+      "skipped_count_total": 0
+    },
+    {
+      "algorithm": "DES",
+      "variant": "key_bit_flip",
+      "block_bits": 64,
+      "effective_key_bits": 56,
+      "session_count": 5,
+      "samples_per_session": 2000,
+      "total_raw_samples": 10000,
+      "median_of_session_mean_bits": 31.9375,
+      "median_of_session_median_bits": 32.0,
+      "median_of_session_stdev_bits": 3.9785879820817818,
+      "median_q05": 25.0,
+      "median_q25": 29.0,
+      "median_q75": 35.0,
+      "median_q95": 38.049999999999955,
+      "median_mean_normalized": 0.4990234375,
+      "median_median_normalized": 0.5,
+      "median_stdev_normalized": 0.06216543722002784,
+      "skipped_count_total": 0
+    },
+    {
+      "algorithm": "TDEA",
+      "variant": "plaintext_bit_flip",
+      "block_bits": 64,
+      "effective_key_bits": 168,
+      "session_count": 5,
+      "samples_per_session": 2000,
+      "total_raw_samples": 10000,
+      "median_of_session_mean_bits": 31.971,
+      "median_of_session_median_bits": 32.0,
+      "median_of_session_stdev_bits": 4.032051397146943,
+      "median_q05": 25.0,
+      "median_q25": 29.0,
+      "median_q75": 35.0,
+      "median_q95": 39.0,
+      "median_mean_normalized": 0.499546875,
+      "median_median_normalized": 0.5,
+      "median_stdev_normalized": 0.06300080308042098,
+      "skipped_count_total": 0
+    },
+    {
+      "algorithm": "TDEA",
+      "variant": "key_bit_flip",
+      "block_bits": 64,
+      "effective_key_bits": 168,
+      "session_count": 5,
+      "samples_per_session": 2000,
+      "total_raw_samples": 10000,
+      "median_of_session_mean_bits": 32.0235,
+      "median_of_session_median_bits": 32.0,
+      "median_of_session_stdev_bits": 4.0368228806184625,
+      "median_q05": 25.0,
+      "median_q25": 29.0,
+      "median_q75": 35.0,
+      "median_q95": 39.0,
+      "median_mean_normalized": 0.5003671875,
+      "median_median_normalized": 0.5,
+      "median_stdev_normalized": 0.06307535750966348,
+      "skipped_count_total": 0
+    },
+    {
+      "algorithm": "AES-128",
+      "variant": "plaintext_bit_flip",
+      "block_bits": 128,
+      "effective_key_bits": 128,
+      "session_count": 5,
+      "samples_per_session": 2000,
+      "total_raw_samples": 10000,
+      "median_of_session_mean_bits": 63.9865,
+      "median_of_session_median_bits": 64.0,
+      "median_of_session_stdev_bits": 5.653520929425284,
+      "median_q05": 55.0,
+      "median_q25": 60.0,
+      "median_q75": 68.0,
+      "median_q95": 73.0,
+      "median_mean_normalized": 0.49989453125,
+      "median_median_normalized": 0.5,
+      "median_stdev_normalized": 0.04416813226113503,
+      "skipped_count_total": 0
+    },
+    {
+      "algorithm": "AES-128",
+      "variant": "key_bit_flip",
+      "block_bits": 128,
+      "effective_key_bits": 128,
+      "session_count": 5,
+      "samples_per_session": 2000,
+      "total_raw_samples": 10000,
+      "median_of_session_mean_bits": 63.992,
+      "median_of_session_median_bits": 64.0,
+      "median_of_session_stdev_bits": 5.601034350269283,
+      "median_q05": 55.0,
+      "median_q25": 60.0,
+      "median_q75": 68.0,
+      "median_q95": 73.0,
+      "median_mean_normalized": 0.4999375,
+      "median_median_normalized": 0.5,
+      "median_stdev_normalized": 0.043758080861478775,
+      "skipped_count_total": 0
+    },
+    {
+      "algorithm": "AES-192",
+      "variant": "plaintext_bit_flip",
+      "block_bits": 128,
+      "effective_key_bits": 192,
+      "session_count": 5,
+      "samples_per_session": 2000,
+      "total_raw_samples": 10000,
+      "median_of_session_mean_bits": 64.0275,
+      "median_of_session_median_bits": 64.0,
+      "median_of_session_stdev_bits": 5.641290262689375,
+      "median_q05": 55.0,
+      "median_q25": 60.0,
+      "median_q75": 68.0,
+      "median_q95": 73.0,
+      "median_mean_normalized": 0.50021484375,
+      "median_median_normalized": 0.5,
+      "median_stdev_normalized": 0.04407258017726074,
+      "skipped_count_total": 0
+    },
+    {
+      "algorithm": "AES-192",
+      "variant": "key_bit_flip",
+      "block_bits": 128,
+      "effective_key_bits": 192,
+      "session_count": 5,
+      "samples_per_session": 2000,
+      "total_raw_samples": 10000,
+      "median_of_session_mean_bits": 64.0895,
+      "median_of_session_median_bits": 64.0,
+      "median_of_session_stdev_bits": 5.616695058634646,
+      "median_q05": 55.0,
+      "median_q25": 60.0,
+      "median_q75": 68.0,
+      "median_q95": 73.0,
+      "median_mean_normalized": 0.50069921875,
+      "median_median_normalized": 0.5,
+      "median_stdev_normalized": 0.04388043014558317,
+      "skipped_count_total": 0
+    },
+    {
+      "algorithm": "AES-256",
+      "variant": "plaintext_bit_flip",
+      "block_bits": 128,
+      "effective_key_bits": 256,
+      "session_count": 5,
+      "samples_per_session": 2000,
+      "total_raw_samples": 10000,
+      "median_of_session_mean_bits": 63.976,
+      "median_of_session_median_bits": 64.0,
+      "median_of_session_stdev_bits": 5.653669758738163,
+      "median_q05": 55.0,
+      "median_q25": 60.0,
+      "median_q75": 68.0,
+      "median_q95": 73.0,
+      "median_mean_normalized": 0.4998125,
+      "median_median_normalized": 0.5,
+      "median_stdev_normalized": 0.0441692949901419,
+      "skipped_count_total": 0
+    },
+    {
+      "algorithm": "AES-256",
+      "variant": "key_bit_flip",
+      "block_bits": 128,
+      "effective_key_bits": 256,
+      "session_count": 5,
+      "samples_per_session": 2000,
+      "total_raw_samples": 10000,
+      "median_of_session_mean_bits": 63.9965,
+      "median_of_session_median_bits": 64.0,
+      "median_of_session_stdev_bits": 5.660610303183063,
+      "median_q05": 55.0,
+      "median_q25": 60.0,
+      "median_q75": 68.0,
+      "median_q95": 73.0,
+      "median_mean_normalized": 0.49997265625,
+      "median_median_normalized": 0.5,
+      "median_stdev_normalized": 0.04422351799361768,
+      "skipped_count_total": 0
+    }
+  ],
+  "table": [
+    {
+      "algorithm": "DES",
+      "variant": "plaintext_bit_flip",
+      "block_bits": 64,
+      "median_HD": "32",
+      "mean_HD": "32.02",
+      "q05": "25",
+      "q95": "39",
+      "median_normalized": "0.50",
+      "mean_normalized": "0.5003"
+    },
+    {
+      "algorithm": "DES",
+      "variant": "key_bit_flip",
+      "block_bits": 64,
+      "median_HD": "32",
+      "mean_HD": "31.94",
+      "q05": "25",
+      "q95": "38.05",
+      "median_normalized": "0.50",
+      "mean_normalized": "0.4990"
+    },
+    {
+      "algorithm": "TDEA",
+      "variant": "plaintext_bit_flip",
+      "block_bits": 64,
+      "median_HD": "32",
+      "mean_HD": "31.97",
+      "q05": "25",
+      "q95": "39",
+      "median_normalized": "0.50",
+      "mean_normalized": "0.4995"
+    },
+    {
+      "algorithm": "TDEA",
+      "variant": "key_bit_flip",
+      "block_bits": 64,
+      "median_HD": "32",
+      "mean_HD": "32.02",
+      "q05": "25",
+      "q95": "39",
+      "median_normalized": "0.50",
+      "mean_normalized": "0.5004"
+    },
+    {
+      "algorithm": "AES-128",
+      "variant": "plaintext_bit_flip",
+      "block_bits": 128,
+      "median_HD": "64",
+      "mean_HD": "63.99",
+      "q05": "55",
+      "q95": "73",
+      "median_normalized": "0.50",
+      "mean_normalized": "0.4999"
+    },
+    {
+      "algorithm": "AES-128",
+      "variant": "key_bit_flip",
+      "block_bits": 128,
+      "median_HD": "64",
+      "mean_HD": "63.99",
+      "q05": "55",
+      "q95": "73",
+      "median_normalized": "0.50",
+      "mean_normalized": "0.4999"
+    },
+    {
+      "algorithm": "AES-192",
+      "variant": "plaintext_bit_flip",
+      "block_bits": 128,
+      "median_HD": "64",
+      "mean_HD": "64.03",
+      "q05": "55",
+      "q95": "73",
+      "median_normalized": "0.50",
+      "mean_normalized": "0.5002"
+    },
+    {
+      "algorithm": "AES-192",
+      "variant": "key_bit_flip",
+      "block_bits": 128,
+      "median_HD": "64",
+      "mean_HD": "64.09",
+      "q05": "55",
+      "q95": "73",
+      "median_normalized": "0.50",
+      "mean_normalized": "0.5007"
+    },
+    {
+      "algorithm": "AES-256",
+      "variant": "plaintext_bit_flip",
+      "block_bits": 128,
+      "median_HD": "64",
+      "mean_HD": "63.98",
+      "q05": "55",
+      "q95": "73",
+      "median_normalized": "0.50",
+      "mean_normalized": "0.4998"
+    },
+    {
+      "algorithm": "AES-256",
+      "variant": "key_bit_flip",
+      "block_bits": 128,
+      "median_HD": "64",
+      "mean_HD": "64.00",
+      "q05": "55",
+      "q95": "73",
+      "median_normalized": "0.50",
+      "mean_normalized": "0.5000"
+    }
+  ]
+}

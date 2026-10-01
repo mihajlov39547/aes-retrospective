@@ -1,0 +1,11 @@
+algorithm,variant,block_bits,median_HD,mean_HD,q05,q95,median_normalized,mean_normalized
+DES,plaintext_bit_flip,64,32,32.02,25,39,0.50,0.5003
+DES,key_bit_flip,64,32,31.94,25,38.05,0.50,0.4990
+TDEA,plaintext_bit_flip,64,32,31.97,25,39,0.50,0.4995
+TDEA,key_bit_flip,64,32,32.02,25,39,0.50,0.5004
+AES-128,plaintext_bit_flip,128,64,63.99,55,73,0.50,0.4999
+AES-128,key_bit_flip,128,64,63.99,55,73,0.50,0.4999
+AES-192,plaintext_bit_flip,128,64,64.03,55,73,0.50,0.5002
+AES-192,key_bit_flip,128,64,64.09,55,73,0.50,0.5007
+AES-256,plaintext_bit_flip,128,64,63.98,55,73,0.50,0.4998
+AES-256,key_bit_flip,128,64,64.00,55,73,0.50,0.5000

@@ -377,11 +377,6 @@ Ovo nije GPU merenje: CUDA MB/s za mnogo blokova sa jednim ključem nije
 stopa provere mnogo različitih ključeva sa zasebnim rasporedima ključa.
 % Poreklo: experiments/results/brute_force_demo-final-aggregate/aggregate.json
 
-% TODO MITM: uključiti metodološku podsekciju o Double-DES meet-in-the-middle
-% demonstraciji samo ako ostane u konačnom radu. Koristiti redukovani prostor,
-% zasebne metrike vremena i memorije i dokumentovan broj parova poruka/šifrat;
-% ne predstavljati demonstraciju kao pretragu punog prostora od 56+56 bitova.
-
 \subsubsection{Analiza avalanche efekta}
 Promena jednog bita otvorenog teksta ili efektivnog ključa ispituje se
 Hammingovim rastojanjem između odgovarajućih blokova šifrata. Rastojanje
@@ -391,8 +386,42 @@ bitovi ključa, a promene koje dovode do TDEA degeneracije posebno se
 obrađuju i evidentiraju. Ponavljanje nad različitim ulazima daje raspodelu
 rastojanja, umesto zaključka iz jedne vrednosti; ovaj pokazatelj difuzije
 nije dokaz kriptografske sigurnosti.
-% TODO AVALANCHE: potvrditi uzorkovanje, broj ponavljanja, postupak za
-% degenerisane TDEA ključeve i izvoz raspodela.
+Studija obuhvata DES, troključni TDEA i AES-128/192/256 u ECB konstrukciji
+nad jednim blokom, bez padding-a. Za svaki uzorak generišu se novi
+pseudoslučajni otvoreni tekst i validan ključ; isti par je osnova za
+obe varijante: \texttt{plaintext\_bit\_flip} i \texttt{key\_bit\_flip}.
+Poredi se početni blok šifrata sa blokom dobijenim posle promene tačno
+jednog izabranog bita otvorenog teksta ili efektivnog ključa. Hammingovo
+rastojanje deli se sa 64 za DES/TDEA, odnosno sa 128 za AES.
+AES koristi softversku putanju \texttt{use\_aesni=False}.
+
+Bit se bira uniformno među bitovima bloka, odnosno efektivnim bitovima
+ključa. Za DES/TDEA paritetni bitovi nisu kandidati za izbor; nakon
+promene efektivnog bita ponovo se podešava neparni paritet. Zato se u
+reprezentaciji može promeniti i paritetni bit, ali samo jedan efektivni
+bit ključa. TDEA zahteva tri različite efektivne komponente pre i posle
+promene. Nevažeći predlozi odbijaju se, evidentiraju i ponavlja se izbor;
+time je uzorkovanje uslovljeno validnošću troključnog TDEA ključa.
+
+Pet nezavisnih sesija koristi seedove 2003--2007 i po 2000 uzoraka za
+svaku kombinaciju algoritma i varijante: 20\,000 opservacija po sesiji,
+odnosno ukupno 100\,000 prihvaćenih Hammingovih rastojanja. Pre uzorkovanja
+svaka sesija prošla je validaciju funkcije rastojanja, dimenzija blokova
+i ključeva, pojedinačnih bitnih promena, pariteta, TDEA degeneracije,
+determinističnosti i normalizacije. Izvorni snapshot-i identični su kroz
+svih pet sesija. TDEA audit beleži ukupno 20\,000 predloga, uključujući
+početne i izmenjene ključeve, i isto toliko prihvatanja, bez odbijanja
+u ovim runovima; provera degeneracije ostala je aktivna.
+
+Za svaku grupu čuvaju se prosek, medijana, uzoračka standardna devijacija,
+minimum, maksimum i percentili Q05, Q25, Q75 i Q95. Percentili koriste
+linearnu interpolaciju na poziciji $(n-1)p$ (type 7). Svaka završna
+statistika agregira se kao medijana pet odgovarajućih sesijskih statistika:
+medijana sesijskih proseka, medijana sesijskih medijana, odnosno medijana
+sesijskih percentila. Raw raspodele se ne objedinjavaju i opservacije se
+ne uklanjaju. Ovo je empirijska raspodela promena bitova, ne kompletan
+SAC test niti rangiranje kriptografske sigurnosti.
+% Poreklo: experiments/results/avalanche-final-aggregate/aggregate.json
 
 \subsection{Rezultati}
 
@@ -737,8 +766,53 @@ nisu mereni; AES/Python stopa nije DES/TDEA/GPU stopa pretrage.
 Double-DES ima meet-in-the-middle model napada, dok nominalnih 168 bita
 TDEA prostora nije tvrdnja o efektivnoj sigurnosnoj jačini. AES-192 i
 AES-256 nisu mereni i imaju drugačiji raspored ključa i broj rundi.
-% TODO RESULTS MITM: samo ako demonstracija ostane u radu.
-% TODO RESULTS AVALANCHE
+\subsubsection{Raspodele avalanche efekta}
+
+Tabela~\ref{tab:avalanche-effect-distributions} prikazuje svih deset
+kombinacija. HD označava Hammingovo rastojanje u bitovima, a normirane
+vrednosti dobijaju se deljenjem dužinom bloka. Kolona proseka predstavlja
+medijanu pet sesijskih proseka, a ostale kolone medijane odgovarajućih
+sesijskih statistika. Svaka grupa ima po 2000 uzoraka u svakoj od pet sesija.
+
+\begin{table}[htbp]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\caption{Raspodele avalanche efekta pri promeni jednog bita otvorenog
+teksta (P) ili efektivnog ključa (K). Prikazane su medijane pet sesijskih
+statistika; normiranje je prema veličini bloka.}
+\label{tab:avalanche-effect-distributions}
+\begin{tabular}{llrrrrrrr}
+\toprule
+Algoritam & Var. & Blok & Med. HD & Pros. HD & Q05 & Q95 & Med. norm. & Pros. norm. \\
+\midrule
+DES     & P & 64  & 32 & 32.02 & 25 & 39    & 0.50 & 0.5003 \\
+DES     & K & 64  & 32 & 31.94 & 25 & 38.05 & 0.50 & 0.4990 \\
+TDEA    & P & 64  & 32 & 31.97 & 25 & 39    & 0.50 & 0.4995 \\
+TDEA    & K & 64  & 32 & 32.02 & 25 & 39    & 0.50 & 0.5004 \\
+AES-128 & P & 128 & 64 & 63.99 & 55 & 73    & 0.50 & 0.4999 \\
+AES-128 & K & 128 & 64 & 63.99 & 55 & 73    & 0.50 & 0.4999 \\
+AES-192 & P & 128 & 64 & 64.03 & 55 & 73    & 0.50 & 0.5002 \\
+AES-192 & K & 128 & 64 & 64.09 & 55 & 73    & 0.50 & 0.5007 \\
+AES-256 & P & 128 & 64 & 63.98 & 55 & 73    & 0.50 & 0.4998 \\
+AES-256 & K & 128 & 64 & 64.00 & 55 & 73    & 0.50 & 0.5000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+DES i TDEA imaju medijanu od 32 promenjena bita od 64, a sve AES varijante
+64 od 128: normalizovana medijana iznosi 0.5 u svih deset grupa.
+Agregirani normalizovani proseci kreću se približno od 0.4990 do 0.5007.
+Promena bita otvorenog teksta i promena efektivnog bita ključa daju
+slične raspodele. Q25--Q75 iznose 29--35 bita za DES/TDEA i 60--68 za AES.
+Vrednost Q95 od 38.05 kod DES promene ključa potiče iz interpolacije
+percentila, a ne iz pojedinačne opservacije razlomljenog broja bitova.
+
+Percentili su opisno saglasni sa idealizovanom binomijalnom raspodelom
+promena oko polovine bloka. Nije sproveden formalni test saglasnosti
+sa tim modelom, niti je dokazana nezavisnost promena izlaznih bitova.
+Nalaz podržava očekivanu sliku difuzije, ali ne dokazuje ukupnu
+kriptografsku sigurnost.
 
 \subsection{Diskusija}
 
@@ -892,8 +966,23 @@ uporedivi sa RTX/Tesla kernel-only rekordima iz literature. Bank-conflict-free
 shared-memory T-tabele, bitslicing/PTX i overlap preko streamova ostaju
 budući rad. Prethodni CPU CBC i AES-GCM rezultati nisu speedup referenca.
 
-% TODO DISCUSSION: povezati avalanche sa
-% retrospektivom tek na osnovu odgovarajućih rezultata; MITM ako ostane u radu.
+\subsubsection{Difuzija i granice tumačenja avalanche efekta}
+Raspodele za sve testirane algoritme i obe varijante centrirane su
+približno oko normalizovane vrednosti 0.5. Normalizacija omogućava
+zajedničko tumačenje 64-bitnih DES/TDEA i 128-bitnih AES blokova:
+promena jednog ulaznog ili efektivnog ključnog bita tipično menja
+oko polovine bitova šifrata. Sličnost varijanti saglasna je sa
+očekivanom difuzijom; male razlike proseka nisu osnov za rangiranje.
+Paritetni bitovi metodološki su odvojeni od efektivnih bitova ključa,
+a TDEA degeneracija eksplicitno je kontrolisana i evidentirana.
+
+U retrospektivi DES/TDEA--AES ovaj rezultat pokazuje da i stariji i
+noviji blokovski algoritmi mogu imati očekivanu lokalnu difuziju.
+Savremena prihvatljivost ipak zavisi i od veličine ključa i bloka,
+poznatih napada, režima rada, autentifikacije i implementacionog
+konteksta. Hammingova raspodela predstavlja samo jedan eksperimentalni
+pokazatelj difuzije; medijana 0.5 nije dokaz sigurnosti niti potvrda
+ili pobijanje poznatih kriptoanalitičkih napada.
 
 \subsubsection{Veličina prostora ključeva i cena provere kandidata}
 Bliske stope middle, end i random scenarija saglasne su sa približno
@@ -973,6 +1062,18 @@ stope kao AES-NI pretrage. Ekstrapolacije ne modeluju paralelizaciju,
 hardverske farme, ASIC/FPGA/GPU implementacije ili specifične napade;
 Double-DES i TDEA zahtevaju posebne modele. Konstrukcija nije preporuka
 za ECB u zaštiti podataka.
+
+Avalanche demonstracija koristi ograničeno pseudoslučajno uzorkovanje
+i ECB konstrukciju nad jednim blokom bez padding-a. Ona nije test
+režima rada nad porukama niti kompletan SAC/BIC statistički test;
+Hammingovo rastojanje ne meri otpornost na linearne, diferencijalne
+ili druge napade. Dve varijante dele osnovni par ključ/otvoreni tekst,
+pa sve opservacije nisu međusobno nezavisne. Tabela ne rangira
+algoritme po ukupnoj sigurnosti i ne preporučuje ECB za zaštitu podataka.
+Double-DES meet-in-the-middle demonstracija nije uključena: zahtevala
+bi zaseban model vremena, memorije i provere lažnih pogodaka. Pretraga
+redukovanog prostora i avalanche demonstracija pokrivaju edukativni cilj
+ove celine, dok MITM ostaje mogući budući rad.
 
 Propusnost nije mera kriptografske sigurnosti. DES i TDEA uključeni su
 zbog istorijskog i komparativnog značaja, a ne kao preporuka za savremenu
