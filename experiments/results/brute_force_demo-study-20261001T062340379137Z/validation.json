@@ -1,0 +1,112 @@
+{
+  "session_id": "b843b364-2e5a-4f49-8ec8-00bb10157359",
+  "purpose": "study",
+  "passed": true,
+  "tests": [
+    {
+      "test": "NIST AES-128 ECB KAT",
+      "passed": true
+    },
+    {
+      "test": "Key mapping",
+      "passed": true
+    },
+    {
+      "test": "1/start: index and exact count",
+      "passed": true
+    },
+    {
+      "test": "1/middle: index and exact count",
+      "passed": true
+    },
+    {
+      "test": "1/end: index and exact count",
+      "passed": true
+    },
+    {
+      "test": "1/random: index and exact count",
+      "passed": true
+    },
+    {
+      "test": "4/start: index and exact count",
+      "passed": true
+    },
+    {
+      "test": "4/middle: index and exact count",
+      "passed": true
+    },
+    {
+      "test": "4/end: index and exact count",
+      "passed": true
+    },
+    {
+      "test": "4/random: index and exact count",
+      "passed": true
+    },
+    {
+      "test": "8/start: index and exact count",
+      "passed": true
+    },
+    {
+      "test": "8/middle: index and exact count",
+      "passed": true
+    },
+    {
+      "test": "8/end: index and exact count",
+      "passed": true
+    },
+    {
+      "test": "8/random: index and exact count",
+      "passed": true
+    },
+    {
+      "test": "Wrong ciphertext, complete no-hit scan",
+      "passed": true
+    },
+    {
+      "test": "Seed reproducibility",
+      "passed": true
+    },
+    {
+      "test": "Wall formula and full/half",
+      "passed": true
+    },
+    {
+      "test": "Integer spaces and exact expected counts",
+      "passed": true
+    },
+    {
+      "test": "Full/half/uniform 56",
+      "passed": true
+    },
+    {
+      "test": "Full/half/uniform 112",
+      "passed": true
+    },
+    {
+      "test": "Full/half/uniform 168",
+      "passed": true
+    },
+    {
+      "test": "Full/half/uniform 128",
+      "passed": true
+    },
+    {
+      "test": "Full/half/uniform 192",
+      "passed": true
+    },
+    {
+      "test": "Full/half/uniform 256",
+      "passed": true
+    }
+  ],
+  "timestamp": "2026-10-01T06:13:34.288614+00:00",
+  "kat": {
+    "source": "https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-38a.pdf",
+    "section": "F.1.1, first two blocks",
+    "key": "2b7e151628aed2a6abf7158809cf4f3c",
+    "plaintext": "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e51",
+    "expected_ciphertext": "3ad77bb40d7a3660a89ecaf32466ef97f5d3d58503b9699de785895a96fdbaaf"
+  },
+  "completed_utc": "2026-10-01T06:13:34.310643+00:00"
+}

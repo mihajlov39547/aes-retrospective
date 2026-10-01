@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-01T06:33:43.389613+00:00",
+  "purpose": "study",
+  "seed": 2006,
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "executable": "C:\\Projects\\aes\\.venv\\Scripts\\python.exe",
+  "os": "Windows-10-10.0.19045-SP0",
+  "machine": "AMD64",
+  "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+  "logical_cpus": 8,
+  "physical_cpus": 4,
+  "ram_bytes": 16940544000,
+  "library_versions": {
+    "pycryptodome": "3.23.0",
+    "matplotlib": "3.11.2",
+    "psutil": "7.2.2"
+  },
+  "git_commit": "8d9d1bec77132a7d15889461a416b955f5a40e64",
+  "git_status": "?? experiments/results/brute_force_demo-study-20261001T060310082847Z/\n?? experiments/results/brute_force_demo-study-20261001T061333155317Z/\n?? experiments/results/brute_force_demo-study-20261001T062340379137Z/\n?? experiments/results/brute_force_demo-validation-1e404504-be86-4fcd-95d2-62a7206c110a/\n?? experiments/results/brute_force_demo-validation-6346e4de-8184-4984-946d-6a3af7853138/\n?? experiments/results/brute_force_demo-validation-6efa0fad-e196-4e61-a6ba-5e1ea0c0ddac/\n?? experiments/results/brute_force_demo-validation-b843b364-2e5a-4f49-8ec8-00bb10157359/",
+  "script_sha256": {
+    "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+    "aes_acceleration_smoke_check.py": "aa8625c8aedc612a48ceb30252e2e4785e26cbfaf7f7a4b4c0971109901931d3",
+    "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+    "aes_cuda_baseline_smoke_check.py": "326268dd51f6c2bde64ac153e70b59647837a9f54682506099dbdf83d905bb0a",
+    "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+    "aes_cuda_cpu_gpu_smoke_check.py": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917",
+    "aes_gcm_benchmark.py": "9b89bbc1ddf1c27cfae41314595e5ef2caeb8bbb3086d857c670d5e842680cbf",
+    "aes_gcm_smoke_check.py": "2e96fd3cc6823c5494ed010ce4fcb127a8ccd82c1c405d1268d83ea97b67a018",
+    "aes_gpu.py": "336de03e3880efd3de49da22a8f93947dd7021ae9c1b2d78b1076b3d813e5b44",
+    "avalanche_test.py": "d4622ce7581c936cca049d6756c76363b9a37716d0d4373ea3e5825147e133da",
+    "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+    "brute_force_demo.py": "42b3a093e5dcb0949eeac940a0f197059b1845725554a5a3af321178c17076e3",
+    "brute_force_demo_smoke_check.py": "07bef73d4f8e4ab0ab2c83ef7499f7e2ca50533cb25b8af4db7263d4aae306ea",
+    "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+    "cpu_smoke_check.py": "28beee7607d9ddb09fb6af4b856368b1a130668b43e11d43d3787f64c433ab2a",
+    "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866",
+    "export_results.py": "337937d4d2276a4c256e2d2ebbc4fd1566b4c12a90cadc036b10288d835f3172",
+    "smoke_check.py": "502ca8dcad120da5b5356770e9bc0ba417ccd5fbba9fa1c4cccef4d587e788bc"
+  },
+  "argv": [
+    "scripts\\brute_force_demo.py",
+    "--run",
+    "--profile",
+    "study",
+    "--purpose",
+    "study",
+    "--algorithm",
+    "AES-128",
+    "--mode",
+    "ECB",
+    "--reduced-key-bits",
+    "24",
+    "--target-position",
+    "start",
+    "middle",
+    "end",
+    "random",
+    "--repeats",
+    "3",
+    "--seed",
+    "2006"
+  ],
+  "arguments": {
+    "run": true,
+    "seed": 2006,
+    "output": "C:\\Projects\\aes\\experiments\\results",
+    "purpose": "study",
+    "notes": "",
+    "profile": "study",
+    "reduced_key_bits": 24,
+    "target_position": [
+      "start",
+      "middle",
+      "end",
+      "random"
+    ],
+    "algorithm": "AES-128",
+    "mode": "ECB",
+    "repeats": 3
+  },
+  "method": {
+    "algorithm": "AES-128",
+    "mode": "ECB",
+    "backend": "software",
+    "use_aesni": false,
+    "reduced_key_bits": 24,
+    "keyspace_size": 16777216,
+    "plaintext_hex": "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e51",
+    "mapping": "128-bit big-endian candidate, low b bits variable, upper bits zero",
+    "timed": "Sequential search: integer enumeration, key conversion, new cipher/key schedule per candidate, two-block encryption, output allocation and comparison; stop at first match.",
+    "excluded": "Target/reference construction, validation, post-checks and export",
+    "wall_timer": {
+      "implementation": "QueryPerformanceCounter()",
+      "monotonic": true,
+      "adjustable": false,
+      "resolution": 1e-07
+    },
+    "warmup": "Functional gate primes library; no separate timed warmup",
+    "expected_half": "N/(2r) approximation; exact uniform successful-search expectation (N+1)/(2r) also exported",
+    "hardware_execution_path": "PyCryptodome CPU AES with explicit use_aesni=False; no GPU; no instruction trace claimed",
+    "scenario_order": "CLI order; seed controls random target sequence",
+    "extrapolation": "Linear extrapolation under fixed-rate assumption, not an implementation of full-space search; not a cryptanalytic attack evaluation. AES/Python candidate rate is not DES/TDEA or GPU search rate.",
+    "short_search_note": "Start target tests correctness/latency, not sustained rate. Use end scenario for extrapolation.",
+    "extrapolation_rate_basis": {
+      "scenario": "end",
+      "statistic": "median of repeat rates",
+      "rate": 153903.36495894392,
+      "full_scan_measured": true
+    }
+  },
+  "hardware_execution_path": "PyCryptodome CPU AES with explicit use_aesni=False; no GPU; no instruction trace claimed",
+  "warning": "Educational synthetic experiment; DES/TDEA are legacy algorithms.",
+  "run_id": "brute_force_demo-study-20261001T063343478046Z",
+  "experiment": "brute_force_demo",
+  "session_id": "1e404504-be86-4fcd-95d2-62a7206c110a",
+  "algorithm": "AES-128",
+  "mode": "ECB",
+  "reduced_key_bits": 24,
+  "keyspace_size": 16777216,
+  "validation_passed": true,
+  "validation_sha256": "6b52f6513a6d2a526f877c8ac8eb07fe699f393c885e2bf1591a2967001eea63",
+  "source_sha256": {
+    "brute_force_demo.py": "42b3a093e5dcb0949eeac940a0f197059b1845725554a5a3af321178c17076e3",
+    "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+    "brute_force_demo_smoke_check.py": "07bef73d4f8e4ab0ab2c83ef7499f7e2ca50533cb25b8af4db7263d4aae306ea"
+  },
+  "measurements": [
+    {
+      "scenario": "start",
+      "repeat": 0,
+      "target_index": 0,
+      "candidates_checked": 1,
+      "candidates_per_second": 78740.15748031496
+    },
+    {
+      "scenario": "middle",
+      "repeat": 0,
+      "target_index": 8388608,
+      "candidates_checked": 8388609,
+      "candidates_per_second": 153475.36922023908
+    },
+    {
+      "scenario": "end",
+      "repeat": 0,
+      "target_index": 16777215,
+      "candidates_checked": 16777216,
+      "candidates_per_second": 153829.72771360044
+    },
+    {
+      "scenario": "random",
+      "repeat": 0,
+      "target_index": 13196883,
+      "candidates_checked": 13196884,
+      "candidates_per_second": 154597.99597227035
+    },
+    {
+      "scenario": "start",
+      "repeat": 1,
+      "target_index": 0,
+      "candidates_checked": 1,
+      "candidates_per_second": 108695.65217391304
+    },
+    {
+      "scenario": "middle",
+      "repeat": 1,
+      "target_index": 8388608,
+      "candidates_checked": 8388609,
+      "candidates_per_second": 153480.22317434204
+    },
+    {
+      "scenario": "end",
+      "repeat": 1,
+      "target_index": 16777215,
+      "candidates_checked": 16777216,
+      "candidates_per_second": 154701.9371108161
+    },
+    {
+      "scenario": "random",
+      "repeat": 1,
+      "target_index": 2389648,
+      "candidates_checked": 2389649,
+      "candidates_per_second": 155107.6533827847
+    },
+    {
+      "scenario": "start",
+      "repeat": 2,
+      "target_index": 0,
+      "candidates_checked": 1,
+      "candidates_per_second": 113636.36363636363
+    },
+    {
+      "scenario": "middle",
+      "repeat": 2,
+      "target_index": 8388608,
+      "candidates_checked": 8388609,
+      "candidates_per_second": 154113.93570452352
+    },
+    {
+      "scenario": "end",
+      "repeat": 2,
+      "target_index": 16777215,
+      "candidates_checked": 16777216,
+      "candidates_per_second": 153903.36495894392
+    },
+    {
+      "scenario": "random",
+      "repeat": 2,
+      "target_index": 1739733,
+      "candidates_checked": 1739734,
+      "candidates_per_second": 154025.77999602517
+    }
+  ]
+}
