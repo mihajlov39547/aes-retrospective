@@ -1,7 +1,7 @@
-\section{Poređenje DES-a, Triple DES-a i AES-a}
+\section{Poređenje DES-a, TDEA i AES-a}
 \label{sec:poredjenje}
 
-Poređenje DES-a, Triple DES-a i AES-a zahteva pažljivo razdvajanje
+Poređenje DES-a, TDEA i AES-a zahteva pažljivo razdvajanje
 parametara koji na prvi pogled deluju neposredno uporedivo, ali u
 stvari pripadaju različitim kategorijama. Veličina ključa nije isto
 što i efektivna sigurnosna snaga; broj rundi nije neposredno merilo
@@ -10,28 +10,11 @@ u nasleđenim sistemima; a rezultat benchmark-a jedne implementacije
 ne može se automatski generalizovati na sve softverske i hardverske
 platforme.
 
-Zbog toga se poređenje u ovom radu zasniva na tri odvojena nivoa:
-
-\begin{enumerate}
-    \item normativni parametri algoritma, kao što su veličina bloka,
-    veličina ključa, broj rundi ili DES prolaza i godina
-    standardizacije;
-
-    \item bezbednosne procene, uključujući efektivnu sigurnosnu snagu,
-    poznata ograničenja i status preporuka;
-
-    \item implementacione karakteristike, kao što su softverske i
-    hardverske performanse, mogućnost paralelizacije i dostupnost
-    specijalizovane procesorske podrške.
-\end{enumerate}
-
-Normativne karakteristike preuzimaju se iz FIPS i NIST dokumenata
-~\cite{fips46-3,sp800-67r2,fips197-2023}, dok će kvantitativni
-rezultati performansi u ovom radu biti izvedeni iz zasebnog
-eksperimentalnog postupka. Time se izbegava česta greška da se
-algoritamska svojstva i rezultat jedne konkretne implementacije
-predstave kao ista vrsta dokaza.
-
+Poređenje obuhvata normativne parametre, bezbednosne procene i
+implementacione troškove. Parametri potiču iz FIPS i NIST dokumenata
+~\cite{fips46-3,sp800-67r2,fips197-2023}, a izmerene performanse iz
+Poglavlja~\ref{sec:eksperimenti}. Centralna tabela sažima prva dva
+aspekta; performanse zahtevaju platformu i merni protokol.
 
 \subsection{Kriterijumi i dve vremenske perspektive}
 \label{subsec:poredjenje_kriterijumi}
@@ -48,33 +31,15 @@ posmatrati više od dve decenije praktičnog iskustva sa AES-om,
 formalno povlačenje DES-a i TDEA iz novih NIST primena i razvoj
 specijalizovane CPU i GPU podrške za AES.
 
-Ovakvo razdvajanje je neophodno zato što isti algoritam može imati
-potpuno različit status u dva vremenska trenutka. Na primer, TDEA je
-početkom 2000-ih predstavljao važno kompatibilno rešenje za
-produžavanje životnog veka DES infrastrukture, dok je njegova NIST
-specifikacija povučena 1. januara 2024. godine
-~\cite{tdea-withdrawal-2023}. AES je, nasuprot tome, 2001. bio novi
-standard bez dugog operativnog iskustva, dok je do 2026. ostao
-standardizovana i široko podržana blokovska šifra.
+TDEA je u prvom periodu bio kompatibilno migraciono rešenje, a u drugom
+je povučen za novu zaštitu~\cite{tdea-withdrawal-2023}; AES je od novog
+standarda postao dugovečna osnova. Godine prvih standarda i kasnijih
+revizija razlikuju se, kao i ključni materijal i sigurnosna snaga
+~\cite{fips197-2023,sp800-57pt1r5}. Te razlike prikazuje
+Tabela~\ref{tab:poredjenje}.
 
-Prilikom poređenja godina treba razlikovati godinu prvog standarda od
-godine poslednje revizije. DES je prvi put standardizovan 1977.
-godine, dok FIPS~46-3, korišćen kao normativni istorijski izvor u ovom
-radu, potiče iz 1999. godine. AES je standardizovan kao FIPS~197
-2001. godine, dok izdanje iz 2023. predstavlja uredničko ažuriranje
-bez promene algoritma~\cite{fips197-2023}.
-
-Slično tome, nominalnu dužinu ključa treba razlikovati od efektivne
-sigurnosne snage. DES poseduje 64-bitni zapis ključa, ali samo 56
-kriptografski efektivnih bitova. Kod 3TDEA postoje tri 56-bitne
-komponente, odnosno 168 bita ključnog materijala, ali NIST procenjuje
-sigurnosnu snagu 3TDEA na približno 112 bita zbog poznatih
-generičkih napada~\cite{sp800-57pt1r5}. AES-128, AES-192 i AES-256
-koriste redom 128, 192 i 256 bitova ključnog materijala, pri čemu se
-njihov praktični sigurnosni nivo ne svodi samo na nominalnu dužinu
-ključa, već i na najbolju poznatu kriptoanalizu.
-
-Treba razlikovati i normativni status od stvarne tržišne prisutnosti.
+Treba razlikovati i normativni status od stvarne tržišne prisutnosti. Standardizovana podrška nije merenje
+tržišnog udela; takva procena zahteva zasebnu telemetriju ili mrežna merenja.
 Povlačenje nekog standarda iz NIST preporuka znači da se više ne
 preporučuje ili ne dozvoljava za određene nove primene u datom
 regulatornom okviru. To ne znači da algoritam automatski nestaje iz
@@ -91,29 +56,12 @@ DES, TDEA i AES predstavljaju tri različite faze razvoja simetrične
 kriptografije i zato ne treba očekivati da njihova svojstva skaliraju
 jednostavnim povećanjem broja ključeva ili rundi.
 
-DES koristi 64-bitni blok i efektivni 56-bitni ključ. Njegova osnovna
-Feistel konstrukcija sadrži 16 rundi, ali je praktični problem postao
-prostor ključeva koji se može iscrpno pretraživati. Istorijski projekti
-poput EFF Deep Crack demonstrirali su da je upravo 56-bitni ključ
-dovoljan da DES postane neprihvatljiv kao dugoročni standard.
-
-TDEA povećava sigurnost tako što tri puta primenjuje DES transformaciju.
-Kod 3TDEA koriste se tri nezavisne DES komponente, dok 2TDEA koristi
-dve nezavisne komponente uz $K_3=K_1$. TDEA zato ne treba opisivati
-kao algoritam sa ``48 DES rundi'' u smislu jedinstvene nove strukture,
-iako tri DES prolaza zaista znače tri puta po 16 Feistel rundi.
-Preciznije je navesti da se jedan TDEA blok obrađuje kroz tri
-kompletne DES operacije.
-
-Ovakav pristup povećava računarski trošak. TDEA zadržava 64-bitni blok
-i izvršava tri DES transformacije, pa je njegova efikasnost ograničena
-samom konstrukcijom. Njegova velika prednost bila je kompatibilnost,
-a ne optimalnost.
-
-AES koristi drugačiji dizajn. Standardni blok iznosi 128 bita, a
-varijante AES-128, AES-192 i AES-256 koriste 10, 12 odnosno 14 rundi
-~\cite{fips197-2023}. Veći broj bitova ključa ne menja veličinu bloka,
-ali povećava broj rundi i trošak proširenja ključa.
+Tabela~\ref{tab:poredjenje} pokazuje da je prelazak sa DES-a na TDEA
+povećao sigurnosnu snagu po cenu tri kompletne DES operacije, uz isti
+blok. Izraz „48 rundi” zato ne opisuje jedinstvenu novu konstrukciju:
+preciznije je govoriti o tri DES prolaza. AES je promenio i konstrukciju
+i blok, dok izbor dužeg ključa unutar AES familije povećava broj rundi
+i trošak proširenja ključa~\cite{fips197-2023}.
 
 Sam broj rundi ne može se koristiti kao neposredna mera brzine.
 Jedna AES runda nije računski ekvivalentna jednoj DES rundi, kao što
@@ -134,8 +82,8 @@ GPU implementacije predstavljaju drugačiji oblik ubrzanja. One ne
 moraju posedovati jednu direktnu ekvivalentnu AES instrukciju, već
 koriste veliki broj paralelnih izvršnih niti za obradu nezavisnih
 blokova. Ovaj pristup je posebno pogodan za ECB kao test sirovog
-throughput-a i za CTR, gde se svaki blok brojača može obrađivati
-nezavisno. Zbog toga će eksperimentalni deo rada porediti softverski
+propusnosti i za CTR, gde se svaki blok brojača može obrađivati
+nezavisno. Zbog toga eksperimentalni deo rada poredi softverski
 CPU put, CPU sa hardverskom AES podrškom i NVIDIA CUDA GPU putanju.
 
 Sa stanovišta memorijskih zahteva, DES i AES ne mogu se rangirati
@@ -205,29 +153,12 @@ godine. DES i TDEA nisu preporučeni za novu zaštitu u aktuelnom
 NIST okviru, dok je AES i dalje aktivan standard. Ovo ne predstavlja
 tvrdnju o apsolutnom nestanku DES-a ili TDEA iz svih realnih sistema.
 
-Performansne oznake u centralnoj tabeli treba zadržati opisnim i
-opreznim. Ne treba unapred navoditi numeričke vrednosti u MB/s ili
-Gb/s osim ako su vezane za jasno navedenu platformu i izvor. Glavni
-kvantitativni podaci o CPU i GPU performansama biće dobijeni kroz
-eksperimentalno poglavlje ovog rada.
-
-Eksperimentalni benchmark ima ograničen opseg. On može da meri
-latenciju i throughput konkretnih softverskih biblioteka, AES-NI
-putanje i NVIDIA CUDA implementacije na test sistemu, ali ne meri
-automatski:
-
-\begin{itemize}
-    \item potrošnju energije;
-    \item FPGA površinu;
-    \item broj logičkih elemenata;
-    \item ASIC površinu;
-    \item memorijsku potrošnju svih mogućih implementacija;
-    \item fizičku otpornost na bočne kanale.
-\end{itemize}
-
-Takve karakteristike, ukoliko budu uključene u poređenje, moraju biti
-preuzete iz odgovarajuće literature zajedno sa informacijama o
-platformi, tehnologiji izrade i metodologiji merenja.
+Tabela ne daje univerzalnu brzinu algoritama. Merenja iz
+Poglavlja~\ref{sec:eksperimenti} odnose se na latenciju i propusnost
+konkretnih implementacija; ne obuhvataju energiju, FPGA/ASIC površinu,
+broj logičkih elemenata, memoriju svih implementacija ili fizičke bočne
+kanale. Za te osobine potrebni su zasebni podaci o platformi,
+tehnologiji izrade i metodologiji.
 
 Centralna tabela zato ima dve funkcije. Prva je da sažme proverene
 parametre standarda, a druga da jasno pokaže koje osobine mogu biti

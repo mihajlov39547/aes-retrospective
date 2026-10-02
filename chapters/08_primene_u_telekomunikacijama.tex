@@ -1,28 +1,10 @@
 \section{Primene u telekomunikacijama}
 \label{sec:telekom}
 
-Primena AES-a u telekomunikacijama ne može se pravilno razumeti ako se
-algoritam posmatra izolovano od protokola u kojem se koristi. U
-savremenim komunikacionim sistemima AES najčešće predstavlja samo jednu
-kriptografsku komponentu šireg mehanizma koji određuje način formiranja
-ključeva, upravljanje nonce vrednostima, autentifikaciju, zaštitu
-integriteta, format paketa i ponašanje pri greškama.
-
-Zato se u ovom poglavlju primene AES-a posmatraju na tri nivoa:
-
-\begin{enumerate}
-    \item AES kao blokovska kriptografska primitiva;
-    \item način rada ili AEAD konstrukcija, kao što su CTR, CCM ili GCM;
-    \item komunikacioni protokol koji određuje gde i kako se ta
-    konstrukcija koristi.
-\end{enumerate}
-
-Ovakvo razdvajanje je važno zato što tvrdnja da neki protokol
-``koristi AES'' ne opisuje u potpunosti njegov bezbednosni model.
-Na primer, AES-GCM u IPsec-u i AES-GCM u TLS-u koriste istu osnovnu
-blokovsku šifru i isti AEAD princip, ali imaju različit format paketa,
-upravljanje nonce vrednostima i mehanizme uspostavljanja ključeva
-~\cite{rfc4106,rfc9846}.
+Primene se tumače prema razlici između primitive, načina rada i
+protokola iz Poglavlja~\ref{sec:osnove}. Tako IPsec i TLS mogu koristiti
+AES-GCM, a ipak imati različite formate paketa, upravljanje nonce
+vrednostima i uspostavljanje ključeva~\cite{rfc4106,rfc9846}.
 
 Slično tome, mobilni sistemi koriste AES-zasnovane algoritme za
 poverljivost i integritet, ali ih definišu kao posebne funkcije u okviru
@@ -56,14 +38,8 @@ Na transportnom i aplikativnom nivou TLS štiti komunikaciju između dve
 krajnje TLS tačke. HTTPS je tipičan primer u kojem se TLS koristi za
 zaštitu HTTP saobraćaja.
 
-Ovi nivoi zaštite mogu postojati istovremeno. Na primer, HTTPS zahtev
-može biti:
-
-\begin{enumerate}
-    \item zaštićen AES-baziranim mehanizmom na Wi-Fi pristupnom nivou;
-    \item prenet kroz IPsec VPN;
-    \item dodatno zaštićen AES-GCM cipher suite-om u TLS sesiji.
-\end{enumerate}
+Ovi nivoi mogu postojati istovremeno: HTTPS zahtev zaštićen TLS-om može
+prolaziti kroz IPsec VPN i AES-zasnovanu zaštitu Wi-Fi pristupa.
 
 U tom slučaju AES se pojavljuje više puta u istom komunikacionom toku,
 ali svaki sloj poseduje različite ključeve, nonce vrednosti, bezbednosne
@@ -89,18 +65,9 @@ AES se u IPsec-u može koristiti na više načina. Za retrospektivu ovog
 rada posebno je značajan AES-GCM, definisan za ESP u RFC~4106
 ~\cite{rfc4106}.
 
-GCM omogućava da se u jednoj konstrukciji ostvare:
-
-\begin{itemize}
-    \item poverljivost korisničkih podataka;
-    \item provera integriteta;
-    \item autentifikacija odgovarajućih delova ESP paketa.
-\end{itemize}
-
-RFC~4106 definiše AES-GCM varijante sa ključevima od 128, 192 i
-256 bita. Specifikacija posebno naglašava da kombinacija ključa i
-nonce/IV vrednosti ne sme da se ponovi. Ovo je direktna posledica
-bezbednosnih zahteva GCM konstrukcije.
+RFC~4106 definiše varijante za sve tri dužine AES ključa, uz zahtev
+jedinstvenosti kombinacije ključa i nonce/IV vrednosti. GCM štiti
+poverljivost podataka i autentičnost odgovarajućih delova ESP paketa.
 
 Važna osobina AES-GCM u mrežnim sistemima jeste mogućnost paralelne
 obrade. RFC~4106 navodi da GCM može biti efikasno implementiran u
@@ -114,18 +81,8 @@ paketa, dok se uspostavljanje sigurnosnih asocijacija i ključeva
 uobičajeno obavlja preko Internet Key Exchange protokola, IKEv2,
 definisanog u RFC~7296~\cite{rfc7296}.
 
-Zato se proces pojednostavljeno može predstaviti kao:
-
-\begin{equation}
-\text{IKEv2}
-\rightarrow
-\text{uspostavljanje ključeva i SA}
-\rightarrow
-\text{ESP/AES-GCM zaštita saobraćaja}.
-\end{equation}
-
-AES-GCM nije algoritam za razmenu ključeva. Njegova uloga počinje tek
-nakon što odgovarajući simetrični ključevi budu uspostavljeni.
+IKEv2 uspostavlja ključeve i sigurnosne asocijacije (SA), nakon čega
+ESP/AES-GCM štiti saobraćaj; AES-GCM nije mehanizam razmene ključeva.
 
 IETF smernice za implementaciju IPsec algoritama dodatno potvrđuju
 prelazak ka autentifikovanoj enkripciji. RFC~8221 navodi
@@ -149,7 +106,7 @@ specifikacija 2026. ažurirana dokumentom RFC~9846
 noviju specifikaciju TLS~1.3.
 
 TLS~1.3 definiše, između ostalih, sledeće AES-bazirane cipher suite
-vrednosti:
+vrednosti~\cite{rfc9846}:
 
 \begin{itemize}
     \item \texttt{TLS\_AES\_128\_GCM\_SHA256};
@@ -158,31 +115,17 @@ vrednosti:
     \item \texttt{TLS\_AES\_128\_CCM\_8\_SHA256}.
 \end{itemize}
 
-~\cite{rfc9846}.
-
 Naziv cipher suite-a treba pažljivo tumačiti. Na primer,
-
-\begin{equation}
-\texttt{TLS\_AES\_128\_GCM\_SHA256}
-\end{equation}
-
+$\texttt{TLS\_AES\_128\_GCM\_SHA256}$
 ne znači da se SHA-256 koristi kao zaseban MAC nad AES-GCM
-ciphertext-om. TLS~1.3 koristi AES-GCM kao AEAD konstrukciju, dok
+šifratom. TLS~1.3 koristi AES-GCM kao AEAD konstrukciju, dok
 SHA-256 učestvuje u TLS key schedule-u i transcript hash
 mehanizmima.
 
 Aktuelna TLS~1.3 specifikacija zahteva da implementacije podržavaju
-
-\begin{equation}
-\texttt{TLS\_AES\_128\_GCM\_SHA256},
-\end{equation}
-
+$\texttt{TLS\_AES\_128\_GCM\_SHA256}$,
 dok je podrška za
-
-\begin{equation}
-\texttt{TLS\_AES\_256\_GCM\_SHA384}
-\end{equation}
-
+$\texttt{TLS\_AES\_256\_GCM\_SHA384}$
 preporučena~\cite{rfc9846}.
 
 Ovo je značajna činjenica za retrospektivni deo rada. Više od dvadeset
@@ -195,17 +138,8 @@ ranije periode. CBC cipher suite-ovi koji su bili prisutni u starijim
 TLS verzijama više nisu deo TLS~1.3 cipher suite skupa. Umesto toga,
 za zaštitu aplikacionih podataka koriste se AEAD konstrukcije.
 
-Time se razvoj može pojednostavljeno prikazati kao:
-
-\begin{equation}
-\text{blokovska šifra + poseban MAC}
-\quad\longrightarrow\quad
-\text{AEAD}.
-\end{equation}
-
-Ova promena ne predstavlja zamenu AES primitive, već evoluciju načina
-njene upotrebe.
-
+Prelazak sa zasebne enkripcije i MAC-a na AEAD menja način upotrebe
+AES-a, uz kontinuitet osnovne primitive.
 
 \subsection{Wi-Fi, WPA2 i WPA3}
 \label{subsec:wifi}
@@ -241,20 +175,8 @@ dozvoljeni cipher i zaštitni mehanizam zavise od WPA3/IEEE~802.11
 profila i mogućnosti uređaja. Time se SAE autentifikacija jasno
 razdvaja od AES-zasnovane zaštite korisničkog saobraćaja.
 
-Zato se WPA3 ne može pojednostavljeno opisati kao ``AES algoritam''.
-Njegov bezbednosni model obuhvata najmanje dve različite faze:
-
-\begin{equation}
-\text{SAE autentifikacija}
-\rightarrow
-\text{izvođenje ključeva}
-\rightarrow
-\text{AES-zasnovana zaštita okvira}.
-\end{equation}
-
-Ovo ponovo potvrđuje potrebu da se AES primitiva razlikuje od protokola
-za autentifikaciju i upravljanje ključevima.
-
+SAE, izvođenje ključeva i zaštita okvira zato imaju različite uloge u
+WPA3 bezbednosnom modelu.
 
 \subsection{Mobilni sistemi}
 \label{subsec:mobilni}
@@ -270,50 +192,10 @@ algoritmi za zaštitu poverljivosti i integriteta. AES predstavlja
 osnovu algoritama 128-EEA2 i 128-EIA2
 ~\cite{3gpp-33401}.
 
-Algoritam 128-EEA2 koristi AES sa 128-bitnim ključem u Counter modu
-za zaštitu poverljivosti podataka. Njegova funkcija može se
-pojednostavljeno prikazati kao
-
-\begin{equation}
-    \text{128-EEA2}
-    \rightarrow
-    \text{AES-128-CTR}
-    \rightarrow
-    \text{poverljivost}.
-\end{equation}
-
-Counter način rada omogućava generisanje toka ključa nezavisnom
-enkripcijom vrednosti brojača, nakon čega se rezultat kombinuje sa
-otvorenim tekstom XOR operacijom. Ovakva konstrukcija pogodna je za
-komunikacione sisteme zato što omogućava efikasnu obradu i ne zahteva
-padding podataka.
-
-Za zaštitu integriteta LTE koristi poseban AES-zasnovani algoritam
-128-EIA2. Za razliku od 128-EEA2, njegova osnovna funkcija nije
-šifrovanje podataka već izračunavanje autentifikacione vrednosti.
-128-EIA2 je zasnovan na AES-CMAC konstrukciji:
-
-\begin{equation}
-    \text{128-EIA2}
-    \rightarrow
-    \text{AES-128-CMAC}
-    \rightarrow
-    \text{integritet}.
-\end{equation}
-
-Zbog toga se poverljivost i integritet u LTE sistemu moraju posmatrati
-kao dve različite kriptografske funkcije. Iako obe mogu koristiti AES
-kao osnovnu blokovsku šifru, način na koji se AES koristi i cilj
-operacije nisu isti.
-
-Ovo razdvajanje može se sažeti kao
-
-\begin{align}
-    \text{128-EEA2} &\rightarrow \text{AES-CTR}
-    \rightarrow \text{poverljivost},\\
-    \text{128-EIA2} &\rightarrow \text{AES-CMAC}
-    \rightarrow \text{integritet}.
-\end{align}
+128-EEA2 koristi AES-128-CTR za poverljivost, a 128-EIA2 AES-128-CMAC
+za integritet. Paralelna obrada i odsustvo padding-a kod CTR-a pogoduju
+komunikacionim sistemima; CMAC zasebno izračunava autentifikacionu
+vrednost. Mapiranje je sažeto u Tabeli~\ref{tab:aes-telekom-map}.
 
 AES nije jedina algoritamska familija definisana za LTE. 3GPP
 bezbednosna arhitektura predviđa i druge algoritamske opcije, pa nije
@@ -328,26 +210,8 @@ algoritamske identifikatore koji uključuju AES-zasnovane varijante
 128-NEA2 i 128-NIA2
 ~\cite{3gpp-33501}.
 
-Algoritam 128-NEA2 koristi se za zaštitu poverljivosti:
-
-\begin{equation}
-    \text{128-NEA2}
-    \rightarrow
-    \text{AES-zasnovana enkripcija}
-    \rightarrow
-    \text{poverljivost},
-\end{equation}
-
-dok 128-NIA2 predstavlja odgovarajuću AES-zasnovanu funkciju za
-zaštitu integriteta:
-
-\begin{equation}
-    \text{128-NIA2}
-    \rightarrow
-    \text{AES-zasnovana autentifikaciona funkcija}
-    \rightarrow
-    \text{integritet}.
-\end{equation}
+128-NEA2 obezbeđuje poverljivost, a 128-NIA2 integritet, kao
+odgovarajuće AES-zasnovane funkcije 5G arhitekture.
 
 Kao i kod LTE sistema, 5G ne treba predstavljati kao sistem koji
 koristi isključivo AES. Standard definiše više algoritamskih opcija,
@@ -370,13 +234,8 @@ priroda CTR moda i kasnija dostupnost hardverskih AES instrukcija na
 ARM i drugim procesorskim arhitekturama zato predstavljaju značajne
 implementacione prednosti.
 
-U okviru ovog rada neće se pretpostavljati da sama činjenica da je
-određeni algoritam definisan u 3GPP standardu predstavlja dokaz njegove
-stvarne zastupljenosti u svim mobilnim mrežama. Standardizovana podrška
-posmatra se kao dokaz interoperabilne mogućnosti, dok bi procena realne
-zastupljenosti zahtevala zasebne podatke iz konkretnih operatora,
-uređaja ili mrežnih merenja.
-
+Navedene opcije tumače se prema pravilu o standardizovanoj podršci iz
+odeljka~\ref{subsec:poredjenje_kriterijumi}.
 
 \subsection{Mrežna infrastruktura i MACsec}
 \label{subsec:infrastruktura}
@@ -397,14 +256,12 @@ Ethernet infrastrukturi, nezavisno od protokola viših slojeva
 U praksi se MACsec može realizovati u mrežnim interfejsima, switch
 ASIC-ovima i drugim specijalizovanim mrežnim komponentama. Takve
 implementacije mogu pružati line-rate enkripciju pri veoma visokim
-brzinama, ali konkretne vrednosti throughput-a predstavljaju osobine
+brzinama, ali konkretne vrednosti propusnosti predstavljaju osobine
 određenog proizvoda i hardverske arhitekture, a ne zahtev samog
 kriptografskog standarda.
 
-Zato ovaj rad neće koristiti marketinške podatke proizvođača kao dokaz
-algoritamske brzine AES-a. Ako se takvi podaci koriste kao ilustracija
-realne implementacije, biće jasno označeni naziv uređaja, platforma i
-uslovi merenja.
+Marketinške brzine pojedinačnih uređaja zato nisu osnova ovog
+algoritamskog poređenja.
 
 Kada se MACsec ili srodna link-layer zaštita koristi na Ethernet
 interfejsima koji se fizički prenose preko optičke infrastrukture,
@@ -432,17 +289,9 @@ autentifikaciju ili kombinaciju obe funkcije. Interno se oslanja na
 CTR komponentu za poverljivost i CBC-MAC komponentu za
 autentifikaciju~\cite{ieee802154}.
 
-Ovo je dobar primer kompromisa karakterističnog za IoT. Cilj nije samo
-maksimalni throughput, već:
-
-\begin{itemize}
-    \item mala potrošnja energije;
-    \item ograničen RAM i programska memorija;
-    \item mala latencija;
-    \item jednostavno upravljanje ključevima;
-    \item dovoljno dug životni vek uređaja;
-    \item prihvatljiva sigurnost tokom celog perioda eksploatacije.
-\end{itemize}
+U IoT-u se uz propusnost vrednuju energija, RAM i programska memorija,
+latencija, upravljanje ključevima, životni vek i sigurnost tokom
+eksploatacije.
 
 Hardverska akceleracija može biti posebno korisna u ovakvom okruženju
 jer omogućava da se AES operacija izvrši sa manjim brojem procesorskih
@@ -466,12 +315,17 @@ u različitim protokolima i za različite sigurnosne funkcije.
 
 \begin{table}[htbp]
 \centering
+\small
+\setlength{\tabcolsep}{3pt}
 \caption{Primeri standardizovane primene AES-a u telekomunikacionim
 i mrežnim sistemima.}
 \label{tab:aes-telekom-map}
-\small
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{llllll}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.15\textwidth}
+>{\raggedright\arraybackslash}p{0.10\textwidth}
+>{\raggedright\arraybackslash}p{0.19\textwidth}
+>{\raggedright\arraybackslash}p{0.16\textwidth}
+>{\raggedright\arraybackslash}p{0.17\textwidth}
+>{\raggedright\arraybackslash}p{0.13\textwidth}@{}}
 \toprule
 Sistem/protokol &
 AES varijanta &
@@ -481,95 +335,97 @@ Upravljanje ključevima &
 Izvor \\
 \midrule
 
+
+
 IPsec ESP &
-AES-128/192/256 &
+AES-128/\allowbreak 192/\allowbreak 256 &
 GCM &
 Poverljivost + integritet &
 IKEv2 / SA &
 RFC 4106 \\
-
+\addlinespace[3pt]
 TLS 1.3 &
 AES-128/256 &
 GCM &
 AEAD zaštita sesije &
 TLS key schedule &
 RFC 9846 \\
-
+\addlinespace[3pt]
 TLS 1.3 &
 AES-128 &
 CCM &
 AEAD zaštita sesije &
 TLS key schedule &
 RFC 9846 \\
-
+\addlinespace[3pt]
 WPA2 / IEEE 802.11 &
 AES-128 &
 CCMP / CCM &
 Zaštita Wi-Fi okvira &
 802.11 key management &
 IEEE 802.11 \\
-
+\addlinespace[3pt]
 WPA3-Personal &
 profil-zavisno &
 IEEE 802.11 zaštita okvira &
 Zaštita Wi-Fi okvira &
 SAE + 802.11 key management &
 WPA3 / IEEE 802.11 \\
-
+\addlinespace[3pt]
 LTE 128-EEA2 &
 AES-128 &
 CTR &
 Poverljivost &
 3GPP key hierarchy &
 3GPP TS 33.401 \\
-
+\addlinespace[3pt]
 LTE 128-EIA2 &
 AES-128 &
 CMAC &
 Integritet &
 3GPP key hierarchy &
 3GPP TS 33.401 \\
-
+\addlinespace[3pt]
 5G 128-NEA2 &
 AES-128 &
 AES-zasnovana enkripcija &
 Poverljivost &
 5G key hierarchy &
 3GPP TS 33.501 \\
-
+\addlinespace[3pt]
 5G 128-NIA2 &
 AES-128 &
 AES-zasnovana autentifikaciona funkcija &
 Integritet &
 5G key hierarchy &
 3GPP TS 33.501 \\
-
+\addlinespace[3pt]
 MACsec &
 AES-128/256\textsuperscript{a} &
 GCM &
 Ethernet zaštita &
 MACsec/MKA &
 IEEE 802.1AE \\
-
+\addlinespace[3pt]
 IEEE 802.15.4 &
 AES-128 &
 CCM* &
 Poverljivost + integritet &
 zavisi od višeg protokola &
 IEEE 802.15.4 \\
-
+\addlinespace[3pt]
 \bottomrule
 \end{tabular}
-}
 
 \vspace{1mm}
-\begin{minipage}{0.98\textwidth}
+\noindent\begin{minipage}{\textwidth}
 \footnotesize
 \textsuperscript{a} Dostupne varijante zavise od izdanja i profila
 IEEE 802.1AE standarda. Tabela prikazuje porodicu primena, a ne tvrdnju
 da svaka instalacija podržava svaki navedeni ključ ili profil.
 \end{minipage}
 \end{table}
+\FloatBarrier
 
 Tabela pokazuje da ista AES primitiva može obavljati različite uloge.
 U AES-GCM konstrukcijama istovremeno učestvuje u zaštiti poverljivosti
@@ -584,10 +440,3 @@ za veliki broj softverskih i hardverskih platformi. Više od dve
 decenije kasnije AES se može pronaći od mikrokontrolera i Wi-Fi uređaja,
 preko mobilnih mreža i VPN sistema, do TLS servera i mrežnih
 interfejsa visokih performansi.
-
-Sama širina standardizovane primene ipak nije dovoljna da se zaključi
-koliko je AES stvarno zastupljen u aktivnom saobraćaju. Standard može
-dozvoljavati određeni algoritam, dok konkretna implementacija može
-preferirati drugi. Zbog toga se u ovom radu standardizovana podrška
-tumači kao dokaz tehničke primenljivosti i interoperabilnosti, a ne kao
-direktna mera tržišnog udela.

@@ -1,18 +1,18 @@
 \begin{table}[htbp]
 \centering
 \small
+\setlength{\tabcolsep}{4pt}
 \caption{Dokumentovana očekivanja iz perioda standardizacije AES-a i
 proverljivi ishodi do 2026. godine. Ocena je opisna i ne predstavlja
 numeričko rangiranje.}
 \label{tab:retrospektiva}
-\begin{tabular}{p{0.16\textwidth} p{0.27\textwidth} p{0.36\textwidth} p{0.15\textwidth}}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.15\textwidth} >{\raggedright\arraybackslash}p{0.25\textwidth} >{\raggedright\arraybackslash}p{0.35\textwidth} >{\raggedright\arraybackslash}p{0.15\textwidth}@{}}
 \toprule
 Tema &
 Dokumentovano očekivanje / kriterijum &
 Ishod do 2026. &
 Retrospektivna ocena \\
 \midrule
-
 Bezbednost primitive &
 AES proces daje najveću težinu bezbednosti i procenjuje da Rijndael ima
 adekvatnu marginu, uz očekivanje daljeg napretka kriptoanalize
@@ -71,8 +71,23 @@ Nova primena TDEA zaštite nedozvoljena je posle 31.\ decembra 2023, a
 SP~800-67 Rev.~2 povučen je 1.\ januara 2024.
 \cite{nist_sp800131ar2,nist_tdea_withdrawal_2023}. &
 Duga tranzicija; konačno povučen. \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\addlinespace
+\begin{table}[htbp]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\ContinuedFloat
+\caption[]{Dokumentovana očekivanja i ishodi do 2026. godine (nastavak).}
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.15\textwidth} >{\raggedright\arraybackslash}p{0.25\textwidth} >{\raggedright\arraybackslash}p{0.35\textwidth} >{\raggedright\arraybackslash}p{0.15\textwidth}@{}}
+\toprule
+Tema &
+Dokumentovano očekivanje / kriterijum &
+Ishod do 2026. &
+Retrospektivna ocena \\
+\midrule
 Veličina bloka &
 AES standardizuje blok od 128 bita, nasuprot 64-bitnom DES/TDEA bloku
 \cite{nist_fips197_2001}. &
@@ -83,7 +98,7 @@ buduće visokopropusne primene
 128 bita je dobro ostarilo, ali nije bez granica. \\
 
 \addlinespace
-Implementaciona bezbednost &
+Implementa\-ciona bezbednost &
 AES proces je razmatrao implementacione karakteristike i bočne kanale,
 ali u kontekstu tadašnjeg hardvera \cite{nechvatal2001aes}. &
 Cache/timing rizici tabelarnih implementacija postali su važan praktičan
@@ -115,7 +130,8 @@ Grover daje kvadratno ubrzanje u idealizovanom modelu, ali konkretni
 resursi, serijska dubina i paralelizacija znatno komplikuju praktičnu
 procenu \cite{grassl2016grover,jaques2020grover,nist_pqc_faq}. &
 Izvan originalnog obuhvata; zahteva ogradu. \\
-
 \bottomrule
 \end{tabular}
 \end{table}
+
+\FloatBarrier

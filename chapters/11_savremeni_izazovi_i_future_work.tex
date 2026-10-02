@@ -28,9 +28,9 @@ neposredno proizlaze iz metodologije i rezultata ovog rada.
 \subsection{Šta bismo danas možda uradili drugačije?}
 
 Jedno od retrospektivnih pitanja odnosi se na tri standardizovane dužine
-ključa. FIPS~197 definiše AES-128, AES-192 i AES-256, pri čemu sve tri
-varijante koriste blok od 128 bita
-\cite{NISTFIPS197Update}. AES-192 ostaje potpuno standardizovana i
+ključa. Tri FIPS~197 varijante ostaju polazište te rasprave~\cite{NISTFIPS197Update}.
+
+AES-192 ostaje potpuno standardizovana i
 kriptografski važeća varijanta; dostupni autoritativni izvori ne pružaju
 dovoljno osnova da se njegova stvarna zastupljenost 2026. godine pretvori
 u argument za njegovo uklanjanje. Ipak, postojanje tri dužine ključa
@@ -42,11 +42,9 @@ projektni kompromis, a ne zaključak da je AES-192 suvišan.
 Slična retrospektivna rasprava odnosi se na raspored ključa. Napadi u
 related-key modelu pokazali su strukturne osobine rasporeda ključa kod
 AES-192 i AES-256 koje nisu prisutne u istom obliku kod AES-128
-\cite{BiryukovKhovratovich2009AES}. Ovi rezultati su značajni za
-kriptoanalitičko razumevanje algoritma, ali njihov model pretpostavlja
-mogućnost rada sa ključevima u kontrolisanom međusobnom odnosu. To nije
-standardni model primene u kome su ključevi nezavisno i pravilno
-generisani. Zbog toga iz njih ne sledi da je AES-256 praktično kompromitovan.
+\cite{BiryukovKhovratovich2009AES}. Ograde related-key modela iz odeljka~\ref{subsec:aes_cryptanalysis}
+ostaju presudne: rezultat nije praktično kompromitovanje AES-256.
+
 NIST-ov pregled AES-a takve rezultate posmatra kao deo teorijske analize,
 a ne kao razlog za povlačenje ili izmenu standarda
 \cite{MouhaDworkin2021AESReview}. Moguće je pretpostaviti da bi se pri
@@ -86,23 +84,11 @@ bezbednost, mogućnost akceleracije i veličinu validacione površine.
 
 \subsection{Implementacije i AEAD kao polazište}
 
-Praktična bezbednost blokovske šifre zavisi i od načina njene implementacije.
-Softverske AES realizacije zasnovane na tabelama mogu imati
-tajno-zavisne obrasce pristupa memoriji, zbog čega je literatura pokazala
-praktične cache napade na takve implementacije
-\cite{OsvikShamirTromer2006}. Ovo nije slabost AES transformacije kao
-matematičke funkcije, već posledica interakcije implementacije i
-mikroarhitekture procesora.
-
-Savremeni kriterijumi projektovanja zato pridaju znatno veću pažnju
-izvršavanju bez tajno-zavisnih grana i memorijskih pristupa, kao i
-mogućnosti maskiranja i drugih zaštita od fizičkih bočnih kanala.
-Namenske instrukcije kao što je AES-NI dodatno menjaju odnos bezbednosti
-i performansi: AES runde se izvršavaju bez softverskih lookup tabela, pa
-se uklanja važna klasa cache i timing problema karakterističnih za
-tabelarne implementacije. Ovo, međutim, ne znači da namenske instrukcije
-eliminišu sve bočne kanale, fault napade ili greške u režimu rada i
-protokolu.
+Iskustvo sa tabelarnim implementacijama~\cite{OsvikShamirTromer2006}
+iz odeljka~\ref{subsec:aes_sidechannels} upućuje na savremene kriterijume:
+izvršavanje bez tajno-zavisnih grana i memorijskih pristupa, maskiranje
+i zaštitu od fizičkih bočnih kanala. Namenska akceleracija mora se
+ocenjivati zajedno sa tim zahtevima.
 
 Rezultat iz odeljka~\ref{sec:aes-akceleracija} pokazuje koliko se cena
 iste AES primitive menja kada se pređe sa softverske na namenski
@@ -111,15 +97,9 @@ performanse dugovečnog standarda ne određuje samo struktura algoritma,
 već i sposobnost hardverskog i softverskog ekosistema da ga efikasno i
 bezbedno realizuje.
 
-Druga velika promena odnosi se na nivo interfejsa. NIST SP~800-38A
-definisao je klasične režime poverljivosti kao što su ECB, CBC, CFB,
-OFB i CTR \cite{Dworkin2001Modes}. Kasniji razvoj pomerio je praktični
-fokus ka autentifikovanoj enkripciji. RFC~5116 definiše opšti interfejs
-za Authenticated Encryption with Associated Data (AEAD)
-\cite{RFC5116}, dok TLS~1.3 koristi isključivo AEAD skupove i zahteva
-implementaciju \texttt{TLS\_AES\_128\_GCM\_SHA256}
-\cite{rfc8446}. Savremena IETF uputstva dodatno ograničavaju upotrebu
-CBC skupova u starijim TLS verzijama \cite{rfc9325}.
+Na nivou interfejsa, prelazak sa režima poverljivosti~\cite{Dworkin2001Modes}
+ka AEAD-u~\cite{RFC5116,rfc8446,rfc9325}, prikazan u
+Poglavlju~\ref{sec:telekom}, menja podrazumevani način primene šifre.
 
 Ovakav razvoj podržava ideju da autentifikovana enkripcija treba da bude
 podrazumevani interfejs za većinu aplikacionih potreba, ali ne znači da
@@ -128,13 +108,13 @@ odgovarajućim kompozicijama. Razlika je u bezbednom podrazumevanom
 ponašanju: AEAD eksplicitno povezuje poverljivost, integritet i
 autentifikaciju dodatnih podataka u jednoj apstrakciji.
 
-Ni AEAD ne uklanja mogućnost pogrešne upotrebe. GCM zahteva da se nonce
-vrednosti koriste u skladu sa pravilima režima, a ponovno korišćenje
-iste key--nonce kombinacije može dovesti do ozbiljnog gubitka
-poverljivosti i integriteta \cite{Dworkin2007GCM}. Važno je razlikovati
+AEAD i dalje zahteva pravilno upravljanje stanjem prema pravilima
+režima~\cite{Dworkin2007GCM}.
+
+Važno je razlikovati
 ograničenje maksimalne dužine jedne poruke od ukupnog životnog veka
 ključa: granica od $2^{39}-256$ bita u SP~800-38D odnosi se na maksimalnu
-dužinu plaintext-a u jednoj GCM invokaciji, dok se dozvoljeni broj
+dužinu otvorenog teksta u jednoj GCM invokaciji, dok se dozvoljeni broj
 invokacija i ukupna sigurnosna margina određuju dodatnim pravilima o IV
 vrednostima i verovatnoći falsifikovanja.
 
@@ -249,16 +229,15 @@ istraživačkoj celini, a ne jednostavnom proširenju postojećeg benchmarka.
 \subsection{Dugoročna istraživačka pitanja}
 
 Jedno dugoročno pitanje jeste formalnije povezivanje simetrične
-kriptografije sa kvantnim modelom napada. Groverov algoritam smanjuje
-asimptotski broj upita za iscrpnu pretragu prostora od $N$ elemenata sa
-reda $N$ na red $\sqrt{N}$ \cite{grover1996}. Međutim, pretvaranje ovog
-rezultata u procenu realnog vremena napada na AES zahteva mnogo više od
-zamene $2^k$ sa $2^{k/2}$. Potrebno je konstruisati reverzibilni AES
+kriptografije sa kvantnim modelom napada. Idealizovanu složenost Groverove pretrage~\cite{grover1996} iz
+Poglavlja~\ref{sec:retrospektiva} treba dopuniti konkretnim resursnim modelom.
+
+Potrebno je konstruisati reverzibilni AES
 oracle, odrediti broj logičkih kubita, T-count i T-depth, dubinu kola,
 broj Groverovih iteracija i model paralelizacije, a zatim uvesti pretpostavke
 o korekciji grešaka i fizičkom kvantnom hardveru
 \cite{GrasslEtAl2016AESQuantum,JaquesEtAl2020GroverAES}.
-Zbog toga se stopa klasične reduced-keyspace pretrage iz ovog rada ne
+Zbog toga se stopa klasične pretrage redukovanog prostora ključeva iz ovog rada ne
 može ekstrapolirati na kvantni napad.
 
 Drugo dugoročno pitanje jeste objedinjavanje performansnih i

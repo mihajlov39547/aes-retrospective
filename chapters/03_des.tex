@@ -11,14 +11,9 @@ formalno povučen predstavlja dobar primer načina na koji razvoj
 računarske tehnologije može promeniti praktičnu procenu bezbednosti
 kriptografskog sistema.
 
-DES je standardizovan kao FIPS~46 tokom 1977. godine. Kasnije revizije
-nisu menjale osnovni algoritam, već su prilagođavale tekst standarda,
-implementacione zahteve i njegovo mesto u širem sistemu kriptografskih
-preporuka. Poslednja verzija, FIPS~46-3 iz 1999. godine, obuhvatala je
-i DES i Triple Data Encryption Algorithm (TDEA)
-~\cite{fips46-3}. NIST je FIPS~46-3 povukao 19. maja 2005. godine
-nakon zaključka da DES više ne obezbeđuje nivo sigurnosti potreban za
-zaštitu federalnih informacija~\cite{des-withdrawal-2005}.
+DES je standardizovan 1977. godine, a njegova poslednja specifikacija
+FIPS~46-3 obuhvatila je i TDEA~\cite{fips46-3}. Razvoj i povlačenje
+standarda prikazani su u sledećem odeljku.
 
 Pri analizi DES-a važno je razlikovati dva pitanja. Prvo se odnosi na
 unutrašnju konstrukciju algoritma i njegovu otpornost na
@@ -91,24 +86,14 @@ bitovi parnosti, po jedan za svaki oktet. Kriptografski efektivna
 dužina ključa zato iznosi 56 bita
 ~\cite{fips46-3}.
 
-Za otvoreni tekst $P$ dužine 64 bita i ključ $K$, DES transformacija
-može se apstraktno zapisati kao
-
-\begin{equation}
-    C = \operatorname{DES}_{K}(P),
-\end{equation}
-
-gde je $C$ blok šifrata iste dužine.
+Šifrovanje pod ključem $K$ preslikava 64-bitni otvoreni tekst $P$ u
+šifrat $C$ iste dužine.
 
 DES je zasnovan na Feistel arhitekturi. Pre početka rundi nad ulaznim
 blokom izvršava se inicijalna permutacija (\emph{Initial
 Permutation}, IP). Dobijeni 64-bitni rezultat deli se na dve
 32-bitne polovine,
-
-\begin{equation}
-    L_0 \parallel R_0.
-\end{equation}
-
+$L_0 \parallel R_0$.
 Nakon toga sledi 16 Feistel rundi. Za rundu $i$, gde je
 $i=1,\ldots,16$, transformacija se može zapisati kao
 
@@ -136,68 +121,23 @@ XOR operacija i međusobnog mešanja bitova kroz više rundi.
 \label{subsec:des_round_function}
 
 Funkcija runde $f$ prima 32-bitnu desnu polovinu trenutnog stanja i
-48-bitni podključ:
+48-bitni podključ, a vraća 32-bitni rezultat. Njena četiri koraka su
+ekspanzija, XOR sa podključem, nelinearna supstitucija i završna permutacija.
+
+Ekspanziona permutacija $E$ raspoređuje bitove $R_{i-1}$ u osam grupa
+od po šest bitova. Ne dodaju se nezavisni podaci: izabrani ulazni bitovi
+ponavljaju se prema tabeli standarda. Tako dobijenih 48 bita kombinuje
+se XOR operacijom sa podključem $K_i$.
+
+Rezultat se deli na šestobitne grupe $B_1,\ldots,B_8$. Svaka grupa
+ulazi u odgovarajuću, različitu S-kutiju $S_1,\ldots,S_8$, koja šest
+ulaznih bitova preslikava u četiri izlazna. Konkatenacija osam izlaza
+ponovo daje 32 bita. Fiksna permutacija $P$ zatim raspoređuje te bitove,
+pa se funkcija runde sažeto zapisuje kao
 
 \begin{equation}
-    f : \{0,1\}^{32} \times \{0,1\}^{48}
-    \rightarrow \{0,1\}^{32}.
-\end{equation}
-
-Njena struktura može se razložiti na četiri osnovna koraka:
-
-\begin{enumerate}
-    \item ekspanziju 32-bitnog ulaza na 48 bita;
-    \item XOR sa 48-bitnim podključem;
-    \item nelinearnu transformaciju pomoću osam S-kutija;
-    \item završnu permutaciju 32-bitnog rezultata.
-\end{enumerate}
-
-Prvo se 32-bitna vrednost $R_{i-1}$ transformiše ekspanzionom
-permutacijom $E$:
-
-\begin{equation}
-    E(R_{i-1}) \in \{0,1\}^{48}.
-\end{equation}
-
-Ekspanzija ne predstavlja samo proširenje podataka dodavanjem novih
-bitova. Određeni ulazni bitovi se ponavljaju prema tabeli definisanoj
-standardom, čime se 32-bitni ulaz raspoređuje u osam grupa od po šest
-bitova.
-
-Rezultat se zatim kombinuje sa podključem:
-
-\begin{equation}
-    X = E(R_{i-1}) \oplus K_i.
-\end{equation}
-
-Dobijenih 48 bita deli se na osam grupa
-
-\begin{equation}
-    X = B_1 \parallel B_2 \parallel \cdots \parallel B_8,
-\end{equation}
-
-pri čemu svaki $B_j$ ima šest bitova.
-
-Svaka šestobitna grupa predstavlja ulaz jedne od osam različitih
-S-kutija $S_1,\ldots,S_8$. Svaka S-kutija preslikava šest ulaznih
-bitova u četiri izlazna bita:
-
-\begin{equation}
-    S_j : \{0,1\}^{6} \rightarrow \{0,1\}^{4}.
-\end{equation}
-
-Konkatenacijom izlaza svih osam S-kutija ponovo se dobija 32-bitna
-vrednost. Nad njom se zatim izvršava fiksna permutacija $P$:
-
-\begin{equation}
-    f(R_{i-1},K_i)
-    =
-    P\left(
-        S_1(B_1)\parallel
-        S_2(B_2)\parallel\cdots\parallel
-        S_8(B_8)
-    \right).
-    \label{eq:des-f}
+ f(R_{i-1},K_i)=P\left(S_1(B_1)\parallel S_2(B_2)\parallel\cdots\parallel S_8(B_8)\right).
+ \label{eq:des-f}
 \end{equation}
 
 S-kutije predstavljaju nelinearni deo DES-a i imaju centralnu ulogu u
@@ -218,11 +158,7 @@ Početni 64-bitni zapis ključa sadrži osam bitova parnosti. Nakon
 njihovog uklanjanja ostaje 56 kriptografski relevantnih bitova.
 Permutovani izbor PC-1 (\emph{Permuted Choice 1}) raspoređuje tih
 56 bitova u dve polovine od po 28 bitova:
-
-\begin{equation}
-    C_0 \parallel D_0.
-\end{equation}
-
+$C_0 \parallel D_0$.
 Pre svake runde obe polovine ciklično se rotiraju ulevo za jedan ili
 dva bita, prema rasporedu definisanom standardom. Za rundu $i$ dobija
 se
@@ -236,11 +172,7 @@ gde $\operatorname{LS}_{s_i}$ označava cikličnu rotaciju ulevo za
 $s_i$ mesta.
 
 Raspored rotacija za 16 rundi iznosi
-
-\begin{equation}
-1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1.
-\end{equation}
-
+$1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1$.
 Nakon rotacije, permutovani izbor PC-2 iz ukupno 56 bitova bira 48
 bitova koji formiraju podključ:
 
@@ -299,7 +231,7 @@ benchmark rezultatima sa savremenih procesora. Performanse Python
 biblioteke ili optimizovane C implementacije na procesoru iz 2026.
 godine opisuju konkretnu modernu implementaciju, a ne projektne
 okolnosti u kojima je DES nastao. Eksperimentalni deo ovog rada zato
-će jasno razdvojiti istorijske tvrdnje od savremenih merenja.
+razdvaja istorijske tvrdnje od savremenih merenja.
 
 
 \subsection{Bezbednosna ograničenja i iscrpna pretraga}
@@ -307,29 +239,11 @@ okolnosti u kojima je DES nastao. Eksperimentalni deo ovog rada zato
 
 Najvažnije praktično ograničenje DES-a jeste efektivna dužina ključa
 od 56 bita. Prostor mogućih ključeva zato iznosi
-
-\begin{equation}
-    2^{56}
-    =
-    72\,057\,594\,037\,927\,936.
-\end{equation}
-
-Sa teorijske tačke gledišta ovaj broj je veoma veliki, ali bezbednost
-iscrpne pretrage zavisi od raspoložive računarske moći. Kako je
-pokazano u Jednačini~\eqref{eq:bruteforce-time}, za sistem koji može
-da proveri $R$ ključeva u sekundi očekivano vreme pronalaženja ključa
-iznosi približno
-
-\begin{equation}
-    T_{\mathrm{DES}}
-    \approx
-    \frac{2^{55}}{R}.
-    \label{eq:des-bruteforce}
-\end{equation}
-
-Zbog toga se ista veličina prostora ključeva može smatrati praktično
-nepremostivom u jednom tehnološkom periodu, a nedovoljnom nekoliko
-decenija kasnije.
+$2^{56} = 72\,057\,594\,037\,927\,936$.
+Praktična dostupnost tog prostora zavisi od računarske moći.
+Jednačina~\eqref{eq:bruteforce-time} za DES daje prosečno vreme
+$T_{\mathrm{DES}}\approx 2^{55}/R$, gde je $R$ broj proverenih
+ključeva u sekundi.
 
 Važno je razlikovati iscrpnu pretragu od strukturne kriptoanalize
 DES-a. Diferencijalna kriptoanaliza proučava način na koji razlike
@@ -353,21 +267,13 @@ moguće sistematski pretražiti.
 Drugo ograničenje DES-a jeste veličina bloka od 64 bita. Za
 blokovsku šifru sa $n$-bitnim blokom, kolizije među blokovima postaju
 statistički značajne nakon približno reda
-
-\begin{equation}
-    2^{n/2}
-\end{equation}
-
+$2^{n/2}$
 obrađenih blokova, prema birthday fenomenu. Za DES to daje red
 veličine
-
-\begin{equation}
-    2^{32}
-\end{equation}
-
+$2^{32}$
 blokova. Ovo ograničenje postalo je naročito značajno mnogo kasnije
-kod dugotrajne upotrebe DES-a i Triple DES-a u visokopropusnim
-sistemima i biće detaljnije razmotreno u poglavlju o TDEA.
+kod dugotrajne upotrebe DES-a i TDEA u visokopropusnim
+sistemima i detaljnije je razmotreno u odeljku~\ref{subsec:tdea_sweet32}.
 
 
 \subsection{Istorijski projekti razbijanja DES-a}
@@ -400,11 +306,7 @@ specijalizovani EFF Deep Crack hardver i distribuirana računarska
 mreža projekta distributed.net. Izazov je počeo 18. januara 1999. u
 09:00 po pacifičkom vremenu, a ključ je pronađen 19. januara u 07:15,
 nakon
-
-\begin{equation}
-    22~\text{časa},\ 15~\text{minuta}
-\end{equation}
-
+22 časa i 15 minuta
 rada~\cite{distributed-des-iii-1999}.
 
 Tokom tog eksperimenta pregledano je približno

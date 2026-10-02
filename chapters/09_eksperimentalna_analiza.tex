@@ -72,7 +72,7 @@ generalizaciju. Windows raspoređivanje, dinamički taktovi i temperatura
 koja nije sistematski kontrolisana ostaju izvori varijabilnosti;
 nezavisni procesi nisu nezavisne hardverske platforme. Rezultati ne
 rekonstruišu hardver iz perioda izbora AES-a. Propusnost nije mera
-sigurnosti, fixed-key GPU propusnost nije stopa pretrage ključeva, a
+sigurnosti, GPU propusnost pri fiksnom ključu nije stopa pretrage ključeva, a
 difuzija nije sigurnosni dokaz. Istraživanje ne procenjuje bočne kanale,
 constant-time ili fault-injection osobine implementacija.
 
@@ -214,7 +214,7 @@ ulaze u brojilac propusnosti; GHASH hardverska putanja nije posebno verifikovana
 \centering
 \caption{Propusnost AES-GCM autentifikovane enkripcije na CPU AES-NI putanji.
 Prikazane su medijane medijana pet nezavisnih study sesija. Propusnost je
-izražena u decimalnim MB/s i odnosi se na payload throughput kompletne AEAD
+izražena u decimalnim MB/s i odnosi se na propusnost korisnog sadržaja kompletne AEAD
 transformacije bez konstrukcije objekta, bez dodavanja AAD-a i taga u brojilac.}
 \label{tab:aes-gcm-rezultati}
 \begin{tabular}{llrr}
@@ -252,19 +252,12 @@ i 128 niti po CUDA bloku, bez T-table, shared-memory ili fused
 optimizacija. Python/CuPy upravlja ECB i CTR kernelima
 \cite{nvidia-cuda-model,nvidia-cuda-python,cupy-rawkernel}.
 ECB je samo mikrobenchmark nezavisnih blokova, ne preporuka za zaštitu.
-CTR koristi paralelizabilnu transformaciju
-\begin{equation}
-C_i = P_i \oplus E_K(T_i).
-\label{eq:eksperiment-ctr}
-\end{equation}
-sa punim 128-bitnim big-endian brojačem: početnom brojaču dodaje se indeks
-bloka, preliv se odbija, a nepotpun završni blok koristi potrebne bajtove.
-Za razliku od toga, CBC enkripcija
-\begin{equation}
-C_i = E_K(P_i \oplus C_{i-1})
-\label{eq:eksperiment-cbc}
-\end{equation}
-ima zavisnost između blokova i nije glavni GPU benchmark~\cite{sp800-38a}.
+CTR primenjuje konstrukciju iz odeljka~\ref{subsec:modovi_rada} sa punim
+128-bitnim big-endian brojačem: početnoj vrednosti dodaje se indeks bloka,
+preliv se odbija, a nepotpun završni blok koristi potrebne bajtove.
+CBC enkripcija zavisi od prethodnog bloka šifrata i zato nije glavni
+GPU benchmark~\cite{sp800-38a}.
+
 Svih pet sesija prošlo je 18 provera: NIST ECB F.1.1 i CTR F.5.1,
 CPU diferencijalnu referencu, granice raspoređivanja, prenos brojača i
 nepotpune blokove. Izlazi se porede sa referencom van tajmera.
@@ -341,7 +334,7 @@ Centralni eksperiment ponovo meri CPU software, CPU AES-NI, CUDA baseline
 i laki kandidat v1 u istom ECB/CTR protokolu. V1 dodaje inlining i
 razvijanje petlji, uz istu bajtovsku strukturu, jednu nit po AES bloku i
 128 niti po CUDA bloku; oznaka optimized ne pretpostavlja uspeh.
-Za svaki režim, veličinu i ponavljanje koriste se isti plaintext,
+Za svaki režim, veličinu i ponavljanje koriste se isti otvoreni tekst,
 ključ i početni CTR brojač. Pet procesa sa seedovima 2003--2007 koristi
 pet warmup rundi i 20 ponavljanja, fiksno rastuće veličine 1~KiB,
 16~KiB, 1~MiB, 16~MiB i 32~MiB i seedovano mešanje poslova.
@@ -349,9 +342,8 @@ NIST/diferencijalna validacija obuhvata sve putanje, CTR carry, partial
 tail i odbijanje preliva. Native inicijalizacija CPU software/AES-NI
 potvrđena je za oba režima; to nije CPU instruction trace.
 
-Ključna vrednost nije samo faktor ubrzanja, već razdvajanje dva pitanja:
-kolika je propusnost izolovanog jezgra kada su podaci već na uređaju,
-i kolika je propusnost kada se uključe prenosi i sinhronizacija.
+Upareni protokol primenjuje dva odvojena merna obuhvata.
+
 CPU transform-only uključuje alokaciju izlaza, uz cipher construction
 van tajmera. Resident meri jedan kernel poziv CUDA događajima
 (\texttt{resident\_iterations=1}), bez H2D/D2H, a pipeline zidno vreme
@@ -543,7 +535,7 @@ i lažnih pogodaka; ostaje samo mogući budući rad.
 \subsubsection{Analiza avalanche efekta}
 DES, TDEA i AES-128/192/256 ispituju se ECB konstrukcijom nad jednim
 blokom bez padding-a. Za svaki uzorak novi validan ključ i slučajan
-plaintext čine zajedničku osnovu za promenu jednog plaintext bita i
+otvoreni tekst čine zajedničku osnovu za promenu jednog bita otvorenog teksta i
 jednog efektivnog bita ključa. Hammingovo rastojanje šifrata deli se
 sa 64 za DES/TDEA, odnosno 128 za AES. Paritetni bitovi se ne biraju;
 neparni paritet se obnavlja, pa se menja samo jedan efektivni bit.
@@ -601,22 +593,9 @@ nad porukama ili otpornost na linearne/diferencijalne napade. ECB
 konstrukcija ovde nije preporuka za zaštitu podataka.
 
 \subsection{Sinteza i zaključak}
-Poglavlje uspostavlja ponovljiv okvir, a ne samo skup izolovanih brzina.
-Validacione kapije, dokumentovani profili, seedovi, izvori i agregacija
-po sesijama omogućavaju tumačenje rezultata zajedno sa obuhvatom merenja.
-Time se retrospektiva DES/TDEA--AES povezuje sa proverljivim savremenim
-implementacijama, bez prenosa nalaza na istorijski hardver.
-
-AES-NI značajno smanjuje CPU cenu AES-a. CUDA pokazuje visoku resident
-propusnost na većim ulazima, ali u uparenom pinned pipeline poređenju
-transferi i host upravljanje menjaju zaključak: AES-NI ostaje brži za
-sve testirane veličine i režime. Resident i end-to-end zato odgovaraju
-različitim istraživačkim pitanjima. Laki kandidat v1 ne daje dosledan
-dobitak; korist optimizacije zahteva proveru jezgra i celog toka podataka.
-
-Pretraga redukovanog prostora ilustruje eksponencijalni rast iscrpne
-pretrage bez izvođenja full-space napada. Avalanche raspodele pokazuju
-očekivanu promenu oko polovine bloka, bez dokaza ukupne sigurnosti.
-Glavni metodološki zaključak je potreba za razdvajanjem ovih pokazatelja:
-fixed-key throughput nije candidate-check stopa, resident GPU rezultat
-nije aplikacioni end-to-end rezultat, a difuzija nije sigurnosni dokaz.
+Validacija, dokumentovane sesije i odvojena agregacija povezuju nalaze
+sa njihovim mernim obuhvatom. AES-NI smanjuje CPU cenu AES-a, dok viša
+CUDA resident propusnost ne donosi prednost u testiranoj end-to-end
+putanji. Ni laka optimizacija v1 ne daje dosledan dobitak. Ovi rezultati
+podržavaju upotrebu uparenog protokola, uz granice generalizacije iz
+odeljka~\ref{sec:eksperimentalna-ogranicenja}.

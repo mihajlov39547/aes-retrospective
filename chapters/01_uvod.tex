@@ -28,37 +28,13 @@ samo na osnovu složenosti same šifre, već mora uzeti u obzir i veličinu
 prostora ključeva, cenu računarskih resursa i razvoj specijalizovanog
 hardvera.
 
-Kao način produženja upotrebljivosti postojeće DES infrastrukture
-razvijen je Triple DES, odnosno TDEA, kod kojeg se osnovna DES
-transformacija primenjuje više puta. TDEA je omogućio znatno viši nivo
-bezbednosti u odnosu na pojedinačni DES i imao važnu ulogu kao
-tranziciono rešenje. Međutim, nasledio je 64-bitnu veličinu bloka i
-zahtevao višestruko izvođenje DES operacije, čime su njegova ograničenja
-u pogledu efikasnosti postajala sve značajnija. NIST TDEA retrospektivno
-opisuje kao privremenu zamenu za DES, dok je odgovarajuća preporuka
-SP~800-67 Rev.~2 povučena 1. januara 2024. godine
-~\cite{nist-tdea-withdrawal-2023}.
-
-Potreba za dugoročnim naslednikom DES-a dovela je do procesa razvoja
-novog standarda. National Institute of Standards and Technology (NIST)
-pokrenuo je 1997. godine otvoreni postupak izbora algoritma za Advanced
-Encryption Standard. Od novog standarda očekivalo se ne samo da pruži
-znatno veći prostor ključeva, već i da bude pogodan za efikasne
-implementacije u softveru i hardveru. Među eksplicitnim ciljevima
-razvoja nalazili su se bezbednost najmanje na nivou Triple DES-a,
-značajno bolja efikasnost, mogućnost implementacije na različitim
-platformama i podrška za veće dužine ključeva
-~\cite{nist-aes-report-2001,nist-aes-development-2021}.
-
-NIST je 1998. godine prihvatio petnaest kandidata. Nakon javne
-kriptografske analize i evaluacije izdvojeno je pet finalista:
-MARS, RC6, Rijndael, Serpent i Twofish
-~\cite{nist-aes-report-2001}. Rijndael, koji su razvili Joan Daemen i
-Vincent Rijmen, izabran je u oktobru 2000. godine, a AES je formalno
-standardizovan publikacijom FIPS~197 26. novembra 2001. godine
-~\cite{fips197-2001}. Standardizovani AES koristi blok veličine 128
-bita i tri dužine ključa: 128, 192 i 256 bita. Time je napravljen veliki
-pomak u odnosu na DES-ov 56-bitni efektivni ključ i 64-bitni blok.
+TDEA je produžio upotrebljivost DES infrastrukture, uz veći računarski
+trošak i nasleđeno ograničenje bloka. Oba standarda kasnije su povučena
+za novu zaštitu u NIST okviru~\cite{nist-des-withdrawal-2005,
+nist-tdea-withdrawal-2023}. Otvoreni AES proces doveo je do izbora
+Rijndaela i standardizacije u FIPS~197, sa ciljem dugoročne bezbednosti
+i efikasne primene na različitim platformama
+~\cite{nist-aes-report-2001,nist-aes-development-2021,fips197-2001}.
 
 Period oko 2001--2003. godine zato predstavlja posebno interesantnu
 tačku za retrospektivnu analizu. U tom trenutku DES je još postojao u
@@ -73,7 +49,7 @@ diskusije o simetričnoj kriptografiji.
 Ovaj rad je motivisan upravo tim tehnološkim periodom tranzicije.
 Njegov cilj nije reprodukcija ranijeg magistarskog rada autora iz
 2003. godine, već nova retrospektivna analiza razvoja od DES-a preko
-Triple DES-a do AES-a, zasnovana na danas dostupnoj istorijskoj
+TDEA do AES-a, zasnovana na danas dostupnoj istorijskoj
 dokumentaciji, standardima, naučnoj literaturi i eksperimentalnim
 merenjenjima. Centralno pitanje rada jeste kako su se očekivanja
 formirana u vreme izbora i početnog uvođenja AES-a pokazala nakon više
@@ -83,49 +59,12 @@ od dve decenije njegove praktične upotrebe.
 \subsection{Istorijski trenutak i motivacija}
 \label{subsec:istorijski_trenutak}
 
-Početkom novog milenijuma kriptografski sistemi nalazili su se u
-periodu značajne promene. DES je već pokazivao jasno praktično
-ograničenje zbog 56-bitnog ključa, dok je korišćenje Triple DES-a
-omogućavalo nastavak rada postojeće infrastrukture uz viši nivo
-bezbednosti, ali bez uklanjanja svih ograničenja nasleđenih od DES-a.
-Novi standard morao je zato da odgovori na dva različita problema:
-da obezbedi znatno veću sigurnosnu rezervu i da pri tome bude dovoljno
-efikasan za široku upotrebu u softverskim i hardverskim sistemima.
-
-Važno je naglasiti da uvođenje AES-a nije predstavljalo samo povećanje
-broja bitova ključa. Proces izbora novog standarda obuhvatao je
-sigurnost, cenu implementacije i karakteristike algoritma i
-implementacije. NIST je posebno razmatrao performanse kandidata u
-različitim softverskim i hardverskim okruženjima
-~\cite{nist-aes-report-2001}. Takav pristup bio je značajan za
-komunikacione sisteme, gde kriptografski algoritam mora da obradi
-podatke odgovarajućom brzinom bez stvaranja neprihvatljivog uskog grla.
-
-Rijndael je izabran nakon višegodišnje javne evaluacije, a ne samo na
-osnovu jednog parametra. Njegov izbor odražavao je kombinaciju
-bezbednosti, efikasnosti, implementacione fleksibilnosti i pogodnosti
-za različite platforme~\cite{nist-aes-report-2001}. Upravo je ova
-kombinacija posebno interesantna iz današnje perspektive: moguće je
-proveriti da li su osobine zbog kojih je algoritam izabran ostale
-relevantne i nakon više od dve decenije tehnološkog razvoja.
-
-Kasniji razvoj daje jasan vremenski okvir za takvu analizu. NIST je
-2005. godine formalno povukao DES, uz obrazloženje da više ne pruža
-bezbednost potrebnu za zaštitu federalnih informacija, i preporučio
-prelazak na AES kao snažniji i brži algoritam
-~\cite{nist-des-withdrawal-2005}. TDEA je opstao znatno duže kao
-tranziciona i kompatibilna tehnologija, ali je i njegova NIST
-specifikacija povučena početkom 2024. godine
-~\cite{nist-tdea-withdrawal-2023}. AES, nasuprot tome, ostao je deo
-savremenih bezbednosnih protokola i infrastrukture.
-
-Takav razvoj omogućava da se istorijska tranzicija ne posmatra samo
-kao niz standarda, već kao dugotrajan tehnološki eksperiment:
-DES predstavlja prethodnu generaciju, TDEA pokušaj produženja njenog
-životnog veka, a AES novu konstrukciju odabranu sa očekivanjem
-dugoročne primenljivosti. Period od približno četvrt veka sada pruža
-dovoljno iskustva da se ta očekivanja uporede sa stvarnim ishodima.
-
+Početkom novog milenijuma novi standard morao je da objedini veću
+sigurnosnu rezervu i efikasnost potrebnu komunikacionim sistemima.
+Dokumentacija AES procesa omogućava da se ti kriterijumi rekonstruišu
+nezavisno od kasnijeg uspeha Rijndaela~\cite{nist-aes-report-2001}.
+Period od približno četvrt veka zatim pruža osnovu za poređenje tih
+očekivanja sa razvojem standarda, protokola i implementacija.
 
 \subsection{Istraživačka pitanja i doprinos}
 \label{subsec:istrazivacka_pitanja}
@@ -250,11 +189,8 @@ praksi i standardima}.
 Kada ista specifikacija postoji u više revizija, istorijska analiza
 koristi izdanje relevantno za posmatrani period, dok se za aktuelni
 status koristi najnovija važeća ili poslednja povučena verzija.
-Primer je FIPS~197: originalno izdanje iz 2001. koristi se kao
-istorijski dokument, dok uredničko ažuriranje iz 2023. služi kao
-aktuelna, jasnije predstavljena specifikacija algoritma. NIST
-eksplicitno navodi da ažuriranje iz 2023. nije promenilo sam AES
-algoritam~\cite{fips197-2023}.
+Tako se istorijsko i ažurirano izdanje FIPS~197 koriste prema ulozi
+tvrdnje u analizi~\cite{fips197-2023}.
 
 Vremenski obuhvat rada zato počinje razvojem i slabljenjem praktične
 pozicije DES-a, sa posebnim fokusom na period od druge polovine
@@ -278,7 +214,7 @@ Istovremeno, komunikaciona infrastruktura često ima dug životni vek.
 Kriptografski mehanizam koji je u jednom trenutku savremen može ostati
 prisutan godinama zbog kompatibilnosti sa postojećom opremom,
 protokolima i implementacijama. Upravo je takav problem relevantan za
-prelaz sa DES-a preko Triple DES-a na AES: bezbednosni standard može
+prelaz sa DES-a preko TDEA na AES: bezbednosni standard može
 biti zamenjen relativno brzo na normativnom nivou, dok praktična
 migracija infrastrukture traje znatno duže.
 
@@ -300,19 +236,12 @@ simetrična šifra niti da je jednako zastupljen u svim
 telekomunikacionim sistemima, ali pokazuje njegovu kontinuiranu
 relevantnost više od dve decenije nakon standardizacije.
 
-Zbog toga će u nastavku rada biti jasno razdvojena tri nivoa:
-\begin{enumerate}
-    \item AES kao blokovska kriptografska primitiva;
-    \item način rada ili konstrukcija u kojoj se AES koristi, kao što
-    su CBC, CTR ili GCM;
-    \item komunikacioni protokol ili sistem koji definiše način
-    upotrebe algoritma, upravljanje ključevima i format zaštićenih
-    podataka.
-\end{enumerate}
+Razlika između primitive, načina rada i protokola uspostavlja se u
+Poglavlju~\ref{sec:osnove} i primenjuje kroz ostatak analize.
 
 Nakon uvodnog poglavlja, u Poglavlju~\ref{sec:osnove} daju se osnovni
 pojmovi simetrične kriptografije potrebni za dalje poređenje.
-Zatim se analiziraju DES i Triple DES, njihove konstrukcije i razlozi
+Zatim se analiziraju DES i TDEA, njihove konstrukcije i razlozi
 za postepeno napuštanje. Posebno poglavlje posvećeno je procesu izbora
 AES-a, nakon čega sledi prikaz njegove konstrukcije i implementacionih
 bezbednosnih pitanja. Na toj osnovi vrši se neposredno poređenje tri

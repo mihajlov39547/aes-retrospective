@@ -11,13 +11,10 @@ ne znači da su sva tadašnja očekivanja ostvarena na način koji je početkom
 2000-ih mogao biti precizno predviđen, niti da je AES sam po sebi dovoljan
 za izgradnju bezbednog sistema.
 
-Rijndael je izabran zato što je NIST procenio da pruža povoljnu kombinaciju
-bezbednosti, efikasnosti, implementacionih karakteristika i fleksibilnosti
-\cite{nist-aes-report-2001}. Više od dve decenije kasnije osnovna
-primitiva ostala je standardizovana bez tehničke izmene algoritma:
-ažuriranje FIPS~197 iz 2023. godine zadržalo je AES-128, AES-192 i
-AES-256 sa 128-bitnim blokom
-\cite{fips197-2023}. NIST-ov formalni pregled AES-a zaključuje da
+Kontinuitet standarda podržava NIST-ovu prvobitnu procenu uravnoteženih
+svojstava Rijndaela~\cite{nist-aes-report-2001,fips197-2023}.
+
+NIST-ov formalni pregled AES-a zaključuje da
 poznati klasični analitički napadi ne pružaju praktičan način oporavka
 ključa u standardnom modelu primene, dok se najveća teorijska redukcija
 u odnosu na iscrpnu pretragu za AES-192 i AES-256 javlja pod restriktivnom
@@ -26,16 +23,15 @@ related-key pretpostavkom
 bezbednosne upotrebljivosti AES-a pokazalo se opravdanim.
 
 Istovremeno, retrospektiva pokazuje da se promenilo ono što u praktičnom
-sistemu predstavlja dominantan problem. Povlačenje DES-a 2005. godine i
-znatno duži životni vek TDEA do konačnog povlačenja odgovarajuće NIST
-preporuke početkom 2024. pokazuju da migracija kriptografskih standarda
+sistemu predstavlja dominantan problem. Povlačenje DES-a i
+znatno duži tranzicioni život TDEA pokazuju da migracija kriptografskih standarda
 nije trenutni događaj. AES je opstao, ali se njegov praktični kontekst
 promenio: softverske lookup-table implementacije dopunjene su ili zamenjene
 namenskim procesorskim instrukcijama, autentifikovana enkripcija postala je
 osnovni protokolarni obrazac, a pitanja bočnih kanala, nonce discipline,
 količine podataka pod jednim ključem i bezbednih implementacionih
 interfejsa dobila su veći značaj. Savremena bezbednost zato se ne može
-procjenjivati samo analizom AES transformacije.
+procenjivati samo analizom AES transformacije.
 
 \subsection{Odgovor na centralno pitanje}
 
@@ -50,12 +46,8 @@ standard nije morao biti zamenjen da bi ih iskoristio.
 
 Eksperimentalna analiza daje praktičnu ilustraciju upravo tog razvoja.
 U softverskom CBC poređenju na korišćenoj platformi sve tri AES varijante
-ostvarile su veću propusnost od DES-a i troključnog TDEA. Za velike ulaze
-AES-128 softverska putanja ostvarila je približno 224~MB/s, dok je TDEA
-ostao oko 33~MB/s. Ovi brojevi nisu rekonstrukcija istorijskih računara,
-već savremeno poređenje konkretnih implementacija; njihov značaj je u
-pokazivanju koliko su se performansni odnosi promenili u okruženju u kome
-se legacy algoritmi izvršavaju kroz iste softverske slojeve.
+ostvarile su veću propusnost od DES-a i troključnog TDEA. To je poređenje konkretnih savremenih implementacija, bez
+rekonstrukcije istorijskog hardvera.
 
 Još izraženiji rezultat daje poređenje softverske AES i AES-NI putanje.
 Za ulaze od 1 i 10~MiB AES-NI je na testiranom procesoru ubrzao AES-128
@@ -67,25 +59,15 @@ efikasnu implementaciju---kasnije ostvarivala kroz mehanizme koji tada
 nisu bili deo standardnog procesorskog okruženja.
 
 AES-GCM eksperiment dodatno pokazuje da se savremena performansa više ne
-može svesti na cenu jedne blokovske transformacije. Za ulaze od 1~MiB i
-veće AES-128-GCM je na korišćenoj AES-NI putanji dostizao približno
-1.13--1.19~GB/s, dok je AES-256-GCM dostizao približno
-1.06--1.10~GB/s. Ove vrednosti obuhvataju autentifikovanu obradu payload-a
-u definisanom mernom okviru i zato nisu neposredno poređenje sa CBC
-rezultatima. Njihov značaj je u tome što predstavljaju savremeniji
-kriptografski posao: poverljivost i autentifikaciju treba posmatrati
-zajedno, a ne samo kroz propusnost blokovske šifre.
+može svesti na cenu jedne blokovske transformacije. Autentifikovana obrada u definisanom mernom okviru predstavlja
+drugačiji posao od CBC-a; njene performanse zato se ne tumače kao
+izolovana cena autentifikacije.
 
 Najvažniji eksperimentalni nalaz odnosi se na razliku između izolovanog
 GPU računanja i praktične host--device putanje. U uparenom AES-128
 eksperimentu CUDA resident kernel je na ulazima od 1 do 32~MiB mogao
-nadmašiti jednonitnu CPU AES-NI referencu. Za CTR je resident faktor
-iznosio približno $2.58$--$3.66\times$, a za ECB približno
-$1.89$--$2.65\times$, zavisno od veličine. Međutim, kada se uključe
-pinned H2D transfer, kernel, sinhronizacija i D2H transfer, nijedan
-testirani GPU scenario nije nadmašio AES-NI referencu. Najbliži rezultat
-bio je CTR pri 1~MiB sa faktorom 0.95, dok su ostali praktični faktori
-ostali niži.
+nadmašiti jednonitnu CPU AES-NI referencu. Ipak, nijedan testirani end-to-end GPU scenario nije nadmašio AES-NI.
+Najbliži rezultat bio je CTR pri 1~MiB sa faktorom 0.95.
 
 Ovaj rezultat ne podržava opštu tvrdnju da je CPU ``brži od GPU-a'' za
 AES. On pokazuje nešto metodološki značajnije: resident i end-to-end
@@ -97,16 +79,10 @@ Jednako je važno da laka CUDA optimizacija v1 nije dala konzistentno
 poboljšanje. Time je izbegnuto predstavljanje neuspešnog optimizacionog
 pokušaja kao pozitivnog rezultata.
 
-Samostalni CUDA baseline i kasnija uparena studija takođe nisu proizveli
-isti obrazac ponašanja na najvećim baferima. U baseline studiji izražen
-pad pojavio se na 32~MiB, dok je u uparenom protokolu ta veličina ponovo
-davala veću resident propusnost, a drugi padovi pojavljivali su se u
-drugačijim tačkama. Zbog toga ovaj rad ne pripisuje takvo ponašanje samoj
-veličini bafera niti jednom izolovanom uzroku. WDDM raspoređivanje,
-dinamički taktovi, temperatura, memorijski pritisak i stanje uređaja
-ostaju mogući faktori. Upravo ova neponovljivost između protokola
-pokazuje zašto je dokumentovanje izvršnog okruženja i granica merenja
-jednako važno kao i sama vrednost propusnosti.
+Različito ponašanje velikih bafera u samostalnom baseline-u i uparenoj
+studiji nije pripisano jednom uzroku. WDDM, taktovi, temperatura,
+memorijski pritisak i stanje uređaja ostaju mogući faktori, što
+ograničava generalizaciju i naglašava važnost dokumentovanog protokola.
 
 Demonstracija pretraživanja redukovanog prostora ključeva i avalanche
 analiza imaju drugačiju ulogu. Pretraga $2^{24}$ AES-128 kandidata pokazala
@@ -153,12 +129,8 @@ razdvaja CPU transform-only, GPU resident i GPU end-to-end obuhvat.
 Njegova vrednost nije u tvrdnji o univerzalnom pobedniku, već u
 sprečavanju metodološki nekorektnog poređenja različitih obuhvata.
 
-Treći doprinos predstavlja transparentno dokumentovanje negativnih i
-nestabilnih nalaza. Laka CUDA optimizacija v1 nije dala dosledan dobitak,
-a ponašanje velikih GPU bafera nije bilo identično između dva protokola.
-Ti rezultati nisu uklonjeni niti predstavljeni kao dokaz specifičnog
-hardverskog fenomena. Takav pristup ograničava snagu zaključaka, ali
-povećava njihovu proverljivost.
+Transparentno zadržavanje negativnih i nestabilnih nalaza dodatno
+omogućava proveru granica tog okvira.
 
 Ograničenja rada su značajna. Sva glavna CPU--GPU merenja izvedena su na
 jednoj platformi sa Intel Core i5-10300H procesorom i NVIDIA GTX~1650~Ti
@@ -172,7 +144,7 @@ mogu generalizovati na druge procesore, GPU-ove, operativne sisteme ili
 biblioteke.
 
 Ni sigurnosni eksperimenti ne prelaze svoja definisana ograničenja.
-Reduced-keyspace pretraga nije kriptoanalitički napad na pune prostore
+Pretraga redukovanog prostora ključeva nije kriptoanalitički napad na pune prostore
 ključeva, avalanche analiza nije kompletan SAC/BIC test, a rad ne meri
 timing, cache, power, EM ili fault-injection curenje. Eksperimentalna
 ispravnost implementacije nije isto što i dokaz njene otpornosti na
@@ -201,14 +173,7 @@ zahtevala konkretan AES oracle, broj logičkih kubita, dubinu kola,
 korekciju grešaka i model paralelizacije. Ni jedno ni drugo ne može se
 izvesti prostom ekstrapolacijom sadašnjih vremenskih merenja.
 
-Konačno, najvažnija pouka ovog rada nije pojedinačna vrednost propusnosti
-niti činjenica da je jedna implementacija u određenom testu bila brža od
-druge. Ona je metodološka: rezultat kriptografskog eksperimenta ima
-značenje samo ako su jasno definisani algoritam, implementaciona putanja,
-merna granica i model bezbednosti. Fixed-key throughput nije stopa
-pretrage ključeva, resident GPU rezultat nije aplikaciona end-to-end
-propusnost, avalanche efekat nije dokaz sigurnosti, a bezbedna primitiva
-nije sama po sebi bezbedan protokol. Upravo u tom smislu AES je izdržao
-test vremena: njegova osnovna konstrukcija ostala je relevantna, dok su
-se sistemi, implementacije i kriterijumi kojima se meri njena praktična
-vrednost nastavili menjati.
+Rezultat kriptografskog eksperimenta ima značenje tek uz definisan
+algoritam, implementacionu putanju, mernu granicu i model bezbednosti.
+AES je u tom okviru izdržao test vremena: konstrukcija je ostala
+relevantna, dok su se sistemi i kriterijumi njene praktične primene menjali.
