@@ -1,10 +1,13 @@
 % !TEX program = xelatex
 \documentclass[11pt,a4paper]{article}
+
 \usepackage{fontspec}
 \defaultfontfeatures{Ligatures=TeX}
 \setmainfont{Times New Roman}
+
 \usepackage[english]{babel}
 \babelprovide[import=sr-Latn,main]{serbian}
+
 \usepackage[margin=25mm]{geometry}
 \usepackage{microtype}
 \usepackage{graphicx}
@@ -13,11 +16,21 @@
 \usepackage{pdflscape}
 \usepackage{siunitx}
 \usepackage{csquotes}
-\usepackage[backend=biber,style=numeric,sorting=none,autolang=other]{biblatex}
+\usepackage{xurl}
+
+\usepackage[
+    backend=biber,
+    style=numeric,
+    sorting=none,
+    autolang=other
+]{biblatex}
+
 \DeclareBibliographyAlias{standard}{report}
 \addbibresource{references.bib}
+
 \usepackage[hidelinks]{hyperref}
 \usepackage[nameinlink,noabbrev]{cleveref}
+
 \usepackage{tikz}
 \usetikzlibrary{
     arrows.meta,
@@ -25,28 +38,56 @@
     fit,
     decorations.pathreplacing
 }
+
 \crefname{section}{odeljak}{odeljci}
 \crefname{figure}{slika}{slike}
 \crefname{table}{tabela}{tabele}
-\addto\captionsserbian{\renewcommand{\contentsname}{Sadržaj}
-  \renewcommand{\figurename}{Slika}\renewcommand{\tablename}{Tabela}}
+
+\Crefname{section}{Odeljak}{Odeljci}
+\Crefname{figure}{Slika}{Slike}
+\Crefname{table}{Tabela}{Tabele}
+
+\addto\captionsserbian{
+    \renewcommand{\contentsname}{Sadržaj}
+    \renewcommand{\figurename}{Slika}
+    \renewcommand{\tablename}{Tabela}
+}
+
 \graphicspath{{figures/}}
 \setlength{\emergencystretch}{2em}
 \setcounter{tocdepth}{1}
+
 \newif\ifshowsummary
-\showsummarytrue % TODO: Isključiti sadržaj za kraću verziju prema pravilima časopisa.
+\showsummarytrue
+% Postaviti na \showsummaryfalse za verziju bez sadržaja.
+
 \title{\fontsize{16pt}{20pt}\selectfont\bfseries
-Od DES-a do AES-a: više od dve decenije razvoja, primene i perspektive simetrične kriptografije u telekomunikacijama\\[0.8em]
+Od DES-a do AES-a: retrospektiva razvoja, implementacije i performansi simetrične kriptografije u telekomunikacijama\\[0.8em]
 \normalfont\fontsize{12pt}{15pt}\selectfont
-From DES to AES: More Than Two Decades of Evolution, Applications and Perspectives of Symmetric Cryptography in Telecommunications}
+From DES to AES: A Retrospective on the Evolution, Implementation, and Performance of Symmetric Cryptography in Telecommunications}
+
 \author{\normalsize Marko Mihajlović}
-% TODO: Afilijaciju i kontakt dodati kada budu određeni za objavljivanje.
+% Afilijaciju i kontakt dodati prema pravilima konačne publikacije.
+
 \date{}
-\hypersetup{pdftitle={Od DES-a do AES-a},pdfauthor={Marko Mihajlović}}
+
+\hypersetup{
+    pdftitle={Od DES-a do AES-a},
+    pdfauthor={Marko Mihajlović}
+}
+
 \begin{document}
+
 \maketitle
+
 \input{chapters/00_abstract}
-\ifshowsummary\clearpage\tableofcontents\clearpage\fi
+
+\ifshowsummary
+    \clearpage
+    \tableofcontents
+    \clearpage
+\fi
+
 \input{chapters/01_uvod}
 \input{chapters/02_osnove_simetricne_kriptografije}
 \input{chapters/03_des}
@@ -59,8 +100,10 @@ From DES to AES: More Than Two Decades of Evolution, Applications and Perspectiv
 \input{chapters/10_prediction_vs_reality}
 \input{chapters/11_savremeni_izazovi_i_future_work}
 \input{chapters/12_zakljucak}
+
 \begingroup
 \raggedright
 \printbibliography[heading=bibintoc,title={Literatura}]
 \endgroup
+
 \end{document}

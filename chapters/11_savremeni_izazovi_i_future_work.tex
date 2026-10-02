@@ -1,21 +1,288 @@
 \section{Savremeni izazovi, dizajnerska retrospektiva i budući rad}
 \label{sec:izazovi}
-% TODO: Razraditi poglavlje tek nakon provere izvora; ne unositi neproverene činjenice.
-Diskusija će razmotriti moguće drugačije projektne izbore bez pretpostavke
-da bi oni nužno dali bolji standard. Predlozi budućeg rada ostaju ograničeni
-na pitanja koja neposredno proizlaze iz pregleda i planiranih eksperimenata.
+
+Više od dve decenije standardizacije i praktične primene AES-a pružaju
+dovoljno iskustva da se pojedini projektni izbori razmotre iz savremene
+perspektive. Takva retrospektiva, međutim, ne podrazumeva da bi drugačiji
+izbori nužno proizveli bolji standard. AES je ostao široko primenljiva i
+intenzivno analizirana blokovska šifra, a NIST-ov formalni pregled nije
+identifikovao razlog za promenu same AES primitive
+\cite{MouhaDworkin2021AESReview}. Istovremeno, iskustvo sa implementacijama,
+režimima rada i novim klasama uređaja pokazalo je da se kriterijumi kojima
+se danas ocenjuje simetrična kriptografija delimično razlikuju od kriterijuma
+dominantnih tokom AES procesa.
+
+Savremena pitanja sve češće obuhvataju otpornost implementacije na bočne
+kanale, pogodnost za konstantno-vremensko i maskirano izvršavanje,
+bezbedno upravljanje nonce vrednostima, autentifikovanu enkripciju kao
+podrazumevani interfejs, energetsku efikasnost i ponašanje na heterogenim
+platformama. NIST-ove novije aktivnosti dodatno pokazuju interesovanje za
+lightweight kriptografiju, šire blokovske primitive i nove autentifikovane
+režime za okruženja sa veoma velikim obimom podataka
+\cite{NISTSP800232,Turan2026SymmetricStandards}. Cilj ovog odeljka zato
+nije preprojektovanje AES-a, već identifikovanje pitanja koja bi danas
+verovatno dobila veću težinu i izdvajanje budućih eksperimenata koji
+neposredno proizlaze iz metodologije i rezultata ovog rada.
+
 
 \subsection{Šta bismo danas možda uradili drugačije?}
-% TODO: Istražiti svrhu AES-192, veći blok, key schedule i kompromis fleksibilnosti i jednostavnosti. Izneti različita mišljenja kao mišljenja potkrepljena argumentima; blogovi i Stack Exchange služe pronalaženju pitanja.
+
+Jedno od retrospektivnih pitanja odnosi se na tri standardizovane dužine
+ključa. FIPS~197 definiše AES-128, AES-192 i AES-256, pri čemu sve tri
+varijante koriste blok od 128 bita
+\cite{NISTFIPS197Update}. AES-192 ostaje potpuno standardizovana i
+kriptografski važeća varijanta; dostupni autoritativni izvori ne pružaju
+dovoljno osnova da se njegova stvarna zastupljenost 2026. godine pretvori
+u argument za njegovo uklanjanje. Ipak, postojanje tri dužine ključa
+povećava implementacionu i validacionu površinu, pa se može postaviti
+istraživačko pitanje da li bi savremeni standard opšte namene zahtevao
+tri parametarska skupa ili manji broj podrazumevanih profila. To je
+projektni kompromis, a ne zaključak da je AES-192 suvišan.
+
+Slična retrospektivna rasprava odnosi se na raspored ključa. Napadi u
+related-key modelu pokazali su strukturne osobine rasporeda ključa kod
+AES-192 i AES-256 koje nisu prisutne u istom obliku kod AES-128
+\cite{BiryukovKhovratovich2009AES}. Ovi rezultati su značajni za
+kriptoanalitičko razumevanje algoritma, ali njihov model pretpostavlja
+mogućnost rada sa ključevima u kontrolisanom međusobnom odnosu. To nije
+standardni model primene u kome su ključevi nezavisno i pravilno
+generisani. Zbog toga iz njih ne sledi da je AES-256 praktično kompromitovan.
+NIST-ov pregled AES-a takve rezultate posmatra kao deo teorijske analize,
+a ne kao razlog za povlačenje ili izmenu standarda
+\cite{MouhaDworkin2021AESReview}. Moguće je pretpostaviti da bi se pri
+projektovanju nove primitive danas pažljivije razmatrala difuzija rasporeda
+ključa, ali bi složeniji raspored istovremeno mogao povećati cenu promene
+ključa, hardversku površinu i implementacionu složenost.
+
+Veličina bloka predstavlja aktuelnije pitanje. AES je standardizovan sa
+128-bitnim blokom, što je predstavljalo veliko povećanje u odnosu na
+64-bitni blok DES-a i TDEA. Međutim, granice zasnovane na birthday efektu
+i sve veći obimi podataka pod dugotrajnim ključevima ponovo su otvorili
+pitanje šireg bloka. NIST je 2024. pokrenuo proces razmatranja
+Rijndael-256, sa blokom i ključem od 256 bita, a tokom 2026. nastavio
+rad na wide-AES i povezanim autentifikovanim konstrukcijama
+\cite{NISTWideAES2024,Turan2026SymmetricStandards}. NIST ovaj razvoj
+predstavlja kao dopunu postojećem AES-u, a ne njegovu zamenu.
+
+Širi blok zato nije univerzalno bolji projektni izbor. Može povećati
+dozvoljeni obim podataka i prostor za nonce ili tweak vrednosti u novim
+konstrukcijama, ali ujedno povećava stanje koje se obrađuje, može zahtevati
+više registara i hardverskih resursa i ne uklapa se neposredno u postojeću
+infrastrukturu optimizovanu za 128-bitni AES. Retrospektivno se zato može
+zaključiti samo da bi savremeni dugovečni standard mogao razmotriti širi
+blok kao dodatni profil za veoma velike obime podataka; dostupni izvori ne
+podržavaju tvrdnju da je izbor 128-bitnog AES bloka bio pogrešan.
+
+Jedna od najuspešnijih osobina Rijndaela bila je pravilna i relativno
+jednostavna struktura, koja je olakšala analizu, softversku realizaciju i
+hardversku implementaciju \cite{NechvatalEtAl2001AESDevelopment,
+DaemenRijmen2002}. Dvadeset pet godina kasnije upravo ta jednostavnost
+pokazuje dve strane istog kompromisa. Ona je omogućila veliki broj
+optimizacija i detaljnu javnu kriptoanalizu, ali optimalna implementacija
+više ne znači isto što i početkom 2000-ih. Savremeni projektni kriterijumi
+moraju istovremeno obuhvatiti matematičku jednostavnost, implementacionu
+bezbednost, mogućnost akceleracije i veličinu validacione površine.
+
 
 \subsection{Implementacije i AEAD kao polazište}
-% TODO: Razmotriti side-channel-friendly dizajn, constant-time softver, akceleraciju, nonce disciplinu i autentifikovanu enkripciju kao primarni interfejs.
+
+Praktična bezbednost blokovske šifre zavisi i od načina njene implementacije.
+Softverske AES realizacije zasnovane na tabelama mogu imati
+tajno-zavisne obrasce pristupa memoriji, zbog čega je literatura pokazala
+praktične cache napade na takve implementacije
+\cite{OsvikShamirTromer2006}. Ovo nije slabost AES transformacije kao
+matematičke funkcije, već posledica interakcije implementacije i
+mikroarhitekture procesora.
+
+Savremeni kriterijumi projektovanja zato pridaju znatno veću pažnju
+izvršavanju bez tajno-zavisnih grana i memorijskih pristupa, kao i
+mogućnosti maskiranja i drugih zaštita od fizičkih bočnih kanala.
+Namenske instrukcije kao što je AES-NI dodatno menjaju odnos bezbednosti
+i performansi: AES runde se izvršavaju bez softverskih lookup tabela, pa
+se uklanja važna klasa cache i timing problema karakterističnih za
+tabelarne implementacije. Ovo, međutim, ne znači da namenske instrukcije
+eliminišu sve bočne kanale, fault napade ili greške u režimu rada i
+protokolu.
+
+Rezultat iz odeljka~\ref{sec:aes-akceleracija} pokazuje koliko se cena
+iste AES primitive menja kada se pređe sa softverske na namenski
+akcelerovanu CPU putanju. Iz toga proizlazi važna dizajnerska pouka:
+performanse dugovečnog standarda ne određuje samo struktura algoritma,
+već i sposobnost hardverskog i softverskog ekosistema da ga efikasno i
+bezbedno realizuje.
+
+Druga velika promena odnosi se na nivo interfejsa. NIST SP~800-38A
+definisao je klasične režime poverljivosti kao što su ECB, CBC, CFB,
+OFB i CTR \cite{Dworkin2001Modes}. Kasniji razvoj pomerio je praktični
+fokus ka autentifikovanoj enkripciji. RFC~5116 definiše opšti interfejs
+za Authenticated Encryption with Associated Data (AEAD)
+\cite{RFC5116}, dok TLS~1.3 koristi isključivo AEAD skupove i zahteva
+implementaciju \texttt{TLS\_AES\_128\_GCM\_SHA256}
+\cite{RFC8446}. Savremena IETF uputstva dodatno ograničavaju upotrebu
+CBC skupova u starijim TLS verzijama \cite{RFC9325}.
+
+Ovakav razvoj podržava ideju da autentifikovana enkripcija treba da bude
+podrazumevani interfejs za većinu aplikacionih potreba, ali ne znači da
+CBC ili CTR prestaju da budu validne kriptografske konstrukcije u
+odgovarajućim kompozicijama. Razlika je u bezbednom podrazumevanom
+ponašanju: AEAD eksplicitno povezuje poverljivost, integritet i
+autentifikaciju dodatnih podataka u jednoj apstrakciji.
+
+Ni AEAD ne uklanja mogućnost pogrešne upotrebe. GCM zahteva da se nonce
+vrednosti koriste u skladu sa pravilima režima, a ponovno korišćenje
+iste key--nonce kombinacije može dovesti do ozbiljnog gubitka
+poverljivosti i integriteta \cite{Dworkin2007GCM}. Važno je razlikovati
+ograničenje maksimalne dužine jedne poruke od ukupnog životnog veka
+ključa: granica od $2^{39}-256$ bita u SP~800-38D odnosi se na maksimalnu
+dužinu plaintext-a u jednoj GCM invokaciji, dok se dozvoljeni broj
+invokacija i ukupna sigurnosna margina određuju dodatnim pravilima o IV
+vrednostima i verovatnoći falsifikovanja.
+
+Jedan savremeni odgovor na probleme slučajnog ponavljanja nonce vrednosti
+je AES-GCM-SIV. RFC~8452 definiše AES-GCM-SIV kao nonce-misuse-resistant
+AEAD koji ne doživljava katastrofalni slom svojstava pri slučajnom
+ponavljanju nonce vrednosti \cite{RFC8452}. Ta otpornost nije besplatna:
+enkripcija zahteva dodatnu obradu i konstrukcija ima drugačije zahteve
+za memoriju i obradu poruke. Projektni izbor zato nije između
+``bezbednog'' i ``nebezbednog'' AEAD-a, već između različitih modela
+upotrebe, performansi i tolerancije na greške upravljanja stanjem.
+
 
 \subsection{Embedded, IoT i lightweight kontekst}
-% TODO: Istražiti odnos AES-a i Ascon-a prema stvarnim ograničenjima i relevantnim NIST izdanjima. Ne pretpostaviti da novi algoritam univerzalno zamenjuje AES.
+
+Razvoj Interneta stvari i veoma ograničenih ugrađenih sistema otvorio je
+drugačiji skup kompromisa. NIST je 2013. započeo istraživanje kriptografije
+za ograničena okruženja, a kasnije pokrenuo Lightweight Cryptography
+proces za standardizaciju AEAD i hash funkcija tamo gde performanse
+postojećih NIST standarda nisu zadovoljavajuće
+\cite{NISTLightweightProject}. Posle višegodišnjeg procesa NIST je 2023.
+izabrao Ascon, a u avgustu 2025. objavio SP~800-232, koji standardizuje
+Ascon-AEAD128, Ascon-Hash256, Ascon-XOF128 i Ascon-CXOF128
+\cite{NISTSP800232}.
+
+Ascon je zasnovan na 320-bitnoj permutaciji i projektovan je kao
+lightweight porodica za uređaje sa ograničenom memorijom, energijom i
+računarskim resursima. Za ovaj rad je, međutim, posebno važna granica
+tumačenja: standardizacija Ascon-a ne znači da je AES zamenjen.
+NIST je pri izboru Ascon-a eksplicitno naveo da lightweight projekat nije
+namenjen zameni AES-a i postojećih hash standarda, već dopuni za uređaje
+kod kojih oni imaju nepovoljan implementacioni trošak
+\cite{NISTAsconSelection2023}.
+
+Zbog toga poređenje AES-a i Ascon-a nema univerzalan ishod. Na
+serverima i klijentskim procesorima sa AES-NI ili odgovarajućim ARM
+kriptografskim instrukcijama, AES može koristiti značajnu namensku
+hardversku podršku. Slično tome, pojedini mikrokontroleri imaju ugrađene
+AES periferije, pa softversko poređenje između Ascon-a i AES-a ne opisuje
+stvarni uređaj. Na drugoj strani, na platformama bez takve akceleracije,
+kompaktna permutaciona konstrukcija Ascon-a može biti privlačna zbog
+memorije, koda, energije i AEAD funkcionalnosti integrisane u sam
+standard.
+
+Naučno korektno buduće poređenje zato bi moralo biti stratifikovano po
+platformi. Posebno bi trebalo odvojiti najmanje tri slučaja: softverski
+AES-GCM i Ascon-AEAD128 na istom procesoru, hardverski akcelerovani
+AES-GCM i softverski Ascon na uređaju sa AES podrškom, i oba algoritma
+na ograničenom mikrokontroleru bez kriptografskog akceleratora.
+Propusnost sama ne bi bila dovoljna; trebalo bi meriti latenciju, RAM,
+veličinu koda i energiju po obrađenom bajtu. Tek takav protokol mogao bi
+pokazati u kojim uslovima lightweight konstrukcija predstavlja
+inženjersku prednost.
+
 
 \subsection{Budući eksperimenti}
-% TODO: Proširiti sadašnji AES-NI on/off eksperiment na različite CPU arhitekture; ARM extensions, embedded/FPGA, energiju i odvojeno AES-GCM merenje ostaviti izvan sadašnjeg obima.
+
+Najdirektniji nastavak ovog rada jeste proširenje postojećeg
+validacionog i uparenog protokola na druge CPU arhitekture. Eksperiment iz
+odeljka~\ref{sec:aes-akceleracija} meri softversku i AES-NI putanju na
+jednom Intel procesoru, pa dobijeni faktor ubrzanja ne treba
+generalizovati na druge mikroarhitekture. Buduća studija mogla bi istim
+porukama, režimima, seedovima i obuhvatom merenja uporediti Intel i AMD
+AES instrukcije, ARM kriptografske ekstenzije i eksplicitnu softversku
+fallback putanju. Osnovne metrike ostale bi vreme, propusnost i
+cycles/byte, uz strogu kontrolu frekvencije, termalnog stanja, biblioteke
+i kompajlera.
+
+Drugi direktan nastavak proizlazi iz razlike između resident i end-to-end
+CUDA rezultata iz odeljka~\ref{sec:cpu-gpu-poredjenje}. NVIDIA smernice
+za CUDA naglašavaju da host--device transfer treba minimizovati, da pinned
+memorija može povećati propusnost prenosa i da asinhrone kopije i CUDA
+stream-ovi mogu omogućiti preklapanje prenosa i računanja
+\cite{NVIDIACUDABestPractices}. Budući eksperiment zato može ispitati
+double buffering, više stream-ova, različite batch veličine i
+\texttt{cudaMemcpyAsync}. Istraživačko pitanje ne treba formulisati kao
+pretpostavku da će GPU tada postati brži od CPU-a, već kao proveru u kojoj
+meri se jaz između resident i praktične pipeline propusnosti može smanjiti.
+
+Treći nastavak bio bi potpuno CPU--GPU poređenje AES-GCM-a. Trenutni rad
+meri CPU AES-GCM i zasebno GPU AES-128 ECB/CTR putanju, pa nema osnovu za
+direktno poređenje kompletnog AEAD procesa. Nova implementacija morala bi
+odvojeno evidentirati AES-CTR deo, GHASH, generisanje ili proveru taga,
+H2D/D2H transfere i ukupno vreme autentifikovane enkripcije i
+dekripcije. Time bi se ispitalo da li prednost resident GPU računanja
+opstaje kada se meri kompletna autentifikovana operacija.
+
+Energetska efikasnost predstavlja sledeći korak većeg obima. Za CPU i GPU
+neophodno je jasno definisati mernu granicu: procesorski paket, GPU ploču
+ili celokupan sistem. Pored prosečne snage treba meriti integral energije
+tokom iste količine korisnog rada i izvesti, na primer, J/GB ili GB/J.
+Takav rezultat ne može se izvesti iz postojeće propusnosti, jer dve
+implementacije slične brzine mogu imati različitu potrošnju, a brža
+implementacija može završiti dovoljno ranije da potroši manje ukupne
+energije.
+
+Embedded i FPGA eksperimenti predstavljali bi širenje metodologije.
+Na mikrokontrolerima bi pored cycles/byte i latencije trebalo beležiti
+RAM, flash i energiju, dok bi za FPGA bile relevantne propusnost,
+latencija, radna frekvencija, zauzeta površina i odnos propusnosti i
+površine. Takve vrednosti ne treba neposredno rangirati sa CPU/GPU MB/s,
+jer predstavljaju različite resurse i projektne ciljeve.
+
+Najveće metodološko proširenje bilo bi eksperimentalno ispitivanje bočnih
+kanala. Funkcionalna validacija i stabilni vremenski benchmark ne dokazuju
+odsustvo curenja tajnog podatka. Ozbiljna power ili EM studija zahtevala
+bi kontrolisan target uređaj, okidanje, veliki broj tragova, odgovarajuću
+mernu opremu i statističku metodologiju. Takav rad zato pripada zasebnoj
+istraživačkoj celini, a ne jednostavnom proširenju postojećeg benchmarka.
+
 
 \subsection{Dugoročna istraživačka pitanja}
-% TODO: Predvideti model kvantnog napada, testiranje bočnih kanala i poređenje sa modernim simetričnim rešenjima; definisati šta bi takvo poređenje zahtevalo od podataka i opreme.
+
+Jedno dugoročno pitanje jeste formalnije povezivanje simetrične
+kriptografije sa kvantnim modelom napada. Groverov algoritam smanjuje
+asimptotski broj upita za iscrpnu pretragu prostora od $N$ elemenata sa
+reda $N$ na red $\sqrt{N}$ \cite{Grover1996}. Međutim, pretvaranje ovog
+rezultata u procenu realnog vremena napada na AES zahteva mnogo više od
+zamene $2^k$ sa $2^{k/2}$. Potrebno je konstruisati reverzibilni AES
+oracle, odrediti broj logičkih kubita, T-count i T-depth, dubinu kola,
+broj Groverovih iteracija i model paralelizacije, a zatim uvesti pretpostavke
+o korekciji grešaka i fizičkom kvantnom hardveru
+\cite{GrasslEtAl2016AESQuantum,JaquesEtAl2020GroverAES}.
+Zbog toga se stopa klasične reduced-keyspace pretrage iz ovog rada ne
+može ekstrapolirati na kvantni napad.
+
+Drugo dugoročno pitanje jeste objedinjavanje performansnih i
+implementaciono-bezbednosnih merenja. Budući okvir mogao bi primenjivati
+isti princip koji je korišćen u ovom radu---validacija pre merenja,
+fiksirani obuhvat, eksplicitne metadata zapise i odvajanje različitih
+izvršnih putanja---ali ga proširiti metrikama energije, memorije i
+bočnih kanala. Takav okvir bi omogućio poređenje AES-GCM-a,
+Ascon-AEAD128, AES-GCM-SIV-a i drugih savremenih konstrukcija po više
+dimenzija, bez svođenja rezultata na jednu zbirnu ocenu.
+
+Treće pitanje odnosi se na opštost rezultata u heterogenim sistemima.
+Apsolutne propusnosti i odnosi između softverskog AES-a, AES-NI i CUDA
+putanje u ovom radu specifični su za korišćeni CPU, GPU, operativni sistem,
+drajvere i biblioteke. Nasuprot tome, metodološki principi imaju širu
+primenu: known-answer validacija pre benchmarka, reproduktivne sesije,
+jasno definisana merna granica i razdvajanje primitive, resident kernela
+i kompletne end-to-end putanje mogu se preneti na druge arhitekture i
+algoritme.
+
+Dugoročni doprinos zato ne bi trebalo tražiti u pronalaženju jednog
+``najbržeg'' ili ``najboljeg'' algoritma. Relevantnije istraživačko
+pitanje jeste kako izgraditi ponovljiv okvir koji pokazuje pod kojim
+uslovima određena kriptografska konstrukcija pruža odgovarajuću
+bezbednost, performanse, energetsku efikasnost i implementacionu
+robustnost. Dvadeset pet godina iskustva sa AES-om upravo pokazuju da se
+te osobine ne mogu pouzdano procenjivati nezavisno jedna od druge.

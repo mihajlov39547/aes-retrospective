@@ -130,17 +130,19 @@ dovoljno iskustva da se ta očekivanja uporede sa stvarnim ishodima.
 \subsection{Istraživačka pitanja i doprinos}
 \label{subsec:istrazivacka_pitanja}
 
-Rad je koncipiran kao pregledno-eksperimentalna studija. Ne predlaže se
-novi algoritam niti nova kriptoanalitička metoda; doprinos rada je u
-povezivanju istorijskih razloga za prelazak sa DES-a i Triple DES-a na
-AES sa iskustvima stečenim tokom više od dve decenije njegove
-standardizovane i praktične upotrebe.
+Rad je koncipiran kao pregledno-eksperimentalna retrospektivna studija.
+Ne predlaže se novi simetrični algoritam niti nova kriptoanalitička
+metoda. Polazište je istorijska tranzicija od DES-a preko TDEA ka AES-u,
+ali je centralni cilj širi: proveriti kako su se dokumentovana očekivanja
+iz perioda izbora AES-a pokazala nakon približno četvrt veka razvoja
+kriptografije, procesorskih arhitektura, komunikacionih protokola i
+praktičnih implementacija.
 
 Analiza je organizovana oko sledećih istraživačkih pitanja:
 
 \begin{enumerate}
-    \item[\textbf{IP1}] Koja su bezbednosna i implementaciona
-    ograničenja DES-a i Triple DES-a dovela do potrebe za novim
+    \item[\textbf{IP1}] Koja su bezbednosna, implementaciona i
+    arhitektonska ograničenja DES-a i TDEA dovela do potrebe za novim
     standardom?
 
     \item[\textbf{IP2}] Koji su zahtevi i očekivanja postavljeni pred
@@ -151,35 +153,65 @@ Analiza je organizovana oko sledećih istraživačkih pitanja:
     bezbednosti, performansi, implementacione fleksibilnosti i
     dugovečnosti AES-a potvrdila do 2026. godine?
 
-    \item[\textbf{IP4}] Kako se uloga AES-a razvijala u
-    telekomunikacionim i mrežnim sistemima i na koji način su rast
-    brzine mreža i razvoj procesorske podrške uticali na njegove
-    performanse?
+    \item[\textbf{IP4}] Kako savremena procesorska i GPU akceleracija
+    menjaju praktičnu cenu AES-a i koliko zaključak zavisi od toga da li
+    se meri izolovana transformacija, device-resident izvršavanje ili
+    kompletna end-to-end putanja?
 
     \item[\textbf{IP5}] Koja ograničenja i otvorena pitanja postaju
-    vidljiva iz današnje perspektive, uključujući bočne kanale,
-    autentifikovanu enkripciju, veličinu bloka, okruženja ograničenih
-    resursa i budući kvantni model napada?
+    vidljiva iz današnje perspektive, posebno u vezi sa autentifikovanom
+    enkripcijom, bočnim kanalima, veličinom bloka, lightweight
+    okruženjima i budućim kvantnim modelom napada?
 \end{enumerate}
 
-Prvi deo doprinosa rada predstavlja objedinjenu tehničku analizu
-DES-a, TDEA i AES-a uz jasno razdvajanje nominalne veličine ključa,
-efektivne sigurnosti, veličine bloka, unutrašnje strukture i
-implementacionih karakteristika. Drugi deo predstavlja retrospektivno
-poređenje očekivanja dokumentovanih tokom razvoja AES-a sa stanjem
-tehnologije do 2026. godine. Treći deo čini ograničena eksperimentalna
-analiza, u kojoj će se na istoj računarskoj platformi meriti
-performanse dostupnih implementacija DES-a, Triple DES-a i varijanti
-AES-a, kao i uticaj savremene hardverske akceleracije.
+Prvi doprinos rada je pregledno-sintetički. Dokumentovani razlozi za
+slabljenje DES-a, produženu tranzicionu ulogu TDEA i izbor Rijndaela
+povezuju se sa kasnijim razvojem standarda i protokola do 2026. godine.
+Pri tome se izričito razdvajaju očekivanja dokumentovana tokom AES procesa
+od kasnijih tehnoloških razvoja, kako se AES-NI, GPU izvršavanje ili
+savremena AEAD praksa ne bi retroaktivno pripisivali originalnom procesu
+izbora.
 
-Eksperimentalni rezultati neće biti tumačeni kao univerzalna mera
-brzine pojedinačnih algoritama. Oni predstavljaju merenje konkretnih
-implementacija na dokumentovanoj platformi, sa ciljem da ilustruju
-razliku između algoritamskog dizajna, softverske implementacije i
-hardverske podrške. Posebno će biti analizirano poređenje AES-a sa i
-bez procesorske kriptografske akceleracije, jer takva podrška
-predstavlja jednu od značajnih promena u odnosu na računarsko okruženje
-iz perioda standardizacije AES-a.
+Drugi i centralni eksperimentalni doprinos je metodološki. Uspostavljen
+je validiran i ponovljiv okvir za mikrobenchmarking kriptografskih
+implementacija sa funkcionalnom validacijom pre merenja, eksplicitnim
+granicama tajmera, dokumentovanim seedovima i sesijama, čuvanjem raw,
+summary, validation i metadata artefakata i agregacijom rezultata između
+nezavisnih procesa.
+
+Posebno mesto ima upareni protokol za poređenje CPU AES-NI i CUDA
+AES-128 implementacija. Isti ulazi koriste se kroz poređene putanje, dok
+se odvojeno posmatraju CPU transform-only, GPU resident i GPU end-to-end
+obuhvat. Time se neposredno ispituje koliko zaključak o performansama
+zavisi od merne granice. Takvo razdvajanje je važno jer visoka propusnost
+izolovanog GPU kernela ne mora predstavljati propusnost praktične
+host--device aplikacione putanje.
+
+Treći doprinos predstavlja empirijska evaluacija ovako definisanog
+okvira na dokumentovanoj savremenoj platformi. Ona obuhvata istorijsko
+CPU poređenje DES/TDEA/AES, softverski AES naspram AES-NI, AES-GCM,
+CUDA AES-128 baseline i upareno CPU--GPU poređenje, kao i ilustrativnu
+pretragu redukovanog prostora ključeva i avalanche analizu. Ti rezultati
+ne predstavljaju univerzalne performanse algoritama niti rekonstrukciju
+hardvera iz vremena standardizacije AES-a. Njihova uloga je da
+kvantifikuju razliku između primitive, implementacione putanje i
+kompletnog sistema na jednoj reproducibilno opisanoj platformi.
+
+Važan deo metodološkog doprinosa je i eksplicitno dokumentovanje
+ograničenja i negativnih rezultata. CUDA kandidat lake optimizacije nije
+doneo konzistentno poboljšanje, a samostalni baseline i uparena studija
+nisu pokazali isti obrazac performansi na najvećim baferima. Takvi nalazi
+se ne uklanjaju niti generalizuju bez dodatne kontrole stanja uređaja.
+Ovim se performansni rezultat vezuje za protokol kojim je dobijen, umesto
+za pretpostavljenu univerzalnu osobinu CPU-a ili GPU-a.
+
+Eksperimentalni deo zato nije zamišljen kao potraga za novim rekordom
+propusnosti, već kao kontrolisana demonstracija koliko se zaključak o
+kriptografskim performansama menja kada se promeni implementaciona
+putanja ili obuhvat merenja. Time eksperiment neposredno podržava
+retrospektivnu temu rada: algoritam standardizovan početkom 2000-ih
+ostaje isti, dok se način njegovog efikasnog i bezbednog izvršavanja
+značajno menja.
 
 
 \subsection{Metod izbora literature i vremenski obuhvat}

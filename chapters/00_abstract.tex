@@ -1,26 +1,57 @@
-% TODO: Sažetke finalizovati tek nakon pregleda literature i eksperimenata.
-% TODO: Uskladiti oba jezika, obim i broj ključnih reči sa pravilima časopisa.
 \begin{abstract}
-Ovaj rad planiran je kao pregled razvoja simetrične kriptografije od DES-a,
-preko Triple DES-a, do AES-a, sa naglaskom na telekomunikacione primene.
-Osnovno pitanje jeste kako se očekivanja iz perioda 2001--2003. odnose prema
-iskustvu primene do 2026. godine. Planiran je manji eksperimentalni deo
-za poređenje performansi i ilustraciju izabranih osobina blokovskih šifara.
-Ovo je radni sažetak; rezultati i zaključci još nisu formulisani.
+Rad daje retrospektivnu analizu razvoja simetrične kriptografije od
+Data Encryption Standarda (DES), preko Triple DES-a (TDEA), do Advanced
+Encryption Standarda (AES), sa posebnim osvrtom na telekomunikacione i
+mrežne sisteme. Analiziraju se dokumentovana očekivanja iz perioda izbora
+i početne standardizacije AES-a i porede sa razvojem standarda,
+implementacija i protokola do 2026. godine. Eksperimentalni deo uspostavlja
+validiran i ponovljiv metodološki okvir za mikrobenchmarking
+kriptografskih implementacija, sa jasnim razdvajanjem softverske,
+hardverski akcelerovane, GPU resident i end-to-end putanje. Rezultati
+pokazuju da AES-NI značajno smanjuje praktičnu cenu AES-a na savremenom
+CPU-u, dok CUDA AES-128 ostvaruje višu izolovanu resident propusnost za
+veće ulaze, ali u testiranom sinhronom host--device pipeline-u ne
+nadmašuje AES-NI referencu. AES-GCM merenja dodatno pokazuju značaj
+posmatranja kompletne autentifikovane obrade umesto same blokovske
+transformacije. Demonstracije redukovanog prostora ključeva i avalanche
+efekta koriste se kao ilustrativni, a ne sigurnosno dokazni eksperimenti.
+Retrospektiva pokazuje da je AES izdržao test vremena kao dugovečna,
+fleksibilna i efikasno implementabilna primitiva, dok su se praktični
+izazovi pomerili ka implementacionoj bezbednosti, autentifikovanoj
+enkripciji, upravljanju nonce vrednostima, ograničenim uređajima i
+heterogenim računarskim arhitekturama.
 
-\noindent\textbf{Ključne reči:} simetrična kriptografija; DES; Triple DES; AES;
-telekomunikacije; autentifikovana enkripcija.
+\noindent\textbf{Ključne reči:} simetrična kriptografija; DES; TDEA; AES;
+AES-NI; GPU akceleracija; autentifikovana enkripcija.
 \end{abstract}
+
+
 \begin{otherlanguage}{english}
 \begin{abstract}
-This planned review examines the evolution from DES through Triple DES to
-AES, with an emphasis on telecommunications. It asks how expectations
-from 2001--2003 compare with deployment experience through 2026.
-A limited experimental component will compare performance and illustrate
-selected properties of block ciphers. This is a provisional abstract;
-experimental findings and conclusions remain to be established.
+This paper presents a retrospective analysis of the evolution of symmetric
+cryptography from the Data Encryption Standard (DES), through Triple DES
+(TDEA), to the Advanced Encryption Standard (AES), with particular emphasis
+on telecommunications and networked systems. Documented expectations from
+the AES selection and early standardization period are compared with the
+subsequent evolution of standards, implementations, and protocols through
+2026. The experimental part establishes a validated and reproducible
+methodological framework for microbenchmarking cryptographic
+implementations, with explicit separation of software, hardware-accelerated,
+GPU-resident, and end-to-end execution paths. The results show that AES-NI
+substantially reduces the practical cost of AES on a modern CPU, while
+CUDA AES-128 achieves higher isolated resident throughput for larger
+inputs but does not outperform the AES-NI reference in the tested
+synchronous host--device pipeline. AES-GCM measurements further demonstrate
+the importance of evaluating complete authenticated processing rather than
+block-cipher throughput alone. Reduced-keyspace search and avalanche-effect
+experiments are used as illustrative measurements rather than proofs of
+security. The retrospective indicates that AES has withstood the test of
+time as a long-lived, flexible, and efficiently implementable primitive,
+while practical challenges have increasingly shifted toward implementation
+security, authenticated encryption, nonce management, constrained devices,
+and heterogeneous computing architectures.
 
-\noindent\textbf{Keywords:} symmetric cryptography; DES; Triple DES; AES;
-telecommunications; authenticated encryption.
+\noindent\textbf{Keywords:} symmetric cryptography; DES; TDEA; AES;
+AES-NI; GPU acceleration; authenticated encryption.
 \end{abstract}
 \end{otherlanguage}
