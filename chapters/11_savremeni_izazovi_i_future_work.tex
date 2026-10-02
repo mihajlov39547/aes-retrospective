@@ -118,8 +118,8 @@ fokus ka autentifikovanoj enkripciji. RFC~5116 definiše opšti interfejs
 za Authenticated Encryption with Associated Data (AEAD)
 \cite{RFC5116}, dok TLS~1.3 koristi isključivo AEAD skupove i zahteva
 implementaciju \texttt{TLS\_AES\_128\_GCM\_SHA256}
-\cite{RFC8446}. Savremena IETF uputstva dodatno ograničavaju upotrebu
-CBC skupova u starijim TLS verzijama \cite{RFC9325}.
+\cite{rfc8446}. Savremena IETF uputstva dodatno ograničavaju upotrebu
+CBC skupova u starijim TLS verzijama \cite{rfc9325}.
 
 Ovakav razvoj podržava ideju da autentifikovana enkripcija treba da bude
 podrazumevani interfejs za većinu aplikacionih potreba, ali ne znači da
@@ -251,7 +251,7 @@ istraživačkoj celini, a ne jednostavnom proširenju postojećeg benchmarka.
 Jedno dugoročno pitanje jeste formalnije povezivanje simetrične
 kriptografije sa kvantnim modelom napada. Groverov algoritam smanjuje
 asimptotski broj upita za iscrpnu pretragu prostora od $N$ elemenata sa
-reda $N$ na red $\sqrt{N}$ \cite{Grover1996}. Međutim, pretvaranje ovog
+reda $N$ na red $\sqrt{N}$ \cite{grover1996}. Međutim, pretvaranje ovog
 rezultata u procenu realnog vremena napada na AES zahteva mnogo više od
 zamene $2^k$ sa $2^{k/2}$. Potrebno je konstruisati reverzibilni AES
 oracle, odrediti broj logičkih kubita, T-count i T-depth, dubinu kola,
