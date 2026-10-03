@@ -7,6 +7,17 @@ već razdvajanje algoritma, implementacione putanje i obuhvata merenja.
 CPU CBC, AES-NI, AES-GCM i CUDA merenja daju različite poglede na cenu
 kriptografske obrade, dok pretraga redukovanog prostora ključeva i
 avalanche analiza ilustruju granice performansnih i sigurnosnih pokazatelja.
+Slika~\ref{fig:benchmarking-framework} sažima
+metodološki okvir eksperimentalnog dela i naglašava razdvajanje validacije,
+merenih putanja i završne agregacije rezultata.
+
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{benchmarking_framework_grayscale}
+\caption{Metodološki okvir eksperimentalne analize. Figura prikazuje sled od validacije i pripreme uparenih ulaza, preko četiri merene izvršne putanje, do čuvanja eksperimentalnih artefakata i završne agregacije rezultata kroz više nezavisnih sesija. Posebno su izdvojene granice merenja za CPU putanje (\emph{transform-only}), GPU \emph{resident} putanju (\emph{kernel-only}) i GPU \emph{end-to-end} putanju (\emph{H2D + kernel + D2H}). Time se eksplicitno razdvajaju korektnost, opseg merenja i naknadna interpretacija rezultata.}
+\label{fig:benchmarking-framework}
+\end{figure}
 
 Osnovni doprinos poglavlja je metodološki: uspostavljen je validiran i
 ponovljiv protokol sa jasnim razdvajanjem validacije, merenja, agregacije
