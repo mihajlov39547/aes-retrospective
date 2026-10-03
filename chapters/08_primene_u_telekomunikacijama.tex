@@ -12,8 +12,16 @@ poverljivost i integritet, ali ih definišu kao posebne funkcije u okviru
 ili GCMP konstrukcije, dok SAE u WPA3 predstavlja odvojeni mehanizam
 autentifikacije i uspostavljanja tajne. Zbog toga se u nastavku strogo
 razdvajaju enkripcija saobraćaja, autentifikacija, integritet i
-upravljanje ključevima.
+upravljanje ključevima. Različiti nivoi telekomunikacionog sistema mogu
+nezavisno primenjivati simetričku kriptografiju za zaštitu saobraćaja,
+što je shematski prikazano na slici~\ref{fig:telecom-crypto-stack}.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.94\linewidth]{telecom_crypto_stack_map}
+    \caption{Shematski pregled tipičnih mesta primene simetričke kriptografije u telekomunikacionim i mrežnim sistemima. TLS obezbeđuje zaštitu sesijskog i aplikacionog saobraćaja, IPsec zaštitu na mrežnom nivou, dok WPA2/WPA3 koriste AES zasnovane mehanizme u bežičnim lokalnim mrežama. U LTE i 5G sistemima simetrički algoritmi primenjuju se u zaštiti korisničkog i kontrolnog saobraćaja, pri čemu AES-CTR i AES-CMAC predstavljaju relevantne primere. DES i TDEA prikazani su samo kao istorijski kontekst razvoja. Figura predstavlja orijentacionu mapu mogućih mesta primene, a ne obavezni skup istovremeno aktivnih slojeva niti iscrpan prikaz svih algoritamskih opcija pojedinačnih standarda.}
+    \label{fig:telecom-crypto-stack}
+\end{figure}
 
 \subsection{Mrežni slojevi i zaštita podataka u tranzitu}
 \label{subsec:telekom_slojevi}
