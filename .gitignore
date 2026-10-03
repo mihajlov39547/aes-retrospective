@@ -23,6 +23,7 @@ build/
 
 # Local tooling
 .powershell/
+univerzitetska-misao/
 
 # Secrets / environment
 .env

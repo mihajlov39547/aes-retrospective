@@ -280,7 +280,16 @@ koje eksplicitno kombinuju poverljivost i autentifikaciju.
 GCM, standardizovan 2007. godine, predstavlja važnu tačku ove evolucije
 ~\cite{sp800-38d}. Njegova pogodnost za paralelnu obradu omogućila je
 visoke performanse u softverskim i hardverskim implementacijama, što je
-posebno značajno za mrežne i telekomunikacione sisteme.
+posebno značajno za mrežne i telekomunikacione sisteme.Hijerarhijski odnos
+između blokovske primitive, moda rada, autentifikovane enkripcije i protokolske
+upotrebe pregledno je prikazan na slici~\ref{fig:symmetric-crypto-abstraction}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.92\linewidth]{symmetric_crypto_abstraction_framework}
+    \caption{Hijerarhija apstrakcije u simetričnoj kriptografiji. Panel (a) prikazuje blokovsku šifru kao osnovnu kriptografsku primitivu, panel (b) način na koji se ista primitiva koristi kroz modove rada nad više blokova, panel (c) proširenje ka autentifikovanoj enkripciji sa zaštitom poverljivosti i integriteta, a panel (d) ugradnju takvih mehanizama u širi protokolski ili sistemski kontekst. Slika je namerno svedena na strukturne odnose; terminološka i funkcionalna objašnjenja data su u tekstu.}
+    \label{fig:symmetric-crypto-abstraction}
+\end{figure}
 
 Protokolsku primenu AEAD konstrukcija prikazuje
 Poglavlje~\ref{sec:telekom}, uključujući TLS~1.3~\cite{rfc9846}.
