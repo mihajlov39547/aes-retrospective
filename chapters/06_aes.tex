@@ -62,8 +62,16 @@ ukupnom broju rundi.
 Šifrovanje ne počinje kompletnom AES rundom. Pre prve runde izvršava
 se početni \texttt{AddRoundKey}. Nakon toga sledi $N_r-1$ punih rundi,
 a poslednja runda razlikuje se po tome što ne sadrži
-\texttt{MixColumns}.
+\texttt{MixColumns}. Struktura AES-a može se sažeto prikazati kroz
+transformacije jednog tipičnog kruga i izdvojeni raspored ključeva,
+kao na slici~\ref{fig:aes-round-key-schedule}.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.94\linewidth]{aes_round_and_key_schedule}
+    \caption{Shematski prikaz strukture jednog tipičnog AES kruga i rasporeda ključeva. Ulazno stanje organizovano je kao matrica od $4 \times 4$ bajta, nad kojom se redom primenjuju transformacije \emph{SubBytes}, \emph{ShiftRows}, \emph{MixColumns} i \emph{AddRoundKey}. Zasebni \emph{key schedule} iz glavnog ključa generiše rundne ključeve koji se koriste u koraku \emph{AddRoundKey}. Završni krug izostavlja \emph{MixColumns}, dok broj krugova zavisi od dužine ključa i iznosi $N_r=10$, $12$ ili $14$ za AES-128, AES-192 i AES-256.}
+    \label{fig:aes-round-key-schedule}
+\end{figure}
 
 \subsection{Aritmetika u konačnom polju}
 \label{subsec:aes_gf}
