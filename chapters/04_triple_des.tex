@@ -7,7 +7,16 @@ bez trenutnog napuštanja postojeće hardverske, softverske i protokolarne
 infrastrukture. Osnovna ideja bila je jednostavna: umesto razvoja potpuno
 nove blokovske šifre, DES transformacija se primenjuje tri puta sa više
 ključeva. Time je zadržana kompatibilnost sa postojećim DES sistemima,
-dok je prostor ključeva značajno povećan.
+dok je prostor ključeva značajno povećan. Odnos između ograničenja DES-a,
+neuspeha jednostavnog Double DES proširenja i tranzicione uloge TDEA sažet
+je na slici~\ref{fig:des-tdea-transition}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.94\linewidth]{des_tdea_transition_schematic}
+    \caption{Od DES-a ka TDEA kao tranzicionom rešenju. Panel (a) prikazuje osnovne parametre DES-a, dok (b) ilustruje praktični značaj ograničenog 56-bitnog prostora ključeva. Panel (c) prikazuje Double DES i princip meet-in-the-middle napada. Paneli (d) i (e) prikazuju dvo- i troključnu TDEA EDE konstrukciju. Panel (f) sažima glavne tranzicione prednosti TDEA: veću sigurnosnu snagu i mogućnost ponovne upotrebe postojeće DES infrastrukture. Panel (g) prikazuje ograničenja koja TDEA nije uklonio, pre svega 64-bitni blok, trošak tri sekvencijalne DES operacije i nasleđenu strukturu DES-a.}
+    \label{fig:des-tdea-transition}
+\end{figure}
 
 Ovakav pristup bio je posebno važan u periodu kada je postalo jasno da
 56-bitni DES ključ više nije dovoljan, dok novi standard još nije bio
