@@ -1,0 +1,2 @@
+# Isolated optional experiment; not a dependency of PDF/Pandoc workflows.
+python-docx==1.2.0

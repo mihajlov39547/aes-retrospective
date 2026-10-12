@@ -6,6 +6,12 @@ PDF with pdfLaTeX; PDF is the primary initial submission target. It contains
 only placeholders, including one explicitly fictional bibliography entry.
 No AES manuscript text or results have been inserted.
 
+An optional experiment fills a copy of the original Word template directly:
+see [README_docx_experiment.md](README_docx_experiment.md) and
+`fill_sjee_template_docx.py`. Its output is `main_sjee_filled.docx`.
+It does not replace this PDF workflow or the existing Pandoc export, and it
+is not yet a production-ready Word workflow.
+
 ## Layout and template inspection
 
 The original `SJEE_Template.docx` was inspected read-only as an OOXML ZIP

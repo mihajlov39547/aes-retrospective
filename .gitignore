@@ -1,5 +1,7 @@
 # Python
 .venv/
+sjee/.venv-docx/
+sjee/experimental_review/
 __pycache__/
 *.py[cod]
 
