@@ -1,0 +1,65 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{sjee}[2026/10/12 Simple SJEE-like manuscript layout]
+
+\RequirePackage[T1]{fontenc}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage{geometry}
+\geometry{paperwidth=16.5cm,paperheight=23.5cm,
+  left=2cm,right=2cm,top=2.8cm,bottom=1.7cm,footskip=1cm}
+\RequirePackage{amsmath}
+\RequirePackage{newtxtext}
+\RequirePackage{newtxmath}
+\RequirePackage{graphicx}
+\RequirePackage{booktabs}
+\RequirePackage{array}
+\RequirePackage{float}
+\RequirePackage{caption}
+\RequirePackage{titlesec}
+\RequirePackage{indentfirst}
+\RequirePackage[numbers,square,sort&compress]{natbib}
+% The title affiliation is a plain footnote; omit its hyperlink destination.
+\RequirePackage[hidelinks,hyperfootnotes=false]{hyperref}
+
+% Normal single spacing; exact 11 pt rather than article's nominal 10.95 pt.
+\renewcommand{\normalsize}{\fontsize{11}{13.2}\selectfont}
+\AtBeginDocument{\normalsize}
+\renewcommand{\baselinestretch}{1}
+\setlength{\parindent}{0.7cm}
+\setlength{\parskip}{3pt}
+\pagestyle{plain}
+\raggedbottom
+
+\titleformat{\section}{\fontsize{12}{14.4}\selectfont\bfseries}
+  {\thesection}{0.7em}{}
+\titlespacing*{\section}{0pt}{12pt}{6pt}
+\titleformat{\subsection}{\normalsize\bfseries}
+  {\thesubsection}{0.7em}{}
+\titlespacing*{\subsection}{0pt}{6pt}{3pt}
+
+\DeclareCaptionFont{sjeecaption}{\fontsize{10}{12}\selectfont}
+\DeclareCaptionLabelSeparator{sjeedash}{\space\textminus\space}
+\captionsetup{font=sjeecaption,justification=centering,singlelinecheck=false}
+\captionsetup[figure]{name=Fig.,labelsep=sjeedash,position=bottom,skip=6pt}
+\captionsetup[table]{labelsep=newline,position=top,skip=6pt}
+
+% All layout-specific definitions stay here; main.tex uses standard markup.
+\renewcommand{\maketitle}{%
+  \begingroup
+  \renewcommand{\thefootnote}{\arabic{footnote}}%
+  \begin{center}
+    {\fontsize{16}{18}\selectfont\bfseries\@title\par}
+    \vspace{12pt}
+    {\fontsize{12}{14.4}\selectfont\bfseries\@author\par}
+  \end{center}
+  \@thanks
+  \endgroup
+}
+\renewenvironment{abstract}{%
+  \begin{list}{}{\setlength{\leftmargin}{0.5cm}%
+    \setlength{\rightmargin}{0.5cm}\setlength{\listparindent}{0pt}%
+    \setlength{\parsep}{6pt}\setlength{\topsep}{6pt}}%
+  \item\relax\fontsize{10}{12}\selectfont
+}{\end{list}}
+\renewcommand{\bibfont}{\fontsize{9}{10.8}\selectfont}
+\setlength{\bibsep}{3pt}
+\renewcommand{\bibsection}{\section*{References}}

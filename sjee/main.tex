@@ -1,0 +1,93 @@
+% PDF: powershell -NoProfile -File .\build_sjee.ps1
+% DOCX test: powershell -NoProfile -File .\convert_to_docx.ps1
+% Direct export (the script also selects a numeric CSL style):
+% pandoc main.tex --bibliography=references.bib --citeproc --reference-doc=SJEE_Template.docx -o main_sjee.docx
+% Keep ordinary LaTeX section, citation, equation and caption commands here.
+\documentclass[11pt,onecolumn]{article}
+\usepackage{sjee}
+
+\title{Validation-First CPU/GPU Microbenchmarking of AES Implementations in the Context of Symmetric Cryptography Evolution}
+% Optional \\ in the title provides a soft line break.
+\author{Marko Mihajlovic\thanks{Singidunum University, Belgrade, Serbia; ORCID: 0009-0006-7979-0341}}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\textbf{Abstract:} Placeholder abstract. Replace this paragraph with a concise
+description of the purpose, methods, principal results, and contribution of
+the completed manuscript.
+
+\textbf{Keywords:} Placeholder keyword, Second keyword, Third keyword.
+\end{abstract}
+
+\section{Introduction}
+Placeholder introduction. Describe the motivation, scope, and organization
+of the manuscript. The citation here demonstrates the numeric reference
+format~\cite{placeholder2026}.
+
+\section{Related Work and Research Gap}
+Placeholder related work. Summarize relevant literature and state the research
+gap after the manuscript content and sources have been prepared.
+
+\section{Methodology}
+Placeholder methodology. Describe the experimental procedure and define the
+quantities used in the analysis.
+
+\subsection{Example equation}
+Equation~\eqref{eq:example} is a typesetting example only:
+\begin{equation}
+  y = a x + b .
+  \label{eq:example}
+\end{equation}
+Here, $x$, $y$, $a$, and $b$ are placeholder symbols to be replaced with
+quantities relevant to the completed manuscript.
+
+\section{Results}
+Placeholder results. Fig.~\ref{fig:placeholder} demonstrates a single figure
+placed near its first mention.
+
+% [H] keeps this simple figure at this point in the document (or on the
+% following page if it cannot fit). Replace the box with \includegraphics.
+% Pandoc may omit this TeX-only box; insert the final image in Word if needed.
+\begin{figure}[H]
+  \centering
+  \fbox{\rule{0pt}{22mm}\rule{0.78\linewidth}{0pt}}
+  \caption{Placeholder figure; replace with the final illustration.}
+  \label{fig:placeholder}
+\end{figure}
+
+\textbf{Table~\ref{tab:placeholder}} demonstrates a compact table with units
+in square brackets. Its entries are placeholders, not experimental data.
+
+\begin{table}[H]
+  \centering
+  \caption{Placeholder measurements; replace with verified data.}
+  \label{tab:placeholder}
+  \begin{tabular}{lcc}
+    \toprule
+    Case & Time [s] & Size [byte] \\
+    \midrule
+    Placeholder A & --- & --- \\
+    Placeholder B & --- & --- \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Discussion}
+Placeholder discussion. Interpret the eventual results and describe their
+limitations and implications.
+
+\section{Conclusion}
+Placeholder conclusion. Summarize the eventual findings and possible future
+work without introducing new results.
+
+\section{Acknowledgments}
+Placeholder acknowledgments. Replace with appropriate funding or support
+information, or remove the paragraph if no acknowledgments are needed.
+
+% This deliberately fictional bibliography entry tests the workflow only.
+\bibliographystyle{unsrtnat}
+\bibliography{references}
+\end{document}
