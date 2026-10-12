@@ -1,24 +1,28 @@
+# DEPRECATED: visual-debug Pandoc export only. Never writes the primary DOCX.
 [CmdletBinding()]
 param()
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-Push-Location -LiteralPath $PSScriptRoot
+$workspace = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+Push-Location -LiteralPath $workspace
 try {
+    Write-Warning 'LEGACY Pandoc test only. Use .\build_sjee_docx.ps1 for the primary DOCX.'
     if (-not (Get-Command pandoc -ErrorAction SilentlyContinue)) {
         throw 'Pandoc was not found on PATH.'
     }
-    $inputFile = if (Test-Path -LiteralPath 'main_docx.tex') { 'main_docx.tex' } else { 'main.tex' }
-    foreach ($source in @($inputFile, 'references.bib', 'SJEE_Template.docx', 'sjee-numeric.csl')) {
+    $inputFile = 'experimental/legacy/main_docx.tex'
+    $outputFile = 'experimental/legacy/main_sjee_pandoc.docx'
+    foreach ($source in @($inputFile, 'references.bib', 'SJEE_Template.docx', 'experimental/legacy/sjee-numeric.csl')) {
         if (-not (Test-Path -LiteralPath $source)) { throw "Missing input: $source" }
     }
     Write-Host "Exporting $inputFile"
     # The requested direct conversion, with numeric citations and section numbers.
     $options = @('--bibliography=references.bib', '--citeproc',
-        '--reference-doc=SJEE_Template.docx', '--csl=sjee-numeric.csl',
+        '--reference-doc=SJEE_Template.docx', '--csl=experimental/legacy/sjee-numeric.csl',
         '--number-sections', '--metadata=reference-section-title:References',
-        '-o', 'main_sjee.docx')
+        '-o', $outputFile)
     & pandoc $inputFile @options
     if ($LASTEXITCODE -ne 0) {
         Write-Warning 'Direct conversion failed; trying a flattened LaTeX input.'
@@ -29,13 +33,13 @@ try {
         $flatLines = & latexpand $inputFile
         if ($LASTEXITCODE -ne 0) { throw "latexpand failed (exit $LASTEXITCODE)." }
         $utf8 = New-Object System.Text.UTF8Encoding($false)
-        $flatFile = [System.IO.Path]::GetFileNameWithoutExtension($inputFile) + '_flat.tex'
-        [System.IO.File]::WriteAllLines((Join-Path $PSScriptRoot $flatFile), [string[]]$flatLines, $utf8)
+        $flatFile = 'experimental/legacy/main_docx_flat.tex'
+        [System.IO.File]::WriteAllLines((Join-Path $workspace $flatFile), [string[]]$flatLines, $utf8)
         & pandoc $flatFile @options
         if ($LASTEXITCODE -ne 0) { throw "Flattened conversion failed (exit $LASTEXITCODE)." }
     }
-    if (-not (Test-Path -LiteralPath 'main_sjee.docx')) { throw 'No DOCX output was produced.' }
-    Write-Host "Created $(Join-Path $PSScriptRoot 'main_sjee.docx')"
+    if (-not (Test-Path -LiteralPath $outputFile)) { throw 'No legacy DOCX output was produced.' }
+    Write-Host "Created legacy/debug output: $(Join-Path $workspace $outputFile)"
     Write-Host 'Review in Word: apply SJEE styles; check author footnote, equation numbering, tables, captions, references and pagination. See README_sjee_workflow.md.'
 }
 catch {

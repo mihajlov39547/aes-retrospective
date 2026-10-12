@@ -15,8 +15,11 @@ When adding a figure to the shared manuscript under `content/`, use, for example
 The example file is not supplied. The current shared manuscript has no figures
 and builds without image inputs. `placeholder.png` is a retained 1200 by 280
 pixel bordered fixture used by the separate historical Word-filling experiment.
-It is no longer inserted automatically by either manuscript wrapper. Keep
-new figure content in the shared files, not in `main_docx.tex`.
+It is not inserted automatically by either normal build. Keep new figure
+content in the shared files. The primary copy-based DOCX adapter currently
+supports the figure-free manuscript; extend it explicitly to handle a figure
+environment and Word-compatible image before adding figures. Unsupported
+environments stop the DOCX build rather than silently dropping illustrations.
 
 Keep one illustration per simple figure environment, near its first textual
 reference. Place captions below figures and reference every figure in the text.

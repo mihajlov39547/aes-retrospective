@@ -1,0 +1,5 @@
+python-docx==1.2.0
+pylatexenc==2.10
+bibtexparser==1.4.3
+latex2mathml==3.81.1
+mathml2omml==0.0.2

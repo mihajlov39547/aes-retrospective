@@ -1,163 +1,165 @@
-# SJEE manuscript workspace
+# SJEE manuscript workflow
 
-According to the supplied SJEE instructions, initial submissions may be Word
-or PDF. **`main.tex` -> `main.pdf` remains the primary workflow.**
-`main_docx.tex` is now only a Pandoc wrapper over the same manuscript.
+Initial submission may be Word or PDF under the supplied SJEE instructions.
+The primary submission target remains the LaTeX PDF. There are two normal builds:
 
-The author's updated text, equations, six results tables and bibliography
-have been preserved. Discussion and Acknowledgments still contain the author's
-existing placeholders. No new scientific content was introduced by the refactor.
+| Target | Command | Output |
+| --- | --- | --- |
+| PDF | `.\build_sjee.ps1` | `main.pdf` |
+| DOCX | `.\build_sjee_docx.ps1` | `main_sjee.docx` |
 
-## Edit shared content once
+The DOCX build copies `SJEE_Template.docx` and fills that copy using the
+original SJEE paragraph styles, numbering, page settings, table borders and
+affiliation footnote formatting. It never calls Pandoc. The supplied template
+is never edited or moved. This preserves SJEE formatting better than the old
+Pandoc export, although final review in Microsoft Word is still necessary.
 
-Both wrappers input these files:
+## One source of manuscript content
 
-| File | Content |
-| --- | --- |
-| `content/metadata.tex` | Title, author, affiliation footnote and empty date |
-| `content/abstract.tex` | Abstract prose, without label or environment |
-| `content/keywords.tex` | Keywords, without label |
-| `content/01_introduction.tex` | Introduction heading and text |
-| `content/02_related_work.tex` | Related Work and Research Gap |
-| `content/03_methodology.tex` | Methodology and throughput equation |
-| `content/04_results.tex` | Results, subsections, six tables and captions |
-| `content/05_discussion.tex` | Discussion |
-| `content/06_conclusion.tex` | Conclusion |
-| `content/07_acknowledgments.tex` | Acknowledgments |
+Edit `content/metadata.tex`, `content/abstract.tex`, `content/keywords.tex`,
+`content/01_introduction.tex` through `content/07_acknowledgments.tex`, and
+`references.bib`. Both builds read these sources. Your abstract, introduction,
+conclusion, other prose, equation, six tables and bibliography are preserved;
+no scientific content was added or rewritten. Discussion and Acknowledgments
+still contain their existing placeholders.
 
-Edit these files and `references.bib`, not a second copy of the manuscript
-in an export wrapper. Use ordinary LaTeX section, math, table, caption,
-label, reference and citation commands. The wrappers contain only output
-presentation, include order and bibliography controls.
+`main.tex` remains the primary PDF entry point and specifies source order.
+The DOCX generator reads its shared inputs and creates a generated intermediate
+at `build/docx/manuscript.json`, plus `build/docx/build_report.json` containing
+source hashes, counts and warnings. These JSON files are audit artifacts,
+not additional sources to edit. Rebuilding replaces manual edits to the DOCX;
+keep any final Word-only corrections in a separately named delivery copy and
+record them before rebuilding.
 
-The PDF wrapper retains the styled abstract, bold labels and the author's
-0.2 cm space before Keywords. The DOCX wrapper uses plain `Abstract:` and
-`Keywords:` paragraphs, without `sjee.sty` or an abstract environment.
-Shared metadata exports the author's affiliation as a Word footnote.
-
-The existing `\FloatBarrier` before Conclusion stays in the PDF wrapper,
-with `placeins` loaded to define it. DOCX does not need that layout command.
-The author's table specifications and float options are unchanged. There is
-currently no figure in the manuscript; the earlier PNG fixture is retained
-but is not inserted into either output.
-
-## PDF layout and build
-
-`SJEE_Template.docx` was inspected read-only; the LaTeX layout was written
-manually. The original Word template was not converted, edited or moved.
-`sjee.sty` remains unchanged: custom 16.5 by 23.5 cm paper, 2.0 cm side
-margins, 2.8 cm top margin and 1.7 cm bottom margin. Body text is Times-like
-(newtx), 11 pt, justified and single-spaced (13.2 pt baseline), with 0.7 cm
-first-line indent and 3 pt paragraph spacing. There is no two-column layout.
-
-The title is centered bold 16 pt; authors are centered bold 12 pt.
-Abstract/keywords use 10 pt with 0.5 cm side insets. References are numeric,
-9 pt. Figure captions go below figures; table captions go above tables,
-with the number on its own line. This is an SJEE-like submission layout,
-not an official journal LaTeX class. Publisher production headers are omitted.
+## PDF build
 
 Install TeX Live or MiKTeX with pdfLaTeX, BibTeX, `placeins` and the packages
-listed in `sjee.sty`. Run:
+listed in `sjee.sty`, then run:
 
 ```powershell
 .\build_sjee.ps1
 ```
 
-The script runs pdfLaTeX, BibTeX when requested, and two more LaTeX passes.
-It stops on errors, checks unresolved references, reports final-pass warnings
-and keeps logs/auxiliary files. Output is `main.pdf`; Biber is not needed.
+The script runs pdfLaTeX and BibTeX as needed, resolves references, reports
+warnings and stops on errors. The existing PDF layout is unchanged: custom
+16.5 by 23.5 cm paper, 2 cm side margins, 2.8 cm top and 1.7 cm bottom margins,
+single-column Times-like 11 pt body text, justified paragraphs and 0.7 cm
+first-line indents. Abstract and keywords use 10 pt; references use 9 pt.
+The template was reproduced manually in LaTeX, not converted from Word.
 
-Keep figures/tables near first mention, reference them in the text, avoid
-complex floating layouts and use proper display equations. Use units in
-square brackets where appropriate. These are authoring guidelines; this
-refactor did not rewrite the author's captions, units or table references.
+Keep figures and tables near their first textual reference. Use simple
+layouts, proper display equations and units in square brackets where relevant.
+Avoid two-column text, grouped floating objects and images of equations/tables.
+There are currently no figures in the manuscript; the historical PNG fixture
+is retained but is not inserted automatically.
 
-## Bibliography during drafting
+## Primary DOCX build
 
-`references.bib` contains the author's 21 entries and is unchanged byte-for-byte.
-The prose currently has typed author-year references, not `\cite{key}` commands.
-Those references have been preserved rather than automatically rewritten.
-
-Both wrappers use `\nocite{*}` to include the supplied bibliography before
-citation keys are connected. PDF uses `unsrtnat`; DOCX uses the existing
-`sjee-numeric.csl`. Numeric bibliography labels do not convert the current
-prose references into automatic numeric citations.
-
-Before submission, connect the prose references to the appropriate BibTeX
-keys and review SJEE numeric formatting. Remove `\nocite{*}` from both
-wrappers when only explicitly cited entries should be included. This
-refactor did not infer citation-to-source mappings.
-
-## DOCX export
-
-Install Pandoc. Optional `latexpand` (with Perl if needed) is used only if
-direct conversion fails. Run:
+Python dependencies are isolated in `.venv-docx`. To set up a new machine:
 
 ```powershell
-.\convert_to_docx.ps1
+python -m venv .venv-docx
+.\.venv-docx\Scripts\python.exe -m pip install -r requirements_docx.txt
+.\build_sjee_docx.ps1
 ```
 
-The script prefers `main_docx.tex`, otherwise falls back to `main.tex`.
-Pandoc reads the shared `\input` files directly. The preferred command is:
+The build script prefers that environment; `-PythonPath` can select another
+Python installation with the dependencies installed.
+`fill_sjee_template_docx.py` creates `main_sjee.docx` from a template copy.
+It preserves the template's style and numbering definitions, title/author,
+abstract/keywords, section/body, reference and affiliation-footnote styles.
+Tables are editable Word tables with template borders and merged headers;
+math is converted to editable native Word equations. Sample running headers
+and issue/volume/date/UDC/DOI metadata are removed. Ordinary draft page-number
+fields in footers are retained; no publication metadata is invented.
+
+This is a bounded LaTeX adapter, not a general LaTeX converter. It handles the
+current manuscript's sections/subsections, paragraphs, emphasis, inline math,
+display equation and simple booktabs/tabular tables including multicolumn
+headers. Unsupported commands/environments stop the build before replacing
+the previous DOCX. New figures, citation commands and cross-reference commands
+need explicit adapter support before use in the DOCX path. The original figure
+caption style is preserved, but no figure insertion has been exercised in the
+current manuscript. Math conversion failures produce visible editable
+`[MATH CLEANUP: ...]` text and a build warning instead of losing the expression.
+
+The generator verifies the original template hash and checks preserved styles,
+numbering, page settings and cleared headers. If the journal supplies a new
+template, inspect its structure and update the adapter deliberately.
+
+## Bibliography and remaining Word cleanup
+
+The 21 BibTeX entries remain unchanged. PDF uses `unsrtnat` and `\nocite{*}`;
+the DOCX adapter includes all entries in source order with the template's
+numeric reference-list numbering. Prose currently contains typed author-year
+mentions, not automatic citations. These were preserved, without guessing
+which bibliography entry each mention should cite.
+
+Before submission:
+
+- Connect prose citations to the correct numeric references and review journal
+  bibliography punctuation. The DOCX formatter is deliberately simple; long
+  URLs can leave large justified spaces and need Word cleanup.
+- Review equation typography and numbering. Caption, heading and equation
+  numbers are generated text, not automatic Word cross-reference fields.
+- Review all table widths, merged headings, caption placement and pagination
+  in Microsoft Word; keep tables near their first mention.
+- Finish the existing Discussion and Acknowledgments placeholders.
+- Check final title, affiliation, page breaks and references against the
+  untouched `SJEE_Template.docx`. If needed, import its styles into the final
+  delivery copy. Do not add unassigned journal issue/DOI/UDC/date metadata.
+
+## Optional visual preview
+
+With LibreOffice installed:
 
 ```powershell
-pandoc main_docx.tex --bibliography=references.bib --citeproc --reference-doc=SJEE_Template.docx --csl=sjee-numeric.csl --number-sections --metadata=reference-section-title:References -o main_sjee.docx
+.\render_sjee_docx.ps1
+# Or: .\render_sjee_docx.ps1 -SofficePath 'C:\path\to\soffice.exe'
 ```
 
-On failure, the script runs `latexpand` on the selected input, writes UTF-8
-`main_docx_flat.tex` (or `main_flat.tex`), and retries. These are generated
-files, not sources to edit. The obsolete unconditional placeholder-image
-check was removed because the shared manuscript does not use that image.
+This renders a copied DOCX to `build/docx_preview/main_sjee.pdf`, never to
+`main.pdf`. It can also use the temporary extracted LibreOffice installation
+from this session if that installation still exists. LibreOffice preview is
+useful for inspection but does not guarantee identical Microsoft Word
+pagination. No Word installation is required to generate the primary DOCX.
 
-The local CSL is a numeric approximation, not an official SJEE citation
-style. The reference DOCX supplies page settings and styles but does not
-automatically map Pandoc's standard styles onto the custom SJEE styles.
+## Legacy Pandoc export
 
-Manual Word review remains necessary:
+Pandoc DOCX is deprecated because its visual output did not match the SJEE
+custom styles well. It is excluded from both normal build commands.
+The former `main_docx.tex` wrapper, `sjee-numeric.csl`, conversion script and
+placeholder experiments are clearly archived under `experimental/legacy/`.
+The wrapper still reads shared content; it is not an independent manuscript.
+For deliberate debugging only, run:
 
-- Apply SJEE styles; check font sizes, indents, alignment and spacing.
-- Inspect the author footnote, equation numbers and cross-references.
-- Review all six tables, especially merged headers, widths and borders;
-  check caption numbers, alignment, placement and page breaks. A native
-  editable table is not proof of visual fidelity.
-- Review reference punctuation and connect the author-year prose mentions
-  to numeric citations before final submission.
-- Remove or correct inherited sample running author/title headers and the
-  first-page issue/date/UDC/DOI metadata. Do not invent publication metadata.
+```powershell
+.\experimental\legacy\convert_to_docx.ps1
+```
 
-If final Word is required, use the untouched `SJEE_Template.docx` as the
-visual reference and copy/import its styles as needed. DOCX remains a test
-export; PDF remains primary.
+It writes only `experimental/legacy/main_sjee_pandoc.docx` and cannot overwrite
+`main_sjee.docx`. Older placeholder experiments and `experimental_review/`
+are historical artifacts, not current manuscript outputs.
 
-## Shared-content validation (2026-10-12)
+## Validation (2026-10-12)
 
-- The author's abstract, keywords, seven sections, equations, tables, captions,
-  Serbian characters and metadata were extracted without rewriting the text.
-  `references.bib`, `sjee.sty` and the original Word template are unchanged.
-- The pre-refactor source failed at undefined `\FloatBarrier` and had no
-  BibTeX citation commands. A temporary comparison build of that same source
-  enabled `placeins` and added `\nocite{*}`. All 11 refactored PDF pages are
-  pixel-identical to that repaired comparison build. The older two-page
-  placeholder PDF was not a valid content baseline.
-- `build_sjee.ps1` passed, with no unresolved references. Remaining warnings
-  match the comparison build: one 4.55696 pt overfull line in Introduction
-  and three underfull lines in the bibliography. They were not reformatted
-  because this task preserves the PDF layout.
-- `convert_to_docx.ps1` passed without Pandoc warnings. DOCX XML inspection
-  confirmed the updated abstract, prose and conclusion, sections 1-7,
-  subsections, six native tables, native display math, affiliation footnote
-  and 21 numeric bibliography entries, without an extra Abstract heading.
-- DOCX checks were structural; the current manuscript still needs final
-  visual approval in Word. Earlier placeholder exports showed formatting
-  differences during the separate visual experiment.
+- PDF build passes: 11 pages, single column. Existing warnings remain: one
+  4.55696 pt overfull Introduction line and three underfull bibliography
+  lines. The layout has not been reformatted to suppress them.
+- Primary DOCX build passes without conversion warnings: current shared prose,
+  seven numbered sections, four subsections, six editable tables, one display
+  equation, affiliation footnote and 21 numeric references. No extra Abstract
+  heading or sample running headers remain.
+- All ten pages of the LibreOffice DOCX preview were visually inspected.
+  Table borders and merged headers are readable and the equation renders as
+  a fraction with a right-hand number. Reference URL spacing and final Word
+  pagination still need review. LibreOffice emitted a Python-prefix diagnostic
+  but returned success and produced the complete preview.
+- Scientific source files, `references.bib`, `sjee.sty` and the original Word
+  template are unchanged. The only PDF-wrapper edit describes the DOCX command.
+- All 11 PDF pages match the pre-change PDF pixel-for-pixel at 1200 px preview
+  resolution. Source-to-DOCX checks verified every body paragraph and all 288
+  table cells, including merged headers; unsupported LaTeX rejection was checked.
 
 Original template SHA-256:
 `51ab1782847fabe6910f7fa4af264bc25c3bad8585f0db54d31fe963941e578d`.
-
-## Historical Word-filling experiment
-
-`fill_sjee_template_docx.py` and `main_sjee_filled.docx` remain the separate,
-frozen placeholder experiment described in [README_docx_experiment.md](README_docx_experiment.md).
-They do not contain the author's current manuscript or read `content/`.
-Do not use that fixture as the current paper. Its review artifacts refer
-to the earlier placeholder documents, not this shared-content manuscript.
