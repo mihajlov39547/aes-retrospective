@@ -1,0 +1,16 @@
+\section{Methodology}
+
+Eksperimentalna platforma obuhvata Intel Core i5-10300H procesor, 16 GB RAM-a i NVIDIA GeForce GTX 1650 Ti GPU sa 4096 MiB VRAM-a. Korišćeni su Windows 10, Python 3.12, PyCryptodome, CuPy i CUDA runtime. GPU okruženje radi u WDDM režimu, što je relevantno za tumačenje host-driven GPU merenja, predaje komandi, sinhronizacije i mogućih režijskih troškova. PyCryptodome je korišćen kao kriptografska biblioteka za CPU eksperimente i referentne provere, pri čemu se rezultati tumače kao performanse konkretnih bibliotečkih putanja, a ne kao univerzalne performanse algoritama (PyCryptodome, n.d.). U ovom radu se WDDM tretira samo kao mogući izvor sistemske varijabilnosti, bez tvrdnje da je izolovani uzrok izmerenih razlika (Microsoft, n.d.-a; NVIDIA Corporation, n.d.-a).
+
+Primenjen je pristup \emph{validation-first}: poznati test vektori i funkcionalne provere prethode merenju. Neuspešna validacija zaustavlja eksperiment. Smoke provere ispituju funkcionalnost i izvoz, pilot služi proveri protokola, a finalne tabele koriste study sesije. Sesije imaju dokumentovane seedove, argumente i broj ponavljanja; zagrevanje ne ulazi u statistiku. Metadata, validation, raw i summary zapisi, prateći izveštaji i source snapshot/hash vrednosti omogućavaju sledljivost.
+
+Primarni CPU tajmer je monotoni \texttt{perf\_counter\_ns()}. Za $N$ obrađenih bajtova i zidno vreme $T$ u sekundama propusnost je:
+\begin{equation}
+R = \frac{N}{10^6 T},
+\label{eq:throughput}
+\end{equation}
+u decimalnim MB/s. CPU transform-only merenja uključuju transformacioni poziv, ali ne obavezno punu aplikacionu cenu. CUDA resident meri kernel nad podacima već pripremljenim na uređaju, dok pipeline uključuje pinned H2D $\rightarrow$ kernel $\rightarrow$ D2H tok. Pinned memorija i CUDA događaji koriste se u skladu sa preporukama za merenje CUDA performansi (NVIDIA Corporation, n.d.-c; CuPy, n.d.-a).
+
+Glavne performansne vrednosti agregiraju se kao medijane pet sesijskih medijana, bez objedinjavanja raw raspodela i bez uklanjanja ekstremnih vrednosti. Faktori ubrzanja računaju se po sesijskim odnosima medijana vremena. Ovakav okvir sprečava mešanje različitih obuhvata merenja: izolovani kernel, kompletan pipeline i CPU transformacija nisu ista metrika.
+
+Stabilnost rezultata procenjivana je kroz pet nezavisnih study sesija sa različitim seedovima. Run-to-run varijabilnost analizirana je na nivou sesijskih medijana, pri čemu se standardna devijacija i raspon koriste kao opisne mere stabilnosti, a ne kao formalni intervali poverenja. Zbog toga se termin ponovljivost u ovom radu odnosi na dokumentovan i ponovljiv eksperimentalni protokol, validacione zapise i stabilnost agregiranih sesijskih rezultata, a ne na statističku generalizaciju na druge platforme.

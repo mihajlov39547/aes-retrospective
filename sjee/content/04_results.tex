@@ -1,0 +1,161 @@
+\section{Results}
+
+\subsection{CPU poređenja DES/TDEA/AES i AES-NI akceleracija}
+
+Prvi eksperimenti postavljaju istorijsko i implementaciono polazište. DES, troključni TDEA i AES-128/192/256 poređeni su u CBC režimu bez padding-a. DES/TDEA rezultati imaju retrospektivnu funkciju, jer ovi algoritmi nisu preporuka za novu zaštitu podataka. AES se zatim meri softverski i uz AES-NI putanju. Validacija koristi poznate CBC test vektore iz standardizovanih izvora (National Bureau of Standards, 1980; Dworkin, 2001).
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{CPU performanse CBC i AES-NI eksperimenata. Propusnost je izražena u decimalnim MB/s; prikazane su agregirane medijane study sesija.}
+\label{tab:cpu-summary}
+\begin{tabular}{llrrr}
+\toprule
+Eksperiment & Algoritam / operacija & Software & AES-NI & Faktor \\
+\midrule
+CBC, 10 MiB enc. & DES      & 87.4  & --    & -- \\
+CBC, 10 MiB enc. & TDEA     & 32.6  & --    & -- \\
+CBC, 10 MiB enc. & AES-128  & 223.8 & --    & -- \\
+CBC, 10 MiB enc. & AES-192  & 198.9 & --    & -- \\
+CBC, 10 MiB enc. & AES-256  & 174.6 & --    & -- \\
+\midrule
+AES-NI, 10 MiB enc. & AES-128 & 225.1 & 531.6 & 2.37$\times$ \\
+AES-NI, 10 MiB dec. & AES-128 & 223.7 & 557.2 & 2.47$\times$ \\
+AES-NI, 10 MiB enc. & AES-192 & 198.5 & 504.3 & 2.53$\times$ \\
+AES-NI, 10 MiB dec. & AES-192 & 195.5 & 517.8 & 2.65$\times$ \\
+AES-NI, 10 MiB enc. & AES-256 & 174.9 & 474.0 & 2.71$\times$ \\
+AES-NI, 10 MiB dec. & AES-256 & 171.4 & 480.4 & 2.80$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Rezultati pokazuju očekivanu razliku između istorijskih i savremenih implementacija. AES varijante u softverskom CBC režimu znatno su brže od TDEA, dok se AES-NI akceleracijom postiže dodatno ubrzanje od približno 2.4--2.8 puta u korišćenoj biblioteci, veličinama ulaza i definisanom mernom obuhvatu. Ovi faktori zavise od implementacije biblioteke, veličine ulaza i metodologije merenja, pa se ne tumače kao univerzalni AES-NI faktori. Ovi faktori ne predstavljaju meru sigurnosti, već cenu konkretne implementacione putanje. Veći broj rundi kod AES-192 i AES-256 smanjuje softversku propusnost, ali AES-NI značajno menja praktičnu cenu izvršavanja.
+
+\subsection{AES-GCM kao savremeni AEAD režim}
+
+AES-GCM proširuje analizu na autentifikovanu enkripciju. Eksperiment koristi AES-128-GCM i AES-256-GCM, 96-bitni nonce, 128-bitni tag i fiksni AAD od 16 bajtova, uz validaciju tag-a i odbijanje izmenjenog šifrata, tag-a ili AAD-a. GCM nije direktna zamena za CBC u smislu istog posla: pored poverljivosti, uključuje i autentifikaciju (Dworkin, 2007).
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Propusnost AES-GCM autentifikovane enkripcije na CPU AES-NI putanji. Propusnost je izražena u decimalnim MB/s.}
+\label{tab:gcm-summary}
+\begin{tabular}{llrr}
+\toprule
+Veličina & Algoritam & Enkripcija & Dekripcija \\
+\midrule
+1 KiB   & AES-128-GCM & 70.6   & 38.1 \\
+1 KiB   & AES-256-GCM & 70.1   & 38.0 \\
+1 MiB   & AES-128-GCM & 1148.2 & 1131.4 \\
+1 MiB   & AES-256-GCM & 1059.3 & 1059.8 \\
+100 MiB & AES-128-GCM & 1179.7 & 1189.3 \\
+100 MiB & AES-256-GCM & 1100.4 & 1080.4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Kod malih ulaza dominiraju fiksni troškovi, dok se na 1 MiB i većim ulazima AES-128-GCM kreće oko 1.13--1.19 GB/s, a AES-256-GCM oko 1.06--1.10 GB/s. Rezultat potvrđuje da savremeni režimi rada zahtevaju pažljivo tumačenje: CBC i GCM propusnosti ne predstavljaju istu funkcionalnost, pa se ne smeju tumačiti kao izolovana cena istog kriptografskog zadatka.
+
+\subsection{CUDA baseline i upareno CPU--GPU poređenje}
+
+CUDA AES-128 baseline koristi čitljivi bajtovski kernel, jednu nit po 16-bajtnom AES bloku i 128 niti po CUDA bloku. ECB je korišćen isključivo kao mikrobenchmark nezavisnih blokova, dok CTR omogućava paralelizabilnu transformaciju definisanu u SP 800-38A (Dworkin, 2001). GPU implementacija se oslanja na CUDA/CuPy mehanizme za korisničke CUDA kernele i merenje događajima (NVIDIA Corporation, n.d.-b; CuPy, n.d.-a; CuPy, n.d.-b; Okuta et al., 2017).
+
+Centralni eksperiment poredi CPU software, CPU AES-NI, CUDA baseline i laki kandidat CUDA v1 u istom ECB/CTR protokolu. Za svaki režim, veličinu i ponavljanje koriste se isti plaintext, ključ i početni CTR brojač. Ključna metodološka vrednost eksperimenta nije samo u faktorima ubrzanja, već u razdvajanju dva pitanja: kolika je propusnost izolovanog GPU jezgra kada su podaci već na uređaju, i kolika je praktična propusnost kada se uključe transferi i sinhronizacija.
+
+\begin{table}[htbp]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\caption{Finalno upareno AES-128 CPU--GPU poređenje, u decimalnim MB/s. K označava resident kernel-only, E2E end-to-end pipeline.}
+\label{tab:cpu-gpu-summary}
+\begin{tabular}{llrrrrrr}
+\toprule
+ & & \multicolumn{2}{c}{CPU} & \multicolumn{2}{c}{CUDA baseline} & \multicolumn{2}{c}{CUDA v1} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+Režim & Veličina & Soft. & AES-NI & K & E2E & K & E2E \\
+\midrule
+ECB & 1 MiB  & 275.7 & 1793.5 & 4901.1 & 1339.1 & 5149.3 & 1320.1 \\
+ECB & 16 MiB & 280.5 & 1904.8 & 3667.5 & 1080.0 & 3424.4 & 866.2 \\
+ECB & 32 MiB & 282.1 & 1909.9 & 4753.5 & 1202.0 & 4792.6 & 1214.5 \\
+\midrule
+CTR & 1 MiB  & 257.4 & 1381.7 & 5017.1 & 1313.1 & 4853.9 & 1291.0 \\
+CTR & 16 MiB & 264.3 & 1446.5 & 3655.6 & 1103.1 & 3576.2 & 1074.0 \\
+CTR & 32 MiB & 266.3 & 1455.8 & 4800.6 & 1204.5 & 4877.7 & 1209.1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Resident GPU rezultati nadmašuju CPU AES-NI za veće ulaze, ali pipeline rezultati ne. Na primer, kod CTR 1 MiB resident baseline daje 5017.1 MB/s, dok end-to-end pipeline daje 1313.1 MB/s, ispod CPU AES-NI rezultata od 1381.7 MB/s. Na 32 MiB CTR resident rezultat je 4800.6 MB/s, ali pipeline ostaje 1204.5 MB/s, dok je CPU AES-NI 1455.8 MB/s. Time se pokazuje da resident i end-to-end merenja odgovaraju različitim istraživačkim pitanjima.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Faktori prema CPU AES-NI: medijane pet sesijskih odnosa vremena. I označava resident/isolated, P end-to-end pipeline; vrednost veća od jedan označava kraće GPU vreme.}
+\label{tab:gpu-speedups}
+\begin{tabular}{llrrrr}
+\toprule
+Režim & Veličina & Baseline I & v1 I & Baseline P & v1 P \\
+\midrule
+ECB & 1 MiB  & 2.65 & 2.91 & 0.75 & 0.77 \\
+ECB & 16 MiB & 1.89 & 1.77 & 0.58 & 0.42 \\
+ECB & 32 MiB & 2.50 & 2.52 & 0.63 & 0.64 \\
+\midrule
+CTR & 1 MiB  & 3.66 & 3.54 & 0.95 & 0.91 \\
+CTR & 16 MiB & 2.58 & 2.51 & 0.75 & 0.74 \\
+CTR & 32 MiB & 3.30 & 3.40 & 0.82 & 0.83 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Svi pipeline faktori ostaju ispod jedan. Najbliži je CTR 1 MiB sa 0.95, dok su na 32 MiB CTR faktori 0.82--0.83, a ECB 0.63--0.64. Laka CUDA optimizacija v1 ne daje dosledno poboljšanje: u nekim resident slučajevima rezultat raste, ali u ECB 16 MiB pipeline opada. Ovo pokazuje da optimizacija jezgra ne mora automatski poboljšati aplikacioni tok, jer transferi, sinhronizacija i runtime troškovi mogu promeniti zaključak.
+
+\subsection{Redukovani prostor ključeva i avalanche demonstracija}
+
+Demonstracija redukovanog prostora ključeva koristi AES-128 ECB sa softverskom putanjom i promenljivih 24 bita ključa. Tajmer uključuje formiranje ključa, novi cipher/key schedule, enkripciju dva bloka, alokaciju, poređenje i stop-on-match kontrolu. Cilj nije optimizovana pretraga punog prostora, već ilustracija eksponencijalnog rasta iscrpne pretrage.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{CPU demonstracija pretraživanja redukovanog 24-bitnog prostora AES-128 ključeva.}
+\label{tab:keyspace}
+\begin{tabular}{lrrr}
+\toprule
+Scenario & Kandidati & Vreme (s) & Kandidata/s \\
+\midrule
+start  & 1             & 0.0000088 & 113\,636 \\
+middle & 8\,388\,609   & 54.38     & 154\,263 \\
+end    & 16\,777\,216  & 109.01    & 153\,903 \\
+random & 6\,800\,733   & 43.00     & 154\,079 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+End scenario obilazi ceo redukovani prostor za oko 109 s pri 153.9 hiljada kandidata/s i jedini je osnov za linearne ekstrapolacije. Međutim, ta stopa nije DES/TDEA/GPU stopa, niti procena paralelnih farmi, ASIC/FPGA ili specifičnih kriptoanalitičkih napada. Double-DES meet-in-the-middle menja model napada i zahteva poseban protokol vremena, memorije i lažnih pogodaka, pa nije uključen u ovu studiju.
+
+Avalanche demonstracija meri Hammingovo rastojanje između osnovnog bloka šifrata i bloka dobijenog nakon promene jednog bita plaintext-a ili jednog efektivnog bita ključa. Ideja difuzije prati klasično razumevanje rasprostiranja statističke zavisnosti u kriptografskim sistemima (Shannon, 1949). Rezultat se normalizuje veličinom bloka: 64 bita za DES/TDEA i 128 bita za AES.
+
+\begin{table}[htbp]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\caption{Raspodele avalanche efekta pri promeni jednog bita otvorenog teksta (P) ili efektivnog ključa (K).}
+\label{tab:avalanche}
+\begin{tabular}{llrrrrr}
+\toprule
+Algoritam & Var. & Blok & Med. HD & Pros. HD & Med. norm. & Pros. norm. \\
+\midrule
+DES     & P & 64  & 32 & 32.02 & 0.50 & 0.5003 \\
+DES     & K & 64  & 32 & 31.94 & 0.50 & 0.4990 \\
+TDEA    & P & 64  & 32 & 31.97 & 0.50 & 0.4995 \\
+TDEA    & K & 64  & 32 & 32.02 & 0.50 & 0.5004 \\
+AES-128 & P & 128 & 64 & 63.99 & 0.50 & 0.4999 \\
+AES-128 & K & 128 & 64 & 63.99 & 0.50 & 0.4999 \\
+AES-192 & P & 128 & 64 & 64.03 & 0.50 & 0.5002 \\
+AES-192 & K & 128 & 64 & 64.09 & 0.50 & 0.5007 \\
+AES-256 & P & 128 & 64 & 63.98 & 0.50 & 0.4998 \\
+AES-256 & K & 128 & 64 & 64.00 & 0.50 & 0.5000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+DES/TDEA medijana je 32 od 64 bita, a AES medijana 64 od 128 bita, odnosno 0.5 u svih deset grupa. Normalizovani proseci su približno 0.4990--0.5007. Ovo je očekivan pokazatelj lokalne difuzije, ali nije dokaz kriptografske sigurnosti, kompletan SAC/BIC test niti osnov za rangiranje algoritama.

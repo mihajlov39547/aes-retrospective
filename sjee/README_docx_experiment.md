@@ -1,5 +1,11 @@
 # Experimental filling of the SJEE Word template
 
+**Historical placeholder experiment:** the current manuscript now lives in
+`content/`, shared by `main.tex` and `main_docx.tex`. This experiment remains
+frozen on its original placeholder data and does not export the author's
+current manuscript. The visual comparisons below describe that earlier
+placeholder snapshot. Use the main workflow for current PDF/DOCX builds.
+
 This is a separate experiment. **`main.tex` to `main.pdf` remains the primary
 submission workflow.** Neither this script nor its Python environment is used
 by `build_sjee.ps1` or `convert_to_docx.ps1`. The existing Pandoc export is

@@ -1,185 +1,163 @@
 # SJEE manuscript workspace
 
-According to the supplied SJEE submission instructions, initial submissions
-may be Microsoft Word or PDF. This workspace makes an SJEE-like single-column
-PDF with pdfLaTeX; PDF is the primary initial submission target. It contains
-only placeholders, including one explicitly fictional bibliography entry.
-No AES manuscript text or results have been inserted.
+According to the supplied SJEE instructions, initial submissions may be Word
+or PDF. **`main.tex` -> `main.pdf` remains the primary workflow.**
+`main_docx.tex` is now only a Pandoc wrapper over the same manuscript.
 
-An optional experiment fills a copy of the original Word template directly:
-see [README_docx_experiment.md](README_docx_experiment.md) and
-`fill_sjee_template_docx.py`. Its output is `main_sjee_filled.docx`.
-It does not replace this PDF workflow or the existing Pandoc export, and it
-is not yet a production-ready Word workflow.
+The author's updated text, equations, six results tables and bibliography
+have been preserved. Discussion and Acknowledgments still contain the author's
+existing placeholders. No new scientific content was introduced by the refactor.
 
-## Layout and template inspection
+## Edit shared content once
 
-The original `SJEE_Template.docx` was inspected read-only as an OOXML ZIP
-archive, including its document settings and paragraph styles. It was not
-converted to LaTeX, edited, or moved. The LaTeX layout was written manually.
+Both wrappers input these files:
 
-The Word page dimensions are 9356 by 13325 twips (approximately 16.5 by
-23.5 cm). Its margins are 1134 twips left/right, 1588 top, and 964 bottom.
-`sjee.sty` uses a custom 16.5 by 23.5 cm page with 2.0 cm side margins,
-2.8 cm top and 1.7 cm bottom margins, giving a 12.5 cm text width. A4 is
-not used. Word defaults specify Times New Roman; LaTeX uses the Times-like
-`newtxtext` and `newtxmath` fonts.
+| File | Content |
+| --- | --- |
+| `content/metadata.tex` | Title, author, affiliation footnote and empty date |
+| `content/abstract.tex` | Abstract prose, without label or environment |
+| `content/keywords.tex` | Keywords, without label |
+| `content/01_introduction.tex` | Introduction heading and text |
+| `content/02_related_work.tex` | Related Work and Research Gap |
+| `content/03_methodology.tex` | Methodology and throughput equation |
+| `content/04_results.tex` | Results, subsections, six tables and captions |
+| `content/05_discussion.tex` | Discussion |
+| `content/06_conclusion.tex` | Conclusion |
+| `content/07_acknowledgments.tex` | Acknowledgments |
 
-The body is justified, 11 pt, single-spaced (13.2 pt baseline), with a
-0.7 cm first-line indent and 3 pt between paragraphs. The title is centered,
-bold, 16 pt; authors are centered, bold, 12 pt. Abstract and keywords are
-10 pt with 0.5 cm side insets. Sections are numbered, bold, 12 pt;
-subsections are numbered, bold, 11 pt. References are numeric and 9 pt.
-Figure captions are centered below figures as `Fig. 1 − Caption text.`;
-table captions are centered above tables with the number on its own line.
+Edit these files and `references.bib`, not a second copy of the manuscript
+in an export wrapper. Use ordinary LaTeX section, math, table, caption,
+label, reference and citation commands. The wrappers contain only output
+presentation, include order and bibliography controls.
 
-This is a submission-oriented approximation, not an official SJEE LaTeX
-class. Publisher issue/volume headers, running titles and production
-metadata are intentionally omitted. References use an unnumbered heading
-after Section 7, and a simple `unsrtnat` bibliography rather than a custom
-journal bibliography style. Check final reference punctuation against the
-Word examples when replacing the fixture with real sources.
+The PDF wrapper retains the styled abstract, bold labels and the author's
+0.2 cm space before Keywords. The DOCX wrapper uses plain `Abstract:` and
+`Keywords:` paragraphs, without `sjee.sty` or an abstract environment.
+Shared metadata exports the author's affiliation as a Word footnote.
 
-## Build the PDF
+The existing `\FloatBarrier` before Conclusion stays in the PDF wrapper,
+with `placeins` loaded to define it. DOCX does not need that layout command.
+The author's table specifications and float options are unchanged. There is
+currently no figure in the manuscript; the earlier PNG fixture is retained
+but is not inserted into either output.
 
-Install TeX Live or MiKTeX with pdfLaTeX, BibTeX and the packages named in
-`sjee.sty` (including newtx, geometry, graphicx, booktabs, array, caption,
-amsmath, natbib, hyperref, titlesec, indentfirst and float).
+## PDF layout and build
 
-From this directory in PowerShell:
+`SJEE_Template.docx` was inspected read-only; the LaTeX layout was written
+manually. The original Word template was not converted, edited or moved.
+`sjee.sty` remains unchanged: custom 16.5 by 23.5 cm paper, 2.0 cm side
+margins, 2.8 cm top margin and 1.7 cm bottom margin. Body text is Times-like
+(newtx), 11 pt, justified and single-spaced (13.2 pt baseline), with 0.7 cm
+first-line indent and 3 pt paragraph spacing. There is no two-column layout.
+
+The title is centered bold 16 pt; authors are centered bold 12 pt.
+Abstract/keywords use 10 pt with 0.5 cm side insets. References are numeric,
+9 pt. Figure captions go below figures; table captions go above tables,
+with the number on its own line. This is an SJEE-like submission layout,
+not an official journal LaTeX class. Publisher production headers are omitted.
+
+Install TeX Live or MiKTeX with pdfLaTeX, BibTeX, `placeins` and the packages
+listed in `sjee.sty`. Run:
 
 ```powershell
 .\build_sjee.ps1
 ```
 
-The script runs pdfLaTeX, BibTeX when the auxiliary file requests a
-bibliography, and two more pdfLaTeX passes. It stops on errors, checks for
-unresolved references and reports final-pass warnings. Output is `main.pdf`.
-Logs and auxiliary files remain available for diagnosis; sources are never
-deleted. Biber is not needed for this BibTeX workspace.
+The script runs pdfLaTeX, BibTeX when requested, and two more LaTeX passes.
+It stops on errors, checks unresolved references, reports final-pass warnings
+and keeps logs/auxiliary files. Output is `main.pdf`; Biber is not needed.
 
-## Editing the skeleton
+Keep figures/tables near first mention, reference them in the text, avoid
+complex floating layouts and use proper display equations. Use units in
+square brackets where appropriate. These are authoring guidelines; this
+refactor did not rewrite the author's captions, units or table references.
 
-Use ordinary `\title`, `\author`, `\thanks`, `abstract`, `\section`,
-`\subsection`, `equation`, `\caption`, `\label`, `\ref` and `\cite` markup.
-The affiliation footnote has no email address. Optional `\\` in the title
-provides a soft line break. Keep layout changes in `sjee.sty`.
+## Bibliography during drafting
 
-There is no two-column layout. Insert each figure/table near its first
-mention. The simple `[H]` environments keep each item at its source
-position, moving it to the next page if necessary. Avoid complex floating
-layouts, grouped multi-image objects, landscape pages, scaled tables and
-image-based equations. Reference every figure and table in the text; use
-units in square brackets. Use proper numbered display equations.
-See `figures/README.md` for image guidance.
+`references.bib` contains the author's 21 entries and is unchanged byte-for-byte.
+The prose currently has typed author-year references, not `\cite{key}` commands.
+Those references have been preserved rather than automatically rewritten.
 
-Replace the fictional `placeholder2026` reference before submission. Add
-real entries to `references.bib` and cite them with `\cite{key}`. BibTeX
-assigns numbers in citation order.
+Both wrappers use `\nocite{*}` to include the supplied bibliography before
+citation keys are connected. PDF uses `unsrtnat`; DOCX uses the existing
+`sjee-numeric.csl`. Numeric bibliography labels do not convert the current
+prose references into automatic numeric citations.
 
-## Test export to DOCX
+Before submission, connect the prose references to the appropriate BibTeX
+keys and review SJEE numeric formatting. Remove `\nocite{*}` from both
+wrappers when only explicitly cited entries should be included. This
+refactor did not infer citation-to-source mappings.
 
-Install Pandoc; optional `latexpand` (and its Perl runtime, if required by
-the TeX installation) is used only if direct conversion fails.
+## DOCX export
+
+Install Pandoc. Optional `latexpand` (with Perl if needed) is used only if
+direct conversion fails. Run:
 
 ```powershell
 .\convert_to_docx.ps1
 ```
 
-`main.tex` remains the primary PDF source. The script prefers the separate
-`main_docx.tex` companion when present and otherwise exports `main.tex`.
-The companion is maintained manually: keep its title, author, affiliation,
-placeholder paragraphs, sections, equation, table and citation keys in sync
-when editing the manuscript later. It is not generated by converting the
-Word template. Both paths use the same `references.bib`.
-
-The DOCX source does not load `sjee.sty` or use an abstract environment.
-`Abstract:` and `Keywords:` are ordinary paragraphs. It embeds the supplied
-`figures/placeholder.png` inline at 10 cm width, uses plain caption text,
-a simple native table, and literal figure/table/equation references. The
-affiliation is an ordinary paragraph so it survives conversion reliably.
-The PDF source keeps its original box, affiliation footnote and layout.
-
-The preferred conversion uses the local numeric CSL style and section
-numbering:
+The script prefers `main_docx.tex`, otherwise falls back to `main.tex`.
+Pandoc reads the shared `\input` files directly. The preferred command is:
 
 ```powershell
 pandoc main_docx.tex --bibliography=references.bib --citeproc --reference-doc=SJEE_Template.docx --csl=sjee-numeric.csl --number-sections --metadata=reference-section-title:References -o main_sjee.docx
 ```
 
-If the selected input fails conversion, the script runs `latexpand` on that
-same input, writes UTF-8 `main_docx_flat.tex` (or `main_flat.tex` for the
-fallback source), and retries Pandoc with that file. Flattening expands
-inputs, but does not make arbitrary LaTeX styling portable. Direct fallback
-to `main.tex` retains the original limitations: the style parsing warning,
-extra abstract heading, omitted TeX box and unresolved equation reference
-may return. Prefer the companion for DOCX delivery.
+On failure, the script runs `latexpand` on the selected input, writes UTF-8
+`main_docx_flat.tex` (or `main_flat.tex`), and retries. These are generated
+files, not sources to edit. The obsolete unconditional placeholder-image
+check was removed because the shared manuscript does not use that image.
 
-`sjee-numeric.csl` is a minimal local
-numeric style, not an official SJEE citation style. Without it Pandoc's
-default citation style would not match the numeric PDF citations.
+The local CSL is a numeric approximation, not an official SJEE citation
+style. The reference DOCX supplies page settings and styles but does not
+automatically map Pandoc's standard styles onto the custom SJEE styles.
 
-The reference DOCX supplies page settings and available Word styles; it
-does not automatically map Pandoc's standard styles to SJEE's custom
-`JTitle`, `JAuthor`, `JAbstract`, `JText`, `JSubtitle`, `JFigure`, and
-`JReference` styles. The LaTeX style package is not a DOCX stylesheet.
-Remaining manual cleanup in Word:
+Manual Word review remains necessary:
 
-- Apply the SJEE styles to title, author, body, abstract, keywords, headings,
-  captions and references; check font sizes, paragraph indents, spacing,
-  justification, caption alignment, headers/footers and pagination.
-  The reference document's sample running author/title headers and first-page
-  volume/date/UDC/DOI header are inherited. Remove or replace these sample
-  values before submission; do not invent publication metadata.
-- Move the plain affiliation paragraph to an author footnote if required.
-- The equation is editable Word math, but its right-hand number is not
-  preserved by Pandoc. Add `(1)` beside the equation. `Equation (1)` in the
-  text is literal, not an automatically updating Word cross-reference.
-- Figure/table labels now survive as plain text. Center the figure and
-  captions, keep the figure caption below the image and table caption above
-  the table, and keep captions with their objects. The native table uses
-  automatic width; check borders and use Word's AutoFit to Window if needed
-  to fit the narrow page. Turn labels into Word caption/cross-reference fields if needed;
-  until then, update their numbers manually when inserting or moving items.
-- Check final bibliography details and punctuation against the SJEE Word
-  examples. Replace the fictional citation before submission.
+- Apply SJEE styles; check font sizes, indents, alignment and spacing.
+- Inspect the author footnote, equation numbers and cross-references.
+- Review all six tables, especially merged headers, widths and borders;
+  check caption numbers, alignment, placement and page breaks. A native
+  editable table is not proof of visual fidelity.
+- Review reference punctuation and connect the author-year prose mentions
+  to numeric citations before final submission.
+- Remove or correct inherited sample running author/title headers and the
+  first-page issue/date/UDC/DOI metadata. Do not invent publication metadata.
 
-A successful conversion is still a test export, not final Word typesetting.
+If final Word is required, use the untouched `SJEE_Template.docx` as the
+visual reference and copy/import its styles as needed. DOCX remains a test
+export; PDF remains primary.
 
-Open `main_sjee.docx` in Word and inspect/fix it before delivery. If the
-journal requires final Word, use the untouched `SJEE_Template.docx` as the
-final visual reference and copy/import its styles as needed. Never replace
-the original template with a generated document.
+## Shared-content validation (2026-10-12)
 
-## Validation after DOCX cleanup (2026-10-12)
+- The author's abstract, keywords, seven sections, equations, tables, captions,
+  Serbian characters and metadata were extracted without rewriting the text.
+  `references.bib`, `sjee.sty` and the original Word template are unchanged.
+- The pre-refactor source failed at undefined `\FloatBarrier` and had no
+  BibTeX citation commands. A temporary comparison build of that same source
+  enabled `placeins` and added `\nocite{*}`. All 11 refactored PDF pages are
+  pixel-identical to that repaired comparison build. The older two-page
+  placeholder PDF was not a valid content baseline.
+- `build_sjee.ps1` passed, with no unresolved references. Remaining warnings
+  match the comparison build: one 4.55696 pt overfull line in Introduction
+  and three underfull lines in the bibliography. They were not reformatted
+  because this task preserves the PDF layout.
+- `convert_to_docx.ps1` passed without Pandoc warnings. DOCX XML inspection
+  confirmed the updated abstract, prose and conclusion, sections 1-7,
+  subsections, six native tables, native display math, affiliation footnote
+  and 21 numeric bibliography entries, without an extra Abstract heading.
+- DOCX checks were structural; the current manuscript still needs final
+  visual approval in Word. Earlier placeholder exports showed formatting
+  differences during the separate visual experiment.
 
-The PDF was rebuilt with pdfLaTeX and BibTeX. Both rendered pages are
-pixel-identical to the pre-change PDF, whose pages were visually inspected
-during initial setup. It has the custom page size, one column, title, author,
-affiliation footnote, abstract, keywords, seven sections, one subsection,
-one right-numbered display equation, one figure box, one table,
-acknowledgments and a numeric reference. The final build has no warnings,
-undefined references or overfull/underfull boxes.
-
-Direct Pandoc export selected `main_docx.tex` and succeeded with no conversion
-warnings. Inspection of the generated DOCX ZIP/XML confirmed:
-
-- The complete title, author and plain abstract/keyword paragraphs are present;
-  there is no extra standalone Abstract heading.
-- Sections 1 through 7, subsection 3.1 and the References heading are present.
-- One inline embedded PNG matches `figures/placeholder.png` byte-for-byte;
-  its displayed width is 10 cm, within the 12.5 cm text width.
-- One native editable three-column, three-row table contains the expected
-  header, units and placeholder cells.
-- Figure/table caption labels, the literal `Equation (1)` reference,
-  editable display math, numeric `[1]` citation and `[1]` bibliography
-  entry are present. There is no unresolved `[eq:example]` text.
-- The original custom page size and margins are retained, with one column.
-
-DOCX inspection was structural, not a visual approval in Word; the cleanup
-listed above remains necessary. The latexpand fallback is implemented but
-was not exercised because direct conversion succeeded. `main.tex` and
-`sjee.sty` were verified byte-for-byte unchanged.
-
-The original Word template's SHA-256 was verified unchanged:
+Original template SHA-256:
 `51ab1782847fabe6910f7fa4af264bc25c3bad8585f0db54d31fe963941e578d`.
+
+## Historical Word-filling experiment
+
+`fill_sjee_template_docx.py` and `main_sjee_filled.docx` remain the separate,
+frozen placeholder experiment described in [README_docx_experiment.md](README_docx_experiment.md).
+They do not contain the author's current manuscript or read `content/`.
+Do not use that fixture as the current paper. Its review artifacts refer
+to the earlier placeholder documents, not this shared-content manuscript.

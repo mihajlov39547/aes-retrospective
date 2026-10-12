@@ -13,9 +13,6 @@ try {
     foreach ($source in @($inputFile, 'references.bib', 'SJEE_Template.docx', 'sjee-numeric.csl')) {
         if (-not (Test-Path -LiteralPath $source)) { throw "Missing input: $source" }
     }
-    if ($inputFile -eq 'main_docx.tex' -and -not (Test-Path -LiteralPath 'figures/placeholder.png')) {
-        throw 'Missing DOCX placeholder image: figures/placeholder.png'
-    }
     Write-Host "Exporting $inputFile"
     # The requested direct conversion, with numeric citations and section numbers.
     $options = @('--bibliography=references.bib', '--citeproc',
@@ -39,7 +36,7 @@ try {
     }
     if (-not (Test-Path -LiteralPath 'main_sjee.docx')) { throw 'No DOCX output was produced.' }
     Write-Host "Created $(Join-Path $PSScriptRoot 'main_sjee.docx')"
-    Write-Host 'Review in Word: apply SJEE styles, move affiliation to a footnote, add equation numbering, and check captions, references and pagination. See README_sjee_workflow.md.'
+    Write-Host 'Review in Word: apply SJEE styles; check author footnote, equation numbering, tables, captions, references and pagination. See README_sjee_workflow.md.'
 }
 catch {
     Write-Error "SJEE DOCX conversion failed: $_"
