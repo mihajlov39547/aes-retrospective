@@ -1,16 +1,406 @@
+
 \section{Methodology}
+\label{sec:methodology}
 
-Eksperimentalna platforma obuhvata Intel Core i5-10300H procesor, 16 GB RAM-a i NVIDIA GeForce GTX 1650 Ti GPU sa 4096 MiB VRAM-a. Korišćeni su Windows 10, Python 3.12, PyCryptodome, CuPy i CUDA runtime. GPU okruženje radi u WDDM režimu, što je relevantno za tumačenje host-driven GPU merenja, predaje komandi, sinhronizacije i mogućih režijskih troškova. PyCryptodome je korišćen kao kriptografska biblioteka za CPU eksperimente i referentne provere, pri čemu se rezultati tumače kao performanse konkretnih bibliotečkih putanja, a ne kao univerzalne performanse algoritama (PyCryptodome, n.d.). U ovom radu se WDDM tretira samo kao mogući izvor sistemske varijabilnosti, bez tvrdnje da je izolovani uzrok izmerenih razlika (Microsoft, n.d.-a; NVIDIA Corporation, n.d.-a).
+This study adopts a validation-first experimental methodology for evaluating symmetric cryptographic primitives across CPU and GPU execution environments. The methodology is designed to distinguish functional correctness from performance, explicitly define the boundaries of each timed operation, and preserve the experimental evidence required for subsequent analysis.
 
-Primenjen je pristup \emph{validation-first}: poznati test vektori i funkcionalne provere prethode merenju. Neuspešna validacija zaustavlja eksperiment. Smoke provere ispituju funkcionalnost i izvoz, pilot služi proveri protokola, a finalne tabele koriste study sesije. Sesije imaju dokumentovane seedove, argumente i broj ponavljanja; zagrevanje ne ulazi u statistiku. Metadata, validation, raw i summary zapisi, prateći izveštaji i source snapshot/hash vrednosti omogućavaju sledljivost.
+The primary experimental design combines controlled workloads, paired CPU--GPU measurements, session-based execution, and hierarchical aggregation. Rather than treating encryption throughput as an implementation-independent property of a cryptographic algorithm, the study evaluates the performance of specific execution paths under documented hardware and software conditions.
 
-Primarni CPU tajmer je monotoni \texttt{perf\_counter\_ns()}. Za $N$ obrađenih bajtova i zidno vreme $T$ u sekundama propusnost je:
+\subsection{Experimental Platform}
+\label{subsec:experimental_platform}
+
+The initial experimental platform consists of an Intel Core i5-10300H processor, 16 GB of system memory, and an NVIDIA GeForce GTX 1650 Ti GPU equipped with 4096 MiB of device memory. The system runs Microsoft Windows 10 and uses Python 3.12, PyCryptodome, CuPy, and the NVIDIA CUDA runtime.
+
+PyCryptodome provides the CPU cryptographic implementations and reference operations used for functional validation \cite{pycryptodome}. Consequently, the CPU measurements characterize the performance of specific library execution paths rather than the maximum attainable performance of the underlying algorithms or processor architecture.
+
+GPU implementations are executed through CUDA kernels integrated with CuPy. The CUDA execution environment provides device-memory management, kernel invocation, synchronization, and data-transfer functionality \cite{nvidiaProgrammingGuide,cupyRawKernel}.
+
+The GPU operates under the Windows Display Driver Model (WDDM). This execution environment is relevant because GPU command scheduling, preemption, and synchronization interact with the operating-system driver stack \cite{microsoftGpuPreemption,microsoftTdr}.
+
+However, WDDM is treated as a potential source of system-level overhead and variability rather than an experimentally established cause of the measured CPU--GPU performance differences. Isolating its contribution would require controlled comparisons under different operating-system and driver configurations.
+
+The performance results are therefore interpreted as measurements obtained on a particular hardware and software platform, not as general performance limits of AES or CUDA.
+
+% TODO-ENV-1:
+% Add exact versions of PyCryptodome, CuPy, CUDA runtime,
+% NVIDIA driver, and Windows build.
+%
+% TODO-ENV-2:
+% Report the GPU compute capability, PCIe link configuration,
+% power limits, and relevant clock information.
+%
+% TODO-ENV-3:
+% Document the CPU instruction capabilities and confirm
+% that the AES-NI execution path was active.
+%
+% TODO-ENV-4:
+% Add a complete environment manifest for each experimental
+% platform, including the planned cloud NVIDIA T4 system.
+
+
+\subsection{Validation-First Experimental Protocol}
+\label{subsec:validation_protocol}
+
+Functional correctness is treated as a prerequisite for performance evaluation. Before a benchmark configuration is accepted for timed execution, the corresponding cryptographic implementation must successfully complete the required validation procedures.
+
+The validation process uses known-answer test vectors and functional consistency checks derived from the relevant cryptographic specifications \cite{nist2023aes,dworkin2001modes,dworkin2007gcm}.
+
+Reference implementations provided by PyCryptodome are additionally used to verify selected CPU and GPU outputs \cite{pycryptodome}.
+
+A failed validation prevents the corresponding benchmark configuration from being accepted as a valid performance experiment. This design reduces the risk of reporting high throughput from an implementation that performs an incorrect or incomplete cryptographic transformation.
+
+The experimental workflow distinguishes three execution profiles:
+
+\begin{enumerate}
+
+\item \textbf{Smoke profile:}
+A lightweight execution intended to verify basic functionality, benchmark configuration, validation procedures, and output-artifact generation.
+
+\item \textbf{Pilot profile:}
+A preliminary measurement procedure used to examine timing behavior, execution stability, and the suitability of benchmark parameters before the final study.
+
+\item \textbf{Study profile:}
+The controlled experimental configuration used to generate the measurements included in the principal performance analysis.
+
+\end{enumerate}
+
+Only measurements obtained from the study profile are used to construct the principal performance tables.
+
+The protocol preserves random seeds, execution arguments, workload parameters, repetition counts, validation outcomes, and environment metadata. Source-code snapshots or cryptographic hashes provide additional information for identifying the implementation associated with each experimental session.
+
+This approach establishes traceability between the measured execution, the implementation under evaluation, and the resulting performance records.
+
+It is important to distinguish implementation validation from methodological validation. Passing cryptographic test vectors demonstrates consistency with the expected cryptographic behavior under the tested conditions. It does not independently establish that the timing procedure is unbiased or sufficiently precise.
+
+Consequently, the validity of the benchmarking methodology must also be assessed through measurement consistency, clearly defined timing boundaries, and sensitivity to experimental conditions.
+
+% TODO-VAL-1:
+% Document the exact validation test vectors and their sources.
+%
+% TODO-VAL-2:
+% Specify the validation coverage for AES modes, supported
+% message sizes, key lengths, and encryption/decryption paths.
+%
+% TODO-VAL-3:
+% Introduce a negative control that deliberately produces
+% an incorrect cryptographic result and verify that the
+% validation gate rejects the execution.
+%
+% TODO-VAL-4:
+% Add a timing control with a known artificial delay to test
+% whether the measurement framework detects the expected
+% performance difference.
+
+
+\subsection{Workload Definition and Paired Experimental Design}
+\label{subsec:experimental_design}
+
+The experimental design uses controlled input parameters to improve the comparability of different execution paths. Corresponding CPU and GPU configurations are evaluated using matching workload definitions, including the cryptographic algorithm, mode of operation, data size, and relevant initialization parameters.
+
+Fixed random seeds support deterministic input generation and facilitate the reconstruction of experimental conditions. However, identical seeds across executions do not eliminate environmental variability arising from scheduling, clock changes, memory behavior, or other system-level effects.
+
+The primary heterogeneous comparison focuses on AES-128 execution using hardware-accelerated CPU AES-NI and CUDA implementations. Conventional CPU software execution is retained as an additional reference path.
+
+The CUDA evaluation includes a baseline implementation and a lightweight optimization candidate. Both are subject to the same functional validation requirements and measurement conventions.
+
+The paired design is intended to ensure that observed performance differences reflect the selected execution paths rather than unintended differences in workload configuration.
+
+Nevertheless, pairing does not imply that CPU and GPU implementations perform identical host-side operations. The timing boundaries of each execution path must therefore be specified before their results are interpreted.
+
+The experimental design also distinguishes the characteristics of cryptographic modes. ECB and CTR permit independent block-level processing, whereas CBC encryption introduces sequential dependencies between ciphertext blocks \cite{dworkin2001modes}.
+
+Accordingly, performance comparisons are interpreted within individual cryptographic modes rather than treating throughput across different modes as interchangeable measurements.
+
+% TODO-DESIGN-1:
+% Document the complete workload-size matrix and the
+% corresponding number of repetitions per configuration.
+%
+% TODO-DESIGN-2:
+% Verify that paired CPU/GPU measurements use equivalent
+% input data, cryptographic keys, and mode parameters.
+%
+% TODO-DESIGN-3:
+% Document the execution order of benchmark configurations
+% and assess possible ordering effects.
+%
+% TODO-DESIGN-4:
+% Add a denser workload-size sweep to identify latency
+% transitions and possible CPU/GPU crossover points.
+%
+% TODO-DESIGN-5:
+% Describe the CUDA baseline and lightweight optimization
+% in enough detail to reproduce their execution behavior.
+
+
+\subsection{Measurement Boundaries}
+\label{subsec:measurement_boundaries}
+
+A central element of the methodology is the explicit separation of execution paths according to their measured computational scope.
+
+Four principal performance paths are distinguished:
+
+\begin{enumerate}
+
+\item \textbf{CPU software path:}
+Measures a conventional software-based cryptographic transformation through the selected CPU implementation.
+
+\item \textbf{CPU AES-NI path:}
+Measures the corresponding cryptographic transformation through a hardware-accelerated CPU library path.
+
+\item \textbf{GPU resident path:}
+Measures CUDA kernel execution on input data already resident in device memory, excluding the host--device transfers required to establish that resident state.
+
+\item \textbf{GPU end-to-end path:}
+Measures the defined host-driven CUDA processing pipeline, including the selected host-to-device transfer, kernel execution, device-to-host transfer, and required synchronization operations.
+
+\end{enumerate}
+
+The CPU measurements are classified as transform-only measurements because they focus on the cryptographic transformation call and do not necessarily include all operations that would occur in a complete application.
+
+Similarly, the GPU resident measurement characterizes the computational performance of the CUDA kernel without including the transfer costs associated with moving input and output data between host and device memory.
+
+The GPU end-to-end measurement represents a broader execution scope. In the initial implementation, the pipeline follows a sequential host-to-device (H2D), kernel execution, and device-to-host (D2H) sequence using pinned host memory.
+
+Pinned host memory is relevant because page-locked buffers can support more efficient host--device transfer operations and, under suitable conditions, asynchronous transfers \cite{nvidiaProgrammingGuide,nvidiaBestPractices}.
+
+However, using pinned memory does not imply that the complete pipeline automatically overlaps data transfers with kernel execution.
+
+The present baseline is interpreted as a synchronous, non-overlapped processing pipeline unless a separate asynchronous execution configuration is explicitly introduced and measured.
+
+Furthermore, the term end-to-end refers to the defined benchmark boundary. It does not automatically include every possible application-level cost, such as external I/O, application initialization, memory allocation, or host-side buffer preparation, unless those operations occur within the timed region.
+
+This qualification is essential because an omitted host-side staging operation may produce a materially different performance estimate from a fully application-inclusive measurement.
+
+The measurement boundaries are therefore treated as part of the experimental definition rather than as incidental implementation details.
+
+% TODO-SCOPE-1:
+% Audit the source code to identify the exact start and end
+% of every timed region.
+%
+% TODO-SCOPE-2:
+% Confirm whether allocation, pinned-buffer staging,
+% input preparation, and output materialization are included
+% in the existing end-to-end measurement.
+%
+% TODO-SCOPE-3:
+% If necessary, distinguish:
+%   GPU kernel-only
+%   GPU transfer-inclusive pipeline
+%   GPU application-inclusive end-to-end execution
+%
+% TODO-SCOPE-4:
+% Measure the individual pipeline components to establish
+% which operations dominate total execution time.
+
+
+\subsection{Timing and Throughput Calculation}
+\label{subsec:timing_throughput}
+
+CPU execution time is measured using Python's monotonic high-resolution \texttt{time.perf\_counter\_ns()} interface. The timer provides elapsed wall-clock time with nanosecond representation, although the reported resolution does not imply nanosecond measurement accuracy.
+
+GPU timing is handled separately because CUDA kernel launches and other GPU operations may execute asynchronously relative to the host. CUDA events and explicit synchronization are used where appropriate to obtain completed device-side execution measurements, following established CUDA and CuPy benchmarking recommendations \cite{cupyPerformance,nvidiaBestPractices}.
+
+Host-observed and device-observed timing intervals are not assumed to be equivalent. A GPU event-based kernel measurement principally characterizes elapsed device execution, whereas a host-driven interval may include runtime dispatch and synchronization costs.
+
+For a workload containing $N$ processed bytes and measured elapsed time $T$ in seconds, throughput is calculated as
+
 \begin{equation}
 R = \frac{N}{10^6 T},
 \label{eq:throughput}
 \end{equation}
-u decimalnim MB/s. CPU transform-only merenja uključuju transformacioni poziv, ali ne obavezno punu aplikacionu cenu. CUDA resident meri kernel nad podacima već pripremljenim na uređaju, dok pipeline uključuje pinned H2D $\rightarrow$ kernel $\rightarrow$ D2H tok. Pinned memorija i CUDA događaji koriste se u skladu sa preporukama za merenje CUDA performansi (NVIDIA Corporation, n.d.-c; CuPy, n.d.-a).
 
-Glavne performansne vrednosti agregiraju se kao medijane pet sesijskih medijana, bez objedinjavanja raw raspodela i bez uklanjanja ekstremnih vrednosti. Faktori ubrzanja računaju se po sesijskim odnosima medijana vremena. Ovakav okvir sprečava mešanje različitih obuhvata merenja: izolovani kernel, kompletan pipeline i CPU transformacija nisu ista metrika.
+where $R$ is expressed in decimal megabytes per second (MB/s).
 
-Stabilnost rezultata procenjivana je kroz pet nezavisnih study sesija sa različitim seedovima. Run-to-run varijabilnost analizirana je na nivou sesijskih medijana, pri čemu se standardna devijacija i raspon koriste kao opisne mere stabilnosti, a ne kao formalni intervali poverenja. Zbog toga se termin ponovljivost u ovom radu odnosi na dokumentovan i ponovljiv eksperimentalni protokol, validacione zapise i stabilnost agregiranih sesijskih rezultata, a ne na statističku generalizaciju na druge platforme.
+This convention distinguishes decimal throughput units from binary memory-size units such as mebibytes (MiB).
+
+For a fixed input size, throughput and elapsed time are inversely related. Consequently, a speedup factor can be expressed using the ratio of CPU and GPU execution times:
+
+\begin{equation}
+S_{\mathrm{CPU/GPU}} =
+\frac{T_{\mathrm{CPU}}}{T_{\mathrm{GPU}}},
+\label{eq:cpu_gpu_speedup}
+\end{equation}
+
+where both execution times must refer to the same workload and clearly identified measurement boundaries.
+
+A value greater than one indicates that the GPU execution path completes the defined workload faster than the selected CPU reference. A value below one indicates that the CPU reference is faster.
+
+The comparison does not automatically imply equivalent system-level functionality when one timing scope excludes transfers and the other does not. For this reason, resident and end-to-end speedup factors are reported and interpreted separately.
+
+For small input sizes, elapsed time may provide a more informative measure than throughput because fixed launch and orchestration costs can dominate execution. Accordingly, latency-based reporting is preferable when interpreting very short operations.
+
+% TODO-TIME-1:
+% Verify exact synchronization points and timer placement
+% in all GPU benchmark paths.
+%
+% TODO-TIME-2:
+% Report small-message latency in microseconds.
+%
+% TODO-TIME-3:
+% Add independent CUDA-event measurements for H2D,
+% kernel execution, and D2H.
+%
+% TODO-TIME-4:
+% Ensure that speedup factors are always labeled with
+% their CPU reference and GPU measurement scope.
+
+
+\subsection{Experimental Sessions and Statistical Aggregation}
+\label{subsec:statistical_analysis}
+
+The initial performance study consists of five independent study sessions executed with documented random seeds and experimental arguments.
+
+Each session includes repeated measurements for the corresponding benchmark configurations. Warm-up executions are excluded from the statistical summaries.
+
+For a given configuration, the median of its valid timing observations is calculated independently within each study session.
+
+Let $T_{s,r}$ represent the elapsed time recorded in session $s$ and repetition $r$. The session-level median is defined as
+
+\begin{equation}
+\widetilde{T}_{s} =
+\operatorname{median}_{r}(T_{s,r}).
+\label{eq:session_median}
+\end{equation}
+
+The principal aggregated execution-time statistic is the median of the five session-level medians:
+
+\begin{equation}
+\widetilde{T}_{\mathrm{study}} =
+\operatorname{median}_{s=1,\ldots,5}
+\left(\widetilde{T}_{s}\right).
+\label{eq:study_median}
+\end{equation}
+
+This hierarchical aggregation preserves the distinction between repeated observations within a session and variation across independent sessions.
+
+Raw observations from different sessions are not pooled into a single distribution for the calculation of the principal study median. Furthermore, no observations are excluded solely because they appear extreme.
+
+For paired CPU--GPU comparisons, speedup factors are calculated from corresponding session-level timing medians:
+
+\begin{equation}
+S_s =
+\frac{\widetilde{T}_{\mathrm{CPU},s}}
+     {\widetilde{T}_{\mathrm{GPU},s}}.
+\label{eq:session_speedup}
+\end{equation}
+
+The aggregated speedup is then defined as
+
+\begin{equation}
+\widetilde{S}_{\mathrm{study}} =
+\operatorname{median}_{s=1,\ldots,5}(S_s).
+\label{eq:study_speedup}
+\end{equation}
+
+This approach is distinct from calculating the ratio of independently aggregated CPU and GPU medians. Because the median is a nonlinear statistic, these two calculations need not produce identical results.
+
+The session-level formulation preserves the intended pairing between CPU and GPU measurements.
+
+Measurement stability is evaluated descriptively using variability across session-level summaries. Standard deviation and range are treated as descriptive indicators rather than formal confidence intervals.
+
+The use of five sessions provides an initial assessment of experimental stability but does not support strong statistical generalization to different platforms, workloads, or execution environments.
+
+These limitations are consistent with the broader literature on rigorous computer-system benchmarking, which emphasizes the importance of experimental variability, controlled repetition, and statistically defensible interpretation \cite{kalibera2013rigorous,hoefler2015scientific,mytkowicz2009wrong}.
+
+% TODO-STAT-1:
+% Confirm from the analysis scripts whether the primary
+% throughput summary is computed directly from throughput
+% samples or derived from aggregated timing observations.
+% Preserve the original estimator consistently in all tables.
+%
+% TODO-STAT-2:
+% Increase the number of independent study sessions and
+% report confidence intervals where justified.
+%
+% TODO-STAT-3:
+% Add interquartile range, coefficient of variation, and
+% session-level dispersion to the principal results.
+%
+% TODO-STAT-4:
+% Investigate hierarchical or session-level bootstrap
+% confidence intervals for timing and paired speedups.
+%
+% TODO-STAT-5:
+% Assess the sensitivity of the results to benchmark order,
+% warm-up strategy, and operating-system interference.
+
+
+\subsection{Experimental Artifacts and Traceability}
+\label{subsec:experimental_artifacts}
+
+The benchmarking framework preserves multiple categories of experimental artifacts to support traceability and independent analysis.
+
+These artifacts include raw timing records, aggregated performance summaries, functional validation reports, execution metadata, accompanying reports, and source-code snapshots or cryptographic hashes.
+
+Raw records preserve individual observations rather than only the final aggregated measurements. Summary records document the derived statistics used in the performance analysis.
+
+Validation records establish whether the measured implementations satisfied the required functional checks. Metadata records associate the observations with experimental parameters and the corresponding execution environment.
+
+Source-code identification through snapshots or hash values helps distinguish results produced by different implementation revisions.
+
+Together, these artifacts establish a documented relationship between experimental inputs, executable implementations, measurement observations, and reported conclusions.
+
+The availability of such evidence improves auditability and supports subsequent reanalysis. Nevertheless, the preservation of artifacts alone does not guarantee reproducibility across different hardware or software environments.
+
+Independent reproduction also requires sufficiently precise descriptions of dependencies, benchmark invocation procedures, synchronization behavior, and platform characteristics.
+
+% TODO-ART-1:
+% Verify that each study session exports all required
+% artifacts without missing or inconsistent records.
+%
+% TODO-ART-2:
+% Add explicit software dependency manifests and a
+% machine-readable hardware environment description.
+%
+% TODO-ART-3:
+% Publish a versioned benchmark release with raw data
+% and documentation.
+%
+% TODO-ART-4:
+% Archive the publication-associated release using a
+% persistent identifier, if available.
+
+
+\subsection{Methodological Scope and Limitations}
+\label{subsec:methodological_limitations}
+
+The methodology is designed to support controlled interpretation of CPU--GPU cryptographic performance rather than establish universal rankings between computing architectures.
+
+Several limitations must be considered.
+
+First, the initial experiments are conducted on a single consumer-grade computing platform. Hardware characteristics, operating-system behavior, driver configuration, and runtime implementation may therefore influence the measured results.
+
+Second, the CPU reference is derived from a particular cryptographic library and execution configuration. Although AES-NI provides an appropriate hardware-accelerated reference, the results do not necessarily represent the performance of independently optimized native or multithreaded CPU implementations.
+
+Third, the CUDA baseline and lightweight optimization candidate are not intended to represent the highest attainable AES throughput on the tested GPU. Comparisons with highly optimized GPU implementations must therefore account for differences in kernel design and implementation maturity.
+
+Fourth, resident and end-to-end GPU measurements describe distinct execution scopes. Their throughput values should not be interpreted as competing estimates of the same computational operation.
+
+Fifth, the initial session count and descriptive statistical analysis limit the strength of general conclusions regarding platform-independent performance behavior.
+
+Finally, the current synchronous pipeline does not establish the performance attainable through asynchronous transfers, concurrent execution, or optimized multi-stream processing.
+
+These limitations motivate additional experiments involving independent CPU references, pipeline decomposition, asynchronous execution, denser workload-size sweeps, and evaluation on a second GPU platform.
+
+The intended purpose of these extensions is not to demonstrate a predetermined architectural advantage, but to determine whether the observed performance relationships remain stable when implementation and execution conditions change.
+
+% TODO-EXT-1:
+% Repeat selected experiments on a cloud NVIDIA T4 GPU
+% using a documented Linux execution environment.
+%
+% TODO-EXT-2:
+% Introduce a chunked asynchronous transfer/compute
+% pipeline and compare it against the synchronous baseline.
+%
+% TODO-EXT-3:
+% Develop a quantitative CPU/GPU cost model that accounts
+% for fixed overhead, transfer bandwidth, and device
+% computation throughput.
+%
+% TODO-EXT-4:
+% Evaluate the predicted and measured crossover sizes
+% under multiple CPU and GPU reference configurations.
+%
+% TODO-EXT-5:
+% Update this limitations subsection after the planned
+% experiments have been completed.

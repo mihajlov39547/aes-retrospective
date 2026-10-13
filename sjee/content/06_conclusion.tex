@@ -1,13 +1,42 @@
+
 \section{Conclusion}
+\label{sec:conclusion}
 
-U radu je prikazan validiran i ponovljiv metodološki okvir za mikrobenchmarking kriptografskih primitiva u heterogenom CPU/GPU okruženju. Osnovni doprinos nije u novom algoritmu ili kriptoanalitičkoj metodi, već u eksperimentalnoj organizaciji koja razdvaja validaciju, obuhvat merenja, agregaciju rezultata i granice tumačenja. Takav pristup omogućava da se performanse DES/TDEA--AES familije algoritama i njihovih implementacija tumače u kontekstu konkretne platforme.
+This paper presented a validation-first, reproducible methodological framework for benchmarking symmetric cryptographic primitives in heterogeneous CPU--GPU computing environments. The primary contribution lies not in the development of a new cryptographic algorithm or optimization technique, but in a structured experimental protocol that integrates functional validation, controlled workloads, explicitly defined measurement boundaries, paired performance comparisons, session-level aggregation, and preservation of experimental artifacts. The framework provides a systematic basis for interpreting the performance of specific cryptographic implementations under documented hardware and software conditions.
 
-Rezultati potvrđuju da izbor obuhvata merenja presudno utiče na zaključak. AES-NI značajno smanjuje cenu AES izvršavanja na CPU-u. CUDA AES-128 može postići visoku resident/kernel propusnost kada su podaci već dostupni na uređaju, ali u praktičnom end-to-end pipeline scenariju prednost izolovanog GPU kernela nestaje u testiranom okruženju. Time se pokazuje da resident i end-to-end merenja odgovaraju različitim istraživačkim pitanjima.
+The experimental results demonstrate that the choice of measurement scope can substantially alter conclusions regarding heterogeneous cryptographic performance. Hardware-accelerated AES-NI execution achieved approximately 2.4--2.8 times the throughput of the corresponding conventional software AES implementations in the evaluated CBC configurations. In the principal AES-128 CPU--GPU comparison, the CUDA baseline achieved resident throughput of 4800.6 MB/s for a 32 MiB CTR workload, compared with 1455.8 MB/s for the CPU AES-NI reference. However, when host-to-device transfer, kernel execution, device-to-host transfer, and synchronization were included in the measured GPU pipeline, throughput decreased to 1204.5 MB/s. Thus, the isolated computational advantage of the GPU did not translate into an end-to-end advantage under the tested synchronous execution configuration.
 
-Pokušaj lake CUDA optimizacije dodatno pokazuje da optimizacija kernela ne mora automatski dovesti do boljeg aplikacionog rezultata. Poboljšanje izolovanog koda može biti poništeno memorijskim ponašanjem, redosledom rada, transferima ili drugim sistemskim troškovima. Zbog toga GPU performanse treba analizirati u dva sloja: kao računarsku propusnost jezgra i kao propusnost celokupnog toka podataka.
+The evaluation of a lightweight CUDA optimization candidate further demonstrated that improvements in isolated kernel execution do not necessarily produce corresponding improvements in transfer-inclusive performance. Memory behavior, data movement, synchronization, and runtime overhead may influence the overall result independently of kernel-level throughput. These observations reinforce the importance of reporting resident-kernel and end-to-end pipeline measurements separately, rather than treating them as interchangeable indicators of accelerator performance.
 
-Demonstracija redukovanog prostora ključeva i avalanche analiza dopunjuju performansni deo rada, ali su ograničene u tumačenju. Redukovani prostor ključeva ilustruje eksponencijalni rast iscrpne pretrage, bez tvrdnje o napadu na pune prostore. Avalanche rezultati pokazuju očekivanu raspodelu promene oko polovine bloka, ali ne predstavljaju dokaz ukupne sigurnosti.
+The retrospective DES/TDEA comparisons, reduced-keyspace experiment, and avalanche analysis provided complementary methodological examples while remaining outside the central heterogeneous-performance contribution. In particular, fixed-key encryption throughput must not be interpreted as exhaustive key-search throughput, and avalanche measurements alone do not establish overall cryptographic security. These distinctions illustrate the broader importance of matching experimental metrics to the specific properties or operations being evaluated.
 
-Budući rad može ići u dva pravca. Prvi je dublja GPU optimizacija AES kernela, uključujući shared-memory T-table dizajne sa kontrolom bank konflikata, bitsliced/PTX implementacije i detaljnije merenje occupancy-ja, register pressure-a i memorijskih obrazaca. Drugi pravac je optimizacija samog pipeline-a, kroz chunking, \texttt{cudaMemcpyAsync}, non-default stream-ove i preklapanje transfera i računanja, što NVIDIA dokumentacija i tehnički blogovi navode kao uslovljeno pinned memorijom, asinkronim kopiranjem i odgovarajućim stream-ovima (NVIDIA Corporation, n.d.-c; Harris, 2012). Ovaj drugi pravac je posebno relevantan za rezultate ovog rada, jer finalno poređenje pokazuje da transferni i runtime troškovi mogu poništiti resident dobitak kernela. Dodatno, merenja na Linux/TCC okruženju, uz praćenje takta, temperature, potrošnje i Nsight Systems tragova, omogućila bi jasnije razdvajanje algoritamskih, drajverskih i sistemskih efekata.
+The findings are limited to the evaluated cryptographic library paths, CPU and GPU implementations, hardware platform, workload sizes, and synchronous CUDA processing pipeline. They do not establish a general upper bound on GPU AES throughput or demonstrate that CPU AES-NI is universally faster than GPU-based encryption. Moreover, the current study does not isolate the individual contributions of data-transfer, synchronization, and operating-system overhead, and its five-session statistical design limits broader generalization.
 
-Najvažniji zaključak rada jeste da se kriptografske performanse ne mogu korektno tumačiti bez jasnog metodološkog okvira. Fixed-key throughput nije candidate-check stopa; resident GPU rezultat nije aplikacioni end-to-end rezultat; difuzija nije sigurnosni dokaz. Validacioni postupci, upareni protokoli, dokumentovani seedovi, metapodaci i agregacija po sesijama čine osnovu reproduktivnog poređenja kriptografskih implementacija.
+Future work will prioritize component-level pipeline measurements, asynchronous data transfers using \texttt{cudaMemcpyAsync}, pinned-memory buffering, and multiple CUDA streams. Additional experiments will investigate a wider range of workload sizes, independent native CPU AES-NI references, and a second experimental platform based on an NVIDIA T4 GPU under Linux. These measurements will support the development and validation of a quantitative execution-cost model and the identification of possible CPU--GPU crossover points. Further extensions may examine optimized CUDA AES kernels, GPU AES-GCM, and architecture-specific profiling using NVIDIA performance-analysis tools.
+
+Overall, the study demonstrates that meaningful cryptographic performance evaluation requires more than comparing isolated throughput values. Functional correctness, execution boundaries, hardware acceleration, data residency, statistical treatment, and reproducible experimental records must be considered together. The central result is therefore methodological: the apparent performance advantage of a cryptographic implementation depends not only on its computational capabilities, but also on what is measured and how the complete execution path is defined.
+
+% TODO-CONCLUSION-1:
+% Update the numerical findings after additional study
+% sessions and statistical uncertainty analysis.
+%
+% TODO-CONCLUSION-2:
+% Incorporate NVIDIA T4 measurements and explain whether
+% the resident-versus-E2E findings generalize across platforms.
+%
+% TODO-CONCLUSION-3:
+% Replace planned asynchronous-pipeline statements with
+% experimentally supported findings after implementation.
+%
+% TODO-CONCLUSION-4:
+% Add the measured or modeled CPU--GPU crossover point,
+% if a valid crossover is established.
+%
+% TODO-CONCLUSION-5:
+% Reassess the contribution statement after independent
+% CPU references and methodological controls are completed.
+%
+% TODO-CONCLUSION-6:
+% Consider moving the retrospective DES/TDEA, keyspace,
+% and avalanche experiments to an appendix if necessary
+% to maintain a focused CPU--GPU benchmarking contribution.

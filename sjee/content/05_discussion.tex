@@ -1,3 +1,450 @@
+
 \section{Discussion}
-Placeholder discussion. Interpret the eventual results and describe their
-limitations and implications.
+\label{sec:discussion}
+
+The experimental results highlight the importance of measurement boundaries, hardware acceleration, and execution-pipeline organization when comparing symmetric cryptographic implementations across heterogeneous computing platforms.
+
+The principal finding is that the relative performance of CPU AES-NI and GPU AES-128 changes substantially depending on whether the measurement isolates device-side computation or includes the host-driven processing pipeline.
+
+This distinction is particularly important because a high GPU kernel throughput value does not necessarily indicate a corresponding advantage in the complete execution path.
+
+The following discussion examines the implications of these observations, their relationship to previous research, and the methodological limitations that must be considered before extending the findings to other systems.
+
+
+\subsection{Resident Throughput Versus End-to-End Performance}
+\label{subsec:discussion_scope}
+
+The paired CPU--GPU experiments demonstrate a clear difference between isolated GPU execution and transfer-inclusive processing.
+
+For AES-128 in CTR mode with a 32 MiB input, the CUDA baseline achieves a resident throughput of 4800.6 MB/s, compared with 1455.8 MB/s for the CPU AES-NI reference.
+
+However, when the defined GPU end-to-end pipeline is measured, throughput decreases to 1204.5 MB/s.
+
+A similar relationship is observed in ECB mode, where the resident CUDA implementation outperforms the CPU AES-NI path, while the end-to-end pipeline remains slower under the evaluated conditions.
+
+These results indicate that device-side encryption performance alone is insufficient to characterize the practical cost of the measured GPU processing path.
+
+The distinction is consistent with the general observations of Gregg and Hazelwood \cite{gregg2011data}, who emphasized the importance of data placement and movement when interpreting heterogeneous CPU--GPU performance comparisons.
+
+From a methodological perspective, the results demonstrate that different measurement scopes can produce different architectural rankings even when the cryptographic transformation and workload definition remain unchanged.
+
+A resident-kernel measurement estimates the execution rate of the cryptographic computation after the input has been placed in device memory. In contrast, a host-driven pipeline measurement includes additional operations required to transfer data to and from the accelerator.
+
+Consequently, a resident throughput advantage does not automatically translate into an application-level advantage.
+
+Nevertheless, the interpretation depends on the intended workload.
+
+For an application whose data already reside on the GPU, kernel-only throughput may be directly relevant because host--device transfers are not necessarily required for each cryptographic operation.
+
+Conversely, applications that receive plaintext in host memory and require the resulting ciphertext on the CPU must account for the necessary transfers.
+
+Neither measurement scope is inherently more correct. Rather, each characterizes a different execution scenario.
+
+The methodological requirement is to specify these scenarios explicitly and avoid interpreting measurements obtained under different boundaries as directly interchangeable.
+
+
+\subsection{The Role of CPU AES-NI Acceleration}
+\label{subsec:discussion_aesni}
+
+The experiments also demonstrate the importance of selecting an appropriate CPU reference.
+
+In the CBC experiments, AES-NI improves throughput by approximately 2.4--2.8 times compared with the corresponding conventional software execution path.
+
+The hardware-accelerated CPU implementation therefore constitutes a substantially stronger reference than the software-only implementation.
+
+This distinction has direct implications for heterogeneous performance comparisons.
+
+When evaluated against conventional software AES, a GPU implementation may exhibit a large apparent advantage. However, the same GPU execution path may provide a considerably smaller advantage, or no advantage, when compared against hardware-accelerated CPU AES-NI.
+
+This observation is consistent with the broader methodological arguments presented by Lee et al. \cite{lee2010debunking}, who demonstrated that CPU--GPU performance comparisons can be strongly influenced by the quality and optimization level of the respective implementations.
+
+Accordingly, the present study treats AES-NI as the primary CPU reference in the paired heterogeneous comparison.
+
+However, the reported AES-NI results characterize a particular single-threaded library execution path on the Intel Core i5-10300H processor.
+
+They do not represent the maximum throughput attainable from the entire CPU, nor do they establish a performance bound for independently optimized native implementations.
+
+Different CPU libraries, instruction-dispatch mechanisms, vector instruction extensions, and multithreaded execution strategies may produce different results.
+
+Therefore, the observation that CPU AES-NI outperforms the evaluated synchronous GPU end-to-end pipeline must remain conditional on the specific CPU implementation and workload configuration.
+
+An independent native implementation, such as an OpenSSL EVP benchmark, would help determine whether the observed relationship is sensitive to the CPU software stack.
+
+Furthermore, evaluating multiple CPU thread counts would distinguish single-core or single-thread performance from aggregate processor throughput.
+
+% TODO-DISC-CPU-1:
+% Incorporate native OpenSSL EVP benchmark results.
+%
+% TODO-DISC-CPU-2:
+% Compare single-thread and multithread CPU AES-NI paths.
+%
+% TODO-DISC-CPU-3:
+% Discuss the sensitivity of CPU/GPU conclusions to
+% library choice and CPU execution configuration.
+
+
+\subsection{Pipeline Overhead and the Limits of Synchronous Execution}
+\label{subsec:discussion_pipeline}
+
+The present study deliberately evaluates a synchronous, non-overlapped CUDA end-to-end processing path.
+
+For this configuration, the measured execution time includes the defined sequence of host-to-device transfer, kernel execution, device-to-host transfer, and synchronization.
+
+The difference between resident-kernel throughput and end-to-end throughput indicates that operations outside the isolated kernel contribute substantially to the measured pipeline cost.
+
+However, the existing aggregate measurements do not independently identify the contribution of each component.
+
+In particular, it is not possible to determine from the reported throughput values alone how much of the additional execution time originates from host-to-device transfer, device-to-host transfer, synchronization, host-memory staging, runtime dispatch, or other implementation-dependent operations.
+
+The Windows Display Driver Model (WDDM) may influence command scheduling and host-driven execution behavior, but the present experiment does not isolate its contribution \cite{microsoftGpuPreemption,microsoftTdr}.
+
+It would therefore be inappropriate to attribute the measured performance gap directly to WDDM without additional experiments.
+
+CUDA programming practices provide several mechanisms for reducing the impact of data movement and orchestration overhead, including pinned host memory, asynchronous memory transfers, concurrent streams, and overlapping computation with communication \cite{nvidiaProgrammingGuide,nvidiaBestPractices,harris2012overlap}.
+
+Previous AES-specific research has also examined overlapping transfer and computation \cite{iwai2012acceleration}.
+
+Consequently, the synchronous pipeline evaluated here should be considered one implementation configuration rather than a performance limit of GPU-based encryption.
+
+For an idealized sequential pipeline, total execution time may be approximated as
+
+\begin{equation}
+T_{\mathrm{sync}}(N)
+\approx
+L_{\mathrm{GPU}}
++
+T_{\mathrm{H2D}}(N)
++
+T_{\mathrm{kernel}}(N)
++
+T_{\mathrm{D2H}}(N),
+\label{eq:discussion_sync}
+\end{equation}
+
+where $N$ is the workload size and $L_{\mathrm{GPU}}$ represents fixed launch, synchronization, and other overheads not already included in the individual terms.
+
+In a chunked asynchronous implementation, transfers and computation may overlap when supported by the GPU hardware, memory configuration, stream dependencies, and workload structure.
+
+Under ideal steady-state conditions, the dominant per-chunk processing time may approach
+
+\begin{equation}
+T_{\mathrm{chunk,steady}}
+\gtrsim
+\max
+\left(
+T_{\mathrm{H2D,chunk}},
+T_{\mathrm{kernel,chunk}},
+T_{\mathrm{D2H,chunk}}
+\right),
+\label{eq:discussion_overlap_bound}
+\end{equation}
+
+provided that the three stages can proceed concurrently without resource contention.
+
+This expression is an idealized lower bound rather than a guaranteed achievable execution time.
+
+Practical performance also depends on pipeline startup and draining, available copy engines, PCIe bandwidth, buffer allocation, synchronization dependencies, and the number and size of chunks.
+
+Overlapping transfers with computation may therefore reduce end-to-end execution time, but the magnitude of any improvement must be established experimentally.
+
+The current results demonstrate the cost of the evaluated synchronous pipeline; they do not establish the performance attainable by an optimized asynchronous implementation.
+
+% TODO-DISC-PIPELINE-1:
+% Add measured H2D, kernel, D2H, and synchronization times.
+%
+% TODO-DISC-PIPELINE-2:
+% Quantify the contribution of pinned-buffer staging and
+% other host-side operations.
+%
+% TODO-DISC-PIPELINE-3:
+% Implement a chunked cudaMemcpyAsync pipeline with
+% multiple CUDA streams.
+%
+% TODO-DISC-PIPELINE-4:
+% Measure pipeline performance as a function of chunk size
+% and stream count.
+%
+% TODO-DISC-PIPELINE-5:
+% Compare observed asynchronous throughput against the
+% idealized overlap model and explain deviations.
+
+
+\subsection{Workload Size and the CPU--GPU Crossover Problem}
+\label{subsec:discussion_crossover}
+
+The relationship between CPU and GPU execution is also influenced by workload size.
+
+For relatively small inputs, fixed costs associated with GPU invocation, command submission, transfer initialization, and synchronization may constitute a substantial fraction of total execution time.
+
+As workload size increases, these fixed costs may become less important relative to the cost of processing the input data.
+
+This creates the possibility of a crossover point at which the GPU becomes faster than the selected CPU reference.
+
+However, the existence of such a point depends on the effective CPU processing rate, GPU kernel throughput, transfer bandwidth, and pipeline organization.
+
+A simplified CPU execution model can be expressed as
+
+\begin{equation}
+T_{\mathrm{CPU}}(N)
+\approx
+L_{\mathrm{CPU}}
++
+\frac{N}{R_{\mathrm{CPU}}},
+\label{eq:discussion_cpu_model}
+\end{equation}
+
+where $L_{\mathrm{CPU}}$ is the fixed CPU execution overhead and $R_{\mathrm{CPU}}$ is the effective processing rate.
+
+For a sequential GPU pipeline, a corresponding first-order model is
+
+\begin{equation}
+T_{\mathrm{GPU}}(N)
+\approx
+L_{\mathrm{GPU}}
++
+\frac{N}{B_{\mathrm{H2D}}}
++
+\frac{N}{R_{\mathrm{kernel}}}
++
+\frac{N}{B_{\mathrm{D2H}}},
+\label{eq:discussion_gpu_model}
+\end{equation}
+
+where $B_{\mathrm{H2D}}$ and $B_{\mathrm{D2H}}$ represent effective transfer bandwidths and $R_{\mathrm{kernel}}$ represents effective GPU processing throughput.
+
+Additional host-side staging costs must be included if they contribute materially to the measured execution interval.
+
+A crossover size $N_{\mathrm{cross}}$ can be defined by
+
+\begin{equation}
+T_{\mathrm{CPU}}(N_{\mathrm{cross}})
+=
+T_{\mathrm{GPU}}(N_{\mathrm{cross}}).
+\label{eq:discussion_crossover}
+\end{equation}
+
+However, a positive and practically attainable solution is not guaranteed.
+
+If the GPU pipeline has both greater fixed overhead and a larger effective processing time per byte than the CPU reference, increasing the workload size alone will not reverse the performance relationship within this model.
+
+Furthermore, real execution costs may deviate from a simple linear model due to memory allocation behavior, cache effects, clock variation, transfer characteristics, and runtime scheduling.
+
+The initial experiments cover 1 MiB, 16 MiB, and 32 MiB workloads in the paired CPU--GPU evaluation.
+
+Although these measurements demonstrate the importance of execution scope, they are insufficient to establish a general crossover threshold.
+
+The non-monotonic throughput behavior observed at 16 MiB further indicates that additional measurements are necessary before a predictive model can be considered reliable.
+
+A denser workload-size sweep, combined with independent pipeline-component measurements, would allow the proposed model to be fitted and tested against observed execution times.
+
+This extension would move the analysis beyond descriptive throughput comparison toward quantitative prediction of CPU--GPU execution costs.
+
+% TODO-DISC-MODEL-1:
+% Fit CPU and GPU cost-model parameters from measured data.
+%
+% TODO-DISC-MODEL-2:
+% Perform a dense size sweep from small messages to the
+% largest safely supported buffer sizes.
+%
+% TODO-DISC-MODEL-3:
+% Distinguish measured crossover points from extrapolated
+% model predictions.
+%
+% TODO-DISC-MODEL-4:
+% Validate predicted execution times using held-out
+% workload sizes and independent study sessions.
+%
+% TODO-DISC-MODEL-5:
+% Refit and test the model on the planned NVIDIA T4 system.
+
+
+\subsection{Cross-Platform Generalization and the NVIDIA T4}
+\label{subsec:discussion_platform}
+
+The present experimental evidence is limited to a consumer-grade NVIDIA GeForce GTX 1650 Ti operating under Windows 10 and WDDM.
+
+This platform provides a relevant example of GPU acceleration in a conventional personal-computing environment, but its performance characteristics should not be generalized to server and cloud GPU configurations.
+
+A planned extension of the study involves repeating the benchmarking protocol on an NVIDIA T4 GPU in a Linux-based cloud environment.
+
+Both GPUs belong to the NVIDIA Turing architecture family and support CUDA compute capability 7.5. Nevertheless, they differ in device resources, memory bandwidth, power characteristics, and operating environment.
+
+The cloud platform will also introduce a different host CPU, memory subsystem, PCIe topology, and potentially virtualized execution resources.
+
+Consequently, differences between the two systems cannot be attributed exclusively to the GPU model or operating system.
+
+A cross-platform evaluation should therefore preserve the same workload definitions, functional validation requirements, measurement boundaries, and statistical aggregation procedures while documenting the environment-specific parameters separately.
+
+The primary objective would be to determine whether the observed distinction between resident and end-to-end throughput remains relevant under substantially different execution conditions.
+
+If the T4 demonstrates the same resident-versus-end-to-end ordering, the finding would provide additional evidence that the distinction is important beyond the initial laptop platform.
+
+Conversely, if the T4 achieves an end-to-end advantage over the selected CPU reference, the result would demonstrate the sensitivity of the performance relationship to platform characteristics and pipeline costs.
+
+Neither outcome would invalidate the methodological contribution.
+
+Instead, the comparison would help identify the conditions under which particular CPU--GPU performance conclusions are applicable.
+
+Additional telemetry, including GPU clock behavior, power limits, measured transfer bandwidth, and execution variability, would improve the interpretation of platform-dependent differences.
+
+However, the T4 experiment alone would not isolate WDDM overhead because several hardware and software variables change simultaneously.
+
+A controlled operating-system or driver comparison on otherwise equivalent hardware would be required for stronger causal conclusions.
+
+% TODO-DISC-T4-1:
+% Insert the measured NVIDIA T4 results after completing
+% the cloud experiments.
+%
+% TODO-DISC-T4-2:
+% Compare environment manifests, host CPU characteristics,
+% PCIe configuration, GPU clocks, and transfer bandwidth.
+%
+% TODO-DISC-T4-3:
+% Evaluate cross-platform differences in resident throughput,
+% synchronous E2E throughput, and asynchronous E2E throughput.
+%
+% TODO-DISC-T4-4:
+% Report whether the crossover model generalizes to the
+% second platform.
+%
+% TODO-DISC-T4-5:
+% Avoid attributing observed differences exclusively to
+% WDDM or virtualization without controlled evidence.
+
+
+\subsection{Implications for Authenticated Encryption}
+\label{subsec:discussion_gcm}
+
+Although the principal CPU--GPU comparison focuses on AES-128 ECB and CTR workloads, practical cryptographic applications frequently require authenticated encryption.
+
+AES-GCM combines counter-mode encryption with authentication based on the GHASH function \cite{dworkin2007gcm}.
+
+The CPU AES-GCM measurements included in this study provide a reference for authenticated-encryption performance, but the current experimental framework does not evaluate a corresponding GPU AES-GCM implementation.
+
+This limitation is important because GPU AES-GCM performance depends not only on the AES encryption kernel but also on the implementation of finite-field multiplication and authentication-tag generation.
+
+In particular, GHASH involves arithmetic over the binary field $\mathrm{GF}(2^{128})$, where carryless multiplication is a relevant computational primitive.
+
+Recent NVIDIA developments have introduced hardware support for carryless multiply-accumulate operations through the PTX instruction \texttt{clmad}, documented in CUDA 13.3 for Ampere and newer GPU architectures with compute capability 8.0 or higher.
+
+This instruction provides opportunities for accelerating GHASH and related binary-field computations on supported hardware.
+
+However, neither the GTX 1650 Ti nor the NVIDIA T4 supports this instruction, as both are Turing-generation GPUs with compute capability 7.5.
+
+Therefore, these newer instruction-level capabilities cannot be assumed to improve AES-GCM performance on either of the two intended experimental platforms.
+
+A GPU AES-GCM extension on the T4 would require an implementation compatible with Turing hardware, while investigating newer carryless-multiplication instructions would require an additional Ampere-or-newer platform.
+
+Furthermore, faster GHASH computation does not automatically imply proportionally higher end-to-end AES-GCM throughput.
+
+The full authenticated-encryption pipeline includes counter generation, AES computation, GHASH processing, tag generation or verification, and potentially host--device transfers.
+
+Its performance must therefore be measured as a complete authenticated-encryption workload rather than inferred from isolated GHASH throughput.
+
+The distinction between kernel-level and application-level measurement remains relevant, but the computational balance may differ from the ECB and CTR implementations evaluated in the current study.
+
+% TODO-DISC-GCM-1:
+% Implement a functionally validated GPU AES-GCM path
+% compatible with the selected GPU architecture.
+%
+% TODO-DISC-GCM-2:
+% Evaluate authenticated-encryption latency and throughput
+% for both small-message batches and large buffers.
+%
+% TODO-DISC-GCM-3:
+% Distinguish AES computation, GHASH processing, tag
+% generation/verification, and transfer overhead.
+%
+% TODO-DISC-GCM-4:
+% If an Ampere-or-newer GPU becomes available, investigate
+% architecture-supported carryless multiply-accumulate
+% instructions and their effect on GHASH throughput.
+%
+% TODO-BIB:
+% Add the official NVIDIA CUDA 13.3 carryless-multiplication
+% reference and the relevant PTX ISA documentation.
+
+
+\subsection{Reproducibility and Statistical Limitations}
+\label{subsec:discussion_reproducibility}
+
+The study incorporates several mechanisms intended to improve experimental traceability and repeatability.
+
+These include correctness validation before timing, controlled workloads, documented random seeds, multiple study sessions, preservation of raw observations, and explicit separation of measurement scopes.
+
+The principal performance results are aggregated from five independent study sessions using session-level medians.
+
+This approach avoids indiscriminately pooling all repeated observations and preserves the distinction between within-session and between-session variability.
+
+However, the number of sessions remains limited.
+
+The reported median values provide descriptive evidence of performance behavior on the tested platform but do not establish narrow statistical uncertainty bounds.
+
+Consequently, relatively small differences between implementation variants should be interpreted cautiously.
+
+This qualification is particularly relevant to the CUDA baseline versus CUDA v1 comparison, where some observed throughput differences are modest and may be influenced by experimental variability.
+
+The literature on scientific benchmarking emphasizes the importance of controlled execution, appropriate treatment of variability, and transparent reporting of statistical uncertainty \cite{mytkowicz2009wrong,kalibera2013rigorous,hoefler2015scientific}.
+
+Future experiments should therefore extend the number of independent sessions, report session-level dispersion, and introduce confidence intervals where supported by the experimental design.
+
+Additional controls could examine sensitivity to warm-up procedures, execution ordering, synchronization behavior, and environmental changes.
+
+Independent reference tools would provide further evidence concerning the accuracy and consistency of the measurement procedure.
+
+It is also necessary to distinguish cryptographic correctness from benchmarking validity.
+
+Passing known-answer tests demonstrates that the evaluated implementation produces expected cryptographic outputs under the tested conditions.
+
+It does not independently establish that the performance measurement procedure is free from systematic bias.
+
+The present framework provides a documented foundation for reproducible evaluation, but broader methodological validation requires these additional controls and independent measurements.
+
+% TODO-DISC-STAT-1:
+% Report session-level dispersion and confidence intervals.
+%
+% TODO-DISC-STAT-2:
+% Increase independent study sessions.
+%
+% TODO-DISC-STAT-3:
+% Perform positive and negative measurement-control tests.
+%
+% TODO-DISC-STAT-4:
+% Compare selected results against independent CPU and GPU
+% measurement tools.
+%
+% TODO-DISC-STAT-5:
+% Publish raw data, environment manifests, and versioned
+% source code associated with the submitted paper.
+
+
+\subsection{Broader Implications and Scope of the Findings}
+\label{subsec:discussion_implications}
+
+The findings have implications for both cryptographic benchmarking and heterogeneous application design.
+
+First, selecting a computational accelerator based exclusively on isolated kernel throughput can lead to conclusions that do not reflect the cost of the intended processing workflow.
+
+Second, comparisons against conventional software CPU implementations may exaggerate the benefits of accelerator execution when dedicated CPU cryptographic instructions are available.
+
+Third, the location of application data is an essential factor in determining whether GPU acceleration is advantageous.
+
+When plaintext and ciphertext remain resident in device memory, a GPU kernel may provide substantial computational throughput. When both input and output reside in host memory, transfer and orchestration costs may change the relative advantage.
+
+Fourth, the selection of an execution strategy should be considered jointly with workload size, transfer configuration, CPU reference implementation, and cryptographic mode.
+
+These observations suggest that cryptographic performance should be reported as a multidimensional experimental result rather than a single implementation-independent throughput value.
+
+At minimum, meaningful heterogeneous comparisons should identify the cryptographic workload, hardware configuration, CPU acceleration mechanism, GPU execution scope, timing boundaries, and statistical aggregation procedure.
+
+The principal contribution of this study is therefore methodological.
+
+The results demonstrate how explicit measurement boundaries and controlled CPU--GPU comparisons can prevent misleading interpretations of accelerator performance.
+
+However, the available evidence remains specific to the tested platform, implementation configurations, and synchronous GPU pipeline.
+
+The study does not establish that CPU AES-NI is universally faster than GPU encryption, nor does it claim that the evaluated CUDA kernels represent the highest achievable GPU performance.
+
+Instead, it shows that the measured CPU--GPU performance relationship depends on the experimental definition of the processing path.
+
+Extending the analysis to asynchronous pipelines, independent CPU implementations, additional workload sizes, and a second GPU platform would provide a stronger empirical basis for determining the generality of this conclusion.
