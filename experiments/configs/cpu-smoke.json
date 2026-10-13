@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "suite_id": "aes-retrospective-v1",
+  "execution_profile": "smoke",
+  "seeds": [2003],
+  "platform_alias": "cpu-development",
+  "experiments": {
+    "cpu_cbc": {"enabled": true},
+    "cpu_aesni": {"enabled": false},
+    "cpu_gcm": {"enabled": false},
+    "avalanche": {"enabled": true},
+    "keyspace": {"enabled": true, "options": {"reduced_key_bits": 8, "repeats": 2}}
+  }
+}

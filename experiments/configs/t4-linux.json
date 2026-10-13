@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "suite_id": "aes-retrospective-v1",
+  "execution_profile": "study",
+  "seeds": [2003, 2004, 2005, 2006, 2007],
+  "warmup": 5,
+  "repeats": 20,
+  "platform_alias": "t4-linux-cloud",
+  "fail_fast": true,
+  "gpu_unavailable": "fail",
+  "limits": {"timeout_seconds": 3600},
+  "experiments": {
+    "cpu_cbc": {"options": {"warmup": 3}},
+    "cpu_aesni": {"options": {"warmup": 3}},
+    "cpu_gcm": {},
+    "cuda_baseline": {},
+    "cuda_paired": {"options": {"profile": ["baseline", "optimized"], "measurements": ["resident", "pipeline"], "sizes": [1024, 16384, 1048576, 16777216, 33554432], "modes": ["ECB", "CTR"], "resident_iterations": 1}},
+    "avalanche": {"options": {"samples_per_group": 2000}},
+    "keyspace": {"enabled": false},
+    "legacy_gpu_scaffold": {"enabled": false}
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "suite_id": "bounded-keyspace-v1",
+  "execution_profile": "study",
+  "seeds": [2003, 2004, 2005, 2006, 2007],
+  "limits": {"max_key_bits": 12, "max_key_candidates": 100000, "timeout_seconds": 300},
+  "experiments": {
+    "keyspace": {"options": {"reduced_key_bits": 12, "repeats": 3, "target_position": ["start", "middle", "end", "random"]}}
+  }
+}

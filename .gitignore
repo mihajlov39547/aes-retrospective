@@ -20,6 +20,8 @@ build/
 *.toc
 
 # Generated experiment output
+experiments/results_orchestrated/
+experiments/history-index/
 # experiments/results/*
 !experiments/results/README.md
 

@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "suite_id": "aes-retrospective-v1",
+  "execution_profile": "smoke",
+  "seeds": [2003],
+  "gpu_unavailable": "skip",
+  "experiments": {
+    "cpu_cbc": {}, "cpu_aesni": {}, "cpu_gcm": {},
+    "cuda_baseline": {}, "cuda_paired": {}, "avalanche": {},
+    "keyspace": {"options": {"reduced_key_bits": 8, "repeats": 2}}
+  }
+}

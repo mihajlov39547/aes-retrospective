@@ -129,6 +129,11 @@ Koristiti postojeće oznake `sec:`, `fig:` i `tab:` za cross-reference.
 
 ## Python
 
+Cross-platform experiment runner: [Orchestration guide](experiments/ORCHESTRATION.md).
+Use `python scripts/run_all_experiments.py list` and
+`python scripts/run_all_experiments.py plan --config experiments/configs/cpu-smoke.json`.
+New runs use `experiments/results_orchestrated/`; archived results remain unchanged.
+
 Python skripte su u `scripts/`; opis svake i komande nalaze se u
 [scripts/README.md](scripts/README.md). Metodologija, zavisnosti, CUDA izvor i
 rezultati ostaju u `experiments/`.

@@ -1,5 +1,11 @@
 # Python skripte
 
+The central cross-platform CLI is `run_all_experiments.py`; see the
+[orchestration guide](../experiments/ORCHESTRATION.md) for the audited registry,
+JSON configurations, platform manifests, validation, resume and aggregation.
+Start with `python scripts/run_all_experiments.py list` or
+`python scripts/run_all_experiments.py run --config experiments/configs/cpu-smoke.json`.
+
 Eksperiment 2: [protokol AES software/AES-NI](../experiments/aes_acceleration_protocol.md).
 Izolovana provera je `python scripts/aes_acceleration_smoke_check.py` (samo AES CBC,
 1 KiB smoke). Obe putanje prolaze NIST KAT i dispatch pre wall/process tajmera;

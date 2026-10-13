@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "suite_id": "aes-retrospective-v1",
+  "execution_profile": "pilot",
+  "seeds": [2003],
+  "warmup": 5,
+  "repeats": 10,
+  "platform_alias": "future-cuda",
+  "gpu_unavailable": "fail",
+  "experiments": {
+    "cuda_baseline": {},
+    "cuda_paired": {"options": {"profile": ["baseline", "optimized"], "measurements": ["resident", "pipeline"], "sizes": [1024, 16384, 1048576, 16777216, 33554432], "modes": ["ECB", "CTR"], "resident_iterations": 1}}
+  }
+}
