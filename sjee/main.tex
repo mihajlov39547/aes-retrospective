@@ -5,6 +5,8 @@
 \usepackage{sjee}
 % Required by the manuscript's existing barrier before Conclusion.
 \usepackage{placeins}
+% Allow slightly looser spacing only when needed to prevent overfull prose lines.
+\setlength{\emergencystretch}{2em}
 \input{content/metadata.tex}
 
 \begin{document}
@@ -33,8 +35,7 @@
 
 \input{content/07_acknowledgments.tex}
 
-% Draft prose currently uses typed author-year references rather than \cite.
-% Include all supplied entries until those references are linked to BibTeX keys.
+% Include all supplied entries, ordered after the manuscript's cited sources.
 \nocite{*}
 \bibliographystyle{unsrtnat}
 \bibliography{references}

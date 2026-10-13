@@ -20,8 +20,7 @@ Edit `content/metadata.tex`, `content/abstract.tex`, `content/keywords.tex`,
 `content/01_introduction.tex` through `content/07_acknowledgments.tex`, and
 `references.bib`. Both builds read these sources. Your abstract, introduction,
 conclusion, other prose, equation, six tables and bibliography are preserved;
-no scientific content was added or rewritten. Discussion and Acknowledgments
-still contain their existing placeholders.
+no scientific content was added or rewritten. Acknowledgments still contains its existing placeholder.
 
 `main.tex` remains the primary PDF entry point and specifies source order.
 The DOCX generator reads its shared inputs and creates a generated intermediate
@@ -74,11 +73,11 @@ and issue/volume/date/UDC/DOI metadata are removed. Ordinary draft page-number
 fields in footers are retained; no publication metadata is invented.
 
 This is a bounded LaTeX adapter, not a general LaTeX converter. It handles the
-current manuscript's sections/subsections, paragraphs, emphasis, inline math,
-display equation and simple booktabs/tabular tables including multicolumn
-headers. Unsupported commands/environments stop the build before replacing
-the previous DOCX. New figures, citation commands and cross-reference commands
-need explicit adapter support before use in the DOCX path. The original figure
+current manuscript's sections/subsections/subsubsections, numbered lists,
+paragraphs, emphasis, inline math, display equations, numeric citations,
+label references and simple booktabs/tabular tables including multicolumn headers. Unsupported commands/environments stop the build before replacing
+the previous DOCX. New figures and LaTeX constructs outside this supported subset need explicit
+adapter support before use in the DOCX path. The original figure
 caption style is preserved, but no figure insertion has been exercised in the
 current manuscript. Math conversion failures produce visible editable
 `[MATH CLEANUP: ...]` text and a build warning instead of losing the expression.
@@ -89,22 +88,22 @@ template, inspect its structure and update the adapter deliberately.
 
 ## Bibliography and remaining Word cleanup
 
-The 21 BibTeX entries remain unchanged. PDF uses `unsrtnat` and `\nocite{*}`;
-the DOCX adapter includes all entries in source order with the template's
-numeric reference-list numbering. Prose currently contains typed author-year
-mentions, not automatic citations. These were preserved, without guessing
-which bibliography entry each mention should cite.
+The current manuscript has 32 BibTeX entries and uses numeric `\cite{key}`
+citations. PDF uses `unsrtnat` and `\nocite{*}`. DOCX orders references by first
+citation, then includes uncited entries in source order, matching this PDF
+configuration. Basic `\ref` and `\eqref` resolve from source labels. DOCX
+numbers are regenerated text, not interactive Word citation or reference fields.
 
 Before submission:
 
-- Connect prose citations to the correct numeric references and review journal
-  bibliography punctuation. The DOCX formatter is deliberately simple; long
+- Review numeric citation placement and journal bibliography punctuation.
+  The DOCX formatter is deliberately simple; long
   URLs can leave large justified spaces and need Word cleanup.
 - Review equation typography and numbering. Caption, heading and equation
   numbers are generated text, not automatic Word cross-reference fields.
 - Review all table widths, merged headings, caption placement and pagination
   in Microsoft Word; keep tables near their first mention.
-- Finish the existing Discussion and Acknowledgments placeholders.
+- Finish the existing Acknowledgments placeholder.
 - Check final title, affiliation, page breaks and references against the
   untouched `SJEE_Template.docx`. If needed, import its styles into the final
   delivery copy. Do not add unassigned journal issue/DOI/UDC/date metadata.
@@ -163,3 +162,21 @@ are historical artifacts, not current manuscript outputs.
 
 Original template SHA-256:
 `51ab1782847fabe6910f7fa4af264bc25c3bad8585f0db54d31fe963941e578d`.
+
+## Rebuild validation (2026-10-13)
+
+Both current outputs build successfully: 39-page PDF and 39-page LibreOffice
+DOCX preview. The updated manuscript includes six tables, 12 display equations,
+32 references, seven sections, 26 subsections and two subsubsections.
+All 32 reference numbers and all 50 labels match the PDF auxiliary data.
+
+Build fixes preserve the scientific text: escaped `sm\_80` in a bibliography
+note; enabled 2 em emergency line-breaking stretch in `main.tex` to avoid
+prose overflow; extended the DOCX adapter for citations, references, numbered
+lists and third-level headings; repaired the math converter's wide-tilde XML
+and mapped tilde accents to native Word accents. The PDF has no overfull lines
+or unresolved citations/references; ten underfull-line warnings remain (loose
+spacing, including long bibliography URLs). DOCX conversion has no warnings.
+Selected title, equation, table and bibliography pages were visually checked
+in both outputs. Native Microsoft Word pagination still needs final review.
+The original SJEE template remains unchanged. No scientific review was performed.

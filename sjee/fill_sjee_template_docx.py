@@ -79,6 +79,8 @@ def inline(nodes, **formatting):
                 result.append(dict(text={',': '\u2009', ' ': ' ', '\\': '\n'}.get(name, name), **formatting))
             elif name == 'label':
                 continue
+            elif name in ('cite', 'ref', 'eqref'):
+                result.append(dict(link_kind=name, target=plain(argument(node)), **formatting))
             else:
                 raise ValueError(f'Unsupported inline command: {node.latex_verbatim()}')
         else:
@@ -178,7 +180,7 @@ def blocks(text):
                 if i:
                     flush()
                 pending.append({'text': re.sub(r'\s+', ' ', chunk)})
-        elif isinstance(node, LatexMacroNode) and node.macroname in ('section', 'subsection'):
+        elif isinstance(node, LatexMacroNode) and node.macroname in ('section', 'subsection', 'subsubsection'):
             flush()
             result.append({'kind': node.macroname, 'runs': clean(inline(argument(node)))})
         elif isinstance(node, LatexEnvironmentNode):
@@ -188,6 +190,27 @@ def blocks(text):
             elif node.environmentname == 'equation':
                 raw = ''.join(n.latex_verbatim() for n in node.nodelist)
                 result.append({'kind': 'equation', 'math': re.sub(r'\\label\{[^}]*\}', '', raw).strip()})
+            elif node.environmentname == 'enumerate':
+                items, current = [], []
+                for child in node.nodelist:
+                    if isinstance(child, LatexMacroNode) and child.macroname == 'item':
+                        if current:
+                            items.append(current)
+                        current = []
+                    elif not current and isinstance(child, LatexCharsNode) and not child.chars.strip():
+                        continue
+                    else:
+                        current.append(child)
+                if current:
+                    items.append(current)
+                for number, item in enumerate(items, 1):
+                    item_blocks = blocks(''.join(n.latex_verbatim() for n in item))
+                    for index, block in enumerate(item_blocks):
+                        if block['kind'] != 'paragraph':
+                            raise ValueError('Only paragraph list items are supported')
+                        block['kind'] = 'list_item'
+                        block['number'] = number if index == 0 else None
+                        result.append(block)
             else:
                 raise ValueError(f'Unsupported environment {node.environmentname}; add explicit handling before export')
         else:
@@ -261,12 +284,104 @@ def read_manuscript():
                 raise ValueError(f'{name}: {exc}') from exc
     if not data['blocks']:
         raise ValueError('No manuscript body found')
+    resolve_links(data, contents)
     return data
+
+
+def resolve_links(data, contents):
+    """Resolve source labels and cite order independently of stale PDF aux files."""
+    labels, cited = {}, []
+    counters = dict(section=0, subsection=0, subsubsection=0, table=0, equation=0)
+    current = None
+
+    def visit(nodes):
+        nonlocal current
+        for node in nodes:
+            if isinstance(node, LatexMacroNode):
+                name = node.macroname
+                if name in ('section', 'subsection', 'subsubsection'):
+                    counters[name] += 1
+                    if name == 'section':
+                        counters['subsection'] = counters['subsubsection'] = 0
+                    elif name == 'subsection':
+                        counters['subsubsection'] = 0
+                    levels = ['section', 'subsection', 'subsubsection']
+                    current = '.'.join(str(counters[k]) for k in levels[:levels.index(name)+1])
+                elif name == 'label':
+                    key = plain(argument(node))
+                    if key in labels or current is None:
+                        raise ValueError(f'Duplicate or unbound label: {key}')
+                    labels[key] = current
+                elif name == 'cite':
+                    for key in plain(argument(node)).split(','):
+                        if key.strip() not in cited:
+                            cited.append(key.strip())
+            elif isinstance(node, LatexEnvironmentNode):
+                if node.environmentname in ('table', 'equation'):
+                    counters[node.environmentname] += 1
+                    current = str(counters[node.environmentname])
+                visit(node.nodelist)
+            elif isinstance(node, LatexGroupNode):
+                visit(node.nodelist)
+
+    for name, text in contents.items():
+        if re.match(r'content/\d', name):
+            visit(parse(text))
+    by_key = {r['key']: r for r in data['references']}
+    for key in cited:
+        if key not in by_key:
+            raise ValueError(f'Unknown citation key: {key}')
+    order = cited + [k for k in by_key if k not in cited]
+    data['references'] = [by_key[k] for k in order]
+    numbers = {key: i for i, key in enumerate(order, 1)}
+
+    def resolve(value):
+        if isinstance(value, list):
+            for item in value:
+                resolve(item)
+        elif isinstance(value, dict):
+            if 'link_kind' in value:
+                kind, target = value.pop('link_kind'), value.pop('target')
+                if kind == 'cite':
+                    ids = sorted(set(numbers[k.strip()] for k in target.split(',')))
+                    groups = []
+                    for n in ids:
+                        if groups and n == groups[-1][-1] + 1:
+                            groups[-1].append(n)
+                        else:
+                            groups.append([n])
+                    text = ', '.join(f'{g[0]}\u2013{g[-1]}' if len(g) > 2 else ', '.join(map(str,g)) for g in groups)
+                    value['text'] = '[' + text + ']'
+                else:
+                    if target not in labels:
+                        raise ValueError(f'Unknown cross-reference label: {target}')
+                    value['text'] = '(' + labels[target] + ')' if kind == 'eqref' else labels[target]
+            for child in value.values():
+                if isinstance(child, (dict, list)):
+                    resolve(child)
+    resolve(data)
+    data['citation_numbers'] = numbers
+    data['labels'] = labels
 
 
 def omml(tex):
     xml = mathml_omml(latex_mathml(tex))
+    # mathml2omml 0.0.2 incorrectly closes groupChrPr as groupChr for
+    # over-accents such as widetilde. Repair only that known malformed tag.
+    xml = re.sub(r'(<m:groupChrPr>[^<]*(?:<(?!/?m:groupChr)[^>]+>[^<]*)*)</m:groupChr>',
+                 r'\1</m:groupChrPr>', xml)
     root = etree.fromstring(('<root xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math">' + xml + '</root>').encode('utf-8'))
+    # A tilde is an accent, not a grouping character. Word/LibreOffice can
+    # omit groupChr tildes even when the repaired XML is well formed.
+    ns = {'m': 'http://schemas.openxmlformats.org/officeDocument/2006/math'}
+    for group in root.xpath('.//m:groupChr[m:groupChrPr/m:chr[@m:val="~"]]', namespaces=ns):
+        group.tag = qn('m:acc')
+        props = group.find(qn('m:groupChrPr'))
+        props.tag = qn('m:accPr')
+        props.find(qn('m:chr')).set(qn('m:val'), '\u0303')
+        for child in list(props):
+            if child.tag != qn('m:chr'):
+                props.remove(child)
     return root[0]
 
 
@@ -336,17 +451,27 @@ def render(data, temporary):
         if str(part.partname).startswith('/word/header') and str(part.partname).endswith('.xml'):
             for node in part.element.findall('.//' + qn('w:p')):
                 Paragraph(node, document._body).clear()
-    section = subsection = table_number = equation = 0
+    section = subsection = subsubsection = table_number = equation = 0
     after_equation = False
     for block in data['blocks']:
         kind = block['kind']
         if kind == 'section':
             section += 1
             subsection = 0
+            subsubsection = 0
             paragraph('JSubtitle', [{'text': f'{section}\t'}] + block['runs'])
         elif kind == 'subsection':
             subsection += 1
+            subsubsection = 0
             paragraph('JSubSubTitle', [{'text': f'{section}.{subsection}\t'}] + block['runs'])
+        elif kind == 'subsubsection':
+            subsubsection += 1
+            paragraph('JSubSubTitle', [{'text': f'{section}.{subsection}.{subsubsection}\t'}] + block['runs'])
+        elif kind == 'list_item':
+            prefix = f"{block['number']}. " if block['number'] is not None else ''
+            p = paragraph('JText', [{'text': prefix}] + block['runs'])
+            p.paragraph_format.left_indent = Cm(0.7)
+            p.paragraph_format.first_line_indent = Cm(-0.5 if prefix else 0)
         elif kind == 'paragraph':
             paragraph('JText-noIndent' if after_equation else 'JText', block['runs'])
         elif kind == 'equation':
@@ -463,9 +588,8 @@ def main():
               'tables': sum(b['kind'] == 'table' for b in data['blocks']),
               'equations': sum(b['kind'] == 'equation' for b in data['blocks']),
               'references': len(data['references']), 'warnings': warnings,
-              'manual_review': ['Connect unchanged typed author-year mentions to numeric references.',
+              'manual_review': ['Review resolved numeric citations and cross-references before submission.',
                                 'Review equation appearance, table pagination and reference punctuation in Word.',
-                                'Discussion and Acknowledgments retain source placeholders.',
                                 'Caption/equation numbers are generated literals, not Word cross-reference fields.']}
     (BUILD / 'build_report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f'Created {OUTPUT}: {report["tables"]} tables, {report["equations"]} display equation(s), {report["references"]} references.')
