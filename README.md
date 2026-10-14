@@ -133,6 +133,11 @@ Cross-platform experiment runner: [Orchestration guide](experiments/ORCHESTRATIO
 Use `python scripts/run_all_experiments.py list` and
 `python scripts/run_all_experiments.py plan --config experiments/configs/cpu-smoke.json`.
 New runs use `experiments/results_orchestrated/`; archived results remain unchanged.
+Study exports require complete configured seed sets and required metrics;
+verification distinguishes complete, partial and invalid scientific datasets.
+For a paired-only NVIDIA T4 smoke/pilot/study workflow, see the
+[orchestration guide](experiments/ORCHESTRATION.md#first-complete-study-and-nvidia-t4)
+and `experiments/configs/heterogeneous-core*.json`.
 
 Python skripte su u `scripts/`; opis svake i komande nalaze se u
 [scripts/README.md](scripts/README.md). Metodologija, zavisnosti, CUDA izvor i

@@ -108,7 +108,13 @@ def metadata(args: argparse.Namespace, method: dict) -> dict:
                            r"HARDWARE\DESCRIPTION\System\CentralProcessor\0") as key:
             cpu = str(winreg.QueryValueEx(key, "ProcessorNameString")[0]).strip()
     versions = {name: importlib.metadata.version(name)
-                for name in ("pycryptodome", "matplotlib", "psutil")}
+                for name in ("pycryptodome", "psutil")}
+    # Plotting is optional for measurements. Keep its provenance field, including
+    # explicit absence, without making export-only software a benchmark gate.
+    try:
+        versions["matplotlib"] = importlib.metadata.version("matplotlib")
+    except importlib.metadata.PackageNotFoundError:
+        versions["matplotlib"] = None
     hashes = {path.name: hashlib.sha256(path.read_bytes()).hexdigest()
               for path in sorted(Path(__file__).parent.glob("*.py"))}
     return {"schema_version": 1, "created_utc": datetime.now(timezone.utc).isoformat(),

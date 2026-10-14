@@ -9,9 +9,14 @@ columns and within-session estimators are unchanged. Historical data under
 ## Quick start
 
 Use Python 3.10 or later. The management layer uses the standard library;
-experiments require the existing `experiments/requirements.txt` dependencies
-(PyCryptodome, psutil, matplotlib). CuPy and a working CUDA runtime/NVRTC are
-additional requirements for CUDA experiments. Nothing is installed automatically.
+all active experiments require PyCryptodome and psutil. CUDA experiments also
+require NumPy, CuPy and a working CUDA runtime/NVRTC. Matplotlib is optional for
+benchmarks and required only for the separate plotting exporter. Nothing is
+installed automatically. Preflight checks mandatory package imports, CUDA and
+AES-NI separately; missing optional `nvidia-smi` telemetry is reported without
+failing an otherwise usable environment. The common metadata helper records
+an absent matplotlib version as null; this metadata-only compatibility change
+does not change encryption, timing or statistics.
 
 Windows, from the repository root with the existing environment:
 
@@ -160,6 +165,20 @@ Example files:
   buffer sizes and baseline/v1 scopes, with ten repeats.
 - `keyspace-bounded-study.json`: explicitly bounded 12-bit educational search;
   a new workload, not a claim to reproduce a historical larger keyspace.
+- `heterogeneous-core-smoke.json`, `heterogeneous-core-pilot.json` and
+  `heterogeneous-core.json`: paired CPU software/AES-NI/CUDA baseline/v1 only.
+  Smoke uses seed 2003, 1 KiB, one warmup and two repetitions. Pilot uses seed
+  2003, the five standard sizes, five warmups and ten repetitions. Study uses
+  seeds 2003–2007, the same sizes, five warmups and twenty repetitions. All use
+  ECB/CTR, resident N=1 and pinned pipeline; unavailable CUDA is an error.
+
+Standalone `cuda_baseline` and `cuda_paired` remain independent experiments in
+the original local/T4 configurations. Standalone baseline uses a CPU correctness
+reference, not measured CPU speedup references. Paired baseline is measured anew
+alongside its paired CPU paths. Their artifacts and aggregation groups never
+merge. Resident measures kernel-only work; pipeline measures the prepared-buffer,
+transfer-inclusive path (and its component timings), not application setup.
+Optional T-table timings require an explicit profile selection and a new run.
 
 Select a subset using `--select cpu_cbc avalanche`; selection must be enabled in
 the configuration and is saved in the resolved configuration. `--platform-alias`
@@ -287,8 +306,9 @@ skips is labeled COMPLETED_WITH_SKIPS and has no fabricated GPU rows.
 
 ## Aggregation and history
 
-Aggregation verifies all completed native results before reading them and rejects
-unfinished/failed suites. Explicit skips remain in the validation summary.
+Aggregation verifies all completed native results before reading them. Study
+aggregation requires scientific completeness; smoke/pilot may export valid partial
+results with explicit missing measurements. Integrity failures always block export.
 Outputs are `summary.csv`, `summary.json`, `paired_speedups.csv`,
 `session_variability.csv` and `validation_summary.json`, inside a unique aggregate
 directory. Re-running aggregation never modifies native files or old aggregates.
@@ -301,6 +321,60 @@ median time / GPU median time**, then aggregated by their median. There is no
 division of aggregate throughput medians. GPU pipeline kernel components are
 never substituted for resident measurements. Throughput remains decimal MB/s.
 CPU reference timings come only from the same paired session.
+
+### Scientific completeness and metric contract
+
+Verification and final suite status include `scientific_completeness` separately
+from technical execution states:
+
+- `complete`: every experiment/seed in `config.resolved.json` completed, passed
+  validation and produced intact, scientifically consistent artifacts.
+- `partial`: available results are valid, but configured sessions are skipped,
+  pending, interrupted or otherwise operationally incomplete.
+- `invalid`: validation failed, accepted artifacts are corrupted, or scientific
+  integrity checks failed. A failed measurement verification is not merely partial.
+
+A technically successful `COMPLETED_WITH_SKIPS` suite can retain a successful
+verification exit code while being scientifically **partial**. Consult the field
+and `missing_measurements`, not the exit code alone. A study with skipped GPU work
+cannot generate publication-quality aggregates. Here publication quality means
+completeness and integrity, not an endorsement of experimental design or variance.
+
+The resolved per-experiment seed lists define exact expected sessions. Every
+present session must contain every configured metric group. Duplicate seeds or
+observations, unexpected groups, changed execution scopes, and missing required
+metrics are rejected. Study aggregation never computes required medians from fewer
+sessions. Records include `expected_sessions`, `observed_sessions`, `missing_seeds`
+and `complete`; whole missing experiments also appear in `missing_measurements`.
+
+Required metrics are explicitly defined in `scripts/orchestration/metrics.py`:
+
+| Experiment/scope | Required measurements |
+|---|---|
+| CPU CBC/GCM | Time and throughput medians |
+| CPU AES-NI | Time, throughput and native paired software speedup |
+| Paired CPU | Time, throughput and wall-clock nanosecond medians |
+| CUDA resident | Kernel time/throughput; paired batch time and both CPU ratios |
+| CUDA pipeline | Kernel, transfer components, end-to-end time/throughput; paired CPU ratios |
+| Standalone transfer-only | H2D, D2H and combined transfer medians |
+| Avalanche | Distance and normalized-distance medians |
+| Keyspace | Checked candidates, elapsed time and candidate-rate medians |
+
+Only CPU process-time diagnostics and derived keyspace search-time projections
+are optional. Their aggregate records carry `required: false`, an explicit
+`optional_reason`, and completeness/count fields, even when all observations are
+absent. Inapplicable fields such as resident transfer time remain null in native
+files and are not counted as optional observations. Raw observations are checked
+against required metrics and configured sample counts without pooling or removing
+outliers.
+
+Verification reports and new aggregate JSON use schema version 2 and the explicit
+metric policy version 2; configuration, manifest and native schemas are unchanged.
+Old accepted runs are reverified read-only under these checks, and old aggregates
+are never rewritten. Previously complete compatible studies retain the same
+numerical medians and paired ratios. Reports predating the completeness field
+must be reverified before making a completeness claim. As before, resuming after
+source changes requires a fresh run rather than silently changing source identity.
 
 Session variability is descriptive min/max/sample SD of session values; one
 session has null SD. Native means, percentiles, outlier flags, extrapolation
@@ -325,6 +399,37 @@ are authoritative. The archived paired final aggregation selects baseline/v1,
 not the earlier three-profile pilot.
 
 ## First complete study and NVIDIA T4
+
+For the essential heterogeneous comparison, use the paired-only workflow below
+on either host. Activate its prepared virtual environment first (`.venv\Scripts\Activate.ps1`
+on Windows, `source .venv/bin/activate` on Linux). The commands then match:
+
+```bash
+python scripts/run_all_experiments.py doctor --config experiments/configs/heterogeneous-core-smoke.json
+python scripts/run_all_experiments.py plan --config experiments/configs/heterogeneous-core-smoke.json
+python scripts/run_all_experiments.py run --config experiments/configs/heterogeneous-core-smoke.json --platform-alias t4-linux-cloud
+python scripts/run_all_experiments.py verify --run-dir RUN_DIRECTORY
+```
+
+Use `gtx1650ti-windows` as the alias on the local Windows machine. Replace
+`RUN_DIRECTORY` with the path printed by each run. Only after smoke verification
+reports complete, run the pilot on an otherwise idle host:
+
+```bash
+python scripts/run_all_experiments.py plan --config experiments/configs/heterogeneous-core-pilot.json
+python scripts/run_all_experiments.py run --config experiments/configs/heterogeneous-core-pilot.json --platform-alias t4-linux-cloud
+python scripts/run_all_experiments.py verify --run-dir RUN_DIRECTORY
+python scripts/run_all_experiments.py aggregate --run-dir RUN_DIRECTORY
+```
+
+Inspect pilot timings, validation and variance before launching
+`heterogeneous-core.json` with the same plan/run commands. That study requires
+all five sessions. If interrupted with unchanged sources/environment, use
+`python scripts/run_all_experiments.py resume --run-dir RUN_DIRECTORY`;
+add `--retry-failed` only after inspecting and resolving the failure. Verify and
+aggregate the completed study, then archive the full directory. The broader
+local/T4 configurations remain available for independently measured standalone
+baseline and retrospective experiments:
 
 1. Prepare Python and the existing CPU dependencies. On the cloud host, provision
    a functioning NVIDIA driver and one compatible CuPy/runtime/NVRTC stack using
@@ -364,3 +469,20 @@ Windows/Linux with Python 3.10/3.12 when run by CI. Local validation was on Wind
 here. Cloud portability remains conditional on that host passing its own smoke
 and pilot gates. WDDM versus Linux scheduling, clocks, power policy, CPU/library
 differences and variance remain scientific interpretation limits.
+
+## Hardening verification (2026-10-14)
+
+Local Windows validation passed 67 orchestration tests and all seven dedicated
+legacy smoke checks (CBC, AES-NI, GCM, standalone CUDA, paired CUDA, avalanche,
+bounded keyspace). A fresh heterogeneous-core smoke completed and aggregated on
+the GTX 1650 Ti. A separate CPU smoke completed with matplotlib, NumPy and CuPy
+absent. No pilot or study-scale benchmarks were run for this change.
+
+SHA-256 comparison preserved all 582 historical files, 556 pre-existing
+orchestrated files and four CUDA kernels. All benchmark entrypoints are unchanged;
+the only legacy Python helper edit makes matplotlib metadata optional. Five
+previously accepted suites still verify, 532 previous aggregate records retain
+their exact numerical values, and the regression suite reproduces the archived
+five-session paired-study estimator. Resume/corruption checks use temporary
+fixtures without altering old runs. Local audit details are retained in
+`build/orchestration-hardening-verification.json` (gitignored).

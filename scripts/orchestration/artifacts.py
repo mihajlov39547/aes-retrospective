@@ -8,6 +8,7 @@ import statistics
 from collections import Counter, defaultdict
 from pathlib import Path
 from .registry import REGISTRY
+from .metrics import validate_metrics
 
 
 def read(path):
@@ -121,15 +122,23 @@ def verify_native(folder, experiment, options, seed, purpose, staging=None):
     check(set(raw)==set(expected) and all(len(v)==count for v in raw.values()),'Incomplete or unexpected raw groups')
     summaries={group(r):r for r in data['summary']}
     check(len(summaries)==len(data['summary']) and set(summaries)==set(expected),'Incomplete or duplicate summary groups')
+    for row in data['summary']: validate_metrics(experiment,row)
     for key,observations in raw.items():
         index='sample_id' if experiment=='avalanche' else 'repeat'
         check({r[index] for r in observations}==set(range(count)),'Missing/duplicate sample indices')
+        required,_=validate_metrics(experiment,summaries[key])
+        for field in required:
+            if field.startswith('speedup_'): continue # Ratios are checked against paired timing medians below.
+            metric={'median':'hamming_distance_bits','median_normalized':'normalized_distance'}.get(field,field[:-7])
+            check(all(r.get(metric) is not None for r in observations),'Required raw metric missing: '+metric)
+            if metric+'_count' in summaries[key]: check(summaries[key][metric+'_count']==count,'Inconsistent metric sample count: '+metric)
         for field,value in summaries[key].items():
             metric=field[:-7] if field.endswith('_median') else None
             if metric and metric in observations[0]:
                 values=[r[metric] for r in observations if r[metric] is not None]
                 check((value is None and not values) or (values and math.isclose(value,statistics.median(values),rel_tol=1e-10,abs_tol=1e-15)),'Summary median differs from raw: '+field)
         if experiment=='avalanche': check(summaries[key]['median']==statistics.median(r['hamming_distance_bits'] for r in observations),'Invalid avalanche median')
+        if experiment=='avalanche': check(math.isclose(summaries[key]['median_normalized'],statistics.median(r['normalized_distance'] for r in observations),rel_tol=1e-10),'Invalid normalized avalanche median')
     if experiment=='cuda_paired':
         pairs=defaultdict(list)
         for r in data['raw']: pairs[r['pair_id']].append(r)

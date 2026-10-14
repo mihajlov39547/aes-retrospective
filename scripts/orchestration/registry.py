@@ -9,7 +9,10 @@ ARTIFACTS = ['metadata.json', 'raw.csv', 'summary.csv', 'results.json', 'validat
 
 def entry(script, native, defaults, gate, smoke, cuda=False, aesni=False, notes=''):
     return dict(script='scripts/'+script+'.py', native_name=native, classification='CUDA' if cuda else 'CPU',
-                required_capabilities=['pycryptodome', 'psutil', 'matplotlib'] + (['cuda'] if cuda else []) + (['aesni'] if aesni else []),
+                required_capabilities=['pycryptodome', 'psutil'] + (['numpy', 'cuda'] if cuda else []) + (['aesni'] if aesni else []),
+                required_packages=['pycryptodome', 'psutil'] + (['numpy'] if cuda else []),
+                optional_tools=['nvidia-smi'] if cuda else [],
+                optional_packages={'matplotlib':'Only required for separate plotting/export tools.'},
                 cpu_only_compatible=not cuda, modes=['smoke', 'pilot', 'study'], status='active',
                 defaults=defaults, supported_arguments=['run', 'seed', 'output', 'purpose', 'notes', *defaults],
                 expected_artifacts=ARTIFACTS + (['report.md'] if native in ('avalanche', 'brute_force_demo') else []) + (['extrapolations.csv'] if native=='brute_force_demo' else []),

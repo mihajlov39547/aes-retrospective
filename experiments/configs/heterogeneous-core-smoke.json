@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "suite_id": "heterogeneous-core-v1",
+  "execution_profile": "smoke",
+  "seeds": [2003],
+  "warmup": 1,
+  "repeats": 2,
+  "fail_fast": true,
+  "gpu_unavailable": "fail",
+  "experiments": {
+    "cuda_paired": {"options": {
+      "profile": ["baseline", "optimized"],
+      "measurements": ["resident", "pipeline"],
+      "resident_iterations": 1,
+      "host_memory": "pinned",
+      "sizes": [1024],
+      "modes": ["ECB", "CTR"]
+    }}
+  }
+}

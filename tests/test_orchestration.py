@@ -15,6 +15,7 @@ from orchestration.registry import REGISTRY, command
 from orchestration.configuration import ROOT, resolve, load, safe_output
 from orchestration.platform import fingerprint, child_environment
 from orchestration.aggregation import summarize_sessions, aggregate
+from orchestration.metrics import metric_policy
 
 
 def configuration(**updates):
@@ -24,20 +25,20 @@ def configuration(**updates):
 
 
 def environment():
-    value=dict(os='Test',packages=dict(pycryptodome='test',psutil='test',matplotlib='test'),cpu_features={'aesni':True,'vaes':None},available_ram_bytes=2**34,gpus=[],cuda={'available':False},git={})
+    value=dict(os='Test',packages=dict(pycryptodome='test',psutil='test',matplotlib='test',numpy='test'),cpu_features={'aesni':True,'vaes':None},available_ram_bytes=2**34,gpus=[],cuda={'available':False},git={})
     value['fingerprint']=fingerprint(value)
     return value
 
 
-def fixture(folder, options=None, passed=True):
+def fixture(folder, options=None, passed=True, seed=2003, purpose='smoke'):
     options=options or configuration()['experiments']['avalanche']['options']
     folder.mkdir(parents=True); (folder/'source').mkdir()
     (folder/'source/avalanche_test.py').write_text('# synthetic fixture\n')
-    report=dict(passed=passed,tests=[dict(test='fixture',passed=passed)],session_id='fixture-session',purpose='smoke')
+    report=dict(passed=passed,tests=[dict(test='fixture',passed=passed)],session_id='fixture-session-'+str(seed),purpose=purpose)
     r.write(folder/'validation.json',report)
-    raw=[dict(algorithm='AES-128',variant=v+'_bit_flip',sample_id=i,hamming_distance_bits=60+i,seed=2003) for v in options['variants'] for i in range(2)]
-    summary=[dict(algorithm='AES-128',variant=v+'_bit_flip',median=60.5,count=2) for v in options['variants']]
-    r.write(folder/'metadata.json',dict(experiment='avalanche',seed=2003,purpose='smoke',arguments=options,session_id='fixture-session',validation_sha256=a.digest(folder/'validation.json')))
+    raw=[dict(algorithm='AES-128',variant=v+'_bit_flip',sample_id=i,hamming_distance_bits=60+i,normalized_distance=(60+i)/128,seed=seed) for v in options['variants'] for i in range(2)]
+    summary=[dict(algorithm='AES-128',variant=v+'_bit_flip',median=60.5,median_normalized=60.5/128,count=2) for v in options['variants']]
+    r.write(folder/'metadata.json',dict(experiment='avalanche',seed=seed,purpose=purpose,arguments=options,session_id=report['session_id'],validation_sha256=a.digest(folder/'validation.json')))
     r.write(folder/'results.json',dict(raw=raw,summary=summary))
     (folder/'report.md').write_text('Synthetic test only')
     for name,rows in [('raw',raw),('summary',summary)]:
@@ -302,6 +303,282 @@ class AggregationTests(unittest.TestCase):
     def test_duplicate_session_rejected(self):
         record=dict(experiment='cpu_cbc',seed=1,summary=dict(seconds_median=1))
         with self.assertRaises(ValueError): summarize_sessions([record,record])
+
+
+def study_records(names=('cuda_paired',)):
+    config=configuration(execution_profile='study',seeds=list(range(2003,2008)),experiments={name:{} for name in names})
+    records=[]
+    for name,item in config['experiments'].items():
+        fields,groups=a.expected_groups(name,item['options'])
+        for seed in item['seeds']:
+            for group in groups:
+                row=dict(zip(fields,group))
+                if name=='cuda_baseline': row.update(backend='cuda',profile='baseline',measurement='pipeline',host_memory='pinned',resident_iterations=None)
+                required,optional=metric_policy(name,row)
+                row.update({metric:float(seed-2000) for metric in required|set(optional)})
+                records.append(dict(experiment=name,seed=seed,summary=row))
+    return config,records
+
+
+class ScientificAggregationTests(unittest.TestCase):
+    def test_complete_five_sessions(self):
+        config,records=study_records()
+        rows,variability=summarize_sessions(records,config)
+        self.assertTrue(rows)
+        for row in rows:
+            self.assertEqual(row['expected_sessions'],5)
+            self.assertEqual(row['observed_sessions'],5)
+            self.assertEqual(row['missing_seeds'],[])
+            self.assertTrue(row['complete'])
+            self.assertEqual(row['median_of_sessions'],5.0)
+        self.assertTrue(all(v['session_stdev']>0 for v in variability))
+
+    def test_missing_session(self):
+        config,records=study_records()
+        records=[r for r in records if r['seed']!=2005]
+        with self.assertRaisesRegex(ValueError,'Missing configured session'): summarize_sessions(records,config)
+
+    def test_missing_metric_group_one_session(self):
+        config,records=study_records()
+        records.pop(0)
+        with self.assertRaisesRegex(ValueError,'Incomplete metric groups'): summarize_sessions(records,config)
+
+    def test_missing_required_metric_one_session(self):
+        config,records=study_records()
+        del records[0]['summary']['seconds_median']
+        with self.assertRaisesRegex(ValueError,'Missing required metric'): summarize_sessions(records,config)
+
+    def test_required_metric_missing_everywhere(self):
+        config,records=study_records(('cpu_cbc',))
+        for row in records: row['summary'].pop('throughput_MB_s_median')
+        with self.assertRaisesRegex(ValueError,'Missing required metric'): summarize_sessions(records,config)
+
+    def test_duplicate_observation(self):
+        config,records=study_records()
+        records.append(copy.deepcopy(records[0]))
+        with self.assertRaisesRegex(ValueError,'Duplicate summary observation'): summarize_sessions(records,config)
+
+    def test_duplicate_configured_seed(self):
+        config,records=study_records()
+        config['experiments']['cuda_paired']['seeds'].append(2003)
+        with self.assertRaisesRegex(ValueError,'duplicate configured seeds'): summarize_sessions(records,config)
+
+    def test_unexpected_seed(self):
+        config,records=study_records()
+        records[0]['seed']=9999
+        with self.assertRaisesRegex(ValueError,'Unexpected experiment or seed'): summarize_sessions(records,config)
+
+    def test_optional_diagnostics_are_flagged(self):
+        config,records=study_records(('cpu_cbc',))
+        records[0]['summary'].pop('process_cpu_ns_median')
+        rows,_=summarize_sessions(records,config)
+        partial=[r for r in rows if not r['complete']]
+        self.assertEqual(len(partial),1)
+        row=partial[0]
+        self.assertFalse(row['required']); self.assertTrue(row['optional_reason'])
+        self.assertEqual(row['missing_seeds'],[2003]); self.assertEqual(row['observed_sessions'],4)
+        self.assertEqual(row['median_of_sessions'],5.5)
+
+    def test_optional_metric_absent_entirely_is_explicit(self):
+        config,records=study_records(('cpu_gcm',))
+        for record in records: record['summary'].pop('process_cpu_ns_median')
+        rows,_=summarize_sessions(records,config)
+        missing=[r for r in rows if r['metric']=='process_cpu_ns_median']
+        self.assertTrue(missing)
+        self.assertTrue(all(not r['complete'] and r['observed_sessions']==0 and r['median_of_sessions'] is None for r in missing))
+
+    def test_partial_development_is_labelled(self):
+        config,records=study_records()
+        config['execution_profile']='smoke'
+        rows,_=summarize_sessions([r for r in records if r['seed']!=2007],config)
+        self.assertTrue(all(r['missing_seeds']==[2007] and not r['complete'] for r in rows))
+
+    def test_standalone_and_paired_independent(self):
+        config,records=study_records(('cuda_baseline','cuda_paired'))
+        for record in records:
+            if record['experiment']=='cuda_baseline': record['summary']['kernel_seconds_median']=1000
+        rows,_=summarize_sessions(records,config)
+        standalone=[r for r in rows if r['experiment']=='cuda_baseline' and r['metric']=='kernel_seconds_median']
+        paired=[r for r in rows if r['experiment']=='cuda_paired' and r['metric']=='kernel_seconds_median']
+        self.assertTrue(standalone and paired)
+        self.assertTrue(all(r['median_of_sessions']==1000 for r in standalone))
+        self.assertTrue(all(r['median_of_sessions']==5 for r in paired))
+
+    def test_scientific_paired_estimator_unchanged(self):
+        config,records=study_records()
+        numerators=[1,100,101,102,103]; denominators=[1,2,100,1,100]
+        for record in records:
+            row=record['summary']; i=record['seed']-2003
+            for field in list(row):
+                if field.startswith('speedup_'): row[field]=numerators[i]/denominators[i]
+        rows,_=summarize_sessions(records,config)
+        ratios=[r for r in rows if r['metric'].startswith('speedup_')]
+        self.assertTrue(all(r['median_of_sessions']==1.03 for r in ratios))
+        self.assertNotEqual(1.03,101/2) # Ratio of aggregate timing medians would be 50.5.
+
+    def test_scope_drift_rejected(self):
+        config,records=study_records()
+        records[0]['summary']['host_memory']='pageable'
+        with self.assertRaisesRegex(ValueError,'Inconsistent session execution scopes'): summarize_sessions(records,config)
+
+
+class ScientificSuiteTests(unittest.TestCase):
+    def setUp(self):
+        self.temp=tempfile.TemporaryDirectory(); self.addCleanup(self.temp.cleanup)
+        self.root=Path(self.temp.name); self.env=environment()
+
+    def make_suite(self, profile='study', seeds=(2003,2004,2005,2006,2007), skipped_gpu=False):
+        experiments={'avalanche':{'options':{'algorithms':['AES-128'],'samples_per_group':2}}}
+        if skipped_gpu: experiments['cuda_baseline']={}
+        config=configuration(output_root=str(self.root/'runs'),execution_profile=profile,seeds=list(seeds),experiments=experiments)
+        directory=r.create(config,self.env); status=a.read(directory/'status.json')
+        for seed in seeds:
+            key='avalanche/seed-'+str(seed); folder=directory/'experiments'/key
+            fixture(folder/'native',config['experiments']['avalanche']['options'],seed=seed,purpose=profile)
+            r.write(folder/'orchestration.json',dict(artifact_hashes=a.hashes(folder/'native'),fingerprint=self.env['fingerprint']))
+            status['tasks'][key]['state']='COMPLETED'
+            if skipped_gpu: status['tasks']['cuda_baseline/seed-'+str(seed)]['state']='SKIPPED'
+        status['state']='COMPLETED_WITH_SKIPS' if skipped_gpu else 'COMPLETED'
+        r.write(directory/'status.json',status)
+        return directory,config
+
+    def test_complete_study_export(self):
+        directory,_=self.make_suite()
+        self.assertEqual(r.verify_suite(directory)['scientific_completeness'],'complete')
+        before=a.hashes(directory/'experiments')
+        output=aggregate(directory); report=a.read(output/'summary.json')
+        self.assertEqual(report['schema_version'],2)
+        self.assertTrue(report['publication_quality'])
+        self.assertTrue(all(r['expected_sessions']==5 and r['complete'] for r in report['rows']))
+        self.assertEqual(before,a.hashes(directory/'experiments'))
+
+    def test_skipped_cuda_partial_study_refused(self):
+        directory,_=self.make_suite(skipped_gpu=True)
+        report=r.verify_suite(directory)
+        self.assertTrue(report['passed']) # Backward-compatible technical status.
+        self.assertEqual(report['scientific_completeness'],'partial')
+        self.assertEqual(len(report['missing_measurements']),5)
+        self.assertEqual(report['sessions']['cuda_baseline']['missing_seeds'],list(range(2003,2008)))
+        with self.assertRaisesRegex(ValueError,'requires scientific_completeness=complete'): aggregate(directory)
+        self.assertFalse(list((directory/'aggregates').iterdir()))
+
+    def test_partial_smoke_export_explicit(self):
+        directory,_=self.make_suite(profile='smoke',seeds=(2003,),skipped_gpu=True)
+        output=aggregate(directory); report=a.read(output/'summary.json')
+        self.assertEqual(report['scientific_completeness'],'partial')
+        self.assertFalse(report['publication_quality'])
+        self.assertEqual(report['missing_measurements'][0]['experiment'],'cuda_baseline')
+        self.assertTrue(all(r['experiment']=='avalanche' for r in report['rows']))
+
+    def test_pending_is_partial(self):
+        directory,_=self.make_suite()
+        status=a.read(directory/'status.json'); status['tasks']['avalanche/seed-2007']['state']='PENDING'
+        r.write(directory/'status.json',status)
+        report=r.verify_suite(directory)
+        self.assertEqual(report['scientific_completeness'],'partial'); self.assertFalse(report['passed'])
+        with self.assertRaises(ValueError): aggregate(directory)
+
+    def test_corruption_is_invalid_and_resume_rejects(self):
+        directory,_=self.make_suite()
+        (directory/'experiments/avalanche/seed-2003/native/raw.csv').write_text('corruption')
+        report=r.verify_suite(directory)
+        self.assertEqual(report['scientific_completeness'],'invalid'); self.assertFalse(report['passed'])
+        with self.assertRaises(ValueError): aggregate(directory)
+        with self.assertRaises(ValueError): r.execute(directory)
+
+    def test_failed_gate_is_invalid(self):
+        directory,_=self.make_suite()
+        status=a.read(directory/'status.json'); task=status['tasks']['avalanche/seed-2003']
+        task['state']='FAILED'; task['attempts']=['failed-attempts/gate']
+        r.write(directory/'failed-attempts/gate/staging/validation.json',{'passed':False})
+        r.write(directory/'status.json',status)
+        self.assertEqual(r.verify_suite(directory)['scientific_completeness'],'invalid')
+        with self.assertRaises(ValueError): aggregate(directory)
+
+    def test_corrupted_config_is_structured_invalid(self):
+        directory,_=self.make_suite()
+        (directory/'config.resolved.json').write_text('{}')
+        self.assertEqual(r.verify_suite(directory)['scientific_completeness'],'invalid')
+
+    def test_required_metric_missing_from_accepted_result(self):
+        directory,_=self.make_suite(); folder=directory/'experiments/avalanche/seed-2003'
+        data=a.read(folder/'native/results.json')
+        for row in data['summary']: row.pop('median_normalized')
+        r.write(folder/'native/results.json',data)
+        with (folder/'native/summary.csv').open('w',newline='') as stream:
+            writer=csv.DictWriter(stream,fieldnames=list(data['summary'][0])); writer.writeheader(); writer.writerows(data['summary'])
+        side=a.read(folder/'orchestration.json'); side['artifact_hashes']=a.hashes(folder/'native')
+        r.write(folder/'orchestration.json',side)
+        report=r.verify_suite(directory)
+        self.assertEqual(report['scientific_completeness'],'invalid')
+        self.assertIn('Missing required metric',' '.join(report['errors']))
+
+    def test_skipped_study_cli_verify_preserves_exit_code(self):
+        directory,_=self.make_suite(skipped_gpu=True)
+        process=subprocess.run([sys.executable,str(ROOT/'scripts/run_all_experiments.py'),'verify','--run-dir',str(directory)],capture_output=True,text=True)
+        self.assertEqual(process.returncode,0)
+        self.assertEqual(json.loads(process.stdout)['scientific_completeness'],'partial')
+
+
+class DependencyTests(unittest.TestCase):
+    def test_no_matplotlib_required_for_any_benchmark(self):
+        config=configuration(); env=environment(); env['packages'].pop('matplotlib')
+        env['cuda']=dict(available=True,vram_bytes=2**32)
+        for name,spec in REGISTRY.items():
+            if spec['status']!='active': continue
+            self.assertNotIn('matplotlib',spec['required_packages'])
+            self.assertTrue(r.preflight(name,{},config,env,ROOT)['passed'],name)
+
+    def test_missing_mandatory_dependency_fails(self):
+        env=environment(); env['packages'].pop('pycryptodome')
+        self.assertFalse(r.preflight('avalanche',{},configuration(),env,ROOT)['passed'])
+        env=environment(); env['package_imports']={'pycryptodome':False}
+        self.assertFalse(r.preflight('avalanche',{},configuration(),env,ROOT)['passed'])
+
+    def test_missing_optional_telemetry_does_not_fail(self):
+        env=environment(); env['telemetry_errors']=['nvidia-smi unavailable']; env['cuda']=dict(available=True,vram_bytes=2**32)
+        result=r.preflight('cuda_baseline',{},configuration(),env,ROOT)
+        self.assertTrue(result['passed']); self.assertTrue(result['optional_telemetry_errors'])
+
+    def test_common_metadata_without_matplotlib(self):
+        # No cipher or timing execution. Proves native export no longer fails
+        # merely because optional plotting distribution metadata is absent.
+        try:
+            import common, psutil
+        except ImportError: self.skipTest('psutil unavailable; minimal integration checked separately')
+        import argparse, importlib.metadata
+        def version(name):
+            if name=='matplotlib': raise importlib.metadata.PackageNotFoundError(name)
+            return 'fixture'
+        with patch('common.importlib.metadata.version',side_effect=version),patch('common.command_output',return_value=None):
+            meta=common.metadata(argparse.Namespace(purpose='smoke',seed=2003),{})
+        self.assertIsNone(meta['library_versions']['matplotlib'])
+
+
+class HistoricalCompatibilityTests(unittest.TestCase):
+    def test_saved_five_session_paired_study_exact_values(self):
+        path=ROOT/'experiments/results/aes_cuda_cpu_gpu-final-aggregate/aggregate.json'
+        if not path.exists(): self.skipTest('Archived final study is not available in this checkout')
+        old=a.read(path); records=[]; seeds=[]; options=None
+        for session in old['selected_sessions']:
+            native=path.parent.parent/session['run_id']
+            if not (native/'results.json').exists(): self.skipTest('Archived native data is not available')
+            meta=a.read(native/'metadata.json'); options=meta['arguments']; seeds.append(meta['seed'])
+            for row in a.read(native/'results.json')['summary']:
+                records.append(dict(experiment='cuda_paired',seed=meta['seed'],summary=row))
+        config=dict(execution_profile='study',experiments={'cuda_paired':dict(seeds=seeds,options=options)})
+        rows,_=summarize_sessions(records,config)
+        lookup={(row['backend'],row['mode'],row['bytes'],row['measurement'],row['metric']):row['median_of_sessions'] for row in rows}
+        for row in old['rows']:
+            backend=row['backend']; scope=row['measurement']; prefix=(backend,row['mode'],row['bytes'],scope)
+            timing='seconds' if backend.startswith('cpu') else 'kernel_seconds' if scope=='resident' else 'end_to_end_seconds'
+            throughput='throughput_MB_s' if backend.startswith('cpu') else 'kernel_throughput_MB_s' if scope=='resident' else 'end_to_end_throughput_MB_s'
+            self.assertEqual(lookup[(*prefix,timing+'_median')]*1000,row['time_ms'])
+            self.assertEqual(lookup[(*prefix,throughput+'_median')],row['throughput_MB_s'])
+            if backend.startswith('cuda'):
+                for cpu in ('cpu_aesni','cpu_software'):
+                    metric='speedup_'+('isolated' if scope=='resident' else 'pipeline')+'_vs_'+cpu
+                    self.assertEqual(lookup[(*prefix,metric)],row['speedup_vs_'+cpu])
 
 
 if __name__=='__main__': unittest.main()

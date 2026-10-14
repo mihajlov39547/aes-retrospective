@@ -3,6 +3,11 @@
 The central cross-platform CLI is `run_all_experiments.py`; see the
 [orchestration guide](../experiments/ORCHESTRATION.md) for the audited registry,
 JSON configurations, platform manifests, validation, resume and aggregation.
+Study aggregation requires all configured seeds and required metrics. Verification
+reports scientific completeness separately from technical success, including CUDA
+skips. The `heterogeneous-core-{smoke,pilot}.json` and `heterogeneous-core.json`
+configurations provide a paired-only GPU workflow. Benchmarks need PyCryptodome
+and psutil (CUDA also NumPy/CuPy); matplotlib is only required for plotting.
 Start with `python scripts/run_all_experiments.py list` or
 `python scripts/run_all_experiments.py run --config experiments/configs/cpu-smoke.json`.
 

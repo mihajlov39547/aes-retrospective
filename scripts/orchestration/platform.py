@@ -45,6 +45,15 @@ def detect(config=None):
     for package in ('pycryptodome','psutil','matplotlib','numpy','cupy','cupy-cuda11x','cupy-cuda12x','cupy-cuda13x','nvidia-cuda-runtime-cu12','nvidia-cuda-nvrtc-cu12'):
         try: result['packages'][package]=importlib.metadata.version(package)
         except importlib.metadata.PackageNotFoundError: result['packages'][package]=None
+    imports=probe([sys.executable,'-c',"""import json
+result={}
+for name,code in [('pycryptodome','from Crypto.Cipher import AES, DES, DES3'),('psutil','import psutil'),('numpy','import numpy')]:
+ try: exec(code); result[name]=True
+ except Exception: result[name]=False
+print(json.dumps(result))
+"""])
+    result['package_imports']=json.loads(imports) if imports else {}
+    result['optional_telemetry_tools']=['nvidia-smi']
     try:
         import psutil
         result.update(physical_cpus=psutil.cpu_count(logical=False),ram_bytes=psutil.virtual_memory().total,available_ram_bytes=psutil.virtual_memory().available)

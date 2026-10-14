@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "suite_id": "heterogeneous-core-v1",
+  "execution_profile": "study",
+  "seeds": [2003, 2004, 2005, 2006, 2007],
+  "warmup": 5,
+  "repeats": 20,
+  "fail_fast": true,
+  "gpu_unavailable": "fail",
+  "limits": {"timeout_seconds": 3600},
+  "experiments": {
+    "cuda_paired": {"options": {
+      "profile": ["baseline", "optimized"],
+      "measurements": ["resident", "pipeline"],
+      "resident_iterations": 1,
+      "host_memory": "pinned",
+      "sizes": [1024, 16384, 1048576, 16777216, 33554432],
+      "modes": ["ECB", "CTR"]
+    }}
+  }
+}

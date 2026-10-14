@@ -57,8 +57,9 @@ def lock(path):
 
 def preflight(name, options, config, environment, disk_path):
     reasons=[]; spec=REGISTRY[name]; lim=config['limits']
-    for dep in ('pycryptodome','psutil','matplotlib'):
+    for dep in spec['required_packages']:
         if not environment['packages'].get(dep): reasons.append('Missing '+dep)
+        elif environment.get('package_imports',{}).get(dep) is False: reasons.append('Cannot import mandatory dependency '+dep)
     for feature in set(config['required_cpu_features']) | ({'aesni'} if 'aesni' in spec['required_capabilities'] else set()):
         if environment['cpu_features'].get(feature) is not True: reasons.append('Required CPU feature unavailable: '+feature)
     size=max(options.get('sizes',[32]))
@@ -84,6 +85,7 @@ def preflight(name, options, config, environment, disk_path):
                 actual=(int(cc[:-1]),int(cc[-1])) if cc.isdigit() and len(cc)>1 else None
                 if actual is None or actual<tuple(map(int,required.split('.'))): reasons.append('Required compute capability unavailable')
     return dict(passed=not reasons,reasons=reasons,skip=cuda_missing and config['gpu_unavailable']=='skip' and len(reasons)==1,
+                required_packages=spec['required_packages'],optional_telemetry_errors=environment.get('telemetry_errors',[]),
                 cuda_discovered=environment.get('cuda',{}).get('available',False),kernel_compiled=None,cryptographic_validation=None)
 
 
@@ -100,7 +102,7 @@ def create(config, environment):
     write(directory/'manifest.json',dict(schema_version=1,run_id=directory.name,created_utc=utc(),fingerprint=environment['fingerprint'],
           config_sha256=digest(directory/'config.resolved.json'),environment_sha256=digest(directory/'environment.json'),sources=sources(),
           ordering=[dict(experiment=n,seed=s) for n,s,_ in tasks(config)],global_seeds=config['seeds'],git=environment['git']))
-    write(directory/'status.json',dict(state='PENDING',events=[],tasks={n+'/seed-'+str(s):dict(state='PENDING',attempts=[],events=[dict(state='PENDING',utc=utc())]) for n,s,_ in tasks(config)}))
+    write(directory/'status.json',dict(state='PENDING',scientific_completeness='partial',events=[],tasks={n+'/seed-'+str(s):dict(state='PENDING',attempts=[],events=[dict(state='PENDING',utc=utc())]) for n,s,_ in tasks(config)}))
     return directory
 
 
@@ -108,22 +110,86 @@ def verify_completed(directory, key, task, config):
     name,seed_text=key.split('/seed-'); seed=int(seed_text)
     folder=directory/'experiments'/name/('seed-'+str(seed))
     side=read(folder/'orchestration.json')
+    check(side.get('fingerprint')==read(directory/'manifest.json')['fingerprint'],'Result platform fingerprint mismatch: '+key)
     native=folder/'native'
     check(hashes(native)==side['artifact_hashes'],'Completed artifacts changed: '+key)
     return verify_native(native,name,config['experiments'][name]['options'],seed,config['execution_profile'])
 
 
-def verify_suite(directory):
+def failed_integrity(directory, task):
+    """Inspect the most recent failed attempt; successful retries supersede it."""
+    if task['state']!='FAILED': return False
+    events=task.get('events',[])
+    if len(events)>1 and events[-2]['state']=='VERIFYING': return True
+    for attempt in task.get('attempts',[])[-1:]:
+        folder=directory/attempt
+        if (folder/'failure.json').exists():
+            failure=read(folder/'failure.json')
+            if failure.get('scientific_integrity_failed'): return True
+            if any(v.get('passed') is False for v in failure.get('validation_records',[])): return True
+        for path in folder.rglob('*validation*.json'):
+            if 'source' not in path.relative_to(folder).parts and read(path).get('passed') is False: return True
+    return False
+
+
+def verify_suite(directory, *, strict=False):
+    """Read-only schema-2 report, including for schema-1 suite manifests.
+
+    strict preserves resume's refusal to touch corrupted accepted artifacts.
+    CLI verification returns a structured invalid report instead of losing the
+    classification in an exception. Failed attempts remain explicitly retryable.
+    """
+    try:
+        return _verify_suite(Path(directory).resolve(),strict=strict)
+    except (ValueError,KeyError,TypeError,OSError,ArithmeticError) as exc:
+        if strict: raise
+        return dict(schema_version=2,passed=False,scientific_completeness='invalid',tasks={},
+                    missing_measurements=[],errors=[str(exc)])
+
+
+def _verify_suite(directory, *, strict):
     directory=Path(directory).resolve(); manifest=read(directory/'manifest.json')
     check(digest(directory/'config.resolved.json')==manifest['config_sha256'],'Resolved configuration changed')
     check(digest(directory/'environment.json')==manifest['environment_sha256'],'Environment manifest changed')
     config=read(directory/'config.resolved.json'); status=read(directory/'status.json'); results={}
     expected={n+'/seed-'+str(s) for n,s,_ in tasks(config)}
+    check(bool(expected) and len(expected)==len(tasks(config)),'Empty or duplicate configured sessions')
     check(set(status['tasks'])==expected,'Task inventory mismatch')
+    records=[]; errors=[]; identities=set(); missing=[]; invalid=False
     for key,task in status['tasks'].items():
-        if task['state']=='COMPLETED': results[key]=verify_completed(directory,key,task,config)
-        else: results[key]=dict(passed=False,state=task['state'])
-    return dict(passed=all(r.get('passed') or r.get('state')=='SKIPPED' for r in results.values()),tasks=results)
+        check(task['state'] in ('PENDING','PREFLIGHT','VALIDATING','RUNNING','VERIFYING','COMPLETED','FAILED','SKIPPED','INTERRUPTED'),'Unknown task state: '+key)
+        name,seed=key.split('/seed-'); seed=int(seed)
+        if task['state']=='COMPLETED':
+            try:
+                results[key]=verify_completed(directory,key,task,config)
+                identity=(name,results[key]['session_id'])
+                check(identity not in identities,'Duplicate native session identity: '+key)
+                identities.add(identity)
+                for row in read(directory/'experiments'/name/('seed-'+str(seed))/'native/results.json')['summary']:
+                    records.append(dict(experiment=name,seed=seed,summary=row))
+            except (ValueError,KeyError,TypeError,OSError,ArithmeticError) as exc:
+                if strict: raise
+                invalid=True; errors.append(key+': '+str(exc))
+                results[key]=dict(passed=False,state='COMPLETED',error=str(exc))
+        else:
+            invalid_attempt=failed_integrity(directory,task)
+            invalid=invalid or invalid_attempt
+            results[key]=dict(passed=False,state=task['state'],scientific_completeness='invalid' if invalid_attempt else 'partial')
+            missing.append(dict(experiment=name,seed=seed,state=task['state'],reason=task.get('events',[])[-1] if task.get('events') else None))
+    if records and not invalid:
+        from .aggregation import summarize_sessions
+        try: summarize_sessions(records,config,require_complete=False)
+        except (ValueError,KeyError,TypeError) as exc:
+            if strict: raise
+            invalid=True; errors.append(str(exc))
+    completeness='invalid' if invalid else 'partial' if missing else 'complete'
+    sessions={}
+    for name,item in config['experiments'].items():
+        observed=[s for s in item['seeds'] if results[name+'/seed-'+str(s)].get('passed')]
+        absent=[s for s in item['seeds'] if s not in observed]
+        sessions[name]=dict(expected_sessions=len(item['seeds']),observed_sessions=len(observed),missing_seeds=absent,complete=not absent)
+    return dict(schema_version=2,passed=not invalid and all(r.get('passed') or r.get('state')=='SKIPPED' for r in results.values()),
+                scientific_completeness=completeness,tasks=results,sessions=sessions,missing_measurements=missing,errors=errors)
 
 
 def process(argv, attempt, env, timeout):
@@ -159,13 +225,13 @@ def execute(directory, retry_failed=False, retry_skipped=False):
     directory=safe_output(directory)
     # One performance suite per checkout; file locks release on hard termination.
     with lock(ROOT/'build/orchestration-machine.lock'), lock(directory/'execution.lock'):
-        verify_suite(directory)
+        initial_verification=verify_suite(directory,strict=True)
         config=read(directory/'config.resolved.json'); manifest=read(directory/'manifest.json')
         check(sources()==manifest['sources'],'Source code changed; create a fresh suite instead of resuming')
         environment=detect(config)
         check(environment['fingerprint']==manifest['fingerprint'],'Hardware/software fingerprint changed; create a fresh suite')
         status=read(directory/'status.json')
-        status['state']='RUNNING'; status['events'].append(dict(state='RUNNING',utc=utc()))
+        status['state']='RUNNING'; status['scientific_completeness']=initial_verification['scientific_completeness']; status['events'].append(dict(state='RUNNING',utc=utc()))
         write(directory/'status.json',status)
         for name,seed,options in tasks(config):
             key=name+'/seed-'+str(seed); task=status['tasks'][key]
@@ -231,6 +297,7 @@ def execute(directory, retry_failed=False, retry_skipped=False):
                     try: gates.append(dict(path=path.relative_to(attempt).as_posix(),passed=read(path).get('passed')))
                     except (ValueError,OSError): gates.append(dict(path=path.relative_to(attempt).as_posix(),passed=None))
                 write(attempt/'failure.json',dict(state=state,error=type(exc).__name__+': '+str(exc),utc=utc(),validation_records=gates,
+                      scientific_integrity_failed=task['state']=='VERIFYING' or any(g['passed'] is False for g in gates),
                       note='Missing evidence means unknown, never passed. Compilation is established only by persisted CUDA validation; exit zero alone establishes no scientific condition.'))
                 dest=directory/'failed-attempts'/attempt.name; attempt.rename(dest)
                 task['attempts'][-1]=dest.relative_to(directory).as_posix()
@@ -239,4 +306,9 @@ def execute(directory, retry_failed=False, retry_skipped=False):
         states={t['state'] for t in status['tasks'].values()}
         status['state']='COMPLETED' if states=={'COMPLETED'} else 'COMPLETED_WITH_SKIPS' if states<={'COMPLETED','SKIPPED'} else 'INTERRUPTED' if 'INTERRUPTED' in states else 'INCOMPLETE'
         status['events'].append(dict(state=status['state'],utc=utc())); write(directory/'status.json',status)
-        return status['state'] in ('COMPLETED','COMPLETED_WITH_SKIPS')
+        verification=verify_suite(directory)
+        status['scientific_completeness']=verification['scientific_completeness']
+        status['missing_measurements']=verification['missing_measurements']
+        write(directory/'status.json',status)
+        print('Suite state: '+status['state']+'; scientific_completeness: '+status['scientific_completeness'],flush=True)
+        return status['state'] in ('COMPLETED','COMPLETED_WITH_SKIPS') and verification['scientific_completeness']!='invalid'
