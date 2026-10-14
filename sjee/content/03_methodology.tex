@@ -1,280 +1,215 @@
-
 \section{Methodology}
 \label{sec:methodology}
 
-This study adopts a validation-first, reproducible experimental
-methodology for assessing the performance of symmetric cryptographic
-implementations across heterogeneous CPU and GPU execution
-environments. Its central premise is that encryption throughput is not
-an implementation-independent property of a cryptographic algorithm.
-Rather, observed performance depends on the selected implementation,
-cryptographic mode, workload size, execution environment, and the
-operations included within the measurement boundary.
+This study adopts a validation-first, reproducible experimental methodology for assessing the
+performance of symmetric cryptographic implementations across heterogeneous CPU and GPU
+execution environments. Its central premise is that encryption throughput is not an
+implementation-independent property of a cryptographic algorithm. Rather, observed performance
+depends on the selected implementation, cryptographic mode, workload size, execution
+environment, and the operations included within the measurement boundary.
 
-The methodology combines cryptographic correctness verification,
-deterministic workload generation, paired CPU--GPU comparisons,
-explicitly defined timing scopes, session-based replication, and
-hierarchical statistical aggregation. The resulting framework is
-evaluated on two Windows laptop configurations equipped with 4~GB
-NVIDIA GPUs and a Linux-based Google Colab configuration equipped
-with an NVIDIA Tesla T4.
+The methodology combines cryptographic correctness verification, deterministic workload
+generation, paired CPU--GPU comparisons, explicitly defined timing scopes, session-based
+replication, and hierarchical statistical aggregation. The resulting framework is evaluated on
+two Windows laptop configurations equipped with 4~GB NVIDIA GPUs and a Linux-based Google Colab
+configuration equipped with an NVIDIA Tesla T4.
 
-The experimental contribution is methodological rather than
-algorithmic. The study does not introduce a new AES primitive or
-claim to establish the maximum attainable throughput of the tested
-processors. Instead, it examines how the interpretation of GPU
-acceleration changes when software CPU execution, hardware-assisted
-AES-NI, device-resident CUDA execution, and transfer-inclusive GPU
-processing are evaluated under a common, auditable protocol.
+The experimental contribution is methodological rather than algorithmic. The study does not
+introduce a new AES primitive or claim to establish the maximum attainable throughput of the
+tested processors. Instead, it examines how the interpretation of GPU acceleration changes when
+software CPU execution, hardware-assisted AES-NI, device-resident CUDA execution, and
+transfer-inclusive GPU processing are evaluated under a common, auditable protocol.
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\linewidth]
-        {benchmarking_framework_grayscale}
-    \caption{Validation-first benchmarking framework. Cryptographic
-    correctness and workload preparation precede timed execution.
-    Paired inputs are evaluated through CPU software, CPU AES-NI,
-    GPU resident, and prepared-buffer GPU pipeline paths. Raw timing
-    observations, session summaries, validation records, metadata,
-    and source snapshots are preserved for subsequent verification
-    and aggregation across independent study sessions. The diagram
-    distinguishes CPU transformation time, device-resident kernel
-    time, and host-observed transfer-inclusive GPU execution.}
-    \label{fig:benchmarking-framework}
+  \centering
+  \includegraphics[width=\linewidth] {benchmarking_framework_grayscale}
+  \caption{Validation-first benchmarking framework. Cryptographic correctness and workload
+  preparation precede timed execution. Paired inputs are evaluated through CPU software, CPU
+  AES-NI, GPU resident, and prepared-buffer GPU pipeline paths. Raw timing observations, session
+  summaries, validation records, metadata, and source snapshots are preserved for subsequent
+  verification and aggregation across independent study sessions. The diagram distinguishes CPU
+  transformation time, device-resident kernel time, and host-observed transfer-inclusive GPU
+  execution.}
+  \label{fig:benchmarking-framework}
 \end{figure}
-
 
 \subsection{Experimental Platforms}
 \label{subsec:experimental_platform}
 
-The heterogeneous study was conducted on three distinct hardware
-and software configurations. Two systems represent accessible
-laptop-class NVIDIA GPU environments running Microsoft Windows,
+The heterogeneous study was conducted on three distinct hardware and software configurations.
+Two systems represent accessible laptop-class NVIDIA GPU environments running Microsoft Windows,
 while the third provides a Linux-based datacenter GPU configuration.
 
-The first platform combines an Intel Core i5-10300H processor with
-an NVIDIA GeForce GTX 1650 Ti equipped with 4~GB of device memory.
-The system runs Windows~10 and represents a consumer laptop GPU
-configuration.
+The first platform combines an Intel Core i5-10300H processor with an NVIDIA GeForce GTX 1650 Ti
+equipped with 4~GB of device memory. The system runs Windows~10 and represents a consumer laptop
+GPU configuration.
 
-The second platform combines an Intel Core i7-11850H processor
-with an NVIDIA T600 Laptop GPU, also equipped with 4~GB of device
-memory. It runs Windows~11 and represents an entry-level
+The second platform combines an Intel Core i7-11850H processor with an NVIDIA T600 Laptop GPU,
+also equipped with 4~GB of device memory. It runs Windows~11 and represents an entry-level
 professional mobile GPU configuration.
 
-The third platform uses a Google Colab Linux environment with
-an NVIDIA Tesla T4 GPU. The recorded GPU belongs to NVIDIA's
-Turing generation and provides approximately 15~GiB of accessible
-device memory. The cloud environment exposes an Intel Xeon CPU
-identified as operating at 2.00~GHz and two logical processors.
-The exact host CPU model is not established by the archived
-environment record.
+The third platform uses a Google Colab Linux environment with an NVIDIA Tesla T4 GPU. The
+recorded GPU belongs to NVIDIA's Turing generation and provides approximately 15~GiB of
+accessible device memory. The cloud environment exposes an Intel Xeon CPU identified as
+operating at 2.00~GHz and two logical processors. The exact host CPU model is not established by
+the archived environment record.
 
-The principal characteristics are summarized in
-Table~\ref{tab:experimental_platforms}.
+The principal characteristics are summarized in Table~\ref{tab:experimental_platforms}.
 
 \begin{table}[htbp]
-\centering
-\caption{Hardware and software configurations used in the
-heterogeneous AES study. Operating-system labels describe the
-tested configurations; kernel and runtime details are derived
-from the archived environment records.}
-\label{tab:experimental_platforms}
-\small
-\begin{tabularx}{\linewidth}{
+  \centering
+  \caption{Hardware and software configurations used in the heterogeneous AES study.
+  Operating-system labels describe the tested configurations; kernel and runtime details are
+  derived from the archived environment records.}
+  \label{tab:experimental_platforms}
+  \small
+  \begin{tabularx}{\linewidth}{
     >{\raggedright\arraybackslash}p{0.19\linewidth}
     >{\raggedright\arraybackslash}p{0.26\linewidth}
     >{\raggedright\arraybackslash}X
-}
-\toprule
-\textbf{Platform} &
-\textbf{Host CPU} &
-\textbf{GPU and environment} \\
-\midrule
+  }
+    \toprule
+    \textbf{Platform} & \textbf{Host CPU} & \textbf{GPU and environment} \\
+    \midrule
 
-Windows 10 &
-Intel Core i5-10300H &
-GeForce GTX 1650 Ti;
-4~GB VRAM;
-consumer laptop GPU;
-CUDA runtime 12.9;
-CuPy 13.6.0;
-PyCryptodome 3.23.0 \\
+    Windows 10 & Intel Core i5-10300H & GeForce GTX 1650 Ti; 4~GB VRAM; consumer laptop GPU;
+    CUDA runtime 12.9; CuPy 13.6.0; PyCryptodome 3.23.0 \\
 
-\addlinespace
+    \addlinespace
 
-Windows 11 &
-Intel Core i7-11850H &
-T600 Laptop GPU;
-4~GB VRAM;
-professional mobile GPU;
-Turing architecture;
-SM 7.5 \\
+    Windows 11 & Intel Core i7-11850H & T600 Laptop GPU; 4~GB VRAM; professional mobile GPU;
+    Turing architecture; SM 7.5 \\
 
-\addlinespace
+    \addlinespace
 
-Linux / Colab &
-Intel Xeon CPU at 2.00~GHz;
-two exposed logical processors &
-Tesla T4;
-approximately 15~GiB VRAM;
-Turing architecture;
-SM 7.5;
-CUDA runtime 13.0;
-CuPy 14.0.1;
-PyCryptodome 4.0.0 \\
+    Linux / Colab & Intel Xeon CPU at 2.00~GHz; two exposed logical processors & Tesla T4;
+    approximately 15~GiB VRAM; Turing architecture; SM 7.5; CUDA runtime 13.0; CuPy 14.0.1;
+    PyCryptodome 4.0.0 \\
 
-\bottomrule
-\end{tabularx}
+    \bottomrule
+  \end{tabularx}
 \end{table}
 
-The CPU implementations and cryptographic reference operations
-are provided through PyCryptodome~\cite{pycryptodome}.
-Consequently, the reported CPU measurements characterize
-specific library execution paths rather than theoretical
-performance limits of the AES algorithm or the maximum possible
-performance of independently optimized native implementations.
+The CPU implementations and cryptographic reference operations are provided through
+PyCryptodome~\cite{pycryptodome}. Consequently, the reported CPU measurements characterize
+specific library execution paths rather than theoretical performance limits of the AES algorithm
+or the maximum possible performance of independently optimized native implementations.
 
-The GPU implementations use CUDA kernels invoked through CuPy.
-The CUDA runtime provides kernel execution, memory-management,
-synchronization, and transfer functionality
+The GPU implementations use CUDA kernels invoked through CuPy. The CUDA runtime provides kernel
+execution, memory-management, synchronization, and transfer functionality
 \cite{nvidiaProgrammingGuide,cupyRawKernel}.
 
-The two Windows systems operate within the Windows GPU driver
-environment, where command scheduling, preemption, and
-synchronization can influence observed execution behavior
-\cite{microsoftGpuPreemption,microsoftTdr}. The T4 configuration
-uses a different Linux and cloud execution environment.
+The two Windows systems operate within the Windows GPU driver environment, where command
+scheduling, preemption, and synchronization can influence observed execution behavior
+\cite{microsoftGpuPreemption,microsoftTdr}. The T4 configuration uses a different Linux and
+cloud execution environment.
 
-These differences are treated as characteristics of the measured
-platforms rather than as independently controlled experimental
-variables. In particular, the study does not isolate the effects
-of Windows~10 versus Windows~11, operating-system families,
-GPU product classes, driver versions, or cryptographic library
-versions.
+These differences are treated as characteristics of the measured platforms rather than as
+independently controlled experimental variables. In particular, the study does not isolate the
+effects of Windows~10 versus Windows~11, operating-system families, GPU product classes, driver
+versions, or cryptographic library versions.
 
-All cross-platform findings are therefore interpreted as
-comparisons among three complete hardware--software configurations.
-Absolute GPU throughput is compared separately from speedup
+All cross-platform findings are therefore interpreted as comparisons among three complete
+hardware--software configurations. Absolute GPU throughput is compared separately from speedup
 relative to each system's own CPU reference.
-
 
 \subsection{Validation-First Experimental Protocol}
 \label{subsec:validation_protocol}
 
-Functional correctness is a prerequisite for accepting a
-performance experiment. Cryptographic implementations are subjected
-to validation before their timing results are admitted to the
+Functional correctness is a prerequisite for accepting a performance experiment. Cryptographic
+implementations are subjected to validation before their timing results are admitted to the
 principal study.
 
-The validation procedures include known-answer tests, CPU
-reference comparisons, and consistency checks between supported
-execution backends. The expected cryptographic behavior is based
-on the AES specification and the relevant definitions of
-block-cipher modes of operation
+The validation procedures include known-answer tests, CPU reference comparisons, and consistency
+checks between supported execution backends. The expected cryptographic behavior is based on the
+AES specification and the relevant definitions of block-cipher modes of operation
 \cite{nist2023aes,dworkin2001modes,dworkin2007gcm}.
 
-PyCryptodome provides reference operations used in selected
-CPU--GPU differential checks~\cite{pycryptodome}.
-The archived validation records additionally document the status
-of CUDA compilation and the relevant cross-backend correctness
-checks.
+PyCryptodome provides reference operations used in selected CPU--GPU differential
+checks~\cite{pycryptodome}. The archived validation records additionally document the status of
+CUDA compilation and the relevant cross-backend correctness checks.
 
-A configuration that fails the required validation procedures
-cannot be accepted as a successful study measurement.
+A configuration that fails the required validation procedures cannot be accepted as a successful
+study measurement.
 
-This requirement is important because a high-throughput
-implementation is not meaningful as an AES performance result
-unless the implementation performs the expected cryptographic
+This requirement is important because a high-throughput implementation is not meaningful as an
+AES performance result unless the implementation performs the expected cryptographic
 transformation.
 
 The benchmarking workflow distinguishes three execution profiles:
 
 \begin{enumerate}
 
-    \item \textbf{Smoke profile.}
-    A lightweight execution used to verify basic functionality,
-    cryptographic validation, configuration handling, and the
-    production of required experimental artifacts.
+  \item \textbf{Smoke profile.} A lightweight execution used to verify basic functionality,
+    cryptographic validation, configuration handling, and the production of required
+    experimental artifacts.
 
-    \item \textbf{Pilot profile.}
-    A preliminary execution used to inspect measurement behavior,
-    confirm benchmark parameters, and identify operational
-    problems before the principal study.
+  \item \textbf{Pilot profile.} A preliminary execution used to inspect measurement behavior,
+    confirm benchmark parameters, and identify operational problems before the principal study.
 
-    \item \textbf{Study profile.}
-    The controlled, session-based configuration whose validated
+  \item \textbf{Study profile.} The controlled, session-based configuration whose validated
     observations form the primary quantitative comparisons.
 
 \end{enumerate}
 
-Only the designated study-profile observations are used in the
-principal three-platform performance analysis. Earlier smoke,
-pilot, developmental, and historical runs are not silently
+Only the designated study-profile observations are used in the principal three-platform
+performance analysis. Earlier smoke, pilot, developmental, and historical runs are not silently
 combined with the selected complete studies.
 
-The protocol archives the configuration, random seeds, workload
-parameters, validation results, timing observations, relevant
-environment metadata, and implementation source snapshots.
+The protocol archives the configuration, random seeds, workload parameters, validation results,
+timing observations, relevant environment metadata, and implementation source snapshots.
 
-This distinction between correctness and measurement validity
-is essential. Successful cryptographic validation establishes
-agreement with expected outputs under the tested conditions.
-It does not, by itself, prove the absence of timer bias, operating
-system interference, or other sources of measurement error.
+This distinction between correctness and measurement validity is essential. Successful
+cryptographic validation establishes agreement with expected outputs under the tested
+conditions. It does not, by itself, prove the absence of timer bias, operating system
+interference, or other sources of measurement error.
 
-Accordingly, cryptographic validation is complemented by
-independent verification of experimental completeness,
-configuration consistency, source identity, and saved statistical
+Accordingly, cryptographic validation is complemented by independent verification of
+experimental completeness, configuration consistency, source identity, and saved statistical
 estimators.
-
 
 \subsection{Workload Definition and Paired Experimental Design}
 \label{subsec:experimental_design}
 
-The principal heterogeneous comparison evaluates AES-128 encryption
-in Electronic Codebook (ECB) and Counter (CTR) modes.
+The principal heterogeneous comparison evaluates AES-128 encryption in Electronic Codebook (ECB)
+and Counter (CTR) modes.
 
-ECB and CTR are appropriate for controlled examination of
-independent block-level computation, although their practical
-security properties and operational requirements differ
+ECB and CTR are appropriate for controlled examination of independent block-level computation,
+although their practical security properties and operational requirements differ
 \cite{dworkin2001modes}.
 
-ECB is employed solely as a cryptographic performance probe and
-must not be interpreted as a recommended encryption mode for
-general application data. CTR measurements characterize encryption
-throughput under the selected counter configuration; they do not
-constitute an evaluation of authenticated encryption or
-application-level counter management.
+ECB is employed solely as a cryptographic performance probe and must not be interpreted as a
+recommended encryption mode for general application data. CTR measurements characterize
+encryption throughput under the selected counter configuration; they do not constitute an
+evaluation of authenticated encryption or application-level counter management.
 
 The five workload sizes are:
 
 \begin{equation}
-N \in
-\left\{
-2^{10},\,
-2^{14},\,
-2^{20},\,
-2^{24},\,
-2^{25}
-\right\}
-\ \text{bytes}.
-\label{eq:workload_sizes}
+  N \in
+  \left\{
+  2^{10},\,
+  2^{14},\,
+  2^{20},\,
+  2^{24},\,
+  2^{25}
+  \right\}
+  \ \text{bytes}.
+  \label{eq:workload_sizes}
 \end{equation}
 
 These correspond to 1~KiB, 16~KiB, 1~MiB, 16~MiB, and 32~MiB.
 
-The selected sizes span small-message execution, intermediate
-workloads, and larger contiguous buffers for which GPU execution
-and host--device movement can have materially different relative
+The selected sizes span small-message execution, intermediate workloads, and larger contiguous
+buffers for which GPU execution and host--device movement can have materially different relative
 costs.
 
 Each workload is evaluated through two CPU reference paths:
 
 \begin{enumerate}
 
-    \item A selected software AES implementation.
-    \item A selected hardware-accelerated AES-NI implementation.
+  \item A selected software AES implementation.
+  \item A selected hardware-accelerated AES-NI implementation.
 
 \end{enumerate}
 
@@ -282,164 +217,131 @@ The CUDA evaluation includes two timed kernel candidates:
 
 \begin{enumerate}
 
-    \item A baseline CUDA AES implementation.
-    \item An optimized-v1 CUDA implementation representing a
-    lightweight implementation candidate.
+  \item A baseline CUDA AES implementation.
+  \item An optimized-v1 CUDA implementation representing a lightweight implementation candidate.
 
 \end{enumerate}
 
-The optimized-v1 implementation is treated as a candidate for
-empirical comparison, not as an implementation assumed to be
-superior. Its performance must be evaluated separately for
-each mode, workload size, platform, and timing scope.
+The optimized-v1 implementation is treated as a candidate for empirical comparison, not as an
+implementation assumed to be superior. Its performance must be evaluated separately for each
+mode, workload size, platform, and timing scope.
 
-Corresponding CPU and GPU workloads use deterministically
-generated inputs and matching cryptographic parameters,
-including the plaintext, key, and mode-specific initialization
-values.
+Corresponding CPU and GPU workloads use deterministically generated inputs and matching
+cryptographic parameters, including the plaintext, key, and mode-specific initialization values.
 
-A fixed seed identifies each study session. This design supports
-the reconstruction of workload identities and allows CPU and GPU
-timing comparisons to be paired within the same session.
+A fixed seed identifies each study session. This design supports the reconstruction of workload
+identities and allows CPU and GPU timing comparisons to be paired within the same session.
 
 The five selected seeds are:
 
 \begin{equation}
-s \in
-\{2003,2004,2005,2006,2007\}.
-\label{eq:study_seeds}
+  s \in
+  \{2003,2004,2005,2006,2007\}.
+  \label{eq:study_seeds}
 \end{equation}
 
-The study uses five warm-up executions and twenty recorded timing
-repetitions for each measured configuration.
+The study uses five warm-up executions and twenty recorded timing repetitions for each measured
+configuration.
 
-The warm-up phase is excluded from the saved timing summaries.
-Its execution is supported by the archived configuration and
-execution provenance, rather than by individual warm-up rows in
-the raw timing exports.
+The warm-up phase is excluded from the saved timing summaries. Its execution is supported by the
+archived configuration and execution provenance, rather than by individual warm-up rows in the
+raw timing exports.
 
-The workload matrix contains 60 measured groups per session,
-with twenty recorded observations per group. Each complete
-session therefore contributes 1,200 raw timing records.
+The workload matrix contains 60 measured groups per session, with twenty recorded observations
+per group. Each complete session therefore contributes 1,200 raw timing records.
 
-With five sessions on each of three platforms, the primary
-heterogeneous analysis comprises:
+With five sessions on each of three platforms, the primary heterogeneous analysis comprises:
 
 \begin{equation}
-3 \times 5 \times 1200 = 18\,000
-\label{eq:raw_observation_count}
+  3 \times 5 \times 1200 = 18\,000
+  \label{eq:raw_observation_count}
 \end{equation}
 
 raw timing observations.
 
-These observations are nested within 15 study sessions, rather
-than representing 18,000 statistically independent experimental
-replications.
+These observations are nested within 15 study sessions, rather than representing 18,000
+statistically independent experimental replications.
 
-The execution order follows the archived benchmark protocol
-rather than a randomized sequence of workload sizes. Consequently,
-workload size and elapsed experimental time are not completely
+The execution order follows the archived benchmark protocol rather than a randomized sequence of
+workload sizes. Consequently, workload size and elapsed experimental time are not completely
 separated as potential explanatory factors.
 
-The paired design reduces differences arising from unmatched
-cryptographic inputs, but does not make CPU and GPU host-side
-operations identical. Their timing boundaries are therefore
-reported explicitly.
-
+The paired design reduces differences arising from unmatched cryptographic inputs, but does not
+make CPU and GPU host-side operations identical. Their timing boundaries are therefore reported
+explicitly.
 
 \subsection{Measurement Boundaries}
 \label{subsec:measurement_boundaries}
 
-A central methodological decision is to define the operations
-included in each timed interval.
+A central methodological decision is to define the operations included in each timed interval.
 
 The study distinguishes four principal paths:
 
 \begin{enumerate}
 
-    \item \textbf{CPU software transformation.}
-    Measures the selected software AES encryption operation on
-    the host CPU.
+  \item \textbf{CPU software transformation.} Measures the selected software AES encryption
+    operation on the host CPU.
 
-    \item \textbf{CPU AES-NI transformation.}
-    Measures the selected hardware-accelerated CPU AES operation
-    through the cryptographic library.
+  \item \textbf{CPU AES-NI transformation.} Measures the selected hardware-accelerated CPU AES
+    operation through the cryptographic library.
 
-    \item \textbf{GPU resident execution.}
-    Measures CUDA kernel execution with the input already
-    resident in device memory. Host-to-device and
-    device-to-host transfers are excluded from this interval.
+  \item \textbf{GPU resident execution.} Measures CUDA kernel execution with the input already
+    resident in device memory. Host-to-device and device-to-host transfers are excluded from
+    this interval.
 
-    \item \textbf{Prepared-buffer GPU pipeline.}
-    Measures the defined host-driven sequence comprising
-    host-to-device transfer, CUDA execution, device-to-host
-    transfer, and the synchronization required to complete
-    those operations.
+  \item \textbf{Prepared-buffer GPU pipeline.} Measures the defined host-driven sequence
+    comprising host-to-device transfer, CUDA execution, device-to-host transfer, and the
+    synchronization required to complete those operations.
 
 \end{enumerate}
 
-The CPU intervals are classified as transformation measurements.
-They include the measured encryption call, with output allocation
-performed by the selected CPU library path, but exclude cipher
-construction and other application initialization operations.
+The CPU intervals are classified as transformation measurements. They include the measured
+encryption call, with output allocation performed by the selected CPU library path, but exclude
+cipher construction and other application initialization operations.
 
-The GPU resident interval is a device-execution measurement.
-Input and output buffers are prepared outside the timed kernel
-region. The measured interval therefore characterizes the
-CUDA transformation independently of data movement to and
-from the host.
+The GPU resident interval is a device-execution measurement. Input and output buffers are
+prepared outside the timed kernel region. The measured interval therefore characterizes the CUDA
+transformation independently of data movement to and from the host.
 
-The GPU pipeline uses prepared pinned host buffers and
-preallocated device buffers. Its measured sequence includes
-the synchronous host-to-device (H2D) copy, kernel invocation
-and completion, device-to-host (D2H) copy, and associated
-synchronization.
+The GPU pipeline uses prepared pinned host buffers and preallocated device buffers. Its measured
+sequence includes the synchronous host-to-device (H2D) copy, kernel invocation and completion,
+device-to-host (D2H) copy, and associated synchronization.
 
-Pinned host memory can facilitate efficient transfers between
-host and device, although its use does not itself imply
-overlap between transfers and computation
+Pinned host memory can facilitate efficient transfers between host and device, although its use
+does not itself imply overlap between transfers and computation
 \cite{nvidiaProgrammingGuide,nvidiaBestPractices}.
 
-The measured GPU pipeline is synchronous and does not implement
-a separate overlapping, multi-stream transfer/compute pipeline.
+The measured GPU pipeline is synchronous and does not implement a separate overlapping,
+multi-stream transfer/compute pipeline.
 
-Importantly, the prepared-buffer boundary excludes the
-allocation and pinning of host buffers, device-memory allocation,
-the initial host-side staging of the input, CUDA compilation,
-and cryptographic key preparation.
+Importantly, the prepared-buffer boundary excludes the allocation and pinning of host buffers,
+device-memory allocation, the initial host-side staging of the input, CUDA compilation, and
+cryptographic key preparation.
 
-It also excludes external application I/O, file-system
-operations, authentication, and service-level orchestration.
+It also excludes external application I/O, file-system operations, authentication, and
+service-level orchestration.
 
-For this reason, the term \emph{pipeline} is preferred to an
-unqualified application-level \emph{end-to-end} description.
-Where end-to-end terminology is retained for consistency with
-the benchmark implementation, it refers strictly to the
-documented prepared-buffer boundary.
+For this reason, the term \emph{pipeline} is preferred to an unqualified application-level
+\emph{end-to-end} description. Where end-to-end terminology is retained for consistency with the
+benchmark implementation, it refers strictly to the documented prepared-buffer boundary.
 
-These execution scopes are intentionally different.
-The CPU-to-GPU speedup associated with the resident measurement
-is therefore a compute-path comparison, whereas pipeline
-speedup is a comparison with the broader, transfer-inclusive
-GPU processing sequence.
+These execution scopes are intentionally different. The CPU-to-GPU speedup associated with the
+resident measurement is therefore a compute-path comparison, whereas pipeline speedup is a
+comparison with the broader, transfer-inclusive GPU processing sequence.
 
-Neither comparison automatically establishes the performance
-of a complete encryption application.
+Neither comparison automatically establishes the performance of a complete encryption
+application.
 
-The archived results also contain selected H2D and D2H host
-timing intervals. Because these intervals include synchronization
-effects, they should not be interpreted as isolated PCIe
+The archived results also contain selected H2D and D2H host timing intervals. Because these
+intervals include synchronization effects, they should not be interpreted as isolated PCIe
 transmission times.
 
-Similarly, subtraction of independently measured GPU resident
-time from pipeline time produces, at most, an approximate
-residual-overhead description. It is not an independent direct
+Similarly, subtraction of independently measured GPU resident time from pipeline time produces,
+at most, an approximate residual-overhead description. It is not an independent direct
 measurement of pure transfer latency.
 
-This distinction is particularly important when interpreting
-systems for which resident CUDA throughput substantially
-exceeds the corresponding prepared-buffer pipeline throughput.
-
+This distinction is particularly important when interpreting systems for which resident CUDA
+throughput substantially exceeds the corresponding prepared-buffer pipeline throughput.
 
 \subsection{Timing and Throughput Calculation}
 \label{subsec:timing_throughput}
@@ -447,368 +349,297 @@ exceeds the corresponding prepared-buffer pipeline throughput.
 CPU execution is timed using Python's monotonic high-resolution
 \texttt{time.perf\_counter\_ns()} interface.
 
-This timer records elapsed wall-clock intervals in integer
-nanosecond units. Its numerical representation does not imply
-that the effective measurement accuracy is one nanosecond.
+This timer records elapsed wall-clock intervals in integer nanosecond units. Its numerical
+representation does not imply that the effective measurement accuracy is one nanosecond.
 
-GPU resident execution is measured using CUDA event timing
-with the synchronization necessary to obtain completed
-device-side elapsed time.
+GPU resident execution is measured using CUDA event timing with the synchronization necessary to
+obtain completed device-side elapsed time.
 
-CUDA events are appropriate for this purpose because device
-operations can execute asynchronously with respect to the
-host process~\cite{cupyPerformance,nvidiaBestPractices}.
+CUDA events are appropriate for this purpose because device operations can execute
+asynchronously with respect to the host process~\cite{cupyPerformance,nvidiaBestPractices}.
 
-The prepared-buffer GPU pipeline is measured using host-observed
-wall-clock timing around the defined synchronous processing
-sequence.
+The prepared-buffer GPU pipeline is measured using host-observed wall-clock timing around the
+defined synchronous processing sequence.
 
-Consequently, the GPU resident and pipeline measurements use
-different timing mechanisms as well as different execution
-boundaries. Their values are not interchangeable observations
-of the same interval.
+Consequently, the GPU resident and pipeline measurements use different timing mechanisms as well
+as different execution boundaries. Their values are not interchangeable observations of the same
+interval.
 
-For an input containing $N$ processed bytes and an elapsed
-time $T$ expressed in seconds, throughput is defined as:
+For an input containing $N$ processed bytes and an elapsed time $T$ expressed in seconds,
+throughput is defined as:
 
 \begin{equation}
-R = \frac{N}{10^6 T}.
-\label{eq:throughput}
+  R = \frac{N}{10^6 T}.
+  \label{eq:throughput}
 \end{equation}
 
-The resulting throughput is expressed in decimal megabytes
-per second (MB/s).
+The resulting throughput is expressed in decimal megabytes per second (MB/s).
 
-Input sizes are expressed using binary units such as KiB and
-MiB. This avoids ambiguity between the byte count used in
-the throughput calculation and the displayed workload size.
+Input sizes are expressed using binary units such as KiB and MiB. This avoids ambiguity between
+the byte count used in the throughput calculation and the displayed workload size.
 
 For a fixed workload, the CPU-to-GPU speedup is:
 
 \begin{equation}
-S_{\mathrm{CPU/GPU}} =
-\frac{T_{\mathrm{CPU}}}{T_{\mathrm{GPU}}}.
-\label{eq:cpu_gpu_speedup}
+  S_{\mathrm{CPU/GPU}} =
+  \frac{T_{\mathrm{CPU}}}{T_{\mathrm{GPU}}}.
+  \label{eq:cpu_gpu_speedup}
 \end{equation}
 
-A value of $S_{\mathrm{CPU/GPU}}>1$ indicates that the selected
-GPU path completes its measured operation faster than the
-corresponding CPU reference.
+A value of $S_{\mathrm{CPU/GPU}}>1$ indicates that the selected GPU path completes its measured
+operation faster than the corresponding CPU reference.
 
 A value below one indicates an advantage for the CPU reference.
 
-Every reported speedup is identified by the CPU backend,
-CUDA implementation, cryptographic mode, workload size,
-platform, and GPU timing scope.
+Every reported speedup is identified by the CPU backend, CUDA implementation, cryptographic
+mode, workload size, platform, and GPU timing scope.
 
-For small workloads, latency is also important because
-fixed costs associated with dispatch, synchronization, and
-transfer initiation can dominate the measured interval.
-Throughput-only interpretation can obscure these effects,
-particularly near the lower end of the workload-size range.
-
+For small workloads, latency is also important because fixed costs associated with dispatch,
+synchronization, and transfer initiation can dominate the measured interval. Throughput-only
+interpretation can obscure these effects, particularly near the lower end of the workload-size
+range.
 
 \subsection{Experimental Sessions and Statistical Aggregation}
 \label{subsec:statistical_analysis}
 
-Each platform contributes five study sessions identified by the
-documented seeds. Within each session, twenty timing repetitions
-are recorded per measured workload configuration.
+Each platform contributes five study sessions identified by the documented seeds. Within each
+session, twenty timing repetitions are recorded per measured workload configuration.
 
-The session, rather than an individual timing repetition,
-constitutes the primary experimental replication unit.
+The session, rather than an individual timing repetition, constitutes the primary experimental
+replication unit.
 
-Let $T_{s,r}$ denote the measured elapsed time for repetition
-$r$ within session $s$.
+Let $T_{s,r}$ denote the measured elapsed time for repetition $r$ within session $s$.
 
 The session-level median elapsed time is:
 
 \begin{equation}
-\widetilde{T}_s =
-\operatorname{median}_{r}(T_{s,r}).
-\label{eq:session_median}
+  \widetilde{T}_s =
+  \operatorname{median}_{r}(T_{s,r}).
+  \label{eq:session_median}
 \end{equation}
 
-The principal aggregated elapsed-time statistic is the median
-of the five session medians:
+The principal aggregated elapsed-time statistic is the median of the five session medians:
 
 \begin{equation}
-\widetilde{T}_{\mathrm{study}} =
-\operatorname{median}_{s=1,\ldots,5}
-\left(\widetilde{T}_{s}\right).
-\label{eq:study_median}
+  \widetilde{T}_{\mathrm{study}} =
+  \operatorname{median}_{s=1,\ldots,5}
+  \left(\widetilde{T}_{s}\right).
+  \label{eq:study_median}
 \end{equation}
 
-The study's throughput estimator is computed independently
-from the recorded throughput observations.
+The study's throughput estimator is computed independently from the recorded throughput
+observations.
 
-For each session, the median of the recorded throughput values
-is first calculated:
+For each session, the median of the recorded throughput values is first calculated:
 
 \begin{equation}
-\widetilde{R}_s =
-\operatorname{median}_{r}(R_{s,r}).
-\label{eq:session_throughput}
+  \widetilde{R}_s =
+  \operatorname{median}_{r}(R_{s,r}).
+  \label{eq:session_throughput}
 \end{equation}
 
 The principal throughput statistic is then:
 
 \begin{equation}
-\widetilde{R}_{\mathrm{study}} =
-\operatorname{median}_{s=1,\ldots,5}
-\left(\widetilde{R}_s\right).
-\label{eq:study_throughput}
+  \widetilde{R}_{\mathrm{study}} =
+  \operatorname{median}_{s=1,\ldots,5}
+  \left(\widetilde{R}_s\right).
+  \label{eq:study_throughput}
 \end{equation}
 
-This definition preserves the throughput estimator used by the
-archived analysis instead of deriving every reported rate from
-an aggregated latency value.
+This definition preserves the throughput estimator used by the archived analysis instead of
+deriving every reported rate from an aggregated latency value.
 
-For paired CPU--GPU comparisons, the CPU and GPU timing medians
-are first obtained within the same session, mode, and workload
-configuration.
+For paired CPU--GPU comparisons, the CPU and GPU timing medians are first obtained within the
+same session, mode, and workload configuration.
 
 The session-level paired speedup is:
 
 \begin{equation}
-S_s =
-\frac{
-    \widetilde{T}_{\mathrm{CPU},s}
-}{
-    \widetilde{T}_{\mathrm{GPU},s}
-}.
-\label{eq:session_speedup}
+  S_s =
+  \frac{
+  \widetilde{T}_{\mathrm{CPU},s}
+  }{
+  \widetilde{T}_{\mathrm{GPU},s}
+  }.
+  \label{eq:session_speedup}
 \end{equation}
 
 The reported study-level speedup is:
 
 \begin{equation}
-\widetilde{S}_{\mathrm{study}} =
-\operatorname{median}_{s=1,\ldots,5}(S_s).
-\label{eq:study_speedup}
+  \widetilde{S}_{\mathrm{study}} =
+  \operatorname{median}_{s=1,\ldots,5}(S_s).
+  \label{eq:study_speedup}
 \end{equation}
 
-This estimator is not generally identical to the ratio of
-independently aggregated CPU and GPU throughput statistics,
-nor necessarily to the ratio of their independently
-aggregated latency medians.
+This estimator is not generally identical to the ratio of independently aggregated CPU and GPU
+throughput statistics, nor necessarily to the ratio of their independently aggregated latency
+medians.
 
-The session-level formulation preserves the intended
-CPU--GPU pairing.
+The session-level formulation preserves the intended CPU--GPU pairing.
 
-Measurements from different platforms are aggregated
-separately. CPU references are not pooled between hosts,
-because the systems use different processors, software
-environments, and execution conditions.
+Measurements from different platforms are aggregated separately. CPU references are not pooled
+between hosts, because the systems use different processors, software environments, and
+execution conditions.
 
-Session variability is characterized descriptively using
-the observed range, interquartile range (IQR), and sample
-coefficient of variation (CV), where meaningful.
+Session variability is characterized descriptively using the observed range, interquartile range
+(IQR), and sample coefficient of variation (CV), where meaningful.
 
 For session-level estimates $x_s$, the sample CV is:
 
 \begin{equation}
-\mathrm{CV} =
-\frac{
-    \sqrt{
-        \frac{1}{n-1}
-        \sum_{s=1}^{n}(x_s-\bar{x})^2
-    }
-}{
-    \bar{x}
-},
-\qquad n=5.
-\label{eq:session_cv}
+  \mathrm{CV} =
+  \frac{
+  \sqrt{
+  \frac{1}{n-1}
+  \sum_{s=1}^{n}(x_s-\bar{x})^2
+  }
+  }{
+  \bar{x}
+  },
+  \qquad n=5.
+  \label{eq:session_cv}
 \end{equation}
 
-The number of sessions supporting a directional comparison
-is also reported when relevant.
+The number of sessions supporting a directional comparison is also reported when relevant.
 
-For example, a count of $5/5$ means that all five observed
-session-level speedup values exceed one. It is a descriptive
-consistency measure, not a hypothesis test or a guarantee that
-the same direction will hold in future executions.
+For example, a count of $5/5$ means that all five observed session-level speedup values exceed
+one. It is a descriptive consistency measure, not a hypothesis test or a guarantee that the same
+direction will hold in future executions.
 
-The analysis does not pool twenty repetitions from five
-sessions into one set of one hundred independent replications.
-No observations are discarded solely because they appear
-extreme.
+The analysis does not pool twenty repetitions from five sessions into one set of one hundred
+independent replications. No observations are discarded solely because they appear extreme.
 
-Confidence intervals and statistical significance claims are
-not inferred from descriptive ranges or session-level
-direction counts.
+Confidence intervals and statistical significance claims are not inferred from descriptive
+ranges or session-level direction counts.
 
-This treatment follows established recommendations concerning
-experimental variability, reproducibility, and the
-interpretation of computer-system performance measurements
+This treatment follows established recommendations concerning experimental variability,
+reproducibility, and the interpretation of computer-system performance measurements
 \cite{kalibera2013rigorous,hoefler2015scientific,mytkowicz2009wrong}.
-
 
 \subsection{Experimental Artifacts and Traceability}
 \label{subsec:experimental_artifacts}
 
-The benchmarking workflow preserves the evidence required to
-associate each reported performance result with the original
-experimental execution.
+The benchmarking workflow preserves the evidence required to associate each reported performance
+result with the original experimental execution.
 
 The principal artifact categories include:
 
 \begin{enumerate}
 
-    \item \textbf{Raw observations.}
-    Individual timing and throughput records associated with
-    the measured configurations and repetitions.
+  \item \textbf{Raw observations.} Individual timing and throughput records associated with the
+    measured configurations and repetitions.
 
-    \item \textbf{Session summaries.}
-    Derived statistics for each session and workload
+  \item \textbf{Session summaries.} Derived statistics for each session and workload
     configuration.
 
-    \item \textbf{Validation records.}
-    Documented correctness, compilation, and backend
+  \item \textbf{Validation records.} Documented correctness, compilation, and backend
     verification outcomes.
 
-    \item \textbf{Environment and configuration metadata.}
-    Hardware descriptions, software dependencies, execution
-    arguments, random seeds, and relevant runtime parameters.
+  \item \textbf{Environment and configuration metadata.} Hardware descriptions, software
+    dependencies, execution arguments, random seeds, and relevant runtime parameters.
 
-    \item \textbf{Source-code snapshots.}
-    Archived benchmark and kernel source files permitting
+  \item \textbf{Source-code snapshots.} Archived benchmark and kernel source files permitting
     source-level comparison between experimental runs.
 
-    \item \textbf{Cross-session aggregate records.}
-    Session variability, paired speedups, aggregate summaries,
-    and completeness-verification results.
+  \item \textbf{Cross-session aggregate records.} Session variability, paired speedups,
+    aggregate summaries, and completeness-verification results.
 
 \end{enumerate}
 
-The final analysis uses one selected complete five-session
-heterogeneous study for each of the three platforms.
+The final analysis uses one selected complete five-session heterogeneous study for each of the
+three platforms.
 
-These studies comprise fifteen validated sessions and
-18,000 raw timing observations.
+These studies comprise fifteen validated sessions and 18,000 raw timing observations.
 
-An independent offline analysis reconstructed the saved
-session statistics and aggregate estimators from the original
-raw observations.
+An independent offline analysis reconstructed the saved session statistics and aggregate
+estimators from the original raw observations.
 
-The resulting comparison reported no numerical discrepancies
-within the declared floating-point comparison tolerances.
-The analysis also verified the presence of the required
-sessions, workload groups, validation records, and associated
-source snapshots.
+The resulting comparison reported no numerical discrepancies within the declared floating-point
+comparison tolerances. The analysis also verified the presence of the required sessions,
+workload groups, validation records, and associated source snapshots.
 
-The active benchmark and CUDA source snapshots were compared
-using SHA-256 hashes. Their matching content supports
-source-level comparability across the three selected studies.
+The active benchmark and CUDA source snapshots were compared using SHA-256 hashes. Their
+matching content supports source-level comparability across the three selected studies.
 
-However, matching source-code hashes do not imply identical
-compiled binaries, dependencies, driver behavior, or hardware
-execution.
+However, matching source-code hashes do not imply identical compiled binaries, dependencies,
+driver behavior, or hardware execution.
 
-Similarly, successful artifact verification establishes
-internal consistency and traceability rather than immunity
-from every possible measurement or system-level error.
+Similarly, successful artifact verification establishes internal consistency and traceability
+rather than immunity from every possible measurement or system-level error.
 
-The source archives and analysis outputs retain their
-original platform and session identities. Historical,
-pilot, and smoke results are not merged into the principal
-three-platform estimates.
+The source archives and analysis outputs retain their original platform and session identities.
+Historical, pilot, and smoke results are not merged into the principal three-platform estimates.
 
-The integrity assessment therefore connects each principal
-finding to documented configurations, original run identifiers,
-and archived observations, permitting subsequent independent
+The integrity assessment therefore connects each principal finding to documented configurations,
+original run identifiers, and archived observations, permitting subsequent independent
 inspection and reanalysis.
-
 
 \subsection{Methodological Scope and Limitations}
 \label{subsec:methodological_limitations}
 
-The experimental framework supports controlled interpretation
-of CPU--GPU performance within the tested configurations.
-It does not establish universal architectural rankings or
+The experimental framework supports controlled interpretation of CPU--GPU performance within the
+tested configurations. It does not establish universal architectural rankings or
 application-level encryption performance.
 
 Several limitations are relevant.
 
-First, the three platforms differ simultaneously in CPU model,
-GPU model, memory system, operating system, driver stack,
-CUDA runtime, and supporting software libraries.
+First, the three platforms differ simultaneously in CPU model, GPU model, memory system,
+operating system, driver stack, CUDA runtime, and supporting software libraries.
 
-Consequently, observed differences cannot be causally
-attributed to Windows versus Linux, consumer versus
-professional GPUs, or individual library versions.
+Consequently, observed differences cannot be causally attributed to Windows versus Linux,
+consumer versus professional GPUs, or individual library versions.
 
-Second, only one machine or cloud allocation is evaluated
-per platform, with five study sessions per configuration.
+Second, only one machine or cloud allocation is evaluated per platform, with five study sessions
+per configuration.
 
-The results provide evidence of within-platform
-repeatability under the observed conditions but cannot
-establish population-wide performance characteristics.
+The results provide evidence of within-platform repeatability under the observed conditions but
+cannot establish population-wide performance characteristics.
 
-Third, the CPU reference measurements characterize the
-selected PyCryptodome execution paths. The archived records
-support the intended hardware-assisted AES-NI initialization,
-but they do not constitute a direct processor instruction
-trace.
+Third, the CPU reference measurements characterize the selected PyCryptodome execution paths.
+The archived records support the intended hardware-assisted AES-NI initialization, but they do
+not constitute a direct processor instruction trace.
 
-The CPU measurements are not benchmarks of every available
-AES library or a comprehensive search for the fastest
-possible multithreaded CPU implementation.
+The CPU measurements are not benchmarks of every available AES library or a comprehensive search
+for the fastest possible multithreaded CPU implementation.
 
-Fourth, the CUDA baseline and optimized-v1 kernels are
-implementation candidates rather than representative upper
-bounds on GPU AES performance.
+Fourth, the CUDA baseline and optimized-v1 kernels are implementation candidates rather than
+representative upper bounds on GPU AES performance.
 
-The study therefore examines the measured implementations
-and should not be interpreted as a comparison with every
-published GPU AES optimization technique.
+The study therefore examines the measured implementations and should not be interpreted as a
+comparison with every published GPU AES optimization technique.
 
-Fifth, the measurement scopes differ deliberately.
-Resident execution excludes host--device transfers, while
-the prepared-buffer pipeline includes the selected
-synchronous transfer and execution operations but excludes
-buffer preparation and complete application I/O.
+Fifth, the measurement scopes differ deliberately. Resident execution excludes host--device
+transfers, while the prepared-buffer pipeline includes the selected synchronous transfer and
+execution operations but excludes buffer preparation and complete application I/O.
 
-These boundaries are essential to interpretation and prevent
-the resulting throughput figures from being treated as
-equivalent full-system measurements.
+These boundaries are essential to interpretation and prevent the resulting throughput figures
+from being treated as equivalent full-system measurements.
 
-Sixth, the tested workload sizes are discrete and executed
-in a fixed order. Although a local throughput reduction is
-observed around 16~MiB in some configurations, the study
-does not establish its underlying cause or a universal
-performance threshold.
+Sixth, the tested workload sizes are discrete and executed in a fixed order. Although a local
+throughput reduction is observed around 16~MiB in some configurations, the study does not
+establish its underlying cause or a universal performance threshold.
 
-Driver scheduling, memory effects, clock behavior, thermal
-conditions, and other environmental mechanisms remain
-possible influences rather than experimentally isolated
-explanations.
+Driver scheduling, memory effects, clock behavior, thermal conditions, and other environmental
+mechanisms remain possible influences rather than experimentally isolated explanations.
 
-Seventh, the study is restricted to AES-128 encryption
-in ECB and CTR modes for the primary heterogeneous
-comparison. It does not establish performance for every
-AES key length, authenticated-encryption mode, asynchronous
-GPU pipeline, or complete storage and network application.
+Seventh, the study is restricted to AES-128 encryption in ECB and CTR modes for the primary
+heterogeneous comparison. It does not establish performance for every AES key length,
+authenticated-encryption mode, asynchronous GPU pipeline, or complete storage and network
+application.
 
-The broader retrospective experiments involving DES,
-TDEA, AES-GCM, reduced-keyspace demonstrations, and the
-avalanche effect provide additional historical and
-illustrative context. They are not combined with the
-heterogeneous AES-128 performance matrix as though they
-shared the same timing scope and workload definition.
+The broader retrospective experiments involving DES, TDEA, AES-GCM, reduced-keyspace
+demonstrations, and the avalanche effect provide additional historical and illustrative context.
+They are not combined with the heterogeneous AES-128 performance matrix as though they shared
+the same timing scope and workload definition.
 
-Finally, the statistical analysis emphasizes session-level
-descriptive consistency. The observed speedup ranges and
-directional counts do not independently demonstrate
-statistical significance or guarantee deployment-level
-performance.
+Finally, the statistical analysis emphasizes session-level descriptive consistency. The observed
+speedup ranges and directional counts do not independently demonstrate statistical significance
+or guarantee deployment-level performance.
 
-Within these limits, the methodology permits a reproducible
-comparison of CPU software execution, CPU AES-NI,
-GPU resident execution, and the tested prepared-buffer GPU
-pipeline.
+Within these limits, the methodology permits a reproducible comparison of CPU software
+execution, CPU AES-NI, GPU resident execution, and the tested prepared-buffer GPU pipeline.
 
-Its central contribution is the explicit separation of
-cryptographic correctness, measured execution scope,
-statistical aggregation, and practical performance
-interpretation.
+Its central contribution is the explicit separation of cryptographic correctness, measured
+execution scope, statistical aggregation, and practical performance interpretation.
