@@ -22,7 +22,7 @@ transfer-inclusive GPU processing are evaluated under a common, auditable protoc
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth] {benchmarking_framework_grayscale}
+  \includegraphics[width=\linewidth] {figures/benchmarking_framework_grayscale.jpg}
   \caption{Validation-first benchmarking framework. Cryptographic correctness and workload
   preparation precede timed execution. Paired inputs are evaluated through CPU software, CPU
   AES-NI, GPU resident, and prepared-buffer GPU pipeline paths. Raw timing observations, session
@@ -123,7 +123,7 @@ principal study.
 The validation procedures include known-answer tests, CPU reference comparisons, and consistency
 checks between supported execution backends. The expected cryptographic behavior is based on the
 AES specification and the relevant definitions of block-cipher modes of operation
-\cite{nist2023aes,dworkin2001modes,dworkin2007gcm}.
+\cite{nist2023aes,dworkin2001modes}.
 
 PyCryptodome provides reference operations used in selected CPU--GPU differential
 checks~\cite{pycryptodome}. The archived validation records additionally document the status of
@@ -628,11 +628,6 @@ Seventh, the study is restricted to AES-128 encryption in ECB and CTR modes for 
 heterogeneous comparison. It does not establish performance for every AES key length,
 authenticated-encryption mode, asynchronous GPU pipeline, or complete storage and network
 application.
-
-The broader retrospective experiments involving DES, TDEA, AES-GCM, reduced-keyspace
-demonstrations, and the avalanche effect provide additional historical and illustrative context.
-They are not combined with the heterogeneous AES-128 performance matrix as though they shared
-the same timing scope and workload definition.
 
 Finally, the statistical analysis emphasizes session-level descriptive consistency. The observed
 speedup ranges and directional counts do not independently demonstrate statistical significance

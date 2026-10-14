@@ -294,7 +294,7 @@ execution conditions across different platforms.
 The methodology therefore distinguishes cryptographic correctness, measurement integrity,
 repeatability, and the external validity of the resulting performance conclusions.
 
-\subsection{Research Gap and Research Questions}
+\subsection{Research Gap}
 \label{subsec:research_gap}
 
 The reviewed literature establishes two relevant bodies of knowledge.
@@ -343,83 +343,9 @@ The objective is not to demonstrate a universal architectural advantage, but to 
 conditions under which particular CPU--GPU performance conclusions are supported by reproducible
 evidence.
 
-The overarching research question is formulated as follows:
-
-\begin{quote}
-  \textbf{Central Research Question:}
-
-  Under which measured conditions can GPU-based AES-128 encryption outperform a
-  hardware-accelerated CPU AES-NI implementation, and how does the definition of the measurement
-  boundary affect that conclusion?
-\end{quote}
-
-This question is operationalized through three complementary research questions:
-
-\begin{enumerate}
-
-  \item[\textbf{RQ1:}] \textbf{GPU offloading advantage.} Under which tested input sizes, AES
-    modes, and hardware configurations do CUDA implementations outperform software CPU AES and
-    hardware-assisted AES-NI, and which advantages remain consistent across the five study
-    sessions?
-
-  \item[\textbf{RQ2:}] \textbf{Measurement-scope dependence.} How does the observed CPU--GPU
-    performance relationship change when the GPU boundary is expanded from device-resident
-    kernel execution to the synchronous prepared-buffer pipeline including host--device
-    transfers and synchronization?
-
-  \item[\textbf{RQ3:}] \textbf{Consistency and cross-platform interpretation.} How do session
-    variability, workload size, cipher mode, and differences among the tested Windows laptop and
-    Linux/T4 configurations limit the generalization of observed GPU acceleration?
-
-\end{enumerate}
-
-These questions are intended to be answered empirically using the validated and archived study
-results.
-
-They do not require an assumption that GPU acceleration must be advantageous.
-
-Both positive and negative outcomes are relevant to the research problem.
-
-\subsection{Contributions and Positioning}
-\label{subsec:related_contributions}
-
-Relative to the reviewed literature, the study makes three principal contributions.
-
-\begin{enumerate}
-
-  \item \textbf{An integrated, validation-first, reproducible benchmarking methodology.}
-
-  The framework combines cryptographic correctness verification, deterministic paired inputs,
-  explicit timing scopes, session-level statistical aggregation, and preservation of raw
-  experimental evidence.
-
-  Its methodological contribution lies in applying these requirements together, not in claiming
-  that the individual benchmarking principles are unprecedented.
-
-  \item \textbf{A three-platform empirical assessment of contemporary AES execution paths.}
-
-  The study evaluates software AES, AES-NI, and two CUDA candidates across fifteen sessions and
-  18,000 raw timing observations.
-
-  The platforms include a consumer GeForce GTX~1650~Ti, an entry-level professional T600 Laptop
-  GPU, and a Tesla T4 datacenter GPU.
-
-  The analysis preserves platform-specific CPU references and does not pool heterogeneous
-  systems into a single performance estimate.
-
-  \item \textbf{An evidence-qualified interpretation of GPU acceleration and deployment
-    relevance.}
-
-  The results identify conditions under which GPU execution exceeds the selected AES-NI CPU
-  reference, including a consistent transfer-inclusive CTR advantage on the T600 at 32~MiB.
-
-  They also document resident-to-pipeline reversals, negative or mixed CPU--GPU comparisons, and
-  mode-dependent performance differences.
-
-  These observations support practical interpretation without claiming universal GPU superiority
-  or complete application-level performance.
-
-\end{enumerate}
+The research questions and contributions are stated in
+Section~\ref{subsec:introduction_questions} and
+Section~\ref{subsec:introduction_contributions}, respectively.
 
 The study therefore occupies a distinct position between GPU kernel optimization research and
 general performance-measurement methodology.

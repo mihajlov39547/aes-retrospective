@@ -152,32 +152,8 @@ measured.
 \subsection{Implications for Telecommunications Systems}
 \label{subsec:discussion_implications}
 
-The relevance of these findings to telecommunications lies primarily in the relationship between
-encryption throughput, processing latency, and data movement.
-
-Communication systems process a wide range of workloads. Some operations involve individual
-packets requiring immediate processing, while others involve large data buffers, grouped
-messages, parallel communication flows, or substantial volumes of accumulated data.
-
-These different workloads need not benefit equally from GPU acceleration.
-
-For latency-sensitive processing of small packets, CPU AES-NI is a reasonable architectural
-starting point. Dedicated CPU instructions can perform encryption without requiring the
-application to submit work to a separate accelerator and recover the result through a
-host--device transfer.
-
 The present measurements do not establish a consistent GPU pipeline advantage for the smallest
 workloads. Thus, they do not justify routing every small network packet through a discrete GPU.
-
-A different situation may arise in systems that process larger buffers or collections of
-independent messages.
-
-For example, a communication gateway, aggregation server, or large-volume data-processing
-service may be able to group suitable cryptographic work into larger processing batches.
-
-Such batching can increase the amount of useful computation associated with each accelerator
-invocation. It may also permit more efficient scheduling of independent work, although batching
-can introduce additional waiting latency.
 
 The measured 32~MiB results demonstrate that substantial processing volumes can favor the GPU
 under particular configurations. The T600 result shows that this advantage is not restricted to
@@ -193,172 +169,6 @@ communication system.
 The 32~MiB results should therefore be interpreted as evidence that large aggregate processing
 workloads warrant GPU evaluation, not as proof that individual telecommunication packets will be
 encrypted faster on the GPU.
-
-One potential application area is bulk cryptographic processing associated with large data
-transfers, network storage, traffic aggregation, or distributed data-processing infrastructure.
-
-Another is heterogeneous processing in which application data are already held on the GPU for
-other operations. In such a configuration, encryption may become part of a larger
-device-resident workflow, reducing the need to return intermediate data to host memory.
-
-These scenarios are architectural opportunities suggested by the measurements, rather than
-applications directly benchmarked in this study.
-
-The distinction is especially important for secure communication protocols.
-
-TLS and IPsec deployments generally require authenticated encryption, integrity protection, and
-correct management of cryptographic state. The AES-128 ECB and CTR measurements in this study do
-not include the complete cost of those protocols.
-
-Consequently, the results should not be interpreted as measured TLS or IPsec acceleration.
-
-A production-oriented evaluation would need to include the actual authenticated-encryption mode,
-such as AES-GCM, together with the relevant packet-processing and application boundaries
-\cite{dworkin2007gcm,rfc4106}.
-
-For telecommunications decision-makers, the practical recommendation is therefore conditional:
-GPU acceleration deserves consideration for high-volume, parallelizable cryptographic workloads,
-but the decision should be based on the complete processing path and the performance of the
-available CPU cryptographic instructions.
-
-\subsection{Architectural Guidance for System Designers}
-\label{subsec:discussion_pipeline}
-
-The results suggest that cryptographic acceleration should be treated as a workload-placement
-decision rather than a fixed preference for one processor type.
-
-A practical system may have access to CPU AES-NI, a discrete GPU, or other dedicated
-cryptographic acceleration hardware.
-
-The appropriate choice depends on how much data must be processed, where that data are located,
-and whether the application prioritizes throughput, latency, resource availability, or another
-objective.
-
-Table~\ref{tab:architectural_guidance} translates the measured findings into qualified
-considerations for system design.
-
-\begin{table}[htbp]
-  \centering
-  \small
-  \caption{Architectural implications of the observed AES benchmarking results. These
-  considerations are conditional design guidance, not measured performance guarantees for
-  complete applications.}
-  \label{tab:architectural_guidance}
-  \begin{tabularx}{\linewidth}{
-    >{\raggedright\arraybackslash}p{0.27\linewidth}
-    >{\raggedright\arraybackslash}X
-  }
-    \toprule
-    \textbf{Processing scenario} & \textbf{Evidence-based design consideration} \\
-    \midrule
-
-    Small, latency-sensitive messages & Prefer CPU AES-NI as an initial reference. The study
-    does not establish a general GPU pipeline advantage for small inputs. \\
-
-    \addlinespace
-
-    Large independent workloads & Evaluate a GPU processing path. A consistent 32~MiB CTR
-    pipeline advantage was measured on the T600 and T4 systems. \\
-
-    \addlinespace
-
-    Data already resident on a GPU & Assess device-side encryption as part of the existing
-    workflow. Resident results indicate potential, but complete applications were not tested. \\
-
-    \addlinespace
-
-    Host-memory input and output & Include H2D, kernel execution, D2H, synchronization, and
-    application-specific preparation costs in the evaluation. \\
-
-    \addlinespace
-
-    Secure network protocols & Benchmark complete authenticated encryption and packet-processing
-    operations before choosing a CPU, GPU, or dedicated crypto-offload path. \\
-
-    \bottomrule
-  \end{tabularx}
-\end{table}
-
-The table does not prescribe a universal minimum buffer size for GPU offloading. The experiments
-cover five discrete input sizes, and the observed performance curves are not uniformly
-monotonic.
-
-In particular, the local throughput reduction around 16~MiB is more consistent on the
-GTX~1650~Ti than on the other platforms, while the T4 pipeline follows a different pattern.
-
-A universal crossover threshold cannot therefore be inferred from the present data.
-
-An adaptive implementation could, in principle, select CPU or GPU processing according to
-measured workload characteristics.
-
-For example, a scheduler could retain small latency-sensitive requests on the CPU while
-assigning suitable larger batches to an accelerator.
-
-Such a decision mechanism would need to consider current load, queueing latency, transfer costs,
-and the cryptographic functionality required by the application.
-
-This represents a possible application of the benchmarking methodology, not an adaptive
-scheduling algorithm implemented or evaluated in the present work.
-
-The methodology provides a basis for measuring candidate paths consistently before a system
-designer establishes deployment-specific selection policies.
-
-\subsection{Relation to Contemporary Network and Cryptographic Acceleration}
-\label{subsec:discussion_platform}
-
-The importance of data placement is also reflected in contemporary heterogeneous communication
-architectures.
-
-Technologies such as NVIDIA GPUDirect RDMA enable supported systems to exchange data between GPU
-memory and compatible peripheral devices without requiring the same sequence of intermediate
-host-memory copies used by conventional processing paths\cite{nvidiaGpudirectRdma}.
-
-Such capabilities illustrate a broader architectural direction: reducing unnecessary data
-movement when accelerators participate in communication and data-processing systems.
-
-However, GPUDirect availability depends on specific hardware, platform topology, driver support,
-and application integration. The present GTX, T600, and T4 experiments did not evaluate
-GPUDirect communication or network-interface-to-GPU transfers.
-
-These technologies are therefore relevant to the interpretation and future application of the
-findings, not an explanation for the measured benchmark results.
-
-Another architectural direction is cryptographic offloading to network adapters and data
-processing units (DPUs).
-
-For example, NVIDIA BlueField and selected ConnectX devices support dedicated cryptographic
-offloading functionality, including implementations associated with IPsec and
-AES-GCM\cite{nvidiaDocaIpsecOffload}.
-
-This is distinct from executing a software-defined CUDA AES kernel on a general-purpose GPU.
-
-A dedicated cryptographic engine may integrate differently with the network data path and may
-avoid processing stages that are present in a host-driven discrete-GPU benchmark.
-
-The existence of these alternatives reinforces the need to distinguish cryptographic primitives,
-acceleration hardware, and complete processing paths.
-
-The present results should not be interpreted as a performance comparison between CUDA and
-BlueField, SmartNICs, or dedicated AES engines.
-
-Instead, they provide a methodological reference for evaluating such alternatives: the
-cryptographic functionality, measurement boundary, data location, CPU baseline, and statistical
-protocol must be specified before performance claims can be compared.
-
-An additional distinction concerns instruction-level cryptographic support.
-
-The tested CPU AES-NI path uses a hardware-assisted AES implementation.
-
-The CUDA baseline and optimized-v1 kernels, by contrast, implement AES through GPU-executed
-operations and do not rely on a dedicated GPU instruction directly equivalent to CPU AES-NI.
-
-Thus, a measured CUDA speedup must not be described as evidence of AES-NI instructions operating
-on the GPU.
-
-Future GPUs, programming environments, and dedicated acceleration devices may introduce
-different cryptographic execution capabilities.
-
-Nevertheless, the present study establishes no performance prediction for such future hardware.
 
 \subsection{Authenticated Encryption and Practical Security}
 \label{subsec:discussion_gcm}
@@ -381,10 +191,7 @@ provided by authenticated-encryption constructions.
 AES-GCM combines counter-mode AES processing with authentication based on
 GHASH~\cite{dworkin2007gcm}.
 
-The earlier CPU AES-GCM measurements reported in this paper illustrate the performance of one
-such authenticated-encryption implementation.
-
-However, the study does not include a validated GPU AES-GCM pipeline.
+The study does not include a validated GPU AES-GCM pipeline.
 
 Therefore, measured GPU ECB and CTR throughput cannot be treated as AES-GCM throughput, and the
 T600 or T4 CTR speedups cannot be transferred directly to TLS or IPsec deployments.
@@ -393,38 +200,10 @@ A complete AES-GCM GPU implementation would require evaluation of AES counter pr
 authentication-tag generation and verification, nonce management, and the relevant transfer and
 application-processing costs.
 
-This distinction also applies when considering specialized cryptographic hardware.
-
-The main architectural lesson is that the accelerated operation must match the actual security
-functionality required by the system.
-
-Higher isolated encryption throughput does not compensate for omitted authentication, incorrect
-nonce management, or incomplete protocol processing.
-
 \subsection{Limitations and Threats to Validity}
 \label{subsec:discussion_reproducibility}
 
-The findings are subject to several limitations.
-
-First, the study evaluates one machine or cloud allocation per platform, with five sessions
-each. Session-level consistency supports repeatability under the observed conditions but does
-not establish population-wide performance or statistical significance.
-
-Second, the platforms differ simultaneously in CPU, GPU, memory system, software libraries,
-drivers, and operating environment. These differences prevent isolating hardware-class or
-operating-system effects.
-
-Third, the CPU references represent selected library execution paths, while the CUDA
-implementations are baseline and lightweight optimization candidates rather than performance
-limits for the corresponding architectures.
-
-Fourth, the prepared-buffer GPU pipeline excludes allocation, initial staging, initialization,
-application I/O, and authenticated protocol processing. Its throughput must not be presented as
-complete application performance.
-
-Finally, the fixed workload-size order and the limited set of discrete sizes prevent causal
-explanations of the observed 16~MiB throughput feature or precise determination of general
-CPU--GPU crossover thresholds.
+The methodological limitations are detailed in Section~\ref{subsec:methodological_limitations}.
 
 The independently reconstructed statistics and archived source evidence strengthen internal
 traceability, but do not eliminate these external-validity and measurement-scope limitations.
@@ -470,40 +249,3 @@ architectures.
 More densely sampled and randomized workload sizes, combined with synchronized instrumentation,
 could also help investigate the observed non-monotonic throughput behavior and improve
 performance prediction.
-
-These directions reflect broader developments toward heterogeneous, data-aware cryptographic
-processing.
-
-They are not prerequisites for the conclusions reported in this paper.
-
-\subsection{Overall Interpretation}
-\label{subsec:discussion_overall}
-
-The results support a practical and methodologically qualified conclusion.
-
-GPU-based AES execution can outperform even a CPU path using dedicated AES-NI instructions,
-including under a transfer-inclusive processing boundary.
-
-The T600 and T4 CTR experiments provide direct measured examples of this possibility.
-
-At the same time, the consumer GTX~1650~Ti results show that substantial acceleration over
-software AES does not necessarily translate into an advantage over hardware-assisted CPU
-encryption.
-
-The T4 ECB and CTR contrast further demonstrates that CPU reference behavior and cipher mode can
-strongly influence reported GPU speedup factors.
-
-For system designers, the appropriate conclusion is therefore not that AES workloads should
-generally migrate to GPUs.
-
-Rather, CPU AES-NI should remain a strong reference for latency-sensitive or host-resident
-processing, while GPU offloading should be evaluated for suitable large, parallelizable, or
-device-resident workloads.
-
-For telecommunications, this supports a broader design principle: cryptographic execution should
-be selected according to the complete data-processing path, not the peak throughput of an
-isolated kernel.
-
-The contribution of the present study is to provide an auditable methodology and empirical
-evidence for making that distinction across accessible laptop GPUs and a datacenter
-configuration.
