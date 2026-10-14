@@ -2,218 +2,896 @@
 \section{Related Work and Research Gap}
 \label{sec:related_work}
 
+Research on the acceleration of symmetric cryptography has
+progressed along two complementary directions. The first
+investigates algorithmic and implementation techniques for
+improving AES throughput on parallel hardware. The second
+addresses the methodological requirements for comparing
+heterogeneous computing systems, including the choice of
+CPU reference, data-transfer overhead, timing boundaries,
+experimental variability, and reproducibility.
+
+These directions are closely related but do not answer
+the same research question. A highly optimized GPU kernel
+may demonstrate the computational potential of a particular
+architecture without establishing that transferring data
+to and from the device is advantageous for an application.
+Conversely, a transfer-inclusive comparison may reveal
+important system-level costs without identifying the
+maximum achievable performance of the underlying GPU.
+
+The present study builds on both research directions.
+It evaluates validated AES-128 implementations across
+three heterogeneous configurations, explicitly separating
+software CPU execution, hardware-assisted AES-NI,
+device-resident CUDA processing, and a synchronous
+prepared-buffer GPU pipeline.
+
+The purpose of this section is to position the study
+relative to previous AES acceleration research, identify
+the relevant methodological limitations of performance
+comparisons, and define the specific research gap
+addressed by the experimental evaluation.
+
+
 \subsection{GPU Acceleration of AES}
 \label{subsec:gpu_aes_literature}
 
-The acceleration of the Advanced Encryption Standard (AES) on graphics processing units has been investigated for nearly two decades. Early studies established the potential of GPU architectures to exploit the data-level parallelism available in block-cipher operations \cite{manavski2007cuda,harrison2007aes}. In particular, the Electronic Codebook (ECB) and Counter (CTR) modes offer independent block-level computation, making them suitable for massively parallel execution. By contrast, Cipher Block Chaining (CBC) encryption introduces dependencies between consecutive ciphertext blocks, limiting direct parallelization within a single message. CBC decryption, however, permits parallel block-cipher operations when the corresponding ciphertext blocks are available \cite{dworkin2001modes}.
+The acceleration of the Advanced Encryption Standard
+(AES) on graphics processing units has been investigated
+for nearly two decades.
 
-Manavski \cite{manavski2007cuda} demonstrated an early CUDA-compatible implementation of AES, contributing to the exploration of programmable GPUs as cryptographic accelerators. Harrison and Waldron \cite{harrison2007aes} investigated AES encryption and decryption on GPU architectures, providing additional evidence of the applicability of graphics hardware to symmetric cryptography.
+Early studies established that programmable GPUs
+could exploit the data-level parallelism available
+in symmetric block-cipher operations
+\cite{manavski2007cuda,harrison2007aes}.
 
-Iwai et al. \cite{iwai2012acceleration} subsequently examined the effects of thread granularity and memory placement on CUDA AES performance. Their experiments on an NVIDIA GeForce GTX 285 demonstrated that assigning 16 bytes per thread achieved approximately 35 Gbit/s. Importantly, the authors also investigated overlapping computation and data transfers, reporting approximately 22.5 Gbit/s when transfer time was included. This finding demonstrates that host--device communication had already been recognized as an important component of GPU cryptographic performance and that transfer-aware optimization predates the present study.
+The suitability of a cryptographic workload for
+parallel execution depends partly on its mode
+of operation.
 
-Wang and Chu \cite{wang2019gpu} investigated GPU-accelerated AES encryption and decryption using ECB mode, lookup-table-based transformations, and one AES state per thread. Their work further illustrated how memory organization, scheduling granularity, and algorithm representation influence the achievable performance of GPU implementations.
+Electronic Codebook (ECB) mode permits independent
+encryption of individual plaintext blocks.
+Counter (CTR) mode similarly permits independent
+generation of keystream blocks from distinct
+counter values.
 
-More recent research has emphasized increasingly specialized kernel optimization techniques. Tezcan \cite{tezcan2021optimization} introduced shared-memory optimizations designed to eliminate bank conflicts in table-based AES implementations. The reported AES-128 encryption throughput reached 878.6 Gbit/s on an NVIDIA RTX 2070 Super GPU, demonstrating the substantial performance potential of carefully optimized CUDA kernels.
+By contrast, Cipher Block Chaining (CBC) encryption
+introduces a dependency between consecutive
+ciphertext blocks, limiting direct parallelization
+within a single message. CBC decryption permits
+parallel block-cipher evaluation when the
+corresponding ciphertext blocks are available
+\cite{dworkin2001modes}.
 
-Subsequent bit-sliced AES implementations have further advanced GPU encryption throughput. A study published in 2024 \cite{bitsliced2024gpu} reported peak AES-CTR throughput of approximately 1623 Gbit/s on an RTX 3080 and 60 Gbit/s on an embedded Jetson Orin Nano GPU. These results illustrate the continuing importance of algorithm representation, parallel counter generation, and device-specific optimization.
+These differences explain why ECB and CTR
+frequently appear in GPU AES performance studies.
+ECB remains unsuitable for the protection of
+general structured application data, however,
+and its use as a performance benchmark should
+not be interpreted as a security recommendation.
 
-However, such throughput figures must be interpreted in relation to the workload, hardware generation, implementation strategy, and measurement boundaries used in each study. They should not be treated as directly interchangeable with throughput measured for a complete host-driven encryption pipeline.
+Manavski~\cite{manavski2007cuda} demonstrated
+an early CUDA-oriented AES implementation,
+contributing to the investigation of
+programmable GPUs as cryptographic accelerators.
 
-The present work does not seek to reproduce these optimized implementations or claim competitive state-of-the-art kernel throughput. Instead, it uses a functionally validated CUDA baseline and a lightweight optimization candidate to investigate how the definition of the measured execution path influences conclusions about CPU--GPU performance.
+Harrison and Waldron~\cite{harrison2007aes}
+also investigated AES encryption and
+decryption on GPU architectures, providing
+early evidence that general-purpose graphics
+hardware could support symmetric cryptography.
 
-% TODO-GPU-1:
-% After implementing and evaluating the NVIDIA T4 platform,
-% discuss how kernel performance and memory-transfer costs
-% vary across the two experimental environments.
-%
-% TODO-GPU-2:
-% Provide a precise description of the CUDA baseline and
-% lightweight optimization candidate, including memory
-% organization, thread granularity, and modified operations.
+Iwai et al.~\cite{iwai2012acceleration}
+subsequently studied the effects of thread
+granularity and memory placement on AES
+execution using an NVIDIA GeForce GTX~285.
+
+Their experiments identified a processing
+granularity of 16 bytes per thread as
+favorable for the evaluated implementation,
+achieving approximately 35~Gbit/s.
+
+Importantly, they also investigated
+overlapping computation and data transfers,
+reporting approximately 22.5~Gbit/s
+when transfer time was included.
+
+This work demonstrates that the importance
+of host--device communication was recognized
+in early CUDA AES research.
+
+The separation of device computation and
+transfer-inclusive performance is therefore
+not introduced here as a previously
+unknown concept.
+
+Later studies investigated increasingly
+specialized implementation strategies.
+
+Wang and Chu~\cite{wang2019gpu}
+examined GPU AES encryption and decryption
+using lookup-table-based transformations
+and independent AES states assigned
+to GPU execution threads.
+
+Their work illustrates how representation
+of the cipher state, memory access,
+and thread-level organization influence
+the performance of CUDA implementations.
+
+Tezcan~\cite{tezcan2021optimization}
+investigated shared-memory optimizations
+for GPU AES, including techniques designed
+to eliminate memory-bank conflicts.
+
+The reported AES-128 encryption throughput
+reached 878.6~Gbit/s on an NVIDIA
+RTX~2070~Super.
+
+This result illustrates the substantial
+potential of architecture-aware GPU
+optimization, but it should not be
+directly compared with transfer-inclusive
+throughput measured on different
+implementations and hardware.
+
+More recent bit-sliced approaches have
+further investigated the relationship
+between AES representation and
+GPU parallelism.
+
+A 2024 study~\cite{bitsliced2024gpu}
+reported high-throughput AES-ECB and
+AES-CTR execution using bit-sliced
+implementations, including results
+on an RTX~3080 and an embedded
+Jetson Orin Nano GPU.
+
+The study demonstrates the continuing
+relevance of representation-specific
+optimizations and parallel counter
+generation in GPU AES research.
+
+Taken together, these studies establish
+that GPU AES throughput can be improved
+substantially through memory organization,
+parallel granularity, instruction use,
+and algorithm representation.
+
+Nevertheless, reported performance
+figures must be interpreted within
+their respective experimental conditions.
+
+Results obtained using different GPU
+architectures, AES modes, workload sizes,
+software implementations, and timing
+boundaries cannot be treated as directly
+interchangeable measurements.
+
+The present work does not seek to
+reproduce state-of-the-art optimized
+GPU AES implementations or claim
+record-setting encryption throughput.
+
+Instead, a validated CUDA baseline
+and a lightweight optimized-v1
+candidate are used to investigate
+how the observed CPU--GPU relationship
+changes with workload size,
+cipher mode, computing environment,
+and measured execution scope.
 
 
 \subsection{CPU Acceleration and Fair Heterogeneous Comparisons}
 \label{subsec:cpu_gpu_comparison}
 
-A fundamental challenge in evaluating GPU-accelerated cryptography is the selection of an appropriate CPU reference. Conventional software implementations and hardware-accelerated CPU implementations may differ substantially in performance. Modern x86 processors provide dedicated AES instructions, commonly known as AES-NI, which accelerate important AES transformations in hardware \cite{intel2012aesni}.
+A fundamental issue in assessing
+GPU acceleration is the choice
+of CPU reference implementation.
 
-Consequently, comparisons between optimized GPU kernels and conventional software-based CPU implementations may exaggerate the practical benefits of GPU acceleration. A meaningful heterogeneous comparison should include the hardware-accelerated CPU path and clearly identify whether the reported CPU implementation uses a single processing thread, multiple threads, or additional vector instruction extensions.
+Modern x86 processors commonly
+provide dedicated Advanced
+Encryption Standard New Instructions
+(AES-NI), which accelerate
+important AES transformations
+through processor-supported
+operations~\cite{intel2012aesni}.
 
-This concern extends beyond cryptography. Lee et al. \cite{lee2010debunking} critically evaluated claims of exceptionally large GPU speedups and demonstrated that the observed performance advantage can decrease substantially when both architectures receive appropriate optimizations. Their study reported an average GPU advantage of approximately 2.5 times across the evaluated throughput-oriented kernels, rather than the much larger speedup factors sometimes reported in less balanced comparisons.
+The performance of an AES-NI-enabled
+implementation can differ substantially
+from that of a conventional software
+implementation.
 
-The relevance of this finding to cryptographic benchmarking is methodological rather than algorithm-specific. It suggests that GPU acceleration should not be evaluated against an artificially weak CPU baseline or without accounting for differences in implementation quality.
+Consequently, an apparent GPU
+advantage over software AES
+does not necessarily establish
+an advantage over a modern
+hardware-accelerated CPU.
 
-For this reason, the present study distinguishes conventional CPU software AES from hardware-accelerated CPU AES-NI. The AES-NI path serves as the primary CPU reference in the paired CPU--GPU comparison, while the software implementation provides an additional reference for evaluating the influence of processor-level acceleration.
+A meaningful CPU--GPU comparison
+should therefore identify the
+cryptographic library, hardware
+acceleration path, execution scope,
+and relevant threading assumptions.
 
-Nevertheless, CPU implementation characteristics remain relevant. Library selection, instruction dispatch, thread count, mode-specific processing, and application-level invocation overhead may influence the measured throughput. Therefore, conclusions obtained using a specific CPU library and execution configuration must not be interpreted as universal limits of CPU AES performance.
+This concern is not specific
+to cryptography.
 
-% TODO-CPU-1:
-% Add an independent OpenSSL EVP reference using a native
-% implementation and document the active AES instruction path.
-%
-% TODO-CPU-2:
-% Extend the CPU comparison to multiple thread counts,
-% where appropriate, and distinguish single-thread from
-% aggregate CPU throughput.
-%
-% TODO-CPU-3:
-% Report the exact CPU library versions and confirm the
-% hardware acceleration selected at runtime.
+Lee et al.~\cite{lee2010debunking}
+investigated CPU--GPU performance
+comparisons and demonstrated that
+large reported GPU speedups can
+decrease substantially when the
+CPU implementation is appropriately
+optimized.
+
+Their findings establish a broader
+methodological principle:
+comparisons between heterogeneous
+architectures are sensitive to
+the quality of the implementations
+selected as references.
+
+The present study applies this
+principle by reporting two
+distinct CPU execution paths.
+
+The conventional software AES
+implementation provides a
+reference for assessing the
+impact of software-level
+cryptographic computation.
+
+The AES-NI-enabled implementation
+provides a stronger hardware-assisted
+CPU reference for evaluating
+GPU offloading.
+
+The AES-NI path is used as the
+principal CPU denominator in
+the paired GPU speedup analysis.
+
+However, the CPU reference is
+not presented as the maximum
+attainable AES performance
+of the entire host system.
+
+Library choice, mode-specific
+processing, processor features,
+instruction dispatch,
+thread count, and invocation
+overhead can affect the result.
+
+In particular, a single-threaded
+library execution path should
+not be interpreted as equivalent
+to a fully optimized multithreaded
+CPU encryption service.
+
+Accordingly, the present results
+characterize measured implementation
+paths rather than universal
+architectural performance limits.
 
 
 \subsection{Measurement Scope and Data-Movement Overhead}
 \label{subsec:measurement_scope}
 
-One of the most consequential methodological issues in heterogeneous performance evaluation is the boundary of the timed operation. GPU applications typically involve more than device-side computation. Depending on the workload and implementation, execution may include input preparation, host-memory staging, host-to-device (H2D) transfer, kernel launch, device execution, synchronization, and device-to-host (D2H) transfer.
+Another central methodological
+issue concerns the operations
+included within a timed interval.
 
-Gregg and Hazelwood \cite{gregg2011data} demonstrated the importance of data placement and movement in CPU--GPU comparisons. Their work established that accelerator performance cannot be interpreted independently of where application data reside and which transfers are necessary to complete the evaluated workload.
+A GPU application may involve
+input preparation, host-buffer
+staging, host-to-device transfer,
+kernel dispatch, device execution,
+synchronization, device-to-host
+transfer, and subsequent
+application processing.
 
-This distinction is particularly important for cryptographic processing because the input and output buffers may originate from, and ultimately return to, host memory. In such scenarios, the throughput of an isolated device-resident encryption kernel is not necessarily representative of the application-visible encryption throughput.
+Whether these operations are
+included in a benchmark
+determines the meaning of
+the reported elapsed time.
 
-For a sequential, non-overlapped GPU execution path, total processing time can be represented conceptually as
+Gregg and Hazelwood
+\cite{gregg2011data}
+demonstrated the importance
+of data location in meaningful
+CPU--GPU comparisons.
+
+Their work emphasizes that
+application-level performance
+cannot be inferred solely
+from device computation
+when substantial data movement
+is required.
+
+CUDA programming guidance
+similarly identifies minimizing
+unnecessary transfers and
+organizing computation and
+data movement as important
+optimization considerations
+\cite{nvidiaProgrammingGuide,
+nvidiaBestPractices,harris2012overlap}.
+
+CuPy documentation further
+emphasizes that CUDA operations
+may execute asynchronously
+relative to the host, making
+appropriate device timing
+and synchronization essential
+\cite{cupyPerformance,cupyRawKernel}.
+
+These considerations are
+particularly important
+for cryptographic workloads
+because the input and output
+buffers may be maintained
+in CPU memory rather than
+resident GPU memory.
+
+A resident kernel measurement
+characterizes device execution
+after the necessary input
+data have been placed
+on the GPU.
+
+A transfer-inclusive pipeline
+measurement additionally
+captures the defined
+host-driven operations
+needed to move data
+through the accelerator.
+
+The two measurements therefore
+answer different computational
+questions.
+
+For a sequential GPU pipeline,
+the elapsed time may be
+represented conceptually as
 
 \begin{equation}
-T_{\mathrm{GPU,E2E}} =
-T_{\mathrm{setup}} +
-T_{\mathrm{H2D}} +
-T_{\mathrm{kernel}} +
-T_{\mathrm{D2H}} +
-T_{\mathrm{sync}} +
-T_{\mathrm{other}},
+T_{\mathrm{pipeline}}
+=
+T_{\mathrm{H2D}}
++
+T_{\mathrm{kernel}}
++
+T_{\mathrm{D2H}}
++
+T_{\mathrm{overhead}},
 \label{eq:gpu_e2e_components}
 \end{equation}
 
-where the individual terms represent setup costs, data transfers, device computation, synchronization, and other implementation-dependent overheads. The exact inclusion of these components must be documented for each measurement.
+where the terms denote
+non-overlapping conceptual
+contributions from transfer,
+kernel execution, and
+other operations within
+the chosen measurement boundary.
 
-By contrast, a resident-kernel measurement isolates the device execution component after input data have already been placed in GPU memory. Such a measurement is useful for investigating kernel efficiency, but it answers a different question from the end-to-end experiment.
+This expression is a
+conceptual decomposition,
+not a claim that separately
+measured component medians
+must sum to the observed
+median pipeline time.
 
-CUDA programming guidelines emphasize that minimizing unnecessary data movement and overlapping transfers with computation are important techniques for improving application performance \cite{nvidiaProgrammingGuide,nvidiaBestPractices,harris2012overlap}. The CuPy performance guidelines similarly emphasize appropriate GPU timing procedures and the effects of asynchronous execution \cite{cupyPerformance,cupyRawKernel}.
+The overhead term may include
+dispatch, synchronization,
+and relevant host-side
+operations, depending
+on the implementation.
 
-These considerations motivate a distinction between three experimental concepts: the computational throughput of the cryptographic transformation, the throughput of a GPU kernel operating on resident data, and the throughput of a complete host-driven processing pipeline.
+Operations outside the
+timer must also be identified.
 
-The present study explicitly separates these measurement scopes rather than treating them as equivalent estimates of practical encryption performance.
+In the present study,
+the measured GPU pipeline
+starts with prepared
+pinned host buffers and
+preallocated device buffers.
 
-% TODO-PIPELINE-1:
-% Measure H2D, kernel, D2H, synchronization, and host-side
-% staging costs independently.
-%
-% TODO-PIPELINE-2:
-% Verify which setup, allocation, and staging operations
-% are included in the current end-to-end timer.
-%
-% TODO-PIPELINE-3:
-% Implement an asynchronous chunked pipeline using pinned
-% host memory, CUDA streams, and overlapping transfers.
-%
-% TODO-PIPELINE-4:
-% Compare synchronous and asynchronous end-to-end execution
-% without assuming that overlap necessarily improves throughput.
+The interval includes
+the defined synchronous
+H2D--kernel--D2H sequence
+and the synchronization
+required for completion.
+
+It does not include
+initial host staging,
+buffer allocation or
+pinning, cryptographic
+key preparation, or
+complete application I/O.
+
+Therefore, the term
+\emph{prepared-buffer pipeline}
+is preferred over an
+unqualified claim of
+complete application-level
+end-to-end performance.
+
+This explicit boundary
+makes the comparison
+reproducible and helps
+prevent resident-kernel
+throughput from being
+misinterpreted as the
+throughput of a complete
+encryption application.
 
 
 \subsection{Scientific Benchmarking and Reproducibility}
 \label{subsec:benchmarking_literature}
 
-Beyond implementation efficiency, the reliability of a performance comparison depends on experimental design and statistical interpretation.
+The reliability of
+performance comparisons
+depends on experimental
+design as well as
+implementation efficiency.
 
-Mytkowicz et al. \cite{mytkowicz2009wrong} demonstrated that apparently minor changes in experimental conditions can introduce systematic measurement bias and alter the conclusions of computer-system performance evaluations. Their findings highlight the need to control factors such as execution order, environment configuration, and other sources of experimental variability.
+Mytkowicz et al.
+\cite{mytkowicz2009wrong}
+demonstrated that seemingly
+minor experimental conditions
+can introduce systematic
+bias and substantially
+alter benchmark conclusions.
 
-Kalibera and Jones \cite{kalibera2013rigorous} examined rigorous benchmarking under practical measurement-time constraints. Their work emphasizes the importance of accounting for variability across repeated observations and across different levels of experimental execution.
+Their work highlights
+the importance of
+documenting execution
+conditions and potential
+sources of measurement
+interference.
 
-Hoefler and Belli \cite{hoefler2015scientific} addressed the scientific interpretation of parallel-computing performance results, emphasizing statistically sound experimental design, meaningful performance reporting, and the distinction between reproducible effects and measurement noise.
+Kalibera and Jones
+\cite{kalibera2013rigorous}
+examined rigorous benchmarking
+under practical time
+constraints and emphasized
+the need to account
+for variability across
+different levels of
+experimental replication.
 
-These studies provide a methodological foundation for the present benchmarking protocol. Rather than relying exclusively on isolated timing observations, the framework organizes measurements into documented experimental sessions and preserves the information required to evaluate their consistency.
+Hoefler and Belli
+\cite{hoefler2015scientific}
+further discussed
+scientific benchmarking
+of parallel computing
+systems, stressing
+defensible performance
+reporting and the
+interpretation of
+measurement variability.
 
-Functional correctness is verified before accepting performance measurements. Controlled inputs and fixed random seeds are used to reduce unnecessary workload variation, while paired experimental configurations are intended to improve the comparability of CPU and GPU execution paths.
+These studies motivate
+a hierarchical treatment
+of benchmark observations
+rather than indiscriminate
+pooling of all repeated
+timing values.
 
-The framework also records raw measurements, aggregated results, validation outcomes, and execution-environment metadata. This separation of experimental evidence from derived summaries is intended to support subsequent auditing and independent reanalysis.
+The present study
+organizes observations
+into independent
+study sessions.
 
-However, successful cryptographic test-vector validation establishes the correctness of the evaluated implementations under the tested conditions; it does not, by itself, establish the statistical validity of the benchmarking methodology. The latter requires additional evidence concerning measurement stability, sensitivity to experimental conditions, and consistency with independently obtained measurements.
+Each selected platform
+contributes five sessions,
+and each measured group
+contains twenty recorded
+timing repetitions
+following five warm-up
+executions.
 
-Accordingly, the methodological contribution is evaluated through its explicit measurement definitions, repeatable execution protocol, preserved artifacts, and analysis of the observed performance differences.
+The session constitutes
+the primary replication
+unit for statistical
+aggregation.
 
-% TODO-STAT-1:
-% Extend the statistical analysis with session-level
-% confidence intervals, dispersion measures, and sensitivity
-% to execution order and warm-up conditions.
-%
-% TODO-STAT-2:
-% Introduce positive and negative controls for validating
-% the measurement procedure itself.
-%
-% TODO-STAT-3:
-% Cross-check selected CPU and GPU measurements using
-% independent tools, such as OpenSSL and CUDA bandwidth tests.
-%
-% TODO-REPRO-1:
-% Publish versioned source code, raw measurements, validation
-% reports, and environment manifests.
-%
-% TODO-REPRO-2:
-% Clearly distinguish repeatability, reproducibility, and
-% replicability according to the adopted terminology.
+CPU--GPU speedups are
+calculated from paired
+session-level timing
+medians and subsequently
+aggregated across the
+five sessions.
+
+This preserves the
+workload pairing and
+avoids treating nested
+repetitions as independent
+experimental sessions.
+
+The framework additionally
+retains raw observations,
+derived summaries,
+validation records,
+source snapshots,
+and execution metadata.
+
+An independent offline
+analysis reconstructed
+the saved statistical
+estimators from the
+archived raw data
+without detecting
+numerical discrepancies
+within the declared
+comparison tolerances.
+
+This verification
+supports the internal
+consistency and auditability
+of the analysis.
+
+However, successful
+cryptographic validation
+does not independently
+establish the absence
+of timing bias.
+
+Likewise, matching source
+hashes do not imply
+identical compiled
+binaries or equivalent
+execution conditions
+across different platforms.
+
+The methodology therefore
+distinguishes cryptographic
+correctness, measurement
+integrity, repeatability,
+and the external validity
+of the resulting
+performance conclusions.
 
 
-\subsection{Research Gap and Contributions}
+\subsection{Research Gap and Research Questions}
 \label{subsec:research_gap}
 
-The reviewed literature reveals two complementary research directions.
+The reviewed literature
+establishes two relevant
+bodies of knowledge.
 
-The first focuses on accelerating AES through parallel algorithm design, memory-placement strategies, table-based transformations, bit-slicing, and architecture-specific kernel optimizations \cite{iwai2012acceleration,wang2019gpu,tezcan2021optimization,bitsliced2024gpu}.
+The first demonstrates
+the potential of GPU
+AES acceleration through
+parallel execution,
+memory organization,
+table-based transformations,
+bit slicing, and
+architecture-specific
+optimizations
+\cite{iwai2012acceleration,
+wang2019gpu,
+tezcan2021optimization,
+bitsliced2024gpu}.
 
-The second focuses on the methodological foundations of heterogeneous performance evaluation, including fair CPU--GPU comparisons, data-transfer costs, experimental variability, and scientifically defensible benchmarking practices \cite{lee2010debunking,gregg2011data,mytkowicz2009wrong,kalibera2013rigorous,hoefler2015scientific}.
+The second establishes
+methodological requirements
+for heterogeneous
+performance comparisons,
+including appropriate
+CPU references,
+data-movement costs,
+experimental variability,
+and reproducible
+benchmarking practices
+\cite{lee2010debunking,
+gregg2011data,
+mytkowicz2009wrong,
+kalibera2013rigorous,
+hoefler2015scientific}.
 
-These directions are closely related, but they address different aspects of performance evaluation. Kernel optimization studies establish what can be achieved under particular computational conditions, whereas measurement-methodology studies establish how performance results should be collected, compared, and interpreted.
+These principles are
+already well established.
 
-Importantly, previous GPU AES research has already investigated data-transfer overhead and overlapping computation with communication \cite{iwai2012acceleration}. Therefore, the distinction between kernel-only and transfer-inclusive measurements is not claimed as a new concept.
+In particular, previous
+AES-specific research
+has considered transfer
+overhead and overlap
+between computation
+and communication
+\cite{iwai2012acceleration}.
 
-The research gap addressed by this paper is more specific: the need to bring cryptographic correctness validation, contemporary CPU AES-NI baselines, explicitly separated GPU measurement scopes, paired execution conditions, and preserved experimental artifacts into a unified and documented evaluation protocol.
+Therefore, the present
+work does not claim
+to have discovered
+data-transfer overhead
+or introduced the
+kernel-only versus
+pipeline distinction.
 
-Within this scope, the main contributions of the present study are summarized as follows:
+Instead, the specific
+research gap addressed
+here is the need for
+an integrated,
+validation-first,
+auditable empirical
+comparison that
+simultaneously includes:
 
 \begin{enumerate}
 
-\item \textbf{A validation-first cryptographic benchmarking protocol.}
-The study establishes correctness checks as a prerequisite for accepting timing measurements and defines controlled execution profiles, fixed workloads, and documented experimental configurations.
+\item A conventional
+software AES reference
+and a hardware-assisted
+CPU AES-NI reference;
 
-\item \textbf{An explicit separation of heterogeneous execution paths.}
-The protocol distinguishes conventional software AES, hardware-accelerated CPU AES-NI, GPU resident-kernel execution, and GPU end-to-end processing. This prevents computational and application-level throughput measurements from being treated as directly equivalent.
+\item Validated baseline
+and optimized-v1
+CUDA AES-128
+implementations;
 
-\item \textbf{A paired CPU AES-NI versus CUDA comparison.}
-The experimental design compares corresponding workloads under explicitly documented conditions, with AES-NI serving as the primary CPU reference and a software implementation serving as an additional baseline.
+\item Matched ECB and
+CTR workloads across
+multiple input sizes;
 
-\item \textbf{A reproducible measurement and reporting structure.}
-Raw timing observations, aggregated summaries, functional validation records, and execution metadata are retained to support transparent interpretation and subsequent independent analysis.
+\item Explicitly
+distinguished resident
+and transfer-inclusive
+GPU measurement scopes;
 
-\item \textbf{An empirical assessment of measurement-scope dependence.}
-The study examines the extent to which observed CPU--GPU performance relationships depend on whether device computation or the complete host-driven pipeline is measured, while limiting its conclusions to the tested hardware, software stack, and execution configuration.
+\item Independent
+study sessions,
+paired statistical
+estimators, and
+reported variability;
+
+\item Preserved raw data,
+configuration metadata,
+validation artifacts,
+and source-level
+provenance;
+
+\item Observations from
+two accessible NVIDIA
+laptop GPUs and a
+Linux-based datacenter
+GPU configuration.
 
 \end{enumerate}
 
-The scientific contribution is therefore not an assertion that one computational architecture is universally superior for AES encryption. Instead, it is an experimentally grounded assessment of how implementation choices, measurement boundaries, and reference baselines influence the interpretation of heterogeneous cryptographic performance.
+The objective is not
+to demonstrate a
+universal architectural
+advantage, but to
+identify conditions
+under which particular
+CPU--GPU performance
+conclusions are
+supported by
+reproducible evidence.
 
-This perspective is particularly relevant to systems in which encryption is one stage of a larger data-processing workflow, because the optimal processing location may depend on data residency, transfer costs, workload size, and the available CPU and GPU execution resources.
+The overarching
+research question
+is formulated as follows:
 
-% TODO-T4-1:
-% Extend the framework to an NVIDIA T4 cloud GPU under Linux
-% and evaluate whether the measurement-scope conclusions
-% remain consistent across the two environments.
-%
-% TODO-T4-2:
-% Characterize PCIe transfer bandwidth, launch overhead,
-% clock behavior, and the available CPU reference on each
-% platform before interpreting cross-platform differences.
-%
-% TODO-MODEL-1:
-% Introduce and validate a quantitative latency/throughput
-% cost model for CPU versus GPU execution.
-%
-% TODO-MODEL-2:
-% Estimate the workload-size crossover, if one exists,
-% and distinguish observed crossover points from extrapolated
-% predictions.
-%
-% TODO-SCOPE-1:
-% Revise the contribution list after the additional
-% experiments are completed. Do not claim cross-platform
-% validation or pipeline optimization before measurements
-% provide supporting evidence.
+\begin{quote}
+\textbf{Central Research Question:}
+
+Under which measured conditions
+can GPU-based AES-128 encryption
+outperform a hardware-accelerated
+CPU AES-NI implementation,
+and how does the definition
+of the measurement boundary
+affect that conclusion?
+\end{quote}
+
+This question is
+operationalized through
+three complementary
+research questions:
+
+\begin{enumerate}
+
+\item[\textbf{RQ1:}]
+\textbf{GPU offloading advantage.}
+Under which tested input
+sizes, AES modes,
+and hardware configurations
+do CUDA implementations
+outperform software CPU
+AES and hardware-assisted
+AES-NI, and which advantages
+remain consistent across
+the five study sessions?
+
+\item[\textbf{RQ2:}]
+\textbf{Measurement-scope
+dependence.}
+How does the observed
+CPU--GPU performance
+relationship change
+when the GPU boundary
+is expanded from
+device-resident kernel
+execution to the
+synchronous prepared-buffer
+pipeline including
+host--device transfers
+and synchronization?
+
+\item[\textbf{RQ3:}]
+\textbf{Consistency and
+cross-platform interpretation.}
+How do session
+variability, workload
+size, cipher mode,
+and differences among
+the tested Windows
+laptop and Linux/T4
+configurations limit
+the generalization
+of observed
+GPU acceleration?
+
+\end{enumerate}
+
+These questions are
+intended to be answered
+empirically using
+the validated and
+archived study results.
+
+They do not require
+an assumption that
+GPU acceleration must
+be advantageous.
+
+Both positive and
+negative outcomes
+are relevant to
+the research problem.
+
+
+\subsection{Contributions and Positioning}
+\label{subsec:related_contributions}
+
+Relative to the
+reviewed literature,
+the study makes
+three principal
+contributions.
+
+\begin{enumerate}
+
+\item \textbf{An integrated,
+validation-first,
+reproducible benchmarking
+methodology.}
+
+The framework combines
+cryptographic correctness
+verification, deterministic
+paired inputs, explicit
+timing scopes,
+session-level statistical
+aggregation, and
+preservation of raw
+experimental evidence.
+
+Its methodological
+contribution lies
+in applying these
+requirements together,
+not in claiming
+that the individual
+benchmarking principles
+are unprecedented.
+
+\item \textbf{A three-platform
+empirical assessment
+of contemporary
+AES execution paths.}
+
+The study evaluates
+software AES, AES-NI,
+and two CUDA candidates
+across fifteen sessions
+and 18,000 raw timing
+observations.
+
+The platforms include
+a consumer GeForce
+GTX~1650~Ti,
+an entry-level
+professional T600
+Laptop GPU, and
+a Tesla T4
+datacenter GPU.
+
+The analysis preserves
+platform-specific
+CPU references and
+does not pool
+heterogeneous systems
+into a single
+performance estimate.
+
+\item \textbf{An
+evidence-qualified
+interpretation of
+GPU acceleration
+and deployment
+relevance.}
+
+The results identify
+conditions under which
+GPU execution exceeds
+the selected AES-NI
+CPU reference,
+including a consistent
+transfer-inclusive
+CTR advantage on
+the T600 at 32~MiB.
+
+They also document
+resident-to-pipeline
+reversals, negative
+or mixed CPU--GPU
+comparisons, and
+mode-dependent
+performance differences.
+
+These observations
+support practical
+interpretation without
+claiming universal
+GPU superiority or
+complete application-level
+performance.
+
+\end{enumerate}
+
+The study therefore
+occupies a distinct
+position between
+GPU kernel optimization
+research and general
+performance-measurement
+methodology.
+
+Its scientific value
+lies in connecting
+validated cryptographic
+execution, clearly
+defined timing
+boundaries, a strong
+CPU hardware baseline,
+and independently
+auditable experimental
+results.
+
+This approach is
+particularly relevant
+to heterogeneous
+data-processing and
+communication systems,
+where the appropriate
+cryptographic execution
+path may depend on
+data residency,
+workload size,
+required functionality,
+and the acceleration
+mechanisms available
+on the host.
+
+The resulting
+methodology provides
+a basis for informed
+architectural
+assessment rather
+than a predetermined
+recommendation
+to favor either
+CPU or GPU execution.
