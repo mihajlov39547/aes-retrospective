@@ -255,6 +255,8 @@ def execute(directory, retry_failed=False, retry_skipped=False):
                                 proc=psutil.Process(orphan['pid'])
                                 check(orphan.get('process_created') is not None and proc.create_time()!=orphan['process_created'],'Prior benchmark process is still alive; wait for it to exit before resuming')
                             except psutil.NoSuchProcess: pass
+                            except psutil.AccessDenied as exc:
+                                raise ValueError('Cannot establish prior benchmark process identity; refusing to resume') from exc
                     old_path.rename(directory/'failed-attempts'/old_path.name)
                     task['attempts'][task['attempts'].index(old)]='failed-attempts/'+old_path.name
             attempt=directory/'attempts'/(name+'-seed-'+str(seed)+'-'+identifier()); attempt.mkdir()

@@ -224,6 +224,56 @@ p.write_text(json.dumps(data))
         self.assertTrue(r.execute(self.directory))
         self.assertEqual(len(a.read(self.directory/'status.json')['tasks']['avalanche/seed-2003']['attempts']),1)
 
+    def orphan_attempt(self, created):
+        attempt=self.directory/'attempts/orphan'; attempt.mkdir()
+        r.write(attempt/'command.json',dict(pid=12345,process_created=created))
+        state=a.read(self.directory/'status.json')
+        state['tasks']['avalanche/seed-2003'].update(state='RUNNING',attempts=['attempts/orphan'])
+        r.write(self.directory/'status.json',state)
+        return attempt
+
+    def test_resume_original_pid_still_running(self):
+        attempt=self.orphan_attempt(100.0)
+        with patch('psutil.Process') as process, patch('orchestration.runner.process') as launch:
+            process.return_value.create_time.return_value=100.0
+            with self.assertRaisesRegex(ValueError,'still alive'): r.execute(self.directory)
+            launch.assert_not_called()
+        self.assertTrue(attempt.exists())
+        self.assertEqual(len(a.read(self.directory/'status.json')['tasks']['avalanche/seed-2003']['attempts']),1)
+
+    def test_resume_reused_pid_runs_once(self):
+        attempt=self.orphan_attempt(100.0)
+        with patch('psutil.Process') as process, patch('orchestration.runner.process',wraps=r.process) as launch:
+            process.return_value.create_time.return_value=200.0
+            self.assertTrue(r.execute(self.directory))
+            self.assertTrue(r.execute(self.directory))
+            self.assertEqual(launch.call_count,1)
+            process.return_value.terminate.assert_not_called()
+            process.return_value.kill.assert_not_called()
+        self.assertFalse(attempt.exists())
+        self.assertTrue((self.directory/'failed-attempts/orphan/command.json').exists())
+
+    def test_resume_missing_creation_timestamp_blocks(self):
+        self.orphan_attempt(None)
+        with patch('psutil.Process'), patch('orchestration.runner.process') as launch:
+            with self.assertRaisesRegex(ValueError,'still alive'): r.execute(self.directory)
+            launch.assert_not_called()
+
+    def test_resume_unreadable_creation_timestamp_blocks(self):
+        import psutil
+        self.orphan_attempt(100.0)
+        with patch('psutil.Process') as process, patch('orchestration.runner.process') as launch:
+            process.return_value.create_time.side_effect=psutil.AccessDenied(12345)
+            with self.assertRaisesRegex(ValueError,'Cannot establish'): r.execute(self.directory)
+            launch.assert_not_called()
+
+    def test_resume_missing_timestamp_exited_pid_safe(self):
+        import psutil
+        self.orphan_attempt(None)
+        original=psutil.Process
+        with patch('psutil.Process',side_effect=lambda pid: (_ for _ in ()).throw(psutil.NoSuchProcess(pid)) if pid==12345 else original(pid)):
+            self.assertTrue(r.execute(self.directory))
+
     def test_config_tamper(self):
         c=a.read(self.directory/'config.resolved.json'); c['seeds']=[1]
         r.write(self.directory/'config.resolved.json',c)
@@ -449,6 +499,8 @@ class ScientificSuiteTests(unittest.TestCase):
         output=aggregate(directory); report=a.read(output/'summary.json')
         self.assertEqual(report['schema_version'],2)
         self.assertTrue(report['publication_quality'])
+        self.assertEqual(report['publication_quality_definition'],
+                         'Dataset completeness and integrity only; not statistical or scientific publication readiness.')
         self.assertTrue(all(r['expected_sessions']==5 and r['complete'] for r in report['rows']))
         self.assertEqual(before,a.hashes(directory/'experiments'))
 

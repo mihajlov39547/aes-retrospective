@@ -288,6 +288,10 @@ Ctrl+C terminates/waits for the active subprocess, preserves its attempt and
 records interruption. Timeouts are failures, preserving logs and partial output.
 Hard-killed parent processes can leave an orphan child: resume refuses to start
 another measurement while that recorded child is alive. Wait for it to exit.
+PID identity includes its creation timestamp. A reused PID permits recovery only
+when a different creation time establishes that the original process has exited.
+Missing or unreadable timestamps block recovery while that PID exists; an absent
+PID permits recovery. Resume does not terminate unrelated processes.
 Each retry gets a separate attempt. Interrupted work is retried; FAILED and
 SKIPPED require their explicit flags. Completed results are verified and reused,
 never overwritten. A crash after promotion is recovered by verifying the bundle.
@@ -339,6 +343,10 @@ verification exit code while being scientifically **partial**. Consult the field
 and `missing_measurements`, not the exit code alone. A study with skipped GPU work
 cannot generate publication-quality aggregates. Here publication quality means
 completeness and integrity, not an endorsement of experimental design or variance.
+The boolean `publication_quality` retains its existing name and behavior for
+compatibility. New exports also include `publication_quality_definition`, explicitly
+stating that it is not statistical or scientific publication readiness. Older
+exports without this explanatory field retain the same limited meaning.
 
 The resolved per-experiment seed lists define exact expected sessions. Every
 present session must contain every configured metric group. Duplicate seeds or

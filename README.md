@@ -44,6 +44,11 @@ Pregled projektnih izvora; lokalni direktorijumi navedeni su zasebno ispod.
 │   ├── common.py
 │   ├── benchmark.py
 │   ├── aes_acceleration.py
+│   ├── aes_gcm_benchmark.py
+│   ├── aes_cuda_baseline.py
+│   ├── aes_cuda_cpu_gpu.py
+│   ├── run_all_experiments.py
+│   ├── orchestration/
 │   ├── aes_gpu.py
 │   ├── avalanche_test.py
 │   ├── brute_force_demo.py
@@ -52,6 +57,11 @@ Pregled projektnih izvora; lokalni direktorijumi navedeni su zasebno ispod.
 ├── experiments/
 │   ├── README.md
 │   ├── requirements.txt
+│   ├── ORCHESTRATION.md
+│   ├── configs/
+│   ├── aes_cuda_baseline.cu
+│   ├── aes_cuda_optimized.cu
+│   ├── aes_cuda_ttable.cu
 │   ├── aes_gpu_kernel.cu
 │   └── results/
 │       └── README.md
@@ -133,6 +143,8 @@ Cross-platform experiment runner: [Orchestration guide](experiments/ORCHESTRATIO
 Use `python scripts/run_all_experiments.py list` and
 `python scripts/run_all_experiments.py plan --config experiments/configs/cpu-smoke.json`.
 New runs use `experiments/results_orchestrated/`; archived results remain unchanged.
+The compatibility field `publication_quality` means dataset completeness and integrity,
+not statistical or scientific publication readiness.
 Study exports require complete configured seed sets and required metrics;
 verification distinguishes complete, partial and invalid scientific datasets.
 For a paired-only NVIDIA T4 smoke/pilot/study workflow, see the
@@ -143,31 +155,28 @@ Python skripte su u `scripts/`; opis svake i komande nalaze se u
 [scripts/README.md](scripts/README.md). Metodologija, zavisnosti, CUDA izvor i
 rezultati ostaju u `experiments/`.
 
-### Novi CPU/GPU eksperiment
+### Operational CUDA experiments and inactive scaffold
 
-Dodati su `scripts/aes_gpu.py`, `experiments/aes_gpu_kernel.cu` i
-`tables/aes_cpu_gpu.tex`. Poglavlje 9 sada obuhvata tri AES-128 putanje u
-ECB/CTR modu: CPU software, CPU AES-NI i NVIDIA CUDA. CBC ostaje odvojeni
-istorijski CPU eksperiment. Poglavlja 6 i 10 povezuju ovu metodologiju sa
-paralelizacijom i retrospektivom, bez unapred pretpostavljene prednosti GPU-a.
+`scripts/aes_cuda_baseline.py` is the operational standalone AES-128 CUDA
+benchmark. `scripts/aes_cuda_cpu_gpu.py` performs the paired CPU software,
+CPU AES-NI and CUDA baseline/v1 comparison in ECB/CTR. Resident kernel-only
+measurements remain separate from prepared-buffer, transfer-inclusive pipeline
+measurements. Standalone and paired results are independent datasets.
+
+`scripts/aes_gpu.py` and `experiments/aes_gpu_kernel.cu` are an inactive legacy
+scaffold with an intentional compilation blocker, excluded from executable suites.
+They do not describe the readiness of the operational CUDA implementations.
+T-table is a separate validated candidate, absent from final archived timings.
 
 ```powershell
-python scripts/aes_gpu.py
-python scripts/aes_gpu.py --check
+python scripts/run_all_experiments.py doctor --config experiments/configs/heterogeneous-core-smoke.json
+python scripts/run_all_experiments.py plan --config experiments/configs/heterogeneous-core-smoke.json
+python scripts/run_all_experiments.py run --config experiments/configs/heterogeneous-core-smoke.json
 ```
 
-Prva komanda prikazuje plan, druga otkriva CPU/GPU okruženje bez merenja.
-CUDA fajl je namerno blokiran skeleton: potrebno je implementirati i validirati
-AES-128 pre `--validate-only` i `--run`. Ni GPU merenja ni grafikoni još nisu
-generisani. CuPy je opciona zavisnost; konkretan paket bira se nakon provere
-runtime-a, drajvera, platforme i Python verzije, prema uputstvu u
-[eksperimentalnom README-u](experiments/README.md#gpu-cuda-okvir).
-
-Izvoz je pripremljen za stvarne, validirane podatke:
-`python scripts/export_results.py experiments/results/aes_cpu_gpu-pilot-ID`.
-U poddirektorijumima `ECB/` i `CTR/` nastaju `throughput_vs_size.pdf`,
-`latency_vs_size.pdf`, `gpu_overhead_breakdown.pdf` i `speedup_vs_size.pdf`,
-uz PNG kopije i LaTeX tabelu. Bez validacije exporter odbija GPU grafikone.
+The legacy exporter supports CBC, AES-NI and the old scaffold schema, not the
+operational paired CUDA schema. Use orchestrator aggregation for suite summaries.
+Export plots only into a separate copy, never into accepted historical artifacts.
 
 ### Osnovne zavisnosti
 
@@ -181,9 +190,10 @@ python -m pip install -r experiments/requirements.txt
 
 Aktivacija nije obavezna: može se direktno koristiti `.\.venv\Scripts\python.exe`.
 Linux/macOS: `python3 -m venv .venv` i `source .venv/bin/activate`.
-Direktne zavisnosti: PyCryptodome, matplotlib, psutil. Statistika, CSV i JSON
-koriste standardnu biblioteku; pandas nije potreban, NumPy dolazi uz matplotlib.
-Tačne instalirane verzije beleže se po izvršavanju u `requirements-lock.txt`.
+Benchmark dependencies are PyCryptodome and psutil; CUDA also requires NumPy,
+CuPy and a working CUDA runtime. Matplotlib is required only for plotting.
+The requirements file includes plotting dependencies; CPU-only execution does
+not require them. Installed versions are recorded in `requirements-lock.txt`.
 
 Bez `--run` skripte prikazuju plan bez merenja i kreiranja rezultata:
 
@@ -216,8 +226,10 @@ Ovaj eksperiment poredi AES-NI sa prenosivim kompajliranim AES-om iste bibliotek
 uz proveru izbora putanje pre merenja. Bez AES-NI podrške prekida se sa objašnjenjem,
 bez lažnog hardverskog rezultata. Ne predstavlja rekonstrukciju performansi iz 2003.
 
-`python scripts/smoke_check.py` proverava male uzorke i izvoz.
-Izlazi su u `build/smoke/`, sa oznakom `smoke`, i nisu rezultati rada.
+Use `python -m unittest discover -s tests -p test_orchestration.py -v` and the
+seven dedicated smoke checks listed in [scripts/README.md](scripts/README.md).
+The old omnibus `smoke_check.py` assumes obsolete avalanche/keyspace schemas.
+Smoke artifacts are technical checks, not study results.
 Metod i otvoreni zadaci su u [experiments/README.md](experiments/README.md).
 
 ## Bibliografija i metodološka pravila

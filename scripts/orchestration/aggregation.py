@@ -93,6 +93,7 @@ def aggregate(directory):
         target=directory/'aggregates'/identifier(); target.mkdir()
         write(target/'summary.json',dict(schema_version=2,metric_policy_version=POLICY_VERSION,
               scientific_completeness=validation['scientific_completeness'],publication_quality=config['execution_profile']=='study' and validation['scientific_completeness']=='complete',
+              publication_quality_definition='Dataset completeness and integrity only; not statistical or scientific publication readiness.',
               expected_seeds={n:item['seeds'] for n,item in config['experiments'].items()},missing_measurements=validation['missing_measurements'],
               policy='Median of session-level medians; speedups are median of within-session timing ratios; no raw pooling. Decimal MB/s.',fingerprint=read(directory/'manifest.json')['fingerprint'],execution_profile=config['execution_profile'],limitations=['No cross-platform pooling or historical import.','No inference of timing reliability from correctness.','Only native medians and native paired ratios are aggregated. Quantiles, means, extrapolation tables and confidence intervals are not combined.','Session stdev is descriptive; null for one session.','Publication quality here means dataset completeness and integrity, not methodological endorsement.'],rows=rows))
         csvwrite(target/'summary.csv',rows)
