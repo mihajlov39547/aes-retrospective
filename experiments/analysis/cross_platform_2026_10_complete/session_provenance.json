@@ -1,0 +1,2618 @@
+{
+  "gtx1650ti": [
+    {
+      "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+      "dispatch": {
+        "CTR": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "CTR",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        },
+        "ECB": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "ECB",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        }
+      },
+      "environment_after": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:29:32.951947+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "153",
+          "power.draw": "9.74",
+          "pstate": "P5",
+          "temperature.gpu": "56"
+        }
+      },
+      "environment_before": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:28:42.958878+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "55",
+          "power.draw": "16.47",
+          "pstate": "P0",
+          "temperature.gpu": "53"
+        }
+      },
+      "logical_cpus": 8,
+      "mixed_clock_component_exceeds_total_rows": 0,
+      "physical_cpus": 4,
+      "raw_rows": 1200,
+      "seed": 2003,
+      "session_id": "456fd1db-4e05-431b-a9b1-c42d4942f717",
+      "source_hashes": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "summary_rows": 60,
+      "zero_process_time_rows": 240
+    },
+    {
+      "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+      "dispatch": {
+        "CTR": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "CTR",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        },
+        "ECB": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "ECB",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        }
+      },
+      "environment_after": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:30:28.727526+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "153",
+          "power.draw": "7.93",
+          "pstate": "P5",
+          "temperature.gpu": "51"
+        }
+      },
+      "environment_before": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:29:38.264397+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "55",
+          "power.draw": "16.55",
+          "pstate": "P0",
+          "temperature.gpu": "57"
+        }
+      },
+      "logical_cpus": 8,
+      "mixed_clock_component_exceeds_total_rows": 0,
+      "physical_cpus": 4,
+      "raw_rows": 1200,
+      "seed": 2004,
+      "session_id": "831aa4f7-4de1-4990-bcbc-f2d4c45521b9",
+      "source_hashes": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "summary_rows": 60,
+      "zero_process_time_rows": 234
+    },
+    {
+      "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+      "dispatch": {
+        "CTR": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "CTR",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        },
+        "ECB": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "ECB",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        }
+      },
+      "environment_after": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:31:23.985200+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "153",
+          "power.draw": "6.17",
+          "pstate": "P5",
+          "temperature.gpu": "50"
+        }
+      },
+      "environment_before": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:30:33.851650+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "55",
+          "power.draw": "16.43",
+          "pstate": "P0",
+          "temperature.gpu": "53"
+        }
+      },
+      "logical_cpus": 8,
+      "mixed_clock_component_exceeds_total_rows": 0,
+      "physical_cpus": 4,
+      "raw_rows": 1200,
+      "seed": 2005,
+      "session_id": "cb48d0d1-eb5c-4df1-907c-ad1708b67f1c",
+      "source_hashes": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "summary_rows": 60,
+      "zero_process_time_rows": 241
+    },
+    {
+      "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+      "dispatch": {
+        "CTR": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "CTR",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        },
+        "ECB": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "ECB",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        }
+      },
+      "environment_after": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:32:19.300838+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "153",
+          "power.draw": "17.21",
+          "pstate": "P0",
+          "temperature.gpu": "56"
+        }
+      },
+      "environment_before": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:31:29.076945+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "55",
+          "power.draw": "16.40",
+          "pstate": "P0",
+          "temperature.gpu": "52"
+        }
+      },
+      "logical_cpus": 8,
+      "mixed_clock_component_exceeds_total_rows": 0,
+      "physical_cpus": 4,
+      "raw_rows": 1200,
+      "seed": 2006,
+      "session_id": "c64fd393-88b3-40eb-80ce-c1b13f040f4a",
+      "source_hashes": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "summary_rows": 60,
+      "zero_process_time_rows": 245
+    },
+    {
+      "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+      "dispatch": {
+        "CTR": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "CTR",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        },
+        "ECB": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "ECB",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        }
+      },
+      "environment_after": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:33:17.840354+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "153",
+          "power.draw": "9.32",
+          "pstate": "P5",
+          "temperature.gpu": "52"
+        }
+      },
+      "environment_before": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:32:24.384038+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "55",
+          "power.draw": "16.67",
+          "pstate": "P0",
+          "temperature.gpu": "57"
+        }
+      },
+      "logical_cpus": 8,
+      "mixed_clock_component_exceeds_total_rows": 0,
+      "physical_cpus": 4,
+      "raw_rows": 1200,
+      "seed": 2007,
+      "session_id": "09fc39b7-e9ec-465f-910d-044326a2e46f",
+      "source_hashes": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "summary_rows": 60,
+      "zero_process_time_rows": 237
+    }
+  ],
+  "t4": [
+    {
+      "cpu": "x86_64",
+      "dispatch": {
+        "CTR": {
+          "aes_module_sha256": "ca98601f61376cdea2307d007516ada3fb8232209511b94a90889c34ad038004",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "CTR",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        },
+        "ECB": {
+          "aes_module_sha256": "ca98601f61376cdea2307d007516ada3fb8232209511b94a90889c34ad038004",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "ECB",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        }
+      },
+      "environment_after": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:56:34.690066+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "15360",
+          "memory.used": "309",
+          "power.draw": "32.36",
+          "pstate": "P0",
+          "temperature.gpu": "76"
+        }
+      },
+      "environment_before": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:55:43.669062+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "15360",
+          "memory.used": "211",
+          "power.draw": "31.97",
+          "pstate": "P0",
+          "temperature.gpu": "75"
+        }
+      },
+      "logical_cpus": 2,
+      "mixed_clock_component_exceeds_total_rows": 0,
+      "physical_cpus": 1,
+      "raw_rows": 1200,
+      "seed": 2003,
+      "session_id": "4a51efd2-ef3e-46c5-898b-bd68c698331f",
+      "source_hashes": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "summary_rows": 60,
+      "zero_process_time_rows": 0
+    },
+    {
+      "cpu": "x86_64",
+      "dispatch": {
+        "CTR": {
+          "aes_module_sha256": "ca98601f61376cdea2307d007516ada3fb8232209511b94a90889c34ad038004",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "CTR",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        },
+        "ECB": {
+          "aes_module_sha256": "ca98601f61376cdea2307d007516ada3fb8232209511b94a90889c34ad038004",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "ECB",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        }
+      },
+      "environment_after": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:57:30.613799+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "15360",
+          "memory.used": "309",
+          "power.draw": "33.43",
+          "pstate": "P0",
+          "temperature.gpu": "77"
+        }
+      },
+      "environment_before": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:56:38.296978+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "15360",
+          "memory.used": "211",
+          "power.draw": "32.46",
+          "pstate": "P0",
+          "temperature.gpu": "76"
+        }
+      },
+      "logical_cpus": 2,
+      "mixed_clock_component_exceeds_total_rows": 0,
+      "physical_cpus": 1,
+      "raw_rows": 1200,
+      "seed": 2004,
+      "session_id": "ee986697-6cdf-47ee-9a80-ae10572e759d",
+      "source_hashes": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "summary_rows": 60,
+      "zero_process_time_rows": 0
+    },
+    {
+      "cpu": "x86_64",
+      "dispatch": {
+        "CTR": {
+          "aes_module_sha256": "ca98601f61376cdea2307d007516ada3fb8232209511b94a90889c34ad038004",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "CTR",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        },
+        "ECB": {
+          "aes_module_sha256": "ca98601f61376cdea2307d007516ada3fb8232209511b94a90889c34ad038004",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "ECB",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        }
+      },
+      "environment_after": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:58:25.962841+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "15360",
+          "memory.used": "309",
+          "power.draw": "31.87",
+          "pstate": "P0",
+          "temperature.gpu": "77"
+        }
+      },
+      "environment_before": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:57:34.514151+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "15360",
+          "memory.used": "211",
+          "power.draw": "32.06",
+          "pstate": "P0",
+          "temperature.gpu": "77"
+        }
+      },
+      "logical_cpus": 2,
+      "mixed_clock_component_exceeds_total_rows": 0,
+      "physical_cpus": 1,
+      "raw_rows": 1200,
+      "seed": 2005,
+      "session_id": "6121bae1-7166-4043-8ed0-3c3322eb5bd4",
+      "source_hashes": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "summary_rows": 60,
+      "zero_process_time_rows": 0
+    },
+    {
+      "cpu": "x86_64",
+      "dispatch": {
+        "CTR": {
+          "aes_module_sha256": "ca98601f61376cdea2307d007516ada3fb8232209511b94a90889c34ad038004",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "CTR",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        },
+        "ECB": {
+          "aes_module_sha256": "ca98601f61376cdea2307d007516ada3fb8232209511b94a90889c34ad038004",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "ECB",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        }
+      },
+      "environment_after": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:59:20.005655+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "15360",
+          "memory.used": "309",
+          "power.draw": "32.06",
+          "pstate": "P0",
+          "temperature.gpu": "77"
+        }
+      },
+      "environment_before": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:58:29.569775+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "15360",
+          "memory.used": "211",
+          "power.draw": "32.46",
+          "pstate": "P0",
+          "temperature.gpu": "77"
+        }
+      },
+      "logical_cpus": 2,
+      "mixed_clock_component_exceeds_total_rows": 0,
+      "physical_cpus": 1,
+      "raw_rows": 1200,
+      "seed": 2006,
+      "session_id": "4a366d18-34d4-43d5-a47a-62a5aaa5ee76",
+      "source_hashes": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "summary_rows": 60,
+      "zero_process_time_rows": 0
+    },
+    {
+      "cpu": "x86_64",
+      "dispatch": {
+        "CTR": {
+          "aes_module_sha256": "ca98601f61376cdea2307d007516ada3fb8232209511b94a90889c34ad038004",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "CTR",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        },
+        "ECB": {
+          "aes_module_sha256": "ca98601f61376cdea2307d007516ada3fb8232209511b94a90889c34ad038004",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "ECB",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        }
+      },
+      "environment_after": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T11:00:14.418368+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "15360",
+          "memory.used": "309",
+          "power.draw": "32.66",
+          "pstate": "P0",
+          "temperature.gpu": "76"
+        }
+      },
+      "environment_before": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T10:59:23.602681+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "15360",
+          "memory.used": "211",
+          "power.draw": "33.53",
+          "pstate": "P0",
+          "temperature.gpu": "77"
+        }
+      },
+      "logical_cpus": 2,
+      "mixed_clock_component_exceeds_total_rows": 0,
+      "physical_cpus": 1,
+      "raw_rows": 1200,
+      "seed": 2007,
+      "session_id": "c9046094-33da-4142-94e8-0f6481ea6316",
+      "source_hashes": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "summary_rows": 60,
+      "zero_process_time_rows": 0
+    }
+  ],
+  "t600": [
+    {
+      "cpu": "11th Gen Intel(R) Core(TM) i7-11850H @ 2.50GHz",
+      "dispatch": {
+        "CTR": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "CTR",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        },
+        "ECB": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "ECB",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        }
+      },
+      "environment_after": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T06:45:05.308991+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "153",
+          "power.draw": null,
+          "pstate": "P0",
+          "temperature.gpu": "68"
+        }
+      },
+      "environment_before": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T06:44:20.438824+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "55",
+          "power.draw": null,
+          "pstate": "P0",
+          "temperature.gpu": "67"
+        }
+      },
+      "logical_cpus": 16,
+      "mixed_clock_component_exceeds_total_rows": 0,
+      "physical_cpus": 8,
+      "raw_rows": 1200,
+      "seed": 2003,
+      "session_id": "749a0cbd-1c6c-40fb-baa7-c7886230df86",
+      "source_hashes": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "summary_rows": 60,
+      "zero_process_time_rows": 250
+    },
+    {
+      "cpu": "11th Gen Intel(R) Core(TM) i7-11850H @ 2.50GHz",
+      "dispatch": {
+        "CTR": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "CTR",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        },
+        "ECB": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "ECB",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        }
+      },
+      "environment_after": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T06:46:01.941030+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "153",
+          "power.draw": null,
+          "pstate": "P5",
+          "temperature.gpu": "66"
+        }
+      },
+      "environment_before": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T06:45:17.154929+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "55",
+          "power.draw": null,
+          "pstate": "P0",
+          "temperature.gpu": "67"
+        }
+      },
+      "logical_cpus": 16,
+      "mixed_clock_component_exceeds_total_rows": 0,
+      "physical_cpus": 8,
+      "raw_rows": 1200,
+      "seed": 2004,
+      "session_id": "37b9b54e-73ef-4625-97ee-e9bd1789e1b5",
+      "source_hashes": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "summary_rows": 60,
+      "zero_process_time_rows": 259
+    },
+    {
+      "cpu": "11th Gen Intel(R) Core(TM) i7-11850H @ 2.50GHz",
+      "dispatch": {
+        "CTR": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "CTR",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        },
+        "ECB": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "ECB",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        }
+      },
+      "environment_after": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T06:46:52.032417+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "153",
+          "power.draw": null,
+          "pstate": "P0",
+          "temperature.gpu": "67"
+        }
+      },
+      "environment_before": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T06:46:12.618778+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "55",
+          "power.draw": null,
+          "pstate": "P0",
+          "temperature.gpu": "67"
+        }
+      },
+      "logical_cpus": 16,
+      "mixed_clock_component_exceeds_total_rows": 0,
+      "physical_cpus": 8,
+      "raw_rows": 1200,
+      "seed": 2005,
+      "session_id": "25678811-0f36-4804-8e76-7400966ac09c",
+      "source_hashes": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "summary_rows": 60,
+      "zero_process_time_rows": 257
+    },
+    {
+      "cpu": "11th Gen Intel(R) Core(TM) i7-11850H @ 2.50GHz",
+      "dispatch": {
+        "CTR": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "CTR",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        },
+        "ECB": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "ECB",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        }
+      },
+      "environment_after": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T06:47:43.551016+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "153",
+          "power.draw": null,
+          "pstate": "P0",
+          "temperature.gpu": "67"
+        }
+      },
+      "environment_before": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T06:47:02.613275+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "55",
+          "power.draw": null,
+          "pstate": "P0",
+          "temperature.gpu": "67"
+        }
+      },
+      "logical_cpus": 16,
+      "mixed_clock_component_exceeds_total_rows": 0,
+      "physical_cpus": 8,
+      "raw_rows": 1200,
+      "seed": 2006,
+      "session_id": "12adc2e3-2ab0-4696-950d-b6e81349df95",
+      "source_hashes": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "summary_rows": 60,
+      "zero_process_time_rows": 246
+    },
+    {
+      "cpu": "11th Gen Intel(R) Core(TM) i7-11850H @ 2.50GHz",
+      "dispatch": {
+        "CTR": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "CTR",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        },
+        "ECB": {
+          "aes_module_sha256": "24af7918b87ca1c3025348200ade01b17a2c8310237ac25d097d266cff577fd6",
+          "aesni_library_loaded": true,
+          "available": true,
+          "cpu_aesni": true,
+          "mode": "ECB",
+          "passed": true,
+          "paths": {
+            "aesni": "_raw_aesni",
+            "software": "_raw_aes"
+          },
+          "preflight": [
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 128,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 192,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 2,
+                "software": 0
+              },
+              "requested": "aesni"
+            },
+            {
+              "key_bits": 256,
+              "native_start_calls": {
+                "aesni": 0,
+                "software": 2
+              },
+              "requested": "software"
+            }
+          ],
+          "scope": "Native backend initialization observed; not a CPU instruction trace."
+        }
+      },
+      "environment_after": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T06:48:36.021513+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "153",
+          "power.draw": null,
+          "pstate": "P0",
+          "temperature.gpu": "67"
+        }
+      },
+      "environment_before": {
+        "source": "nvidia-smi",
+        "timestamp": "2026-10-14T06:47:53.745521+00:00",
+        "units": "temperature C, power W, memory MiB",
+        "values": {
+          "memory.total": "4096",
+          "memory.used": "55",
+          "power.draw": null,
+          "pstate": "P0",
+          "temperature.gpu": "67"
+        }
+      },
+      "logical_cpus": 16,
+      "mixed_clock_component_exceeds_total_rows": 0,
+      "physical_cpus": 8,
+      "raw_rows": 1200,
+      "seed": 2007,
+      "session_id": "e7fb4262-ffd4-451d-9380-588be6c9c699",
+      "source_hashes": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "summary_rows": 60,
+      "zero_process_time_rows": 257
+    }
+  ]
+}

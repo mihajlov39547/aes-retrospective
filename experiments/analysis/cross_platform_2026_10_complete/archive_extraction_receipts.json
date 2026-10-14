@@ -1,0 +1,820 @@
+{
+  "t4": {
+    "archive": {
+      "path": "C:/Projects/aes/experiments/results_orchestrated/t4-colab/heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386.tar.gz",
+      "sha256": "1104a0dd49cc13949e993bb2ef70204a390ee393d3e9777d47297937a65f4c6b"
+    },
+    "files": {
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/aggregates/20261014T110051371457Z-ed92b22142fa/paired_speedups.csv": {
+        "bytes": 11866,
+        "sha256": "f6749f1e71750d295df0aed2ca12bc47797990912065b3e5a3a79dea0e177570"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/aggregates/20261014T110051371457Z-ed92b22142fa/session_variability.csv": {
+        "bytes": 98533,
+        "sha256": "a2f60d64dc0a75fe50e610a6da674f61c8a8ec04dda6e439db9a8045d882e00e"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/aggregates/20261014T110051371457Z-ed92b22142fa/summary.csv": {
+        "bytes": 61310,
+        "sha256": "fed208522a419957ecd275d58ad9d590f77aa2c07ccf97bfe0df98adb54ddc3d"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/aggregates/20261014T110051371457Z-ed92b22142fa/summary.json": {
+        "bytes": 248979,
+        "sha256": "552a35dc4451647f90ab73b953a83ec9cd9bc5344a7ba6dd3b146dc5c890b1a3"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/aggregates/20261014T110051371457Z-ed92b22142fa/validation_summary.json": {
+        "bytes": 8011,
+        "sha256": "06b528cee1c02c0111237427c638867c322c58c4df75b2b903138132368e9cfd"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2003-20261014T105541896511Z-7cc974cc1d2a/command.json": {
+        "bytes": 944,
+        "sha256": "f6b8b444ecf1d480263fba342fe2fede72d85a3981d81815bf3605974f214e85"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2003-20261014T105541896511Z-7cc974cc1d2a/execution.json": {
+        "bytes": 1036,
+        "sha256": "b115577596da4d74135ac6651d5d22c269fbe796cef64b080a8423226ae5f1f3"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2003-20261014T105541896511Z-7cc974cc1d2a/preflight.json": {
+        "bytes": 256,
+        "sha256": "13d89a857cf928d4f065d66b59d8916cb052b50f92015fe9a2ac21035697deb6"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2003-20261014T105541896511Z-7cc974cc1d2a/staging/aes_cuda_cpu_gpu-validation-4a51efd2-ef3e-46c5-898b-bd68c698331f/validation.json": {
+        "bytes": 457110,
+        "sha256": "e969d73c4602d3f959f5f1fe22295d542dfc44b963f0e705f10583d29669fde9"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2003-20261014T105541896511Z-7cc974cc1d2a/stderr.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2003-20261014T105541896511Z-7cc974cc1d2a/stdout.log": {
+        "bytes": 273,
+        "sha256": "b818b51f917e5a444d3e5cfe400545a718b5d628f5238e63a1ccda3816fd3ebb"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2003-20261014T105541896511Z-7cc974cc1d2a/verification.json": {
+        "bytes": 1403,
+        "sha256": "9aad64847ffde70476e137d47ad3aa7b42ecb005412eec8b536fe685c22e7308"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2004-20261014T105636505328Z-57a7a4cf3dc2/command.json": {
+        "bytes": 944,
+        "sha256": "a460502722adc3e67905a012ab80cd64f6b42960f7908697a60e4405b5096f1a"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2004-20261014T105636505328Z-57a7a4cf3dc2/execution.json": {
+        "bytes": 1036,
+        "sha256": "a9490fb13aa83f89ad09eb71c871cf002bceb7291f6f8144e409ca55fa44bfb3"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2004-20261014T105636505328Z-57a7a4cf3dc2/preflight.json": {
+        "bytes": 256,
+        "sha256": "13d89a857cf928d4f065d66b59d8916cb052b50f92015fe9a2ac21035697deb6"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2004-20261014T105636505328Z-57a7a4cf3dc2/staging/aes_cuda_cpu_gpu-validation-ee986697-6cdf-47ee-9a80-ae10572e759d/validation.json": {
+        "bytes": 457110,
+        "sha256": "26a2e5d04d81fd2b6d3fd02d3e7b04c6d1b2b7a4f0cb8483c2746c862c9f93fd"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2004-20261014T105636505328Z-57a7a4cf3dc2/stderr.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2004-20261014T105636505328Z-57a7a4cf3dc2/stdout.log": {
+        "bytes": 273,
+        "sha256": "9e04c88e7d0ad138680f2ea6a69425d0fcb042f2f1983f9742febab04a4f3b50"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2004-20261014T105636505328Z-57a7a4cf3dc2/verification.json": {
+        "bytes": 1403,
+        "sha256": "3c8e2923c3b3a78025bc64a187a44ddea2ea050ab26fc24e33fbc536800004d7"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2005-20261014T105732657809Z-2b59de4c245a/command.json": {
+        "bytes": 944,
+        "sha256": "bb5ea88e4d8cd4da4c8d974dab46f78961978192c61225c73ab110a2b22df1b9"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2005-20261014T105732657809Z-2b59de4c245a/execution.json": {
+        "bytes": 1036,
+        "sha256": "8a437f009ad40a453624d884f0cb1cb102d8ba6351c17409c5e80763b5279148"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2005-20261014T105732657809Z-2b59de4c245a/preflight.json": {
+        "bytes": 256,
+        "sha256": "13d89a857cf928d4f065d66b59d8916cb052b50f92015fe9a2ac21035697deb6"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2005-20261014T105732657809Z-2b59de4c245a/staging/aes_cuda_cpu_gpu-validation-6121bae1-7166-4043-8ed0-3c3322eb5bd4/validation.json": {
+        "bytes": 457110,
+        "sha256": "8a93cf7c238cbe129c4b11885e84367d21fb3d9bd2b6f62a33e314052cb21fc6"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2005-20261014T105732657809Z-2b59de4c245a/stderr.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2005-20261014T105732657809Z-2b59de4c245a/stdout.log": {
+        "bytes": 273,
+        "sha256": "b3bfc74461ec745be17bdbdaaaff0c88cd5879e3955b179f4162e667a3c281aa"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2005-20261014T105732657809Z-2b59de4c245a/verification.json": {
+        "bytes": 1403,
+        "sha256": "c2fe321bd95733486529e598adfe10b39810b5d31f5d7965f1dc62336541580a"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2006-20261014T105827781088Z-baa013330c1f/command.json": {
+        "bytes": 944,
+        "sha256": "db5cbf08855b49e10f493e760e60498dfca6d8962a4325a7029774f8b3dd7dcd"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2006-20261014T105827781088Z-baa013330c1f/execution.json": {
+        "bytes": 1036,
+        "sha256": "8b23195b19df4b6ffe491c85800450673d693ab6a00ad2952ea2674cb7baf97b"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2006-20261014T105827781088Z-baa013330c1f/preflight.json": {
+        "bytes": 256,
+        "sha256": "13d89a857cf928d4f065d66b59d8916cb052b50f92015fe9a2ac21035697deb6"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2006-20261014T105827781088Z-baa013330c1f/staging/aes_cuda_cpu_gpu-validation-4a366d18-34d4-43d5-a47a-62a5aaa5ee76/validation.json": {
+        "bytes": 457110,
+        "sha256": "9f8279c75490bca76b49061cc2b78db56f4e63685920c7bfe6a59c195592724a"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2006-20261014T105827781088Z-baa013330c1f/stderr.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2006-20261014T105827781088Z-baa013330c1f/stdout.log": {
+        "bytes": 273,
+        "sha256": "b145bdaf740b0830d53780c90c4bb92666a941307e600f913f684351d1a3684b"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2006-20261014T105827781088Z-baa013330c1f/verification.json": {
+        "bytes": 1403,
+        "sha256": "59b6148e82578047bc2dfc07ed8403a4c8749558907a2fb8f2ee9888cfb89567"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2007-20261014T105921791092Z-c02ada233718/command.json": {
+        "bytes": 944,
+        "sha256": "64976af777929f9588effef4695196003d1d24174a6a3a657db17c6b1d6849df"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2007-20261014T105921791092Z-c02ada233718/execution.json": {
+        "bytes": 1037,
+        "sha256": "418784d8d1327feb9ba816061049babf943e4843194241e760a9d98bed3de597"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2007-20261014T105921791092Z-c02ada233718/preflight.json": {
+        "bytes": 256,
+        "sha256": "13d89a857cf928d4f065d66b59d8916cb052b50f92015fe9a2ac21035697deb6"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2007-20261014T105921791092Z-c02ada233718/staging/aes_cuda_cpu_gpu-validation-c9046094-33da-4142-94e8-0f6481ea6316/validation.json": {
+        "bytes": 457110,
+        "sha256": "07601a3d21a95edf417dfcf72025734a308c6e21958241533adc9e9dd5cea9cc"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2007-20261014T105921791092Z-c02ada233718/stderr.log": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2007-20261014T105921791092Z-c02ada233718/stdout.log": {
+        "bytes": 273,
+        "sha256": "7acd31f1a758d15a70d5cce026696836ffec8842f15697b46f69ed1c42de3a0c"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2007-20261014T105921791092Z-c02ada233718/verification.json": {
+        "bytes": 1403,
+        "sha256": "fec1ce7bcd816fd72cfe0370d4308d7fd83f39ddd29be599d3c3c07fabbad036"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/config.resolved.json": {
+        "bytes": 1327,
+        "sha256": "8a88a2ef34dcad4a7636ef7a0f633fa01d07aa75b05adcfed99b0f0b4fe88da5"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/environment.json": {
+        "bytes": 2106,
+        "sha256": "111dc56faa5377554c62e29a3e12effb7f1f9d1c859bccb28748eab4d6ce5333"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/execution.lock": {
+        "bytes": 1,
+        "sha256": "5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/metadata.json": {
+        "bytes": 13076,
+        "sha256": "db7c40c7a05b1787bba0e475fd8c93960541d389f2c9c92975135c115c3d91ee"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/raw.csv": {
+        "bytes": 358744,
+        "sha256": "dd35d6212f0a203c7aa6f83c1aea85b933c061c80dfbe2d714ffc993ccca055e"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/requirements-lock.txt": {
+        "bytes": 14203,
+        "sha256": "1640dd7359e72caf1d0a79944a9fa6a383eff3f1f49d872f5ca3f4a29279b06c"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/results.json": {
+        "bytes": 1790367,
+        "sha256": "e69fd599df5553763a4d6e4746640e042a698f120ffe4204ba096b5bccd60a95"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/source/aes_acceleration.py": {
+        "bytes": 13584,
+        "sha256": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/source/aes_cuda_baseline.cu": {
+        "bytes": 3995,
+        "sha256": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/source/aes_cuda_baseline.py": {
+        "bytes": 21994,
+        "sha256": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/source/aes_cuda_cpu_gpu.py": {
+        "bytes": 14870,
+        "sha256": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/source/aes_cuda_cpu_gpu_smoke_check.py": {
+        "bytes": 7989,
+        "sha256": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/source/aes_cuda_optimized.cu": {
+        "bytes": 4285,
+        "sha256": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/source/aes_cuda_ttable.cu": {
+        "bytes": 8484,
+        "sha256": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/source/benchmark.py": {
+        "bytes": 8755,
+        "sha256": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/source/common.py": {
+        "bytes": 6711,
+        "sha256": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/source/cpu_validation.py": {
+        "bytes": 5146,
+        "sha256": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/source/cuda_optimized_cpu_gpu_protocol.md": {
+        "bytes": 12400,
+        "sha256": "73beb98afcefeb45ca13e741ff4fc4654f032047b36140a8346af57dd3834848"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/summary.csv": {
+        "bytes": 75294,
+        "sha256": "880418bf795a6c8152dac2b34000a29832c2d62172ce5eafc4aabc5ac5f15273"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/validation.json": {
+        "bytes": 457110,
+        "sha256": "e969d73c4602d3f959f5f1fe22295d542dfc44b963f0e705f10583d29669fde9"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/orchestration.json": {
+        "bytes": 5158,
+        "sha256": "d90784e433003a96ba94c41a4ff2cab0dbd3f17b5fbcea84ba3af76a31b21055"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/metadata.json": {
+        "bytes": 13076,
+        "sha256": "c66fde589ca13b070cca18a977843c7d2960957a3a8c9c176bc671d17d125202"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/raw.csv": {
+        "bytes": 358795,
+        "sha256": "9057d1ffb292ccae5fa53efef26de6985307ffaddcef41199d30e8fea55f691a"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/requirements-lock.txt": {
+        "bytes": 14203,
+        "sha256": "1640dd7359e72caf1d0a79944a9fa6a383eff3f1f49d872f5ca3f4a29279b06c"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/results.json": {
+        "bytes": 1790162,
+        "sha256": "700766fb433a0e4b74c571ce69abc836ae7317cdda2e9fd9290bc7116d949ec1"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/source/aes_acceleration.py": {
+        "bytes": 13584,
+        "sha256": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/source/aes_cuda_baseline.cu": {
+        "bytes": 3995,
+        "sha256": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/source/aes_cuda_baseline.py": {
+        "bytes": 21994,
+        "sha256": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/source/aes_cuda_cpu_gpu.py": {
+        "bytes": 14870,
+        "sha256": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/source/aes_cuda_cpu_gpu_smoke_check.py": {
+        "bytes": 7989,
+        "sha256": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/source/aes_cuda_optimized.cu": {
+        "bytes": 4285,
+        "sha256": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/source/aes_cuda_ttable.cu": {
+        "bytes": 8484,
+        "sha256": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/source/benchmark.py": {
+        "bytes": 8755,
+        "sha256": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/source/common.py": {
+        "bytes": 6711,
+        "sha256": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/source/cpu_validation.py": {
+        "bytes": 5146,
+        "sha256": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/source/cuda_optimized_cpu_gpu_protocol.md": {
+        "bytes": 12400,
+        "sha256": "73beb98afcefeb45ca13e741ff4fc4654f032047b36140a8346af57dd3834848"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/summary.csv": {
+        "bytes": 75038,
+        "sha256": "c7c0f13e24260706c2ccb492fc32e47afe4036273bdef2e1ed26704dbbd43d7e"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/validation.json": {
+        "bytes": 457110,
+        "sha256": "26a2e5d04d81fd2b6d3fd02d3e7b04c6d1b2b7a4f0cb8483c2746c862c9f93fd"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/orchestration.json": {
+        "bytes": 5158,
+        "sha256": "18a764e585e3d5f7f7996d4971d29f3a69073a2df2a9e043ca408f7f869e34fa"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/metadata.json": {
+        "bytes": 13076,
+        "sha256": "f7dac9be85953bf694d0be3d6fd34ac2393722a66956a5307e933a04caaa52bc"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/raw.csv": {
+        "bytes": 358690,
+        "sha256": "235eea920b3ab53a40a79646dc2568b695bc3dc620b64466777c93ea5d14e62c"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/requirements-lock.txt": {
+        "bytes": 14203,
+        "sha256": "1640dd7359e72caf1d0a79944a9fa6a383eff3f1f49d872f5ca3f4a29279b06c"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/results.json": {
+        "bytes": 1790107,
+        "sha256": "c8add59e7296da5a386cdde470f62c01759151ad663930c7fd9d0b0a9e8f6ed3"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/source/aes_acceleration.py": {
+        "bytes": 13584,
+        "sha256": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/source/aes_cuda_baseline.cu": {
+        "bytes": 3995,
+        "sha256": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/source/aes_cuda_baseline.py": {
+        "bytes": 21994,
+        "sha256": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/source/aes_cuda_cpu_gpu.py": {
+        "bytes": 14870,
+        "sha256": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/source/aes_cuda_cpu_gpu_smoke_check.py": {
+        "bytes": 7989,
+        "sha256": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/source/aes_cuda_optimized.cu": {
+        "bytes": 4285,
+        "sha256": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/source/aes_cuda_ttable.cu": {
+        "bytes": 8484,
+        "sha256": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/source/benchmark.py": {
+        "bytes": 8755,
+        "sha256": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/source/common.py": {
+        "bytes": 6711,
+        "sha256": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/source/cpu_validation.py": {
+        "bytes": 5146,
+        "sha256": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/source/cuda_optimized_cpu_gpu_protocol.md": {
+        "bytes": 12400,
+        "sha256": "73beb98afcefeb45ca13e741ff4fc4654f032047b36140a8346af57dd3834848"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/summary.csv": {
+        "bytes": 75088,
+        "sha256": "b7ae0582b9580ddf7bcc2ca91be54134067671f8f3230565587319dedab670a1"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/validation.json": {
+        "bytes": 457110,
+        "sha256": "8a93cf7c238cbe129c4b11885e84367d21fb3d9bd2b6f62a33e314052cb21fc6"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/orchestration.json": {
+        "bytes": 5158,
+        "sha256": "ddde67f34c4805071ecf059e4b08ed96d33a9f07f426644a93f0f643fd92f73d"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/metadata.json": {
+        "bytes": 13076,
+        "sha256": "9ea9141672c0b56239d671713e9663139f12b17110515b196c957ed059ec9312"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/raw.csv": {
+        "bytes": 358697,
+        "sha256": "cafc3181043290a67d783149cd74fd4b02b5d767b44f8b978a89de11651185e7"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/requirements-lock.txt": {
+        "bytes": 14203,
+        "sha256": "1640dd7359e72caf1d0a79944a9fa6a383eff3f1f49d872f5ca3f4a29279b06c"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/results.json": {
+        "bytes": 1790118,
+        "sha256": "44bd6d73ac166cec5004377a0e4428004b1a9f75d0b18e7cfa31fe49675fa9fd"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/source/aes_acceleration.py": {
+        "bytes": 13584,
+        "sha256": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/source/aes_cuda_baseline.cu": {
+        "bytes": 3995,
+        "sha256": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/source/aes_cuda_baseline.py": {
+        "bytes": 21994,
+        "sha256": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/source/aes_cuda_cpu_gpu.py": {
+        "bytes": 14870,
+        "sha256": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/source/aes_cuda_cpu_gpu_smoke_check.py": {
+        "bytes": 7989,
+        "sha256": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/source/aes_cuda_optimized.cu": {
+        "bytes": 4285,
+        "sha256": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/source/aes_cuda_ttable.cu": {
+        "bytes": 8484,
+        "sha256": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/source/benchmark.py": {
+        "bytes": 8755,
+        "sha256": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/source/common.py": {
+        "bytes": 6711,
+        "sha256": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/source/cpu_validation.py": {
+        "bytes": 5146,
+        "sha256": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/source/cuda_optimized_cpu_gpu_protocol.md": {
+        "bytes": 12400,
+        "sha256": "73beb98afcefeb45ca13e741ff4fc4654f032047b36140a8346af57dd3834848"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/summary.csv": {
+        "bytes": 75092,
+        "sha256": "0c5b78158487dc50f5b6178c671d7a46b7bbf6aba1b0cce2efb10c03e2233beb"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/validation.json": {
+        "bytes": 457110,
+        "sha256": "9f8279c75490bca76b49061cc2b78db56f4e63685920c7bfe6a59c195592724a"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/orchestration.json": {
+        "bytes": 5158,
+        "sha256": "63d662aef8175068ce64c55d52ca5952277a021fa8d08dbf44824afea7fc1f90"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/metadata.json": {
+        "bytes": 13076,
+        "sha256": "6ffc03e0ca7369f034cbd8c7b2ded60f6c7ddfd8efef77e167390c70db42af89"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/raw.csv": {
+        "bytes": 358493,
+        "sha256": "8ca5450300d9ab6e4e824fc18f306bd2caaedbc19f2690a950722c6d2ee1ab6d"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/requirements-lock.txt": {
+        "bytes": 14203,
+        "sha256": "1640dd7359e72caf1d0a79944a9fa6a383eff3f1f49d872f5ca3f4a29279b06c"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/results.json": {
+        "bytes": 1789973,
+        "sha256": "e61e27a2b6306e1b62dae8aa32fedb69c0c10222e48fa519569bf34513e8ef72"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/source/aes_acceleration.py": {
+        "bytes": 13584,
+        "sha256": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/source/aes_cuda_baseline.cu": {
+        "bytes": 3995,
+        "sha256": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/source/aes_cuda_baseline.py": {
+        "bytes": 21994,
+        "sha256": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/source/aes_cuda_cpu_gpu.py": {
+        "bytes": 14870,
+        "sha256": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/source/aes_cuda_cpu_gpu_smoke_check.py": {
+        "bytes": 7989,
+        "sha256": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/source/aes_cuda_optimized.cu": {
+        "bytes": 4285,
+        "sha256": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/source/aes_cuda_ttable.cu": {
+        "bytes": 8484,
+        "sha256": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/source/benchmark.py": {
+        "bytes": 8755,
+        "sha256": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/source/common.py": {
+        "bytes": 6711,
+        "sha256": "6330b9af2594bbc941372a12018b885e34a42970de866a87c75faa55f389486b"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/source/cpu_validation.py": {
+        "bytes": 5146,
+        "sha256": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/source/cuda_optimized_cpu_gpu_protocol.md": {
+        "bytes": 12400,
+        "sha256": "73beb98afcefeb45ca13e741ff4fc4654f032047b36140a8346af57dd3834848"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/summary.csv": {
+        "bytes": 75151,
+        "sha256": "73da75a82020f118548ddf441ce84b4b4bcd77dc8bf57440a69213a75a7a3236"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/validation.json": {
+        "bytes": 457110,
+        "sha256": "07601a3d21a95edf417dfcf72025734a308c6e21958241533adc9e9dd5cea9cc"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/orchestration.json": {
+        "bytes": 5159,
+        "sha256": "dc049476a3d5526dec7c9efeaad52a0926a35bfdcec7b31e56ab2ba397e39fbc"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/manifest.json": {
+        "bytes": 5119,
+        "sha256": "07e518e40416d37319a579252b5efd3732eca30b65132f98ed858f8a2aed68c4"
+      },
+      "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/status.json": {
+        "bytes": 5369,
+        "sha256": "37f9d6ae58bf284280fe98566c310f6ec2176b65db1878ed3fa1de585f802581"
+      }
+    },
+    "format": "tar",
+    "maximum_member_path_characters": 213,
+    "pax_path_records": 130,
+    "prior_import": {
+      "files": 36,
+      "matches": [
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/aggregates/20261014T110051371457Z-ed92b22142fa/validation_summary.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/aggregates/20261014T110051371457Z-ed92b221",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2003-20261014T105541896511Z-7cc974cc1d2a/verification.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2003-20261014T10",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2004-20261014T105636505328Z-57a7a4cf3dc2/verification.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2004-20261014T10",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2005-20261014T105732657809Z-2b59de4c245a/verification.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2005-20261014T10",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2006-20261014T105827781088Z-baa013330c1f/verification.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2006-20261014T10",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2007-20261014T105921791092Z-c02ada233718/verification.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2007-20261014T10",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/config.resolved.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/config.resolved.json",
+          "truncated_to_100": false
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/environment.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/environment.json",
+          "truncated_to_100": false
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/execution.lock"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/execution.lock",
+          "truncated_to_100": false
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/metadata.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/m",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/results.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/r",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/summary.csv"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/s",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2003-20261014T105541896511Z-7cc974cc1d2a/staging/aes_cuda_cpu_gpu-validation-4a51efd2-ef3e-46c5-898b-bd68c698331f/validation.json",
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/validation.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/native/v",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/orchestration.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2003/orchestr",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/metadata.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/m",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/results.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/r",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/summary.csv"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/s",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2004-20261014T105636505328Z-57a7a4cf3dc2/staging/aes_cuda_cpu_gpu-validation-ee986697-6cdf-47ee-9a80-ae10572e759d/validation.json",
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/validation.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/native/v",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/orchestration.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2004/orchestr",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/metadata.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/m",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/results.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/r",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/summary.csv"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/s",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2005-20261014T105732657809Z-2b59de4c245a/staging/aes_cuda_cpu_gpu-validation-6121bae1-7166-4043-8ed0-3c3322eb5bd4/validation.json",
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/validation.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/native/v",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/orchestration.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2005/orchestr",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/metadata.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/m",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/results.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/r",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/summary.csv"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/s",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2006-20261014T105827781088Z-baa013330c1f/staging/aes_cuda_cpu_gpu-validation-4a366d18-34d4-43d5-a47a-62a5aaa5ee76/validation.json",
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/validation.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/native/v",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/orchestration.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2006/orchestr",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/metadata.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/m",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/results.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/r",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/summary.csv"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/s",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/attempts/cuda_paired-seed-2007-20261014T105921791092Z-c02ada233718/staging/aes_cuda_cpu_gpu-validation-c9046094-33da-4142-94e8-0f6481ea6316/validation.json",
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/validation.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/native/v",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/orchestration.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/experiments/cuda_paired/seed-2007/orchestr",
+          "truncated_to_100": true
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/manifest.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/manifest.json",
+          "truncated_to_100": false
+        },
+        {
+          "archive_matches": [
+            "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/status.json"
+          ],
+          "imported_name": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386/status.json",
+          "truncated_to_100": false
+        }
+      ],
+      "path": "C:/Projects/aes/experiments/results_orchestrated/t4-colab/heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386",
+      "truncated_100_character_matches": 31
+    },
+    "raw_csv_files": 5,
+    "regular_files": 135,
+    "source_snapshots": 55
+  }
+}

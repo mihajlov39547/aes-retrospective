@@ -1,0 +1,34 @@
+platform,run_id,seed,status,check,detail
+gtx1650ti,heterogeneous-core-v1-20261014T102836520134Z-1472bd2f13cf,all,PASS,Resolved protocol and manifest,Verified
+gtx1650ti,heterogeneous-core-v1-20261014T102836520134Z-1472bd2f13cf,all,PASS,Existing read-only artifact verifier,complete
+gtx1650ti,heterogeneous-core-v1-20261014T102836520134Z-1472bd2f13cf,all,WARN,Working tree,"Recorded dirty tree: M .gitignore
+?? experiments/results_orchestrated/; archived active sources are checked separately."
+gtx1650ti,heterogeneous-core-v1-20261014T102836520134Z-1472bd2f13cf,all,WARN,Platform interpretation,"OS release/kernel are captured facts; Windows marketing edition and Colab provider labels are user supplied, not inferred from NT version."
+gtx1650ti,heterogeneous-core-v1-20261014T102836520134Z-1472bd2f13cf,2003,PASS,"Raw CSV, 1200 observations / 60 groups, dispatch, sources, all summary statistics",Verified
+gtx1650ti,heterogeneous-core-v1-20261014T102836520134Z-1472bd2f13cf,2004,PASS,"Raw CSV, 1200 observations / 60 groups, dispatch, sources, all summary statistics",Verified
+gtx1650ti,heterogeneous-core-v1-20261014T102836520134Z-1472bd2f13cf,2005,PASS,"Raw CSV, 1200 observations / 60 groups, dispatch, sources, all summary statistics",Verified
+gtx1650ti,heterogeneous-core-v1-20261014T102836520134Z-1472bd2f13cf,2006,PASS,"Raw CSV, 1200 observations / 60 groups, dispatch, sources, all summary statistics",Verified
+gtx1650ti,heterogeneous-core-v1-20261014T102836520134Z-1472bd2f13cf,2007,PASS,"Raw CSV, 1200 observations / 60 groups, dispatch, sources, all summary statistics",Verified
+gtx1650ti,heterogeneous-core-v1-20261014T102836520134Z-1472bd2f13cf,all,PASS,Within-run source equality,All active Python and CUDA snapshots identical over five sessions
+gtx1650ti,heterogeneous-core-v1-20261014T102836520134Z-1472bd2f13cf,all,PASS,Independent five-session estimators versus all saved aggregate exports,Verified
+t4,heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386,all,PASS,Resolved protocol and manifest,Verified
+t4,heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386,all,PASS,Existing read-only artifact verifier,complete
+t4,heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386,all,WARN,Platform interpretation,"OS release/kernel are captured facts; Windows marketing edition and Colab provider labels are user supplied, not inferred from NT version."
+t4,heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386,2003,PASS,"Raw CSV, 1200 observations / 60 groups, dispatch, sources, all summary statistics",Verified
+t4,heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386,2004,PASS,"Raw CSV, 1200 observations / 60 groups, dispatch, sources, all summary statistics",Verified
+t4,heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386,2005,PASS,"Raw CSV, 1200 observations / 60 groups, dispatch, sources, all summary statistics",Verified
+t4,heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386,2006,PASS,"Raw CSV, 1200 observations / 60 groups, dispatch, sources, all summary statistics",Verified
+t4,heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386,2007,PASS,"Raw CSV, 1200 observations / 60 groups, dispatch, sources, all summary statistics",Verified
+t4,heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386,all,PASS,Within-run source equality,All active Python and CUDA snapshots identical over five sessions
+t4,heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386,all,PASS,Independent five-session estimators versus all saved aggregate exports,Verified
+t600,heterogeneous-core-v1-20261014T064407642462Z-636c48c0ebaf,all,PASS,Resolved protocol and manifest,Verified
+t600,heterogeneous-core-v1-20261014T064407642462Z-636c48c0ebaf,all,PASS,Existing read-only artifact verifier,complete
+t600,heterogeneous-core-v1-20261014T064407642462Z-636c48c0ebaf,all,WARN,Platform interpretation,"OS release/kernel are captured facts; Windows marketing edition and Colab provider labels are user supplied, not inferred from NT version."
+t600,heterogeneous-core-v1-20261014T064407642462Z-636c48c0ebaf,2003,PASS,"Raw CSV, 1200 observations / 60 groups, dispatch, sources, all summary statistics",Verified
+t600,heterogeneous-core-v1-20261014T064407642462Z-636c48c0ebaf,2004,PASS,"Raw CSV, 1200 observations / 60 groups, dispatch, sources, all summary statistics",Verified
+t600,heterogeneous-core-v1-20261014T064407642462Z-636c48c0ebaf,2005,PASS,"Raw CSV, 1200 observations / 60 groups, dispatch, sources, all summary statistics",Verified
+t600,heterogeneous-core-v1-20261014T064407642462Z-636c48c0ebaf,2006,PASS,"Raw CSV, 1200 observations / 60 groups, dispatch, sources, all summary statistics",Verified
+t600,heterogeneous-core-v1-20261014T064407642462Z-636c48c0ebaf,2007,PASS,"Raw CSV, 1200 observations / 60 groups, dispatch, sources, all summary statistics",Verified
+t600,heterogeneous-core-v1-20261014T064407642462Z-636c48c0ebaf,all,PASS,Within-run source equality,All active Python and CUDA snapshots identical over five sessions
+t600,heterogeneous-core-v1-20261014T064407642462Z-636c48c0ebaf,all,PASS,Independent five-session estimators versus all saved aggregate exports,Verified
+cross-platform,selected primary runs,all,PASS,Active Python/CUDA source identity,Actual archived source SHA-256 equality; Git commit equality is not assumed.

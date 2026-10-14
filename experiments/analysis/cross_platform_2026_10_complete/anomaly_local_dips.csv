@@ -1,0 +1,37 @@
+platform,backend,scope,mode,sessions_local_dip,seeds
+gtx1650ti,cpu_aesni,transform,CTR,0,[]
+gtx1650ti,cpu_aesni,transform,ECB,0,[]
+gtx1650ti,cpu_software,transform,CTR,1,[2003]
+gtx1650ti,cpu_software,transform,ECB,2,"[2006, 2007]"
+gtx1650ti,cuda_baseline,pipeline,CTR,5,"[2003, 2004, 2005, 2006, 2007]"
+gtx1650ti,cuda_baseline,pipeline,ECB,5,"[2003, 2004, 2005, 2006, 2007]"
+gtx1650ti,cuda_baseline,resident,CTR,5,"[2003, 2004, 2005, 2006, 2007]"
+gtx1650ti,cuda_baseline,resident,ECB,5,"[2003, 2004, 2005, 2006, 2007]"
+gtx1650ti,cuda_optimized_v1,pipeline,CTR,5,"[2003, 2004, 2005, 2006, 2007]"
+gtx1650ti,cuda_optimized_v1,pipeline,ECB,5,"[2003, 2004, 2005, 2006, 2007]"
+gtx1650ti,cuda_optimized_v1,resident,CTR,5,"[2003, 2004, 2005, 2006, 2007]"
+gtx1650ti,cuda_optimized_v1,resident,ECB,5,"[2003, 2004, 2005, 2006, 2007]"
+t4,cpu_aesni,transform,CTR,0,[]
+t4,cpu_aesni,transform,ECB,0,[]
+t4,cpu_software,transform,CTR,2,"[2003, 2004]"
+t4,cpu_software,transform,ECB,1,[2004]
+t4,cuda_baseline,pipeline,CTR,0,[]
+t4,cuda_baseline,pipeline,ECB,0,[]
+t4,cuda_baseline,resident,CTR,4,"[2003, 2004, 2006, 2007]"
+t4,cuda_baseline,resident,ECB,4,"[2003, 2004, 2006, 2007]"
+t4,cuda_optimized_v1,pipeline,CTR,0,[]
+t4,cuda_optimized_v1,pipeline,ECB,0,[]
+t4,cuda_optimized_v1,resident,CTR,4,"[2003, 2004, 2006, 2007]"
+t4,cuda_optimized_v1,resident,ECB,4,"[2003, 2004, 2006, 2007]"
+t600,cpu_aesni,transform,CTR,3,"[2005, 2006, 2007]"
+t600,cpu_aesni,transform,ECB,3,"[2005, 2006, 2007]"
+t600,cpu_software,transform,CTR,3,"[2005, 2006, 2007]"
+t600,cpu_software,transform,ECB,3,"[2005, 2006, 2007]"
+t600,cuda_baseline,pipeline,CTR,4,"[2003, 2004, 2005, 2006]"
+t600,cuda_baseline,pipeline,ECB,3,"[2003, 2004, 2006]"
+t600,cuda_baseline,resident,CTR,4,"[2003, 2004, 2005, 2006]"
+t600,cuda_baseline,resident,ECB,3,"[2003, 2004, 2006]"
+t600,cuda_optimized_v1,pipeline,CTR,4,"[2003, 2004, 2005, 2006]"
+t600,cuda_optimized_v1,pipeline,ECB,3,"[2003, 2004, 2006]"
+t600,cuda_optimized_v1,resident,CTR,4,"[2003, 2004, 2005, 2006]"
+t600,cuda_optimized_v1,resident,ECB,5,"[2003, 2004, 2005, 2006, 2007]"
