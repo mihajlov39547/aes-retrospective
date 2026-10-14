@@ -1,0 +1,34 @@
+{
+  "figures": [
+    {
+      "file": "benchmarking_framework_grayscale.jpg",
+      "source": "figures/benchmarking_framework_grayscale.jpg",
+      "sha256": "dd9a6a7defb7af504caef607da0bb1d9622f1358db131ec98fada7d9f2e19c10",
+      "latex_source": "content/03_methodology.tex"
+    },
+    {
+      "file": "02_pipeline_throughput.pdf",
+      "source": "experiments/analysis/cross_platform_2026_10_complete/figures/02_pipeline_throughput.pdf",
+      "sha256": "ed44e58589eb82b476ce744b136353329571d26e35181b87b097d5505704e66a",
+      "latex_source": "content/04_results.tex"
+    },
+    {
+      "file": "03_pipeline_speedup_vs_aesni.pdf",
+      "source": "experiments/analysis/cross_platform_2026_10_complete/figures/03_pipeline_speedup_vs_aesni.pdf",
+      "sha256": "e23c0b47f74dfe2b82dc8d2d40ea33fc729425af78f7bcc20eccd5b885f416a3",
+      "latex_source": "content/04_results.tex"
+    },
+    {
+      "file": "08_pipeline_resident_ratio.pdf",
+      "source": "experiments/analysis/cross_platform_2026_10_complete/figures/08_pipeline_resident_ratio.pdf",
+      "sha256": "57c5ff04335d952f68ee7f5a347cb5423bca07ada31cfde476626940b743368d",
+      "latex_source": "content/04_results.tex"
+    },
+    {
+      "file": "05_session_variability.pdf",
+      "source": "experiments/analysis/cross_platform_2026_10_complete/figures/05_session_variability.pdf",
+      "sha256": "8cb04ed9af5a7ed0a9245d89c8e5d4d3a2641d62311ea4bff0f38b4a71fd41cd",
+      "latex_source": "content/04_results.tex"
+    }
+  ]
+}

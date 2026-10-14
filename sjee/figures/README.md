@@ -1,26 +1,38 @@
 # Manuscript figures
 
-Store final figures here. Prefer vector PDF for diagrams in the PDF build,
-or high-resolution PNG where raster output is appropriate. Retain editable
-originals. Use readable labels and distinguish lines in monochrome as well
-as color. For DOCX, supply a PNG or another image format supported by Word;
-a PDF figure may need a separate Word-compatible export.
+All five manuscript graphics are stored here. The PDF build uses only local
+`figures/` paths; no external figure directory is needed. `SOURCES.json` records
+repository origins and SHA-256 hashes. The four plots are unchanged vector PDFs;
+the framework is the unchanged original JPEG (no vector counterpart was found).
 
-When adding a figure to the shared manuscript under `content/`, use, for example:
+| Figure | Local file | Source |
+|---|---|---|
+| 1 | `benchmarking_framework_grayscale.jpg` | Repository `figures/` |
+| 2 | `02_pipeline_throughput.pdf` | Completed cross-platform analysis |
+| 3 | `03_pipeline_speedup_vs_aesni.pdf` | Completed cross-platform analysis |
+| 4 | `08_pipeline_resident_ratio.pdf` | Completed cross-platform analysis |
+| 5 | `05_session_variability.pdf` | Completed cross-platform analysis |
 
-```latex
-\includegraphics[width=0.9\linewidth]{figures/example.pdf}
-```
+The analysis plots originate in
+`experiments/analysis/cross_platform_2026_10_complete/figures/`. Copies preserve
+original bytes, vector content and quality. Do not regenerate or alter numerical
+plots during manuscript layout work.
 
-The example file is not supplied. The current shared manuscript has no figures
-and builds without image inputs. `placeholder.png` is a retained 1200 by 280
-pixel bordered fixture used by the separate historical Word-filling experiment.
-It is not inserted automatically by either normal build. Keep new figure
-content in the shared files. The primary copy-based DOCX adapter currently
-supports the figure-free manuscript; extend it explicitly to handle a figure
-environment and Word-compatible image before adding figures. Unsupported
-environments stop the DOCX build rather than silently dropping illustrations.
+The previous local framework JPEG was a stale, different diagram despite sharing
+its filename with the repository original. It has been replaced with the existing
+validation-first framework diagram that matches the manuscript caption. The
+original outside `sjee/` remains untouched.
 
-Keep one illustration per simple figure environment, near its first textual
-reference. Place captions below figures and reference every figure in the text.
-Avoid grouped floating layouts and images of equations or tables.
+All figures use `width=\linewidth`, preserve their aspect ratios, have captions
+below the image, and retain their original labels. The PDF figure pages were
+visually checked for margins, clipping, labels and placement after consolidation.
+The embedded plot provenance footnotes are small; the vector PDFs retain their
+resolution when enlarged.
+
+The unused `placeholder.png` is no longer in this directory. Its bytes are
+preserved in `sjee/experimental/legacy/figures/placeholder.png`, the location
+expected by the historical placeholder experiment. It is not a manuscript figure.
+No duplicate manuscript graphics or redundant raster plot exports are retained.
+
+This pass validates the PDF build only. The separate historical DOCX adapters
+are not validated for these figure environments or vector PDF inputs.

@@ -74,7 +74,7 @@ workload sizes for both CUDA implementations and both AES modes.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{../experiments/analysis/cross_platform_2026_10_complete/figures/02_pipeline_throughput.pdf}
+  \includegraphics[width=\linewidth]{figures/02_pipeline_throughput.pdf}
   \caption{Prepared-buffer GPU pipeline throughput for AES-128 ECB and CTR on the three
   platforms. Values are medians of five session-level throughput medians, expressed in decimal
   MB/s. Input sizes are binary quantities. Observed session ranges describe measured variability
@@ -114,7 +114,7 @@ platform's own AES-NI reference.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{../experiments/analysis/cross_platform_2026_10_complete/figures/03_pipeline_speedup_vs_aesni.pdf}
+  \includegraphics[width=\linewidth]{figures/03_pipeline_speedup_vs_aesni.pdf}
   \caption{Paired AES-128 GPU pipeline speedup relative to the corresponding host CPU AES-NI
   transformation. Speedup is the median of five session-specific CPU/GPU median-time ratios. The
   reference value of one denotes parity. Values above one indicate a shorter measured GPU
@@ -272,7 +272,7 @@ Figure~\ref{fig:pipeline-retention} presents the pipeline-to-resident throughput
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{../experiments/analysis/cross_platform_2026_10_complete/figures/08_pipeline_resident_ratio.pdf}
+  \includegraphics[width=\linewidth]{figures/08_pipeline_resident_ratio.pdf}
   \caption{Ratio of prepared-buffer GPU pipeline throughput to GPU resident throughput across
   the tested configurations. The ratios describe throughput retention under different timing
   boundaries; they are not direct measurements of PCIe transfer efficiency or the fraction of
@@ -376,7 +376,7 @@ Between-session variability is summarized in Figure~\ref{fig:session-variability
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth]{../experiments/analysis/cross_platform_2026_10_complete/figures/05_session_variability.pdf}
+  \includegraphics[width=\linewidth]{figures/05_session_variability.pdf}
   \caption{Between-session variability in CPU transformation and GPU pipeline latency. The
   coefficient of variation is computed from the five session-level median times using sample
   standard deviation divided by the session mean. The figure describes observed variability

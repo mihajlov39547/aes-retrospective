@@ -18,11 +18,12 @@ The experimental contribution is methodological rather than algorithmic. The stu
 introduce a new AES primitive or claim to establish the maximum attainable throughput of the
 tested processors. Instead, it examines how the interpretation of GPU acceleration changes when
 software CPU execution, hardware-assisted AES-NI, device-resident CUDA execution, and
-transfer-inclusive GPU processing are evaluated under a common, auditable protocol.
+transfer-inclusive GPU processing are evaluated under a common, auditable protocol
+(Figure~\ref{fig:benchmarking-framework}).
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[width=\linewidth] {figures/benchmarking_framework_grayscale.jpg}
+  \includegraphics[width=\linewidth]{figures/benchmarking_framework_grayscale.jpg}
   \caption{Validation-first benchmarking framework. Cryptographic correctness and workload
   preparation precede timed execution. Paired inputs are evaluated through CPU software, CPU
   AES-NI, GPU resident, and prepared-buffer GPU pipeline paths. Raw timing observations, session
