@@ -2,82 +2,177 @@
 \section{Results}
 \label{sec:results}
 
-This section presents the experimental results obtained using the validation-first benchmarking methodology described in Section~\ref{sec:methodology}. The analysis begins with retrospective CPU comparisons of symmetric encryption algorithms, followed by authenticated encryption measurements and the principal paired CPU--GPU evaluation.
+This section presents the experimental findings obtained from
+the cryptographic benchmarking framework described in
+Section~\ref{sec:methodology}. The analysis combines a
+retrospective CPU evaluation of DES, TDEA, and AES with the
+principal heterogeneous AES-128 study conducted on three
+CPU--GPU configurations.
 
-The main objective is not to identify a universally superior cryptographic implementation, but to examine how algorithm selection, hardware acceleration, and measurement scope influence the interpretation of observed performance.
+The retrospective experiments provide historical and
+implementation-oriented context, including conventional CBC
+encryption, AES-NI acceleration, AES-GCM authenticated
+encryption, reduced-keyspace search, and avalanche behavior.
+These experiments are reported separately from the primary
+heterogeneous comparison because their workloads and
+measurement boundaries are not identical.
 
-Unless otherwise stated, throughput values are expressed in decimal megabytes per second (MB/s), and the reported aggregate values represent the corresponding statistics obtained from five study sessions.
+The principal study comprises fifteen validated sessions,
+five per platform, and 18,000 raw timing observations.
+It evaluates software CPU AES, hardware-accelerated AES-NI,
+and baseline and optimized-v1 CUDA implementations using
+AES-128 in ECB and CTR modes.
 
-\subsection{CPU Comparison of DES, TDEA, and AES}
+The analysis emphasizes three questions: whether GPU
+execution provides an advantage over the selected CPU
+references; whether that advantage persists when transfers
+are included; and how the observed relationships vary across
+workload sizes, cipher modes, and computing configurations.
+
+Unless otherwise stated, input sizes use binary units
+(KiB and MiB), while throughput is reported in decimal
+megabytes per second (MB/s). The principal heterogeneous
+results are medians of five session-level estimates.
+Paired speedups are medians of corresponding session-level
+CPU-to-GPU timing ratios, not ratios of independently
+aggregated throughput values.
+
+
+\subsection{Retrospective CPU Comparison of DES, TDEA,
+and AES}
 \label{subsec:cpu_results}
 
-The initial experiments establish a historical and implementation-oriented reference for symmetric encryption performance. DES, three-key TDEA, and AES-128/192/256 were evaluated in Cipher Block Chaining (CBC) mode without padding.
+The first group of experiments establishes a historical
+reference for the execution costs of symmetric encryption
+implementations. DES, three-key TDEA, and AES-128/192/256
+were evaluated in Cipher Block Chaining (CBC) mode without
+padding.
 
-DES and TDEA are included exclusively for retrospective comparison and are not presented as recommended algorithms for protecting new data. Their historical standardization and subsequent withdrawal or restriction provide context for the evolution of symmetric cryptographic implementations \cite{nist1999des,nbs1980des,barker2017tdea,barker2019transitioning}.
+DES and TDEA are included exclusively for retrospective
+comparison. Their historical importance does not imply
+that they remain appropriate choices for protecting new
+data. The transition away from these algorithms is
+documented in the relevant standards and migration
+guidance
+\cite{nist1999des,nbs1980des,barker2017tdea,
+barker2019transitioning}.
 
-Functional validation employed known-answer CBC test vectors derived from standardized sources \cite{nbs1980des,dworkin2001modes}. The AES experiments additionally distinguished conventional software execution from the hardware-accelerated AES-NI library path.
+The CPU experiments also compare conventional software
+AES execution with an AES-NI-enabled library path.
+Functional correctness was checked using the applicable
+reference vectors and mode specifications
+\cite{nbs1980des,dworkin2001modes}.
 
-Table~\ref{tab:cpu-summary} summarizes the measured throughput and corresponding acceleration factors.
+Table~\ref{tab:cpu-summary} summarizes the measured
+throughput. These earlier CPU experiments are reported
+as a distinct benchmark series and are not pooled
+with the heterogeneous AES-128 dataset.
 
 \begin{table}[htbp]
 \centering
 \small
-\caption{CPU performance of CBC encryption and AES-NI experiments. Throughput is expressed in decimal MB/s; aggregated study-session medians are reported.}
+\setlength{\tabcolsep}{4pt}
+\caption{Retrospective CPU CBC and AES-NI measurements
+for 10~MiB workloads. Throughput is expressed in
+decimal MB/s.}
 \label{tab:cpu-summary}
 \begin{tabular}{llrrr}
 \toprule
-Experiment & Algorithm / operation & Software & AES-NI & Speedup \\
+Operation & Algorithm & Software & AES-NI & Speedup \\
 \midrule
-CBC, 10 MiB enc. & DES     & 87.4  & --    & -- \\
-CBC, 10 MiB enc. & TDEA    & 32.6  & --    & -- \\
-CBC, 10 MiB enc. & AES-128 & 223.8 & --    & -- \\
-CBC, 10 MiB enc. & AES-192 & 198.9 & --    & -- \\
-CBC, 10 MiB enc. & AES-256 & 174.6 & --    & -- \\
+CBC encryption & DES     & 87.4  & --    & -- \\
+CBC encryption & TDEA    & 32.6  & --    & -- \\
+CBC encryption & AES-128 & 223.8 & --    & -- \\
+CBC encryption & AES-192 & 198.9 & --    & -- \\
+CBC encryption & AES-256 & 174.6 & --    & -- \\
 \midrule
-AES-NI, 10 MiB enc. & AES-128 & 225.1 & 531.6 & 2.37$\times$ \\
-AES-NI, 10 MiB dec. & AES-128 & 223.7 & 557.2 & 2.47$\times$ \\
-AES-NI, 10 MiB enc. & AES-192 & 198.5 & 504.3 & 2.53$\times$ \\
-AES-NI, 10 MiB dec. & AES-192 & 195.5 & 517.8 & 2.65$\times$ \\
-AES-NI, 10 MiB enc. & AES-256 & 174.9 & 474.0 & 2.71$\times$ \\
-AES-NI, 10 MiB dec. & AES-256 & 171.4 & 480.4 & 2.80$\times$ \\
+Encryption & AES-128 & 225.1 & 531.6 & 2.37 \\
+Decryption & AES-128 & 223.7 & 557.2 & 2.47 \\
+Encryption & AES-192 & 198.5 & 504.3 & 2.53 \\
+Decryption & AES-192 & 195.5 & 517.8 & 2.65 \\
+Encryption & AES-256 & 174.9 & 474.0 & 2.71 \\
+Decryption & AES-256 & 171.4 & 480.4 & 2.80 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The results demonstrate substantial implementation-dependent differences in encryption throughput. Among the conventional software paths, AES variants outperform TDEA under the evaluated CBC workload. AES-128 achieves the highest throughput among the software AES configurations, followed by AES-192 and AES-256.
+Among the evaluated conventional software paths,
+AES-128 achieves the highest CBC throughput,
+followed by AES-192 and AES-256. All three
+software AES variants outperform TDEA for
+the measured workload.
 
-This ordering is consistent with the increasing number of AES rounds associated with longer keys. AES-128, AES-192, and AES-256 require 10, 12, and 14 rounds, respectively \cite{nist2023aes}. However, the measured throughput differences also depend on the library implementation and should not be attributed exclusively to round counts.
+The ordering among the AES key lengths is consistent
+with their different round counts. AES-128,
+AES-192, and AES-256 use 10, 12, and 14 rounds,
+respectively~\cite{nist2023aes}. Nevertheless,
+the measured differences also depend on the
+library implementation and execution environment.
 
-Hardware acceleration considerably changes the observed performance relationship. The AES-NI path achieves approximately 2.4--2.8 times the throughput of the corresponding software execution path in the evaluated configurations.
+Hardware-assisted execution changes the observed
+performance relationship substantially.
 
-For example, AES-128 CBC encryption increases from 225.1 MB/s to 531.6 MB/s, while AES-256 CBC encryption increases from 174.9 MB/s to 474.0 MB/s.
+For AES-128 CBC encryption, the selected AES-NI
+path reaches 531.6~MB/s, compared with
+225.1~MB/s for the corresponding software path.
+The measured acceleration factor is approximately
+$2.37\times$.
 
-The relative acceleration is somewhat larger for AES-256 than for AES-128 in the reported measurements. Nevertheless, these factors characterize the specific processor, cryptographic library, workload size, and measurement boundary used in the experiment. They should not be interpreted as universal AES-NI speedup factors.
+For AES-256 encryption, throughput increases
+from 174.9 to 474.0~MB/s, corresponding
+to approximately $2.71\times$.
 
-Importantly, the observed performance differences do not represent comparative cryptographic security. They quantify the execution costs of particular algorithm and implementation configurations.
+Across the reported AES-NI comparisons, the
+speedup ranges from approximately $2.37\times$
+to $2.80\times$.
 
-These findings also motivate the selection of AES-NI, rather than conventional software AES alone, as the primary CPU reference in the subsequent heterogeneous CPU--GPU evaluation.
+These findings characterize the tested CPU
+implementations, rather than universal AES-NI
+performance. They also demonstrate why a
+software-only CPU baseline is insufficient
+for evaluating the practical benefits of
+GPU offloading.
+
+The security of an encryption algorithm cannot
+be inferred from these throughput measurements.
+The comparison concerns implementation costs,
+not comparative cryptographic strength.
 
 
 \subsection{AES-GCM Authenticated Encryption}
 \label{subsec:gcm_results}
 
-The second group of experiments extends the CPU analysis to authenticated encryption using AES in Galois/Counter Mode (GCM).
+A second group of experiments examines AES in
+Galois/Counter Mode (GCM), extending the CPU
+analysis beyond confidentiality-only encryption.
 
-Unlike CBC encryption, which provides confidentiality without integrated authentication, GCM combines encryption with authentication of the ciphertext and optional associated data \cite{dworkin2007gcm}.
+AES-GCM combines counter-mode encryption with
+authentication of the ciphertext and optional
+additional authenticated data
+\cite{dworkin2007gcm}.
 
-The experiment evaluates AES-128-GCM and AES-256-GCM using a 96-bit nonce, a 128-bit authentication tag, and 16 bytes of fixed additional authenticated data (AAD).
+The evaluated configurations use AES-128-GCM
+and AES-256-GCM, a 96-bit nonce, a 128-bit
+authentication tag, and 16 bytes of fixed
+additional authenticated data (AAD).
 
-Functional validation includes authentication-tag verification and rejection of modified ciphertext, authentication tags, or associated data.
+Functional validation includes successful
+authentication and rejection of modified
+ciphertext, authentication tags, and AAD.
 
-These validation requirements distinguish the GCM workload from confidentiality-only encryption experiments and prevent direct interpretation of CBC and GCM throughput as equivalent cryptographic operations.
+These operations are distinct from the
+ECB and CTR encryption-only workloads used
+in the primary heterogeneous comparison.
 
-Table~\ref{tab:gcm-summary} presents the measured AES-GCM throughput on the selected CPU AES-NI execution path.
+Table~\ref{tab:gcm-summary} presents the
+recorded CPU AES-GCM results.
 
 \begin{table}[htbp]
 \centering
 \small
-\caption{Throughput of AES-GCM authenticated encryption and decryption on the CPU AES-NI path, expressed in decimal MB/s.}
+\caption{AES-GCM authenticated encryption and
+decryption throughput on the selected CPU path,
+in decimal MB/s.}
 \label{tab:gcm-summary}
 \begin{tabular}{llrr}
 \toprule
@@ -93,294 +188,1081 @@ Input size & Algorithm & Encryption & Decryption \\
 \end{tabular}
 \end{table}
 
-The results show a pronounced dependence on input size.
+The results show a strong dependence on message size.
 
-For 1 KiB messages, the reported throughput is substantially lower than for larger inputs. This behavior is consistent with the increased relative contribution of fixed per-operation costs, including invocation overhead and mode-specific processing, when the payload is small.
+At 1~KiB, the measured throughput is substantially
+below that obtained with larger messages. This
+behavior is consistent with a greater relative
+contribution from fixed operation costs, although
+the experiment does not independently isolate
+individual sources of overhead.
 
-At 1 MiB and 100 MiB, AES-128-GCM achieves approximately 1.13--1.19 GB/s, while AES-256-GCM achieves approximately 1.06--1.10 GB/s.
+At 1 and 100~MiB, AES-128-GCM reaches approximately
+1.13--1.19~GB/s, while AES-256-GCM reaches
+approximately 1.06--1.10~GB/s.
 
-The differences between encryption and decryption are relatively small for larger inputs. However, a more pronounced asymmetry is observed for 1 KiB messages, particularly in AES-128-GCM, where encryption reaches 70.6 MB/s and decryption reaches 38.1 MB/s.
+Encryption and decryption rates are relatively
+close for the larger messages. By contrast,
+the 1~KiB AES-128-GCM result exhibits a
+pronounced asymmetry: 70.6~MB/s for encryption
+and 38.1~MB/s for decryption.
 
-The current measurements establish this asymmetry as an observation but do not isolate its cause. Additional profiling would be required to determine the contributions of authentication verification, invocation overhead, and library-specific execution behavior.
+The measurements establish this asymmetry
+as an observation of the selected execution
+path. They do not determine whether it is
+primarily caused by authentication processing,
+invocation costs, or library-specific behavior.
 
-For small messages, latency expressed in microseconds per operation would provide a more direct characterization than throughput alone.
+The GCM results emphasize that throughput
+depends not only on the underlying AES
+primitive but also on the cryptographic
+functionality and operational boundary.
 
-These results demonstrate the importance of workload size and cryptographic functionality when interpreting performance measurements. They also establish a contemporary authenticated-encryption reference that complements the subsequent AES-128 ECB/CTR CPU--GPU experiments.
-
-% TODO-GCM-1:
-% Report latency in microseconds for 1 KiB workloads.
-%
-% TODO-GCM-2:
-% Investigate the observed encryption/decryption asymmetry
-% for small AES-GCM messages.
-%
-% TODO-GCM-3:
-% Consider a GPU AES-GCM extension only after validating
-% both encryption and authentication processing.
+They provide an authenticated-encryption
+reference within the retrospective study,
+rather than a directly interchangeable
+baseline for the AES-128 ECB/CTR GPU experiments.
 
 
-\subsection{CUDA Baseline and Paired CPU--GPU Comparison}
+\subsection{Three-Platform AES-128 CPU--GPU Evaluation}
 \label{subsec:cpu_gpu_results}
 
-The central experiment evaluates AES-128 execution across conventional CPU software, hardware-accelerated CPU AES-NI, and two CUDA implementation variants.
+The principal experiment evaluates AES-128
+encryption across three heterogeneous
+computing configurations:
 
-The CUDA baseline uses a readable byte-oriented AES kernel in which each CUDA thread processes one 16-byte AES block. The execution configuration employs 128 threads per CUDA block.
+\begin{enumerate}
+    \item Windows~10 with an Intel Core
+    i5-10300H and GeForce GTX~1650~Ti;
 
-ECB and CTR modes were selected because they permit independent block-level execution. ECB is used exclusively as a controlled microbenchmark of independent block transformations, while CTR provides a parallelizable counter-based encryption mode defined by NIST SP 800-38A \cite{dworkin2001modes}.
+    \item Windows~11 with an Intel Core
+    i7-11850H and T600 Laptop GPU;
 
-ECB is not presented as a recommended mode for protecting general application data, since independent encryption of identical plaintext blocks can reveal structural information.
+    \item Google Colab/Linux with an exposed
+    Intel Xeon host CPU and Tesla T4 GPU.
+\end{enumerate}
 
-The GPU implementations use CUDA execution functionality exposed through CuPy, including custom kernel invocation and CUDA event-based measurement facilities \cite{nvidiaProgrammingGuide,cupyPerformance,cupyRawKernel,okuta2017cupy}.
+The GTX~1650~Ti represents a consumer laptop
+GPU, while the T600 is an entry-level professional
+mobile GPU. Both have 4~GB of device memory.
+The T4 provides a datacenter-oriented comparison.
 
-The paired protocol uses corresponding plaintext data, encryption keys, and initial CTR counter values for each mode, workload size, and repetition.
+The CUDA baseline assigns an independent
+AES block to each CUDA thread, with a launch
+configuration of 128 threads per CUDA block.
+The optimized-v1 kernel is evaluated as a
+separate lightweight implementation candidate.
 
-In addition to the baseline CUDA implementation, a lightweight optimization candidate, designated CUDA v1, is evaluated under the same experimental protocol.
+Both kernels are measured in ECB and CTR modes.
+Their results are interpreted as implementation
+measurements, not limits on the attainable
+performance of GPU AES.
 
-The comparison distinguishes two GPU measurement scopes:
+The two GPU timing scopes are evaluated
+separately:
+
+\begin{enumerate}
+    \item \textbf{Resident:} device-resident
+    CUDA execution excluding host--device
+    data transfers.
+
+    \item \textbf{Pipeline:} the synchronous,
+    prepared-buffer sequence including H2D
+    transfer, kernel execution, D2H transfer,
+    and required synchronization.
+\end{enumerate}
+
+The pipeline scope excludes buffer allocation,
+initial host staging, cryptographic initialization,
+and external application I/O. It therefore does
+not represent full application-level encryption.
+
+The three selected studies contain five sessions
+per platform and cover 1~KiB, 16~KiB, 1~MiB,
+16~MiB, and 32~MiB.
+
+The independent audit confirmed completeness
+of the selected datasets and reproduced the
+saved statistical estimators without detected
+numerical discrepancies at the specified
+floating-point tolerances.
+
+The following analysis uses the archived
+three-platform study results exclusively.
+
+
+\subsubsection{GPU Pipeline Performance Across Input Sizes}
+
+The first practical comparison considers
+the throughput of the prepared-buffer
+GPU pipeline, which includes the measured
+host--device transfers.
+
+Figure~\ref{fig:gpu-pipeline-throughput}
+presents the resulting throughput across
+all five workload sizes for both CUDA
+implementations and both AES modes.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{
+experiments/analysis/cross_platform_2026_10_complete/
+figures/02_pipeline_throughput.pdf}
+\caption{Prepared-buffer GPU pipeline throughput
+for AES-128 ECB and CTR on the three platforms.
+Values are medians of five session-level
+throughput medians, expressed in decimal MB/s.
+Input sizes are binary quantities. Observed
+session ranges describe measured variability
+and are not confidence intervals.
+The three panels represent distinct systems,
+rather than a controlled GPU-class comparison.}
+\label{fig:gpu-pipeline-throughput}
+\end{figure}
+
+For 32~MiB CTR workloads, baseline pipeline
+throughput reaches approximately 1188.9~MB/s
+on the GTX~1650~Ti, 2049.4~MB/s on the
+T600 Laptop GPU, and 3713.9~MB/s on the T4.
+
+The corresponding resident throughputs are
+4585.6, 4328.9, and 9166.8~MB/s, respectively.
+
+These results demonstrate substantial
+differences between isolated GPU execution
+and transfer-inclusive processing.
+
+They also show that the T4 achieves the
+highest absolute GPU throughput in this
+matched large-buffer CTR configuration.
+
+However, the comparison includes differences
+in the complete host systems, drivers,
+CUDA environments, and device architectures.
+It cannot establish that GPU product category
+alone causes the observed ordering.
+
+The two 4~GB laptop GPUs remain practically
+relevant because they deliver substantial
+absolute throughput on the selected workloads
+without requiring a datacenter GPU.
+
+Whether that throughput constitutes useful
+acceleration depends on the CPU reference
+and the scope of the comparison.
+
+
+\subsubsection{CPU AES-NI Versus GPU Pipeline Speedup}
+
+The central offloading question is whether
+the GPU pipeline completes the measured
+operation faster than the corresponding
+hardware-accelerated CPU AES-NI path.
+
+Figure~\ref{fig:pipeline-speedup-aesni}
+presents the paired pipeline speedup
+relative to each platform's own AES-NI
+reference.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{
+experiments/analysis/cross_platform_2026_10_complete/
+figures/03_pipeline_speedup_vs_aesni.pdf}
+\caption{Paired AES-128 GPU pipeline speedup
+relative to the corresponding host CPU AES-NI
+transformation. Speedup is the median of five
+session-specific CPU/GPU median-time ratios.
+The reference value of one denotes parity.
+Values above one indicate a shorter measured
+GPU pipeline interval. Session ranges are
+descriptive, and each platform has its own
+CPU reference.}
+\label{fig:pipeline-speedup-aesni}
+\end{figure}
+
+The results are strongly configuration-dependent.
+
+On the consumer GTX~1650~Ti, baseline CTR
+at 32~MiB achieves a pipeline speedup
+of $0.935\times$ relative to AES-NI.
+The five-session range is
+$0.918$--$1.008\times$, with only one
+session above parity.
+
+The corresponding CUDA v1 result is
+$0.954\times$, also with a gain
+in only one of five sessions.
+
+Thus, neither implementation demonstrates
+a consistently faster transfer-inclusive
+pipeline than AES-NI on the GTX platform.
+
+This finding contrasts with the same
+GPU's comparison against the selected
+software CPU AES implementation.
+
+At 32~MiB CTR, baseline pipeline
+execution is approximately
+$4.566\times$ faster than software
+CPU AES, with an advantage in all
+five sessions.
+
+The difference between these conclusions
+is not contradictory: the CPU software
+and AES-NI execution paths have
+substantially different performance.
+
+The T600 Laptop GPU provides a
+particularly informative positive case.
+
+For baseline CUDA in CTR mode at
+32~MiB, the pipeline achieves a
+median paired speedup of
+
+\begin{equation}
+\widetilde{S}_{\mathrm{T600,CTR,P}}
+=1.353841.
+\label{eq:t600_pipeline_speedup}
+\end{equation}
+
+The observed session range is
+$1.128769$--$1.391103$, and all
+five sessions exceed parity.
+
+This corresponds to an approximately
+35.38\% improvement in the reported
+CPU-to-GPU speedup ratio, or an
+approximately 26.14\% reduction
+in the median paired latency ratio.
+
+The observed speedup IQR is 0.030896,
+with a sample coefficient of variation
+of approximately 8.18\%.
+
+This result is the strongest
+all-five-session pipeline advantage
+over AES-NI among the tested laptop
+conditions.
+
+Nevertheless, it is specific to
+the T600 host configuration,
+baseline CUDA implementation,
+CTR mode, 32~MiB input size,
+and the documented prepared-buffer
+measurement boundary.
+
+It does not establish a guaranteed
+advantage for every 4~GB GPU,
+every Windows laptop, or
+every AES workload.
+
+The T600 baseline and optimized-v1
+CTR pipelines also outperform AES-NI
+in all five sessions at 1~MiB.
+At 16~MiB, however, the direction
+is inconsistent, illustrating
+the importance of examining the
+complete size grid rather than a
+single favorable operating point.
+
+On the Tesla T4, baseline CTR
+pipeline execution reaches
+approximately $4.761\times$
+the paired host AES-NI speed
+at 32~MiB, with an advantage
+in all five sessions.
+
+In the same 32~MiB ECB workload,
+the T4 baseline pipeline achieves
+only approximately $0.893\times$
+the host AES-NI reference and
+loses in every session.
+
+Therefore, even the datacenter
+GPU configuration does not provide
+a universal pipeline advantage
+over hardware-accelerated CPU AES.
+
+The mode-dependent CPU reference
+is essential to interpreting
+this contrast.
+
+
+\subsubsection{Resident Versus Pipeline Measurements}
+\label{subsec:speedup_results}
+
+The distinction between resident-only
+and transfer-inclusive execution is
+the principal methodological finding
+of the heterogeneous study.
+
+Table~\ref{tab:gpu-speedups}
+reports the paired GPU speedup
+relative to CPU AES-NI at 32~MiB.
+
+The table includes both CUDA
+implementations and both AES modes
+on all three platforms, retaining
+positive, negative, and
+mixed-session outcomes.
+
+\begin{table}[htbp]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\caption{AES-128 speedup relative to paired
+CPU AES-NI for 32~MiB inputs. R denotes GPU
+resident execution and P the prepared-buffer
+pipeline. Values are medians of five paired
+session-level timing ratios. The last column
+gives the number of sessions with pipeline
+speedup above one.}
+\label{tab:gpu-speedups}
+\begin{tabular}{lllrrc}
+\toprule
+Platform & CUDA & Mode & R & P & P $>1$ \\
+\midrule
+
+GTX 1650 Ti & Base & ECB & 3.091 & 0.761 & 0/5 \\
+GTX 1650 Ti & Base & CTR & 3.693 & 0.935 & 1/5 \\
+GTX 1650 Ti & v1   & ECB & 3.082 & 0.765 & 0/5 \\
+GTX 1650 Ti & v1   & CTR & 3.698 & 0.954 & 1/5 \\
+
+\midrule
+
+T600 & Base & ECB & 2.215 & 1.118 & 3/5 \\
+T600 & Base & CTR & 2.666 & 1.354 & 5/5 \\
+T600 & v1   & ECB & 2.158 & 1.112 & 4/5 \\
+T600 & v1   & CTR & 2.541 & 1.354 & 4/5 \\
+
+\midrule
+
+T4 & Base & ECB & 2.207 & 0.893 & 0/5 \\
+T4 & Base & CTR & 11.758 & 4.761 & 5/5 \\
+T4 & v1   & ECB & 2.202 & 0.891 & 0/5 \\
+T4 & v1   & CTR & 11.838 & 4.756 & 5/5 \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+Every 32~MiB resident comparison
+reported in Table~\ref{tab:gpu-speedups}
+exceeds the paired AES-NI reference
+in all five sessions.
+
+However, the same consistency
+does not hold for the broader
+GPU pipeline.
+
+On the GTX~1650~Ti, every 32~MiB
+pipeline median remains below
+parity. The ECB pipeline loses
+in all five sessions for both
+CUDA implementations.
+
+On the T600, the CTR baseline
+retains a consistent pipeline
+advantage, whereas ECB and
+optimized-v1 CTR show mixed
+session-level outcomes.
+
+On the T4, CTR retains a
+substantial pipeline advantage,
+while ECB consistently favors
+the CPU AES-NI reference.
+
+These findings demonstrate that
+a resident-only GPU result
+cannot be used as a substitute
+for measuring the corresponding
+transfer-inclusive processing path.
+
+The same CUDA kernel can appear
+substantially faster than the CPU
+in resident measurements while
+the complete measured pipeline
+produces a smaller advantage,
+no consistent advantage, or
+a reversal in relative ranking.
+
+The practical implication is
+not that GPU acceleration is
+inherently ineffective.
+
+Instead, data residency,
+workload size, execution scope,
+and the performance of the
+CPU reference determine whether
+offloading is advantageous under
+the tested processing sequence.
+
+The distinction is consistent
+with the broader importance
+of data movement in heterogeneous
+computing~\cite{gregg2011data}.
+
+
+\subsubsection{Pipeline Throughput Retention}
+
+A complementary perspective
+examines how much of the
+device-resident throughput is
+retained when the measured
+GPU processing boundary is
+expanded to include data
+movement and synchronization.
+
+Figure~\ref{fig:pipeline-retention}
+presents the pipeline-to-resident
+throughput ratios.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{
+experiments/analysis/cross_platform_2026_10_complete/
+figures/08_pipeline_resident_ratio.pdf}
+\caption{Ratio of prepared-buffer GPU pipeline
+throughput to GPU resident throughput across
+the tested configurations. The ratios describe
+throughput retention under different timing
+boundaries; they are not direct measurements
+of PCIe transfer efficiency or the fraction
+of elapsed time spent copying data.}
+\label{fig:pipeline-retention}
+\end{figure}
+
+At 32~MiB, the pipeline generally
+retains approximately 25--26\%
+of resident throughput on the
+GTX~1650~Ti, 46--48\% on the
+T600, and about 40\% on the T4.
+
+These differences are relevant
+because the GPU kernels process
+the same number of bytes in
+both measurement scopes, while
+the pipeline includes additional
+operations.
+
+Nevertheless, the measured
+ratios cannot be interpreted
+as the pure fraction of time
+spent on PCIe transfers.
+
+The resident kernel is measured
+using CUDA events, whereas
+pipeline timing uses the
+host-observed synchronous
+processing interval.
+
+The archived H2D and D2H
+component intervals also
+include synchronization effects.
+
+For the T4 32~MiB workload,
+representative recorded H2D
+and D2H intervals are
+approximately 2.77 and
+2.60~ms, respectively.
+
+These values describe the
+instrumented component
+intervals and do not
+independently establish
+physical PCIe transfer times.
+
+Accordingly, the results
+support a measurement-scope
+interpretation without
+claiming a complete
+causal decomposition of
+pipeline overhead.
+
+
+\subsubsection{Cipher-Mode Dependence and the T4 Contrast}
+
+The T4 measurements reveal a
+particularly important difference
+between absolute GPU performance
+and speedup relative to a host CPU.
+
+At 32~MiB, baseline T4 GPU
+pipeline throughput is
+approximately 3713~MB/s
+for ECB and 3714~MB/s for CTR.
+
+The corresponding resident
+throughputs are approximately
+9177 and 9167~MB/s.
+
+Thus, the GPU's measured
+throughput is nearly identical
+for the two cipher modes
+under these conditions.
+
+However, the relative
+CPU--GPU pipeline speedups
+are markedly different:
+approximately $0.893\times$
+for ECB and $4.761\times$
+for CTR.
+
+The difference is associated
+with the corresponding host
+CPU performance.
+
+At 32~MiB, the T4 host's
+AES-NI ECB throughput is
+approximately $5.378\times$
+its AES-NI CTR throughput,
+with a session range of
+$5.250$--$5.795\times$.
+
+The two Windows systems
+show substantially smaller
+ECB-to-CTR AES-NI ratios
+of approximately $1.26\times$
+at the same input size.
+
+The T4 disparity is
+reproducible across the
+five observed sessions,
+but its underlying
+cause was not isolated.
+
+Potential influences include
+the host library's
+mode-specific execution,
+counter processing,
+processor behavior,
+and cloud runtime
+conditions.
+
+The results do not establish
+that any particular
+library version,
+virtualization mechanism,
+or CPU microarchitecture
+feature causes the disparity.
+
+This finding illustrates
+a broader interpretive problem:
+a high CPU-to-GPU speedup
+can arise from a slower
+CPU reference as well as
+from faster GPU execution.
+
+For this reason, the study
+reports both absolute
+throughput and speedup
+relative to explicitly
+identified CPU paths.
+
+The T4's large CTR speedup
+must not be interpreted as
+a $4.761\times$ absolute
+GPU throughput advantage
+over the laptop GPUs,
+because those speedups
+use different host CPUs.
+
+
+\subsubsection{Workload-Size Effects and Session Variability}
+
+The measured throughput
+does not always increase
+monotonically with input size.
+
+A local throughput reduction
+is observed around 16~MiB
+on the GTX~1650~Ti.
+
+Across the two CUDA
+implementations, two modes,
+and two timing scopes,
+all eight GTX groups
+show a 16~MiB local dip
+below both the 1~MiB
+and 32~MiB measurements
+in all five study sessions.
+
+On the T600, the corresponding
+joint local-dip counts vary
+from three to five sessions,
+depending on the implementation,
+cipher mode, and timing scope.
+
+On the T4, resident
+measurements exhibit
+the local dip in four
+sessions, whereas the
+pipeline measurements
+do not show the same
+joint local-dip pattern.
+
+Indeed, T4 pipeline
+throughput increases
+from 1~MiB to 16~MiB
+in every session.
+
+The 16~MiB feature is
+therefore not universal
+across the tested GPUs
+or timing boundaries.
+
+The fixed ascending
+workload-size order
+also prevents the
+experiment from separating
+buffer-size effects
+completely from
+time-dependent system behavior.
+
+No causal explanation
+is assigned to the
+observed reduction.
+
+In particular, the data
+do not establish that
+WDDM scheduling,
+thermal throttling,
+GPU memory behavior,
+or PCIe transfers are
+responsible for the feature.
+
+Between-session variability
+is summarized in
+Figure~\ref{fig:session-variability}.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{
+experiments/analysis/cross_platform_2026_10_complete/
+figures/05_session_variability.pdf}
+\caption{Between-session variability in CPU
+transformation and GPU pipeline latency.
+The coefficient of variation is computed
+from the five session-level median times
+using sample standard deviation divided
+by the session mean. The figure describes
+observed variability rather than a
+population confidence interval.}
+\label{fig:session-variability}
+\end{figure}
+
+The T600 environment exhibits
+appreciable variation for
+selected pipeline configurations,
+while the GTX and T4 show
+different variability profiles.
+
+These observations reinforce
+the importance of preserving
+session-level statistics and
+not reporting a single
+maximum-throughput result
+as representative of the
+complete study.
+
+In addition to aggregate
+medians, the analysis retains
+observed session ranges,
+interquartile ranges,
+coefficients of variation,
+and counts of sessions
+supporting a particular
+performance direction.
+
+A $5/5$ directional result
+indicates consistency among
+the five observed sessions.
+It does not constitute a
+formal significance test
+or a guarantee of the
+same outcome on another device.
+
+
+\subsubsection{Baseline Versus Optimized-v1 CUDA}
+
+The optimized-v1 implementation
+does not provide a uniform
+performance advantage
+over the CUDA baseline.
+
+Its relative behavior changes
+with GPU model, AES mode,
+workload size, and
+measurement scope.
+
+For example, at 32~MiB
+on the T4, optimized-v1
+resident CTR shows a
+small advantage over
+baseline, while
+resident ECB is
+slightly slower.
+
+On the GTX~1650~Ti,
+the optimized-v1 pipeline
+does not consistently
+remove the disadvantage
+relative to AES-NI.
+
+On the T600, the optimized-v1
+CTR pipeline has a median
+speedup above one at 32~MiB,
+but the direction reverses
+in at least one session.
+
+The observed differences
+are therefore insufficient
+to claim that the lightweight
+optimization candidate
+is generally superior.
+
+The result is important
+methodologically because
+kernel changes that
+improve a particular
+resident measurement
+do not necessarily improve
+the complete measured
+processing pipeline.
+
+The main contribution
+of the CUDA comparison
+is consequently the
+controlled assessment
+of implementation
+and timing-scope
+dependence, rather
+than a new optimized
+AES performance record.
+
+
+\subsection{Practical Interpretation of GPU Offloading}
+\label{subsec:practical_gpu_implications}
+
+The combined findings
+support a qualified
+interpretation of
+AES acceleration on
+accessible NVIDIA GPUs.
+
+The GTX~1650~Ti
+demonstrates that a
+consumer GPU with
+4~GB of memory can
+provide substantial
+AES-128 acceleration
+relative to the selected
+software CPU backend.
+
+At 32~MiB CTR, its
+baseline pipeline is
+approximately
+$4.57\times$ faster
+than software AES
+in the paired comparison.
+
+However, the same
+pipeline does not
+provide a consistent
+advantage over the
+host's AES-NI path.
+
+This distinction matters
+for users whose processors
+already offer dedicated
+AES acceleration.
+
+The T600 Laptop GPU
+demonstrates a positive
+transfer-inclusive result
+under specific conditions.
+
+In particular, baseline
+CTR processing at
+32~MiB is approximately
+$1.35\times$ faster
+than the paired AES-NI
+reference in all
+five measured sessions.
+
+Thus, a 4~GB laptop GPU
+can provide an observed
+advantage even when
+the measured pipeline
+includes transfers.
+
+Nevertheless, the
+result must not be
+generalized to all
+4~GB devices,
+all encryption modes,
+or all workload sizes.
+
+The Tesla T4 provides
+a complementary
+datacenter-oriented
+comparison.
+
+Its substantially higher
+absolute GPU throughput
+and strong CTR pipeline
+speedup demonstrate
+the potential of the
+tested server-class
+configuration.
+
+At the same time,
+its ECB pipeline
+result remains below
+the paired CPU AES-NI
+reference at 32~MiB.
+
+Accordingly, the
+presence of a more
+capable GPU does not
+remove the importance
+of the host CPU,
+cipher mode, and
+measurement boundary.
+
+The practical conclusions
+can be summarized as follows:
 
 \begin{enumerate}
 
-\item \textbf{Resident kernel-only (K):}
-The CUDA kernel operates on data already available in device memory. Host--device transfer costs are excluded from the measured kernel execution.
+\item Software-only AES is not
+a sufficient CPU reference
+for assessing GPU offloading
+on systems supporting AES-NI.
 
-\item \textbf{End-to-end pipeline (E2E):}
-The measurement includes the defined host-driven sequence consisting of host-to-device data transfer, CUDA kernel execution, device-to-host transfer, and required synchronization.
+\item Resident CUDA throughput
+can substantially exceed
+CPU transformation throughput
+without implying an equivalent
+transfer-inclusive advantage.
+
+\item Accessible laptop GPUs
+can provide practical benefits
+for selected prepared-buffer
+AES workloads, but the
+benefit is conditional.
+
+\item Absolute GPU throughput
+and speedup relative to
+the host CPU must be
+reported separately.
+
+\item Session consistency
+and measurement scope
+are essential when
+interpreting small or
+configuration-dependent
+performance differences.
 
 \end{enumerate}
 
-The CPU execution paths provide corresponding transform-only references.
+These conclusions apply to
+the specific AES-128
+implementations and
+prepared-buffer processing
+boundaries investigated.
 
-Table~\ref{tab:cpu-gpu-summary} presents the principal throughput results.
-
-\begin{table}[htbp]
-\centering
-\small
-\setlength{\tabcolsep}{3pt}
-\caption{Paired AES-128 CPU--GPU throughput comparison in decimal MB/s. K denotes resident kernel-only execution, whereas E2E denotes the defined host-driven GPU pipeline.}
-\label{tab:cpu-gpu-summary}
-\begin{tabular}{llrrrrrr}
-\toprule
-& & \multicolumn{2}{c}{CPU}
-  & \multicolumn{2}{c}{CUDA baseline}
-  & \multicolumn{2}{c}{CUDA v1} \\
-\cmidrule(lr){3-4}
-\cmidrule(lr){5-6}
-\cmidrule(lr){7-8}
-Mode & Size & Soft. & AES-NI & K & E2E & K & E2E \\
-\midrule
-ECB & 1 MiB  & 275.7 & 1793.5 & 4901.1 & 1339.1 & 5149.3 & 1320.1 \\
-ECB & 16 MiB & 280.5 & 1904.8 & 3667.5 & 1080.0 & 3424.4 & 866.2 \\
-ECB & 32 MiB & 282.1 & 1909.9 & 4753.5 & 1202.0 & 4792.6 & 1214.5 \\
-\midrule
-CTR & 1 MiB  & 257.4 & 1381.7 & 5017.1 & 1313.1 & 4853.9 & 1291.0 \\
-CTR & 16 MiB & 264.3 & 1446.5 & 3655.6 & 1103.1 & 3576.2 & 1074.0 \\
-CTR & 32 MiB & 266.3 & 1455.8 & 4800.6 & 1204.5 & 4877.7 & 1209.1 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The results reveal a consistent distinction between resident GPU throughput and the throughput of the complete measured GPU pipeline.
-
-In all reported configurations, resident CUDA execution achieves higher throughput than the corresponding CPU AES-NI reference.
-
-However, this relationship does not persist when the measured GPU execution includes host--device transfers and synchronization.
-
-For example, in CTR mode with a 1 MiB input, the baseline resident kernel reaches 5017.1 MB/s, compared with 1381.7 MB/s for CPU AES-NI. When the end-to-end GPU pipeline is measured, throughput decreases to 1313.1 MB/s, which is below the AES-NI result.
-
-A similar distinction appears at 32 MiB. The baseline resident CTR throughput reaches 4800.6 MB/s, whereas the corresponding pipeline achieves 1204.5 MB/s. The CPU AES-NI path reaches 1455.8 MB/s for the same workload size.
-
-Thus, the observed GPU computational advantage does not translate into an end-to-end advantage under the tested synchronous pipeline configuration.
-
-This result must be interpreted within the measured execution boundaries. The resident kernel and the CPU transform-only path provide useful comparisons of computational performance, but they do not represent identical application-level processing costs.
-
-The end-to-end GPU measurement includes additional operations required to move data through the accelerator. The comparison therefore illustrates the practical importance of data residency and processing-pipeline organization, consistent with the broader heterogeneous benchmarking literature \cite{gregg2011data}.
-
-Importantly, the observed relationship does not establish an intrinsic limitation of GPU AES encryption. Different transfer configurations, asynchronous execution, stronger CUDA implementations, or alternative platforms could change the measured end-to-end result.
-
-% TODO-CUDA-1:
-% Describe the exact transformations introduced in CUDA v1.
-%
-% TODO-CUDA-2:
-% Repeat the workload-size sweep at additional buffer sizes
-% to investigate the observed non-monotonic behavior.
-%
-% TODO-CUDA-3:
-% Decompose the measured E2E time into H2D, kernel, D2H,
-% synchronization, and relevant host-side costs.
-%
-% TODO-CUDA-4:
-% Test asynchronous transfers and multi-stream execution.
-%
-% TODO-CUDA-5:
-% Repeat the paired experiment on an NVIDIA T4 under Linux.
+They do not establish
+the performance of
+complete file-encryption
+applications,
+authenticated-encryption
+services, or arbitrary
+GPU deployments.
 
 
-\subsection{Speedup Analysis and Measurement-Scope Dependence}
-\label{subsec:speedup_results}
-
-To examine the relative execution costs more directly, GPU speedup factors were calculated using the corresponding CPU AES-NI execution path as the reference.
-
-The speedup statistics were derived from paired session-level timing medians and subsequently aggregated across five study sessions, as defined in Section~\ref{subsec:statistical_analysis}.
-
-A speedup factor greater than one indicates shorter GPU execution time for the corresponding measured scope, whereas a value below one indicates shorter CPU AES-NI execution time.
-
-Table~\ref{tab:gpu-speedups} presents the resulting factors for resident kernel-only (I) and end-to-end pipeline (P) execution.
-
-\begin{table}[htbp]
-\centering
-\small
-\caption{GPU speedup relative to CPU AES-NI, calculated as the median of five paired session-level timing ratios. I denotes isolated resident execution and P denotes the end-to-end pipeline. Values greater than one indicate shorter GPU execution time.}
-\label{tab:gpu-speedups}
-\begin{tabular}{llrrrr}
-\toprule
-Mode & Size & Baseline I & v1 I & Baseline P & v1 P \\
-\midrule
-ECB & 1 MiB  & 2.65 & 2.91 & 0.75 & 0.77 \\
-ECB & 16 MiB & 1.89 & 1.77 & 0.58 & 0.42 \\
-ECB & 32 MiB & 2.50 & 2.52 & 0.63 & 0.64 \\
-\midrule
-CTR & 1 MiB  & 3.66 & 3.54 & 0.95 & 0.91 \\
-CTR & 16 MiB & 2.58 & 2.51 & 0.75 & 0.74 \\
-CTR & 32 MiB & 3.30 & 3.40 & 0.82 & 0.83 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-The resident measurements indicate substantial acceleration relative to the selected AES-NI CPU reference. Depending on the mode, workload size, and CUDA implementation, the reported resident speedup ranges from approximately 1.77 to 3.66.
-
-However, all reported end-to-end pipeline speedup factors remain below one.
-
-The closest result to parity occurs for the baseline CTR implementation at 1 MiB, where the speedup factor is 0.95. At 32 MiB, the CTR pipeline factors are approximately 0.82--0.83, while the ECB pipeline factors are approximately 0.63--0.64.
-
-These findings demonstrate that the relative ranking of CPU and GPU execution changes when the measurement boundary changes.
-
-A comparison restricted to isolated CUDA kernel execution would suggest a GPU advantage across the evaluated workloads. A transfer-inclusive comparison using the tested synchronous pipeline instead favors the AES-NI CPU reference.
-
-The lightweight CUDA v1 optimization does not provide a consistent performance improvement.
-
-For some resident configurations, the optimized candidate achieves moderately higher throughput than the baseline. In other configurations, the result decreases. The most pronounced difference occurs for ECB at 16 MiB, where the v1 end-to-end pipeline reports lower throughput than the baseline configuration.
-
-Because the optimization is not consistently beneficial and the existing measurements do not isolate the causes of the observed variation, these differences should not be interpreted as evidence of a generally superior CUDA implementation.
-
-The non-monotonic behavior observed around 16 MiB also requires further investigation. Potential contributing factors include execution-environment variability, device clock behavior, memory allocation, transfer characteristics, and synchronization overhead.
-
-Without component-level timing and additional workload-size measurements, assigning the observed reduction to any particular mechanism would be speculative.
-
-The central finding is therefore methodological: the performance relationship between CPU AES-NI and CUDA AES depends on the measured execution scope.
-
-For the tested platform and implementation, high resident GPU throughput does not guarantee higher transfer-inclusive pipeline throughput.
-
-This finding supports the need to report kernel-only and end-to-end measurements separately, particularly when GPU performance is used to motivate architectural decisions in heterogeneous systems.
-
-% TODO-SPEEDUP-1:
-% Add session-level uncertainty or dispersion to speedup
-% tables and plots.
-%
-% TODO-SPEEDUP-2:
-% Verify discrepancies between ratios of aggregated
-% throughput values and medians of paired timing ratios.
-%
-% TODO-SPEEDUP-3:
-% Introduce a dense size sweep to determine whether a
-% crossover exists within the tested workload range.
-%
-% TODO-SPEEDUP-4:
-% Compare synchronous and asynchronous pipeline speedups.
-%
-% TODO-SPEEDUP-5:
-% Evaluate the same speedup definitions on the T4 platform.
-%
-% TODO-SPEEDUP-6:
-% Add an independent native CPU AES-NI implementation,
-% including multithreaded measurements where appropriate.
-
-
-\subsection{Reduced Keyspace and Avalanche Demonstrations}
+\subsection{Reduced-Keyspace and Avalanche Demonstrations}
 \label{subsec:cryptographic_demonstrations}
 
-Two additional experiments investigate conceptual aspects of cryptographic evaluation: exhaustive search over a deliberately reduced keyspace and the avalanche effect.
+Two supplementary experiments
+illustrate conceptual aspects
+of cryptographic evaluation:
+exhaustive search over
+a deliberately reduced
+keyspace and the
+avalanche effect.
 
-These experiments serve a demonstrative and retrospective purpose. They are not intended to provide a new cryptanalytic result or to establish the practical security of the evaluated algorithms.
+These experiments support
+the retrospective character
+of the study but are not
+included in the primary
+three-platform performance
+aggregates.
+
+They do not establish
+a new cryptanalytic
+result or provide
+a comparative proof
+of cipher security.
 
 
 \subsubsection{Reduced-Keyspace Search}
 
-The reduced-keyspace experiment uses AES-128 in ECB mode, with 24 variable key bits and a conventional CPU software execution path.
+The reduced-keyspace
+demonstration uses
+AES-128 in ECB mode
+with 24 variable
+key bits.
 
-The timed operation includes candidate-key construction, cipher-object initialization and key scheduling, encryption of two blocks, relevant allocation operations, ciphertext comparison, and termination when a matching candidate is found.
+The search is executed
+using a conventional
+CPU software path.
 
-Consequently, the measured candidate-processing rate characterizes the complete implemented search loop rather than the isolated throughput of the AES encryption primitive.
+Each candidate evaluation
+includes key construction,
+cipher initialization,
+the encryption of two
+blocks, ciphertext
+comparison, and
+termination when a
+matching candidate
+is found.
 
-The purpose is to illustrate the growth of exhaustive-search cost with the number of candidate keys, not to estimate the performance of optimized cryptanalytic hardware.
+The reported processing
+rate therefore describes
+the implemented
+candidate-testing loop,
+not fixed-key AES
+encryption throughput.
 
-Table~\ref{tab:keyspace} summarizes the experimental scenarios.
+Table~\ref{tab:keyspace}
+presents the selected
+search scenarios.
 
 \begin{table}[htbp]
 \centering
 \small
-\caption{CPU exhaustive-search demonstration over a reduced 24-bit AES-128 keyspace.}
+\caption{Exhaustive-search demonstration
+over a reduced 24-bit AES-128 keyspace
+using the selected CPU software path.}
 \label{tab:keyspace}
 \begin{tabular}{lrrr}
 \toprule
 Scenario & Candidates & Time (s) & Candidates/s \\
 \midrule
-Start  & 1              & 0.0000088 & 113\,636 \\
-Middle & 8\,388\,609     & 54.38     & 154\,263 \\
-End    & 16\,777\,216    & 109.01    & 153\,903 \\
-Random & 6\,800\,733     & 43.00     & 154\,079 \\
+Start  & 1          & 0.0000088 & 113\,636 \\
+Middle & 8\,388\,609 & 54.38     & 154\,263 \\
+End    & 16\,777\,216& 109.01    & 153\,903 \\
+Random & 6\,800\,733 & 43.00     & 154\,079 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-The complete traversal of the reduced keyspace requires approximately 109 seconds, corresponding to a processing rate of approximately 153.9 thousand candidate keys per second.
+The complete reduced-keyspace
+traversal requires
+approximately 109 seconds,
+with a processing rate
+of about 153.9 thousand
+candidate keys per second.
 
-The middle, end, and random scenarios exhibit similar candidate-processing rates, while the single-candidate start scenario is dominated by the extremely short measurement interval and should not be treated as a stable throughput estimate.
+The middle, end, and
+random scenarios exhibit
+similar candidate-processing
+rates.
 
-Only the complete-search scenario provides a direct empirical basis for a simple linear extrapolation under the assumption of constant candidate-processing rate.
+The single-candidate
+start scenario is too
+short to support a stable
+throughput interpretation.
 
-However, such extrapolation remains specific to the measured software execution path. The result does not represent the exhaustive-search performance of DES, TDEA, GPUs, FPGA-based accelerators, ASIC implementations, or specialized cryptanalytic systems.
+Only the complete
+traversal provides
+a direct empirical basis
+for simple linear
+extrapolation under
+the assumption of a
+constant processing rate.
 
-Moreover, fixed-key encryption throughput is not equivalent to candidate-key testing throughput. Exhaustive search requires additional work, particularly the generation or initialization of a candidate key and evaluation of a matching condition.
+Even such extrapolation
+is specific to the
+selected CPU implementation.
 
-The distinction is fundamental because the two workloads differ in computational structure and measurement scope.
+It does not estimate
+the performance of
+specialized cryptanalytic
+hardware, GPUs,
+FPGAs, or ASICs.
 
-The present experiment therefore illustrates the limitations of interpreting encryption throughput as an exhaustive-search rate.
+Most importantly,
+fixed-key AES encryption
+throughput is not
+equivalent to
+candidate-key testing
+throughput.
 
-More advanced cryptanalytic techniques, including meet-in-the-middle attacks against multiple encryption constructions, require separate computational and memory-cost models and are outside the experimental scope of this study.
+The latter includes
+key-dependent work
+and matching logic
+that are not present
+in repeated encryption
+under a fixed key.
 
-% TODO-KEYSPACE-1:
-% Consider relocating the reduced-keyspace experiment to
-% an appendix if the final paper emphasizes CPU/GPU
-% benchmarking and pipeline costs.
-%
-% TODO-KEYSPACE-2:
-% If retained as a principal result, quantify the difference
-% between fixed-key encryption throughput and candidate
-% evaluation using comparable implementation conditions.
+This distinction
+prevents misleading
+comparisons between
+AES throughput and
+exhaustive-search
+capabilities.
 
 
 \subsubsection{Avalanche Effect}
 
-The avalanche experiment examines the change in ciphertext output produced by modifying one bit of the plaintext or one effective bit of the cryptographic key.
+The avalanche experiment
+examines ciphertext
+changes resulting
+from a one-bit
+modification of
+the plaintext or
+an effective key bit.
 
-For each tested pair, the Hamming distance between the original and modified ciphertext blocks is calculated.
+For each tested pair,
+the Hamming distance
+between original and
+modified ciphertext
+blocks is calculated.
 
-The concept is related to the classical principle of diffusion in cryptographic systems, where changes in input information should influence multiple output components \cite{shannon1949communication}.
+The underlying concept
+is related to diffusion
+in cryptographic
+systems~\cite{shannon1949communication}.
 
-The Hamming distance is normalized by the block size: 64 bits for DES and TDEA, and 128 bits for AES.
+Hamming distance is
+normalized by the
+corresponding cipher
+block size:
+64 bits for DES
+and TDEA, and
+128 bits for AES.
 
-Table~\ref{tab:avalanche} summarizes the observed median and mean Hamming distances for plaintext-bit (P) and effective key-bit (K) modifications.
+Table~\ref{tab:avalanche}
+summarizes the
+observed medians
+and means.
 
 \begin{table}[htbp]
 \centering
-\small
+\scriptsize
 \setlength{\tabcolsep}{3pt}
-\caption{Avalanche-effect measurements following a one-bit change in plaintext (P) or effective key (K). HD denotes Hamming distance.}
+\caption{Avalanche-effect observations following
+a one-bit plaintext (P) or effective-key (K)
+modification. HD denotes Hamming distance;
+normalized values are relative to block size.}
 \label{tab:avalanche}
 \begin{tabular}{llrrrrr}
 \toprule
-Algorithm & Variation & Block & Median HD & Mean HD
-          & Median norm. & Mean norm. \\
+Algorithm & Change & Bits & Median HD &
+Mean HD & Median norm. & Mean norm. \\
 \midrule
 DES     & P & 64  & 32 & 32.02 & 0.50 & 0.5003 \\
 DES     & K & 64  & 32 & 31.94 & 0.50 & 0.4990 \\
@@ -396,35 +1278,155 @@ AES-256 & K & 128 & 64 & 64.00 & 0.50 & 0.5000 \\
 \end{tabular}
 \end{table}
 
-For DES and TDEA, the median Hamming distance is 32 out of 64 bits. For all AES variants, the median is 64 out of 128 bits.
+For DES and TDEA,
+the observed median
+Hamming distance
+is 32 out of 64 bits.
 
-Thus, the normalized median is 0.5 across all ten experimental groups.
+For all AES variants,
+the median is
+64 out of 128 bits.
 
-The normalized mean values range from approximately 0.4990 to 0.5007, indicating that the observed output differences are concentrated around half of the corresponding ciphertext block size.
+The normalized median
+is therefore 0.5
+across the reported
+experimental groups.
 
-This behavior is consistent with the expected local diffusion properties of established block ciphers.
+The normalized means
+range approximately
+from 0.4990 to 0.5007.
 
-However, the result must not be interpreted as proof of cryptographic security or as evidence that the evaluated algorithms provide equivalent protection.
+These results are
+consistent with
+the expected
+local diffusion
+behavior of
+established block
+ciphers.
 
-The avalanche experiment is not a complete evaluation of the Strict Avalanche Criterion (SAC), the Bit Independence Criterion (BIC), or resistance to differential, linear, or other forms of cryptanalysis.
+They do not,
+however, establish
+equivalent cipher
+security or resistance
+to cryptanalytic attacks.
 
-Furthermore, normalized average Hamming distance alone is insufficient to characterize the full distribution of output changes or to distinguish securely designed ciphers from deliberately weakened constructions.
+Average avalanche
+behavior alone
+does not constitute
+a complete test of
+the Strict Avalanche
+Criterion, the Bit
+Independence Criterion,
+or resistance to
+differential or
+linear cryptanalysis.
 
-Accordingly, the avalanche results are treated as a descriptive demonstration rather than as a basis for ranking algorithmic security.
+Consequently,
+the results are
+interpreted as
+descriptive
+cryptographic
+demonstrations.
 
-% TODO-AVALANCHE-1:
-% Document the number of tested pairs and the sampling
-% procedure used for plaintext-bit and key-bit changes.
-%
-% TODO-AVALANCHE-2:
-% Add distribution-level statistics and uncertainty
-% estimates if the experiment is retained.
-%
-% TODO-AVALANCHE-3:
-% Consider a reduced-round or deliberately weak control
-% implementation to evaluate the discriminating power
-% of the avalanche metric.
-%
-% TODO-AVALANCHE-4:
-% Consider moving this subsection to an appendix to
-% preserve the focus on heterogeneous benchmarking.
+
+\subsection{Summary of Experimental Findings}
+\label{subsec:results_summary}
+
+The retrospective
+CPU measurements
+confirm that
+implementation choice
+and hardware-assisted
+execution strongly
+influence AES
+throughput.
+
+The AES-GCM results
+demonstrate the
+importance of
+message size and
+cryptographic
+functionality when
+comparing encryption
+operations.
+
+The heterogeneous
+AES-128 study
+provides the
+principal empirical
+contribution.
+
+Across all three
+platforms, resident
+GPU execution
+outperforms the
+paired CPU AES-NI
+reference at 32~MiB.
+
+However, that
+advantage does
+not universally
+persist when the
+measurement boundary
+includes synchronous
+host--device
+transfers.
+
+The GTX~1650~Ti
+shows strong
+acceleration over
+the selected software
+CPU implementation
+but no consistently
+positive AES-NI
+pipeline result.
+
+The T600 provides
+a reproducible
+positive 32~MiB CTR
+pipeline example,
+while the T4
+demonstrates
+substantial CTR
+acceleration together
+with an ECB result
+that favors the
+paired AES-NI CPU.
+
+The CUDA v1
+candidate does not
+provide a consistent
+advantage, and the
+observed 16~MiB
+throughput feature
+is not universal
+across platforms
+or measurement
+scopes.
+
+Taken together,
+these results
+support the
+central methodological
+conclusion of the
+study: the observed
+benefit of
+GPU-based AES
+execution depends
+on the CPU reference,
+cipher mode,
+input size,
+implementation,
+and explicitly
+defined timing
+boundary.
+
+A reproducible
+benchmarking framework
+must preserve these
+distinctions before
+making practical
+claims about
+heterogeneous
+cryptographic
+acceleration.
