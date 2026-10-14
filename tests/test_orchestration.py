@@ -170,6 +170,40 @@ class ArtifactTests(unittest.TestCase):
         with self.assertRaises(subprocess.TimeoutExpired): r.process([sys.executable,'-c','import time; time.sleep(30)'],attempt,None,0.1)
         self.assertIn('TimeoutExpired',a.read(attempt/'execution.json')['error'])
 
+    def test_child_exits_before_process_metadata_lookup(self):
+        import psutil
+        original_popen=subprocess.Popen
+        for exit_code in (0,7):
+            with self.subTest(exit_code=exit_code):
+                attempt=self.root/('race-'+str(exit_code)); attempt.mkdir()
+                children=[]
+                def start(*args,**kwargs):
+                    child=original_popen(*args,**kwargs); children.append(child)
+                    return child
+                def metadata_after_exit(pid):
+                    self.assertEqual(children[0].pid,pid)
+                    self.assertEqual(children[0].wait(timeout=10),exit_code)
+                    raise psutil.NoSuchProcess(pid)
+                argv=[sys.executable,'-c','import sys; print("race diagnostic"); sys.exit('+str(exit_code)+')']
+                with patch('orchestration.runner.subprocess.Popen',side_effect=start), patch('psutil.Process',side_effect=metadata_after_exit):
+                    if exit_code:
+                        with self.assertRaisesRegex(ValueError,'Subprocess exited 7'): r.process(argv,attempt,None,10)
+                    else: self.assertEqual(r.process(argv,attempt,None,10)['exit_code'],0)
+                for filename in ('command.json','execution.json'):
+                    self.assertIsNone(a.read(attempt/filename)['process_created'])
+                execution=a.read(attempt/'execution.json')
+                self.assertEqual(execution['exit_code'],exit_code)
+                self.assertIn('race diagnostic',(attempt/'stdout.log').read_text())
+                if exit_code: self.assertIn('Subprocess exited 7',execution['error'])
+
+    def test_process_metadata_access_denied_preserves_exit(self):
+        import psutil
+        attempt=self.root/'metadata-denied'; attempt.mkdir()
+        with patch('psutil.Process',side_effect=psutil.AccessDenied(12345)):
+            result=r.process([sys.executable,'-c','pass'],attempt,None,10)
+        self.assertEqual(result['exit_code'],0)
+        self.assertIsNone(result['process_created'])
+
 
 class LifecycleTests(unittest.TestCase):
     def setUp(self):

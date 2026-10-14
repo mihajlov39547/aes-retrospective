@@ -199,10 +199,16 @@ def process(argv, attempt, env, timeout):
         with (attempt/'stdout.log').open('wb') as stdout, (attempt/'stderr.log').open('wb') as stderr:
             p=subprocess.Popen(argv,cwd=ROOT,env=env,stdout=stdout,stderr=stderr)
             outcome['pid']=p.pid
+            outcome['process_created']=None
             try:
                 import psutil
-                outcome['process_created']=psutil.Process(p.pid).create_time()
-            except (ImportError,OSError): outcome['process_created']=None
+            except ImportError: pass
+            else:
+                try: outcome['process_created']=psutil.Process(p.pid).create_time()
+                # Short-lived children may exit before metadata lookup. Keep
+                # wait() authoritative for exit status; unknown identity remains
+                # conservative during orphan recovery.
+                except (psutil.Error,OSError): pass
             write(attempt/'command.json',outcome)
             try: outcome['exit_code']=p.wait(timeout=timeout)
             except (KeyboardInterrupt,subprocess.TimeoutExpired):
