@@ -1,0 +1,20 @@
+\begin{table}[htbp]
+  \centering
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \caption{Paired speedup over AES-NI at 32~MiB. R: resident; P: pipeline.
+  Brackets show the five-session pipeline range; the last column counts P gains.}
+  \label{tab:gpu-speedups}
+  \begin{tabular}{llrrlc}
+    \toprule
+    System & Mode & R & P & P range & P $>1$ \\
+    \midrule
+    GTX & ECB & 3.091 & 0.761 & [0.722, 0.818] & 0/5 \\
+    GTX & CTR & 3.693 & 0.935 & [0.918, 1.008] & 1/5 \\
+    T600 & ECB & 2.215 & 1.118 & [0.659, 1.144] & 3/5 \\
+    T600 & CTR & 2.666 & 1.354 & [1.129, 1.391] & 5/5 \\
+    T4 & ECB & 2.207 & 0.893 & [0.868, 0.901] & 0/5 \\
+    T4 & CTR & 11.758 & 4.761 & [4.691, 5.021] & 5/5 \\
+    \bottomrule
+  \end{tabular}
+\end{table}

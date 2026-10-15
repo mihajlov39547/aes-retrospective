@@ -1,314 +1,41 @@
 \section{Introduction}
 \label{sec:introduction}
 
-More than two decades after the standardization of the Advanced Encryption Standard (AES), the
-efficiency of symmetric encryption remains an important consideration in computing and
-communication systems. Although the mathematical definition of AES has remained stable, the
-hardware and software environments in which it operates have changed substantially. Modern
-processors provide dedicated cryptographic instructions, while graphics processing units (GPUs)
-offer large numbers of parallel execution resources that can be employed for suitable
-cryptographic workloads. Consequently, the practical performance of AES depends not only on the
-algorithm itself, but also on its implementation, the available acceleration mechanisms, data
-placement, and the operations included in performance measurements.
+AES acceleration is relevant to communication and data-processing systems that must encrypt
+large volumes without excessive latency. CPUs equipped with AES-NI provide a strong reference
+for this task, while GPUs offer parallel execution for independent blocks. The practical
+question is whether a GPU advantage survives the operations needed to move data through the
+accelerator. A fast kernel does not necessarily provide a faster host-to-host processing path.
 
-The historical transition from the Data Encryption Standard (DES), through the Triple Data
-Encryption Algorithm (TDEA), to AES provides a useful perspective on this development. DES and
-TDEA played important roles in the evolution of symmetric cryptography, but their limitations
-eventually led to the adoption of stronger and more flexible alternatives. DES standards have
-been withdrawn, while TDEA is no longer approved by the National Institute of Standards and
-Technology (NIST) for applying new cryptographic protection
-\cite{nist1999des,nbs1980des,barker2017tdea, barker2019transitioning}.
+Existing work demonstrates substantial GPU AES throughput and recognizes the importance of
+transfer costs and optimized CPU references. Yet a result measured on one implementation and
+timing boundary cannot determine whether offloading is beneficial on another system. Useful
+evidence must identify the CPU path, preserve workload pairing, distinguish device computation
+from transfer-inclusive processing, and report variability rather than a selected best time.
+This is particularly relevant to accessible laptop GPUs, whose suitability cannot be inferred
+from results obtained on a different host or accelerator.
 
-AES, standardized in 2001 and subsequently updated in FIPS~197, remains a fundamental
-symmetric-key primitive~\cite{nist2023aes}. Its continued relevance reflects not only its
-cryptographic design, but also its adaptability to changing implementation environments. The
-original transition from DES and TDEA to AES was motivated primarily by security, efficiency,
-and implementation requirements. Today, these considerations extend to hardware-assisted
-execution, heterogeneous computing, and the performance characteristics of complete
-data-processing systems.
-
-In telecommunications and networked environments, the distinction between cryptographic
-primitives and their application is especially important. Encryption must coexist with
-requirements for throughput, latency, authentication, and correct management of cryptographic
-state. Cipher Block Chaining (CBC), Counter (CTR), and Galois/Counter Mode (GCM), for example,
-introduce different computational dependencies and security properties
-\cite{dworkin2001modes,dworkin2007gcm}.
-
-Therefore, high throughput measured for an isolated AES transformation cannot automatically be
-interpreted as the performance of an authenticated network protocol or a complete communication
-application. The evaluated cryptographic functionality and measurement boundary must match the
-intended interpretation of the result.
-
-\subsection{Motivation and Practical Relevance}
-\label{subsec:introduction_motivation}
-
-The increasing availability of GPU acceleration raises a practical question for system
-designers: can a GPU improve AES processing performance when the host CPU already supports
-dedicated cryptographic instructions?
-
-This question is particularly relevant for computers equipped with accessible NVIDIA GPUs,
-including consumer and entry-level professional laptop devices. Such hardware may offer
-substantial parallel computational resources without requiring a dedicated datacenter
-accelerator.
-
-However, the availability of a GPU does not automatically imply that transferring an encryption
-workload to the accelerator will reduce processing time.
-
-Contemporary x86 processors commonly support hardware-accelerated AES execution through the
-Advanced Encryption Standard New Instructions (AES-NI). These instructions substantially reduce
-the computational cost of AES operations relative to selected conventional software
-implementations~\cite{intel2012aesni}.
-
-A GPU that appears considerably faster than software-only AES may therefore provide a smaller
-advantage, or no advantage, when compared against an AES-NI-enabled CPU path.
-
-The choice of CPU reference is consequently central to meaningful heterogeneous performance
-evaluation.
-
-A second consideration concerns the location of the processed data.
-
-A CUDA kernel can execute AES transformations on buffers already resident in GPU memory.
-However, applications that receive plaintext in host memory and require ciphertext to be
-returned to the host must also account for the corresponding transfers and execution
-orchestration.
-
-The cost of these operations can materially change the observed benefit of acceleration.
-
-For applications that process large collections of independent blocks or suitably organized data
-batches, GPU execution may be attractive. For small, latency-sensitive operations, fixed
-dispatch, synchronization, and transfer costs may instead favor direct CPU execution.
-
-These observations motivate a benchmarking approach that distinguishes computational throughput
-from the performance of the complete measured processing path.
-
-The practical objective is not to recommend GPU offloading for every encryption workload, but to
-establish reproducible evidence for determining when it may be advantageous.
-
-\subsection{Background and Research Gap}
-\label{subsec:introduction_gap}
-
-GPU implementations of AES have been investigated for many years, demonstrating the potential of
-parallel hardware for accelerating block-cipher operations
-\cite{manavski2007cuda,harrison2007aes, iwai2012acceleration,wang2019gpu, tezcan2021optimization}.
-
-These studies have examined implementation strategies, parallel processing granularity, memory
-organization, and techniques for improving GPU execution efficiency.
-
-For example, Iwai et al. investigated AES acceleration using CUDA and demonstrated the relevance
-of implementation granularity, memory allocation, and overlapping data transfers with
-computation \cite{iwai2012acceleration}.
-
-Consequently, the influence of data movement on GPU encryption performance is not a previously
-unexplored problem.
-
-More broadly, Gregg and Hazelwood emphasized that CPU--GPU comparisons can be misleading when
-they omit the location of application data and the costs of transferring data between processing
-devices \cite{gregg2011data}.
-
-Lee et al. similarly demonstrated that the apparent performance gap between CPUs and GPUs
-depends strongly on the optimization quality of the respective implementations
-\cite{lee2010debunking}.
-
-These contributions establish important principles for heterogeneous performance evaluation.
-
-Nevertheless, they do not eliminate the need to assess concrete cryptographic implementations
-under reproducible and explicitly defined measurement conditions.
-
-A performance result obtained from isolated GPU execution cannot be assumed to represent a
-host-driven encryption pipeline. Likewise, a speedup measured against conventional software AES
-cannot automatically be transferred to a comparison against hardware-assisted AES-NI.
-
-Additional uncertainty arises when measurements from different computing environments are
-interpreted without preserving the relevant hardware, software, workload, and statistical
-context.
-
-The research gap addressed in this paper is therefore not the absence of previous GPU AES
-implementations or prior awareness of data-transfer overhead.
-
-Rather, it concerns the need for an integrated, auditable experimental assessment that combines
-cryptographic validation, paired workloads, a hardware-accelerated CPU reference, explicit GPU
-timing boundaries, independent study sessions, and source-level traceability within a common
-analysis.
-
-Such an assessment is particularly useful when examining accessible laptop GPUs alongside a
-datacenter GPU, because a positive result on one system may not generalize to another.
-
-The study consequently emphasizes both successful and unsuccessful offloading conditions instead
-of selecting only the highest observed throughput values.
-
-\subsection{Research Objectives and Questions}
-\label{subsec:introduction_questions}
-
-The objective of this study is to establish and apply a reproducible methodology for evaluating
-the performance of AES implementations across heterogeneous CPU and GPU execution environments.
-
-The analysis is motivated by the historical evolution of symmetric cryptography from DES and
-TDEA to AES, but its principal experimental focus is the contemporary relationship between
-software CPU encryption, hardware-assisted AES-NI, and GPU-based AES execution.
-
-The study addresses three research questions.
+We address this problem through a validation-first comparison of AES-NI and a validated CUDA
+AES-128 implementation. The study examines ECB and CTR across input sizes and three computing
+configurations. It addresses three research questions:
 
 \begin{enumerate}
-
-  \item[\textbf{RQ1}] Under which tested workload sizes, AES modes, and implementation
-    configurations does GPU execution outperform conventional software AES and hardware-assisted
-    CPU AES-NI, and which advantages remain consistent across independent study sessions?
-
-  \item[\textbf{RQ2}] How does expanding the GPU measurement boundary from device-resident
-    kernel execution to a synchronous, transfer-inclusive processing pipeline change the
-    magnitude and direction of the observed CPU--GPU performance relationship?
-
-  \item[\textbf{RQ3}] How do performance variability, cipher-mode dependence, workload-size
-    effects, and differences among the tested computing configurations constrain the practical
-    interpretation and generalization of GPU acceleration?
-
+  \item[\textbf{RQ1}] Under which tested sizes and cipher modes does GPU execution outperform
+    AES-NI, and which advantages are consistent across the observed sessions?
+  \item[\textbf{RQ2}] How does including transfers change the magnitude and direction of the
+    resident-only CPU--GPU comparison?
+  \item[\textbf{RQ3}] How do session variability, mode dependence, workload-size effects, and
+    differences among systems constrain the interpretation of GPU acceleration?
 \end{enumerate}
 
-These questions distinguish the performance of a cryptographic implementation from the
-performance of a particular processing workflow.
+The paper makes three contributions: a reproducible protocol combining cryptographic
+validation, paired workloads and explicit timing scopes; a session-based assessment of
+AES-NI and GPU execution on the selected systems; and an interpretation that retains positive,
+negative and mixed-session outcomes. The contribution is a defensible comparison of measured
+execution paths, not a new AES primitive, a throughput record, or a universal hardware ranking.
 
-They also connect the experimental results to practical architectural decisions: whether an AES
-workload should remain on a hardware-accelerated CPU or be assigned to a GPU under a specified
-set of execution conditions.
-
-\subsection{Methodological Approach and Contributions}
-\label{subsec:introduction_contributions}
-
-The experimental methodology follows a validation-first design in which cryptographic
-correctness is established before performance measurements are accepted.
-
-Deterministically generated inputs and matching cryptographic parameters support paired CPU--GPU
-comparisons, while the execution paths are evaluated using separately defined measurement
-boundaries.
-
-The framework distinguishes conventional software AES, hardware-accelerated CPU AES-NI,
-device-resident CUDA kernel execution, and a synchronous prepared-buffer GPU pipeline including
-host--device transfers and synchronization.
-
-These measurements do not represent interchangeable definitions of encryption performance.
-
-In particular, the prepared-buffer pipeline includes a broader execution scope than isolated
-kernel timing, but does not include every operation required by a complete encryption
-application.
-
-The principal experimental campaign was conducted on three configurations: a Windows~10 laptop
-with an NVIDIA GeForce GTX~1650~Ti, a Windows~11 laptop with an NVIDIA T600 Laptop GPU, and a
-Linux-based Google Colab environment with an NVIDIA Tesla T4.
-
-The first GPU represents a consumer laptop device, the second an entry-level professional mobile
-GPU, and the third a datacenter-oriented accelerator.
-
-Both laptop GPUs have 4~GB of device memory, making the evaluation relevant to relatively
-accessible GPU hardware.
-
-The study comprises five sessions per platform, producing fifteen sessions and 18,000 recorded
-timing observations.
-
-The measurements cover AES-128 encryption in ECB and CTR modes, five workload sizes,
-conventional software and AES-NI CPU paths, and baseline and optimized-v1 CUDA implementations.
-
-The statistical analysis preserves session-level pairing and reports results with their observed
-variability. Original timing records, validation outcomes, environment metadata, and
-implementation source snapshots are retained for independent inspection and reanalysis.
-
-The paper makes three principal contributions:
-
-\begin{enumerate}
-
-  \item \textbf{A validation-first, reproducible benchmarking methodology.}
-
-  The study integrates functional correctness checks, deterministic paired workloads, explicit
-  measurement boundaries, session-based aggregation, and archived experimental evidence into a
-  coherent procedure for evaluating cryptographic execution paths.
-
-  \item \textbf{A three-configuration empirical assessment of AES acceleration.}
-
-  Fifteen study sessions and 18,000 raw timing observations characterize software CPU AES,
-  hardware-assisted AES-NI, and two CUDA implementations under resident and transfer-inclusive
-  GPU execution scopes.
-
-  Independent reconstruction of the saved statistical estimators provides additional evidence of
-  the internal consistency and auditability of the reported results.
-
-  \item \textbf{An evidence-qualified interpretation of GPU offloading.}
-
-  The analysis identifies conditions under which accessible GPU hardware can outperform a
-  corresponding AES-NI CPU reference, while also documenting configurations in which the
-  advantage disappears or reverses.
-
-  Workload size, cipher mode, CPU reference performance, measurement scope, and between-session
-  variability are treated as essential qualifications of practical acceleration claims.
-
-\end{enumerate}
-
-These contributions do not rely on introducing a new AES algorithm, a novel cryptanalytic
-method, or a claim of record-setting CUDA throughput.
-
-Instead, the contribution lies in applying a consistent and verifiable experimental methodology
-to practical heterogeneous AES execution choices.
-
-\subsection{Principal Findings and Significance}
-\label{subsec:introduction_significance}
-
-The results demonstrate why the distinction between isolated computation and transfer-inclusive
-processing is practically important.
-
-For 32~MiB AES-128 workloads, device-resident GPU execution outperforms the corresponding host
-AES-NI reference in all five sessions on each platform, for both tested CUDA implementations and
-both encryption modes.
-
-However, this resident advantage does not universally persist when the synchronous GPU pipeline
-includes data transfers and synchronization.
-
-A particularly relevant positive result is obtained on the NVIDIA T600 Laptop GPU.
-
-For AES-128 CTR at 32~MiB, its baseline CUDA pipeline achieves a median paired speedup of
-approximately $1.35\times$ relative to its host AES-NI path, with the advantage observed in all
-five sessions.
-
-The Tesla T4 achieves a larger paired CTR pipeline speedup of approximately $4.76\times$ for the
-corresponding workload.
-
-Conversely, the consumer GTX~1650~Ti does not demonstrate a consistently positive pipeline
-advantage over AES-NI, and the T4 ECB pipeline remains slower than its own AES-NI reference at
-32~MiB.
-
-These contrasting outcomes show that GPU offloading can provide a measurable benefit even when
-transfers are included, but that the benefit cannot be inferred solely from GPU kernel
-throughput or hardware category.
-
-The results also demonstrate that relative GPU speedup must be interpreted alongside the
-performance of the corresponding host CPU.
-
-For system designers, the implication is that cryptographic acceleration should be evaluated as
-a workload-placement decision.
-
-Large, parallelizable, or device-resident cryptographic workloads may justify GPU evaluation,
-whereas host-resident or latency-sensitive processing may favor CPU AES-NI.
-
-These observations are relevant to heterogeneous data-processing and telecommunications systems,
-although the present measurements do not constitute benchmarks of complete TLS, IPsec, or
-authenticated-encryption applications.
-
-The broader significance is therefore methodological: the observed advantage of GPU acceleration
-depends on what is measured, how the workload is organized, and which execution path serves as
-the reference.
-
-\subsection{Paper Organization}
-\label{subsec:introduction_organization}
-
-The remainder of the paper is organized as follows.
-
-Section~\ref{sec:methodology} describes the experimental platforms, correctness validation,
-workload definitions, paired measurement protocol, timing boundaries, statistical aggregation,
-and evidence-preservation procedures.
-
-Section~\ref{sec:results} presents the heterogeneous AES-128 results, including absolute
-throughput, paired speedup, measurement-scope effects, and session variability.
-
-Section~\ref{sec:discussion} interprets the findings in relation to practical GPU offloading,
-CPU hardware acceleration, data placement, telecommunications applications, and limitations of
-the tested configurations.
-
-Finally, Section~\ref{sec:conclusion} summarizes the empirical findings and the methodological
-contribution to reproducible cryptographic performance evaluation.
+Section~\ref{sec:related_work} positions the study within earlier research.
+Section~\ref{sec:methodology} defines the platforms, protocol and estimators.
+Section~\ref{sec:results} reports the measurements, and Section~\ref{sec:discussion} considers
+their practical meaning and limitations. Section~\ref{sec:conclusion} answers the research
+questions.

@@ -1,38 +1,31 @@
-# Manuscript figures
+# Focused manuscript evidence and figure
 
-All five manuscript graphics are stored here. The PDF build uses only local
-`figures/` paths; no external figure directory is needed. `SOURCES.json` records
-repository origins and SHA-256 hashes. The four plots are unchanged vector PDFs;
-the framework is the unchanged original JPEG (no vector counterpart was found).
+The manuscript uses `aesni_gpu_scopes.pdf`, a vector plot of the retained CUDA
+path versus AES-NI. `aesni_gpu_scopes.png` is its high-resolution preview.
+Neither the software-only CPU nor optimized-v1 curves are included.
 
-| Figure | Local file | Source |
-|---|---|---|
-| 1 | `benchmarking_framework_grayscale.jpg` | Repository `figures/` |
-| 2 | `02_pipeline_throughput.pdf` | Completed cross-platform analysis |
-| 3 | `03_pipeline_speedup_vs_aesni.pdf` | Completed cross-platform analysis |
-| 4 | `08_pipeline_resident_ratio.pdf` | Completed cross-platform analysis |
-| 5 | `05_session_variability.pdf` | Completed cross-platform analysis |
+Regenerate from the repository root with:
 
-The analysis plots originate in
-`experiments/analysis/cross_platform_2026_10_complete/figures/`. Copies preserve
-original bytes, vector content and quality. Do not regenerate or alter numerical
-plots during manuscript layout work.
+```powershell
+.venv/Scripts/python.exe sjee/prepare_focused_figures.py
+```
 
-The previous local framework JPEG was a stale, different diagram despite sharing
-its filename with the repository original. It has been replaced with the existing
-validation-first framework diagram that matches the manuscript caption. The
-original outside `sjee/` remains untouched.
+Python and matplotlib are required. No GPU or benchmark execution is needed.
+The script reads original study CSVs (T4 directly from its authoritative tar
+archive), checks their recorded hashes, verifies retained estimates against
+the independent audit, and writes only within `sjee/`. It selects the archived
+`cuda_baseline` implementation; it does not invent a generic GPU estimate or
+combine implementation candidates.
 
-All figures use `width=\linewidth`, preserve their aspect ratios, have captions
-below the image, and retain their original labels. The PDF figure pages were
-visually checked for margins, clipping, labels and placement after consolidation.
-The embedded plot provenance footnotes are small; the vector PDFs retain their
-resolution when enlarged.
+`focused_sessions.csv` contains each retained session median;
+`focused_paired_speedups.csv` contains CPU/GPU timing ratios per session;
+`focused_aggregates.csv` contains medians, ranges, IQRs and CVs;
+`focused_evidence.json` records run IDs, raw-file hashes and selection criteria.
+The generated `content/focused_results_table.tex` supplies the manuscript table.
+All 15 sessions are retained, with 9000 selected raw observations. The original
+18000-row campaign also contains paths not reported in the focused article;
+its original interleaved order and measurements remain unchanged.
 
-The unused `placeholder.png` is no longer in this directory. Its bytes are
-preserved in `sjee/experimental/legacy/figures/placeholder.png`, the location
-expected by the historical placeholder experiment. It is not a manuscript figure.
-No duplicate manuscript graphics or redundant raster plot exports are retained.
-
-This pass validates the PDF build only. The separate historical DOCX adapters
-are not validated for these figure environments or vector PDF inputs.
+The previous five illustrations were removed from this manuscript directory;
+their originals remain untouched in repository `figures/` and the completed
+cross-platform analysis. No historical experimental output is modified.

@@ -1,0 +1,208 @@
+{
+  "selection": "cpu_aesni transform + cuda_baseline resident/pipeline; AES-128 ECB/CTR",
+  "original_campaign_rows": 18000,
+  "selected_rows": 9000,
+  "seeds": [
+    2003,
+    2004,
+    2005,
+    2006,
+    2007
+  ],
+  "repeats": 20,
+  "warmup": 5,
+  "source_audit": "experiments/analysis/cross_platform_2026_10_complete/reproducibility_manifest.json",
+  "estimator": "median of five paired session median-time ratios; no raw pooling",
+  "tolerance": {
+    "relative": 1e-10,
+    "absolute": 1e-15
+  },
+  "numerical_discrepancies": 0,
+  "prose_checks": [
+    {
+      "claim": "gtx1650ti CTR 32MiB pipeline MB/s",
+      "computed": 1188.8680904059083,
+      "displayed": "1188.9"
+    },
+    {
+      "claim": "gtx1650ti CTR 32MiB resident MB/s",
+      "computed": 4585.631949836928,
+      "displayed": "4585.6"
+    },
+    {
+      "claim": "t600 CTR 32MiB pipeline MB/s",
+      "computed": 2049.4094911659004,
+      "displayed": "2049.4"
+    },
+    {
+      "claim": "t600 CTR 32MiB resident MB/s",
+      "computed": 4328.939699483286,
+      "displayed": "4328.9"
+    },
+    {
+      "claim": "t4 CTR 32MiB pipeline MB/s",
+      "computed": 3713.9383406312995,
+      "displayed": "3713.9"
+    },
+    {
+      "claim": "t4 CTR 32MiB resident MB/s",
+      "computed": 9166.795669132192,
+      "displayed": "9166.8"
+    },
+    {
+      "claim": "gtx1650ti CTR 32MiB pipeline speedup",
+      "computed": 0.9351355657646652,
+      "displayed": "0.935"
+    },
+    {
+      "claim": "t600 CTR 32MiB pipeline speedup",
+      "computed": 1.3538409857843063,
+      "displayed": "1.354"
+    },
+    {
+      "claim": "t4 CTR 32MiB pipeline speedup",
+      "computed": 4.761336931964932,
+      "displayed": "4.761"
+    },
+    {
+      "claim": "t4 ECB 32MiB pipeline speedup",
+      "computed": 0.8934521329813533,
+      "displayed": "0.893"
+    },
+    {
+      "claim": "T600 paired latency reduction percent",
+      "computed": 26.136081674268375,
+      "displayed": "26.14"
+    },
+    {
+      "claim": "T600 paired speedup IQR",
+      "computed": 0.03089613590859419,
+      "displayed": "0.030896"
+    },
+    {
+      "claim": "T600 paired speedup CV percent",
+      "computed": 8.180076862537637,
+      "displayed": "8.18"
+    },
+    {
+      "claim": "gtx1650ti CPU ECB/CTR throughput ratio",
+      "computed": 1.2564089380612768,
+      "displayed": "1.26"
+    },
+    {
+      "claim": "gtx1650ti ECB resident local-dip sessions",
+      "computed": 5,
+      "displayed": "5"
+    },
+    {
+      "claim": "gtx1650ti ECB pipeline local-dip sessions",
+      "computed": 5,
+      "displayed": "5"
+    },
+    {
+      "claim": "gtx1650ti CTR resident local-dip sessions",
+      "computed": 5,
+      "displayed": "5"
+    },
+    {
+      "claim": "gtx1650ti CTR pipeline local-dip sessions",
+      "computed": 5,
+      "displayed": "5"
+    },
+    {
+      "claim": "t600 CPU ECB/CTR throughput ratio",
+      "computed": 1.2572021217105276,
+      "displayed": "1.26"
+    },
+    {
+      "claim": "t600 ECB resident local-dip sessions",
+      "computed": 3,
+      "displayed": "3"
+    },
+    {
+      "claim": "t600 ECB pipeline local-dip sessions",
+      "computed": 3,
+      "displayed": "3"
+    },
+    {
+      "claim": "t600 CTR resident local-dip sessions",
+      "computed": 4,
+      "displayed": "4"
+    },
+    {
+      "claim": "t600 CTR pipeline local-dip sessions",
+      "computed": 4,
+      "displayed": "4"
+    },
+    {
+      "claim": "t4 CPU ECB/CTR throughput ratio",
+      "computed": 5.378208901812659,
+      "displayed": "5.378"
+    },
+    {
+      "claim": "T4 CPU mode ratio minimum",
+      "computed": 5.25040421864363,
+      "displayed": "5.250"
+    },
+    {
+      "claim": "T4 CPU mode ratio maximum",
+      "computed": 5.795011030954767,
+      "displayed": "5.795"
+    },
+    {
+      "claim": "t4 ECB resident local-dip sessions",
+      "computed": 4,
+      "displayed": "4"
+    },
+    {
+      "claim": "t4 ECB pipeline local-dip sessions",
+      "computed": 0,
+      "displayed": "0"
+    },
+    {
+      "claim": "t4 CTR resident local-dip sessions",
+      "computed": 4,
+      "displayed": "4"
+    },
+    {
+      "claim": "t4 CTR pipeline local-dip sessions",
+      "computed": 0,
+      "displayed": "0"
+    }
+  ],
+  "studies": {
+    "gtx1650ti": {
+      "run_id": "heterogeneous-core-v1-20261014T102836520134Z-1472bd2f13cf",
+      "source": "experiments/results_orchestrated/first-gpu-windows/6748c32fac83b2916aa48311/heterogeneous-core-v1-20261014T102836520134Z-1472bd2f13cf",
+      "raw_files": {
+        "experiments/cuda_paired/seed-2003/native/raw.csv": "c78e04dedec910254dc704007db43a4b9d0baab9c3e79734be5a80561707834c",
+        "experiments/cuda_paired/seed-2004/native/raw.csv": "d2ecbf727df0bb6327961b3b7195026e0d332d52de26809a055ebf654883c705",
+        "experiments/cuda_paired/seed-2005/native/raw.csv": "cc78a6bc11a2aa731b8fabda8c7088089afc9299685676529d6189c0b3dd043a",
+        "experiments/cuda_paired/seed-2006/native/raw.csv": "b4409727d92ee8c3aaacf24d5598081f2ec88c3eefcd08b8b70b48a55d2db9c3",
+        "experiments/cuda_paired/seed-2007/native/raw.csv": "a60e17649029bea354ab7bf231a0745d7ac6acca0a03ae4a0e0c41392e89f27d"
+      }
+    },
+    "t600": {
+      "run_id": "heterogeneous-core-v1-20261014T064407642462Z-636c48c0ebaf",
+      "source": "experiments/results_orchestrated/second-gpu/aa12d1868e30b6956f14d503/heterogeneous-core-v1-20261014T064407642462Z-636c48c0ebaf",
+      "raw_files": {
+        "experiments/cuda_paired/seed-2003/native/raw.csv": "f4ea9dd8f2e6ea07fcbfd007048f495b667b40f92e92e3161d9440cfc1dbbb6f",
+        "experiments/cuda_paired/seed-2004/native/raw.csv": "64f174e2dda7bd2fcc15fc7bdff84f7498d84d04375197d0704a0ad3570dad4d",
+        "experiments/cuda_paired/seed-2005/native/raw.csv": "db055e3ece8792e97a16ffd0b6ef9ee94402877d024b4ea24b525340cb3ba9ca",
+        "experiments/cuda_paired/seed-2006/native/raw.csv": "411d236efea89b9775d1cf907e447a60c2ad75dcdbd26f3b860549ff7d322078",
+        "experiments/cuda_paired/seed-2007/native/raw.csv": "5b659d09fbb430d4c2d7d8b618514e06b0d836911bffb33ac036249e75c04d79"
+      }
+    },
+    "t4": {
+      "run_id": "heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386",
+      "source": "experiments/results_orchestrated/t4-colab/heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386.tar.gz",
+      "raw_files": {
+        "experiments/cuda_paired/seed-2003/native/raw.csv": "dd35d6212f0a203c7aa6f83c1aea85b933c061c80dfbe2d714ffc993ccca055e",
+        "experiments/cuda_paired/seed-2004/native/raw.csv": "9057d1ffb292ccae5fa53efef26de6985307ffaddcef41199d30e8fea55f691a",
+        "experiments/cuda_paired/seed-2005/native/raw.csv": "235eea920b3ab53a40a79646dc2568b695bc3dc620b64466777c93ea5d14e62c",
+        "experiments/cuda_paired/seed-2006/native/raw.csv": "cafc3181043290a67d783149cd74fd4b02b5d767b44f8b978a89de11651185e7",
+        "experiments/cuda_paired/seed-2007/native/raw.csv": "8ca5450300d9ab6e4e824fc18f306bd2caaedbc19f2690a950722c6d2ee1ab6d"
+      }
+    }
+  }
+}

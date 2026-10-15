@@ -1,96 +1,15 @@
+\begin{samepage}
 \section{Conclusion}
 \label{sec:conclusion}
 
-More than two decades after the standardization of the Advanced Encryption Standard (AES), the
-evolution of computing architectures continues to influence how efficiently symmetric encryption
-can be implemented and deployed. Building on a retrospective examination of the transition from
-DES and Triple DES to AES, this study investigated the practical performance of modern CPU and
-GPU cryptographic implementations, with particular emphasis on the conditions under which GPU
-acceleration can outperform CPUs equipped with dedicated AES instructions.
+For RQ1, the measured GPU pipeline provides consistent CTR gains over AES-NI on T600 and T4
+at 32~MiB, but not on GTX; T4 ECB consistently favors the CPU. For RQ2, resident gains on all
+three systems do not survive transfer inclusion uniformly. For RQ3, mode-dependent CPU
+performance, non-monotonic size behavior and session variation limit generalization from a
+single speedup value.
 
-The principal contribution of this work is a validation-first, reproducible benchmarking
-methodology that integrates cryptographic correctness verification, deterministic and paired
-workloads, explicitly defined measurement boundaries, session-based statistical aggregation, and
-preservation of the experimental evidence required for independent analysis. Rather than
-presenting encryption throughput as an implementation-independent characteristic of AES, the
-framework distinguishes the performance of software CPU execution, hardware-assisted AES-NI,
-device-resident CUDA computation, and a synchronous GPU pipeline that includes host--device
-transfers and synchronization.
-
-The methodology was evaluated across three heterogeneous computing configurations: a Windows~10
-system equipped with a consumer NVIDIA GeForce GTX~1650~Ti, a Windows~11 system equipped with an
-NVIDIA T600 Laptop GPU, and a Linux-based Google Colab environment using an NVIDIA Tesla T4. The
-two laptop GPUs each provide 4~GB of device memory, demonstrating the relevance of the study to
-accessible computing hardware as well as datacenter-oriented acceleration.
-
-The experimental campaign comprised fifteen study sessions and 18,000 raw timing observations.
-Cryptographic validation preceded performance measurement, while an independent analysis
-reconstructed the saved statistical estimators without detecting numerical discrepancies within
-the specified tolerances. These procedures provide traceability between the measured
-implementations, their execution environments, and the reported performance conclusions.
-
-The results demonstrate that GPU acceleration can outperform even a hardware-accelerated CPU
-AES-NI implementation under selected operating conditions. For AES-128 CTR encryption of a
-32~MiB workload, the baseline CUDA implementation on the T600 Laptop GPU achieved a median
-paired speedup of $1.354\times$ over its host CPU AES-NI execution path, with an advantage
-observed in all five sessions. This corresponds to approximately 26\% lower paired processing
-latency within the defined prepared-buffer GPU pipeline.
-
-The Tesla T4 achieved a substantially larger $4.761\times$ paired pipeline speedup for the same
-AES mode and workload size, also outperforming its host AES-NI reference in all five sessions.
-These findings establish that a transfer-inclusive GPU execution path can provide an advantage
-over CPU hardware-assisted encryption, including on a comparatively accessible 4~GB laptop GPU.
-
-However, the experiments also demonstrate why this advantage cannot be generalized without
-considering the measurement boundary and CPU reference. On the consumer GTX~1650~Ti, the 32~MiB
-baseline CTR pipeline achieved a $4.566\times$ speedup over conventional software AES but only
-$0.935\times$ relative to AES-NI. The T4 likewise exhibited a mode-dependent contrast: despite
-similar absolute GPU throughput for ECB and CTR at 32~MiB, its ECB pipeline achieved only
-$0.893\times$ the corresponding host AES-NI performance.
-
-Across all three platforms, device-resident CUDA execution outperformed the paired AES-NI
-reference at 32~MiB for both tested CUDA implementations and both encryption modes, with the
-advantage observed in all five sessions per configuration. Nevertheless, the same consistency
-did not extend to transfer-inclusive pipeline execution. The lightweight optimized-v1 CUDA
-candidate also failed to provide uniform improvements across platforms, workload sizes, cipher
-modes, and measurement scopes.
-
-Together, these results demonstrate that high isolated kernel throughput is neither a sufficient
-condition nor a reliable proxy for advantageous GPU offloading. The observed performance
-relationship depends on the location of data, the costs of host--device movement, the selected
-CPU implementation, and the processing operations included within the timed interval.
-
-For telecommunications and heterogeneous data-processing systems, the findings have a practical
-architectural implication. CPU AES-NI remains a strong reference for small, latency-sensitive,
-or host-resident workloads, whereas GPU processing warrants evaluation for suitable large,
-parallelizable, or device-resident operations. The observed 32~MiB CTR advantages indicate that
-GPU acceleration may be valuable for bulk cryptographic processing and appropriately batched
-workloads, rather than for every individual communication packet.
-
-These observations support workload-aware selection of cryptographic execution paths instead of
-a universal preference for either CPU or GPU execution. Nevertheless, the present experiments do
-not benchmark complete TLS, IPsec, or application-level authenticated encryption. Their results
-therefore provide evidence for architectural assessment rather than a direct deployment
-recommendation for secure communication protocols.
-
-The principal limitations arise from the evaluation of one system or cloud allocation per
-platform, five study sessions per configuration, selected library and CUDA implementations, and
-a synchronous prepared-buffer GPU pipeline. Differences among the tested hardware and software
-environments prevent causal attribution to operating systems, GPU product classes, or individual
-runtime components. Furthermore, the tested ECB and CTR workloads do not establish performance
-for complete authenticated-encryption or network-processing systems.
-
-Future research may extend the methodology to application-level AES-GCM evaluation,
-network-packet batching, asynchronous transfer--compute pipelines, workload-aware CPU--GPU
-scheduling, and newer architectures with dedicated cryptographic acceleration. Such studies
-could investigate whether the performance advantages observed for large independent AES
-workloads remain beneficial when authentication, communication latency, resource contention, and
-complete application data paths are considered.
-
-In conclusion, this study establishes that GPU acceleration is a viable but conditional
-alternative to hardware-assisted CPU AES execution. Its significance lies not in claiming a
-universally faster implementation, but in demonstrating reproducible conditions under which GPU
-offloading succeeds or fails. By combining validated cryptographic execution, explicit
-measurement boundaries, and independently auditable experimental results, the proposed
-methodology provides a practical foundation for evaluating cryptographic acceleration and
-informing the design of future heterogeneous computing and communication systems.
+The study's contribution is a validated, reproducible comparison that preserves these
+conditions and negative results. GPU offloading is a workload-dependent option rather than a
+universal replacement for AES-NI. The decision must be evaluated against the actual host CPU,
+data location and application boundary.
+\end{samepage}
