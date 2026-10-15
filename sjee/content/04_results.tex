@@ -68,6 +68,20 @@ CTR. The host AES-NI ECB/CTR throughput ratio has a session median of $5.378\tim
 of $5.250$--$5.795\times$. The corresponding host ratios on GTX and T600 are approximately
 $1.26\times$. The T4 host therefore records higher ECB than CTR throughput in every session,
 while its measured GPU throughput changes little between modes.
+Figure~\ref{fig:bulk-throughput} compares the absolute rates of all three execution paths,
+using the same vertical scale for both modes.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\linewidth]{figures/bulk_throughput.pdf}
+  \caption{AES-128 throughput at 32~MiB for CPU AES-NI, resident GPU execution,
+  and the prepared-buffer GPU pipeline. Bars show medians of five session-level
+  throughput medians; error bars span the observed session minima and maxima,
+  not confidence intervals. Throughput uses decimal MB/s. The GPU pipeline includes
+  synchronous host--device transfers and synchronization; resident execution excludes
+  these transfers. CPU bars represent the corresponding host implementation on each system.}
+  \label{fig:bulk-throughput}
+\end{figure}
 
 The smaller workloads in Figure~\ref{fig:aesni-scopes} show different acceleration outcomes. At
 1~KiB, both resident and pipeline paths are slower than AES-NI in every session, on all systems

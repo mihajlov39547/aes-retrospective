@@ -5,6 +5,12 @@
       "generator": "sjee/prepare_focused_figures.py",
       "source": "focused_evidence.json",
       "description": "Selected single CUDA implementation versus AES-NI; resident and pipeline scopes"
+    },
+    {
+      "file": "bulk_throughput.pdf",
+      "generator": "sjee/prepare_throughput_figure.py",
+      "source": "bulk_throughput_evidence.json",
+      "description": "32 MiB ECB/CTR absolute throughput: CPU AES-NI, GPU resident, and GPU pipeline; five-session ranges"
     }
   ]
 }

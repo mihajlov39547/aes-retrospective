@@ -1,5 +1,30 @@
 # Focused manuscript evidence and figure
 
+## Absolute-throughput comparison
+
+`bulk_throughput.pdf` compares CPU AES-NI, resident GPU execution, and the
+prepared-buffer GPU pipeline at 32 MiB, with separate ECB and CTR panels on the
+same zero-based scale. Bars are medians of five session throughput medians;
+whiskers show the observed session range, not confidence intervals. Colors and
+hatches distinguish execution paths in color and grayscale output.
+
+Regenerate this figure independently with:
+
+```powershell
+python sjee/prepare_throughput_figure.py
+```
+
+The generator reads the original raw records in `experiments/results_orchestrated/`,
+including the T4 archive without extraction, and verifies their hashes against
+`focused_evidence.json`. It reconstructs 90 session estimates from 1,800 selected
+observations and compares each estimate with the previously audited session data.
+`bulk_throughput_sessions.csv` contains those estimates and
+`bulk_throughput_evidence.json` records the original paths, hashes, estimator,
+medians, and ranges. `bulk_throughput.png` is the preview. All outputs stay in
+`sjee/`; the original experiment data and existing figure are unchanged.
+
+## Relative-speedup comparison
+
 The manuscript uses `aesni_gpu_scopes.pdf`, a vector plot of the retained CUDA
 path versus AES-NI. `aesni_gpu_scopes.png` is its high-resolution preview.
 Neither the software-only CPU nor optimized-v1 curves are included.
