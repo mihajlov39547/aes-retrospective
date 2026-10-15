@@ -8,7 +8,7 @@ transfers and synchronization, using paired measurements across repeated session
 
 For 32~MiB AES-CTR buffers, the pipeline achieved median paired accelerations of $1.354\times$
 on T600 and $4.761\times$ on T4 relative to their respective host implementations. Both
-improvements occurred in all five sessions, including on the tested 4~GB T600 laptop GPU.
+improvements occurred in all five sessions, including on the tested 4~GB T600 GPU.
 Resident execution outperformed AES-NI at this size on every system in both modes, but the GTX
 pipeline did not show a consistent advantage, and T4 ECB remained slower than its CPU reference.
 Thus, a computational advantage survived data movement for selected CTR workloads, while the
