@@ -1,11 +1,25 @@
-GPU kernel throughput alone does not establish whether AES offloading benefits a system with CPU
-AES-NI. We compare validated AES-128 ECB and CTR execution across three configurations, using
-paired inputs, five sessions per system, and separate resident and prepared-buffer pipeline
-measurements. At 32~MiB, resident GPU execution exceeds AES-NI in every session for both modes
-on all systems. Pipeline results differ: CTR achieves median paired speedups of $1.354\times$ on
-T600 and $4.761\times$ on T4, with gains in all five sessions, whereas GTX achieves
-$0.935\times$ with only one session above parity. T4 ECB reaches $0.893\times$ and loses in
-every session. The findings show that GPU offloading can outperform AES-NI, but its advantage
-depends on cipher mode, workload size, host performance, and measurement scope. The pipeline
-excludes preparation and application I/O; these results do not establish full application
-performance.
+
+High-throughput cryptographic processing is an important requirement in modern
+telecommunications infrastructure, where GPU acceleration offers opportunities
+for improving bulk data encryption. This study investigates the conditions
+under which GPU-assisted AES-128 processing can provide measurable benefits
+over hardware-accelerated CPU encryption. A validation-first experimental
+approach evaluates AES in CTR and ECB modes across three heterogeneous
+computing configurations, using paired workloads, five measurement sessions
+per system, and separate device-resident and synchronous transfer-inclusive
+GPU execution boundaries. The analysis retains 9,000 timing observations
+from a larger validated experimental campaign.
+
+For 32~MiB AES-CTR workloads, the GPU processing pipeline achieves median
+paired speedups of $1.354\times$ on the T600 Laptop GPU and $4.761\times$
+on the Tesla T4 relative to their respective AES-NI CPU implementations,
+with improvements observed in all five sessions. In contrast, the GTX
+configuration achieves only $0.935\times$, demonstrating that acceleration
+is not universally beneficial. The results establish experimentally
+supported conditions under which GPU processing can improve bulk AES
+throughput despite synchronous data transfers.
+
+These findings provide a basis for investigating workload-aware encryption
+and GPU-assisted bulk processing in heterogeneous telecommunications
+architectures. However, complete IPsec, authenticated-encryption,
+and packet-processing performance remain outside the evaluated scope.

@@ -1,15 +1,51 @@
-\begin{samepage}
+
 \section{Conclusion}
 \label{sec:conclusion}
 
-For RQ1, the measured GPU pipeline provides consistent CTR gains over AES-NI on T600 and T4
-at 32~MiB, but not on GTX; T4 ECB consistently favors the CPU. For RQ2, resident gains on all
-three systems do not survive transfer inclusion uniformly. For RQ3, mode-dependent CPU
-performance, non-monotonic size behavior and session variation limit generalization from a
-single speedup value.
+This study demonstrates that GPU-assisted AES encryption can improve bulk cryptographic
+processing performance under specific operating conditions, even when the host processor
+already supports hardware-accelerated AES-NI. The contribution is the experimental
+identification of conditions under which this improvement remains observable after
+including synchronous host--device transfers, together with the practical constraints
+that determine its potential relevance to telecommunications systems.
 
-The study's contribution is a validated, reproducible comparison that preserves these
-conditions and negative results. GPU offloading is a workload-dependent option rather than a
-universal replacement for AES-NI. The decision must be evaluated against the actual host CPU,
-data location and application boundary.
-\end{samepage}
+The strongest evidence is obtained for AES-128 CTR encryption of 32~MiB buffers.
+The validated CUDA pipeline achieved a median paired acceleration of $1.354\times$
+on the T600 configuration and $4.761\times$ on the T4 configuration, relative
+to their respective host AES-NI implementations. Both improvements were observed
+in all five experimental sessions. The T600 result is particularly relevant
+because it establishes that a repeatable bulk-processing advantage is possible
+on the tested 4~GB laptop GPU, without relying on a datacenter-class accelerator.
+
+However, the experiments also establish important boundaries. The GTX configuration
+did not provide a consistent transfer-inclusive improvement over AES-NI, while
+the T4 ECB pipeline remained slower than its corresponding CPU reference.
+Although device-resident GPU execution consistently outperformed AES-NI at
+32~MiB, the advantage did not always survive the inclusion of data movement
+and synchronization. The results therefore identify workload-dependent
+acceleration opportunities rather than a universal GPU performance advantage.
+
+For telecommunications infrastructure, these findings support further consideration
+of GPU-assisted bulk encryption, particularly in systems capable of processing
+large buffers or organizing independent cryptographic operations into suitable
+workloads. AES-CTR parallelism provides a relevant computational basis for such
+architectures, including potential acceleration of the encryption component
+within IPsec-oriented processing systems. Nevertheless, the experiments do not
+establish improvements in complete IPsec ESP, AES-GCM, or packet-processing
+pipelines, where authentication, protocol state, batching, and communication
+latency introduce additional requirements.
+
+The validation-first experimental design, paired measurements, explicit timing
+boundaries, and preserved session-level evidence support the reproducibility
+and interpretation of the reported findings. Their generalization remains
+limited to the evaluated implementations and computing configurations.
+The measured 32~MiB advantages do not establish an optimal batching threshold
+or guarantee equivalent improvements under different execution conditions.
+
+The principal implication is that GPU-assisted AES should be investigated as
+a targeted processing strategy for suitable bulk cryptographic workloads,
+rather than as a direct replacement for CPU-based encryption. The findings
+provide experimentally grounded operating conditions and practical constraints
+that can inform the development of heterogeneous telecommunications
+architectures, while identifying authenticated encryption, packet aggregation,
+and workload-aware execution as areas requiring application-level evaluation.

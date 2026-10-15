@@ -1,61 +1,343 @@
+
 \section{Results}
 \label{sec:results}
 
-\subsection{Offloading Advantage and Timing Scope}
+This section presents the experimental evidence for GPU-assisted AES acceleration under
+different workload sizes, cipher modes, and execution conditions. The analysis focuses on
+whether GPU processing provides a measurable improvement over hardware-assisted CPU
+encryption, particularly when the processing path includes data movement between the host
+and the accelerator.
 
-Figure~\ref{fig:aesni-scopes} compares resident and pipeline speedups across the complete size
-grid. The numerical contrast at 32~MiB is summarized in Table~\ref{tab:gpu-speedups}. Each
-comparison uses the corresponding system's AES-NI reference and the estimators defined in
-Section~\ref{subsec:statistical_analysis}.
+The results are obtained from the validated AES-128 study described in
+Section~\ref{sec:methodology}. The reported performance statistics are based on five
+study sessions per configuration, with paired CPU and GPU measurements. The analysis
+distinguishes improvements in device-resident computation from those observed in the
+prepared-buffer GPU pipeline.
+
+The principal interest is the processing of larger encryption buffers, which provides
+an experimental basis for investigating GPU-assisted bulk cryptographic workloads.
+Smaller inputs are retained to establish how the observed advantage changes with
+workload size.
+
+
+\subsection{GPU Acceleration Across Workload Sizes}
+\label{subsec:acceleration_results}
+
+Figure~\ref{fig:aesni-scopes} presents the measured GPU acceleration across the five
+evaluated input sizes, distinguishing AES-128 ECB and CTR execution and the two GPU
+measurement boundaries.
 
 \begin{figure}[p]
   \centering
   \includegraphics[width=\linewidth]{figures/aesni_gpu_scopes.pdf}
-  \caption{AES-NI versus GPU execution by size and mode. Lines show median paired speedups;
-  shading spans the five session estimates. The dotted line denotes parity. Resident and
-  prepared-buffer pipeline are distinct scopes. Ranges are descriptive, not confidence
-  intervals. Input sizes use binary units.}
+  \caption{GPU-assisted AES-128 acceleration across input sizes and encryption modes.
+  Curves represent median paired speedups relative to the corresponding host AES-NI
+  implementation. Resident execution measures device-side computation, whereas
+  the prepared-buffer pipeline includes synchronous host--device transfers and
+  synchronization. Shaded regions represent the observed ranges across five study
+  sessions, not confidence intervals. The horizontal reference denotes parity.}
   \label{fig:aesni-scopes}
 \end{figure}
 
+The results demonstrate that the benefit of GPU acceleration depends on the amount
+of work processed and the execution boundary used to evaluate the workload.
+
+For the 32~MiB input, resident GPU execution exceeds the corresponding CPU AES-NI
+reference on all three systems, in both encryption modes and in all five sessions
+per configuration.
+
+This finding establishes a consistent computational advantage for the evaluated
+CUDA implementation when the input is already available in device memory.
+
+However, resident performance represents only the encryption kernel. Its advantage
+does not automatically establish faster processing when the complete buffer must
+be transferred from host memory to the GPU and returned after encryption.
+
+The prepared-buffer measurements provide a more demanding test of practical
+acceleration because they include the synchronous transfer and execution sequence.
+
+Under this broader measurement boundary, the observed results differ substantially
+among systems and encryption modes. Some configurations retain a measurable advantage,
+while others experience a reversal in favor of the CPU AES-NI path.
+
+Consequently, the experiments identify GPU acceleration as a conditional processing
+opportunity rather than a universally beneficial execution strategy.
+
+
+\subsection{Experimentally Confirmed Bulk Encryption Improvement}
+\label{subsec:bulk_acceleration}
+
+The most relevant positive results are obtained for AES-128 CTR processing of a
+32~MiB buffer.
+
+Table~\ref{tab:gpu-speedups} summarizes the corresponding paired acceleration
+factors for resident and prepared-buffer pipeline execution, including the observed
+session ranges and the number of sessions in which the GPU pipeline is faster.
+
 \input{content/focused_results_table.tex}
 
-Resident execution exceeds AES-NI in all five sessions for both modes on every system at
-32~MiB. Transfer-inclusive results differ. GTX CTR reaches $0.935\times$, with a range of
-$0.918$--$1.008\times$ and only one session above parity; its ECB pipeline loses in all five
-sessions. No tested GTX pipeline condition has an all-five-session advantage over AES-NI.
+The T600 configuration provides a particularly relevant result for GPU-assisted
+bulk encryption on accessible hardware.
 
-T600 CTR provides the clearest consistent laptop result: a median pipeline speedup of
-$1.354\times$ at 32~MiB, with gains in all five sessions. This corresponds to approximately
-26.14\% lower paired latency. The speedup IQR is 0.030896 and
-CV is 8.18\%. CTR also wins in all five sessions at 1~MiB, whereas the direction is mixed at
-16~MiB. T600 ECB at 32~MiB has a median gain but loses in two sessions.
+At 32~MiB, its CUDA CTR pipeline achieves a median paired acceleration of
+$1.354\times$ relative to the host AES-NI implementation. The observed range
+extends from $1.129\times$ to $1.391\times$, with the GPU completing the
+measured processing sequence faster in all five sessions.
 
-T4 CTR reaches $4.761\times$ at 32~MiB and wins in all five sessions. Its ECB pipeline reaches
-only $0.893\times$ and loses in every session. Thus even a consistent resident advantage does
-not establish a corresponding pipeline advantage.
+The result corresponds to approximately 26.14\% lower processing latency
+when expressed through the median of the paired CPU-to-GPU latency ratios.
 
-\subsection{Absolute Throughput and Cipher Mode}
+Importantly, this improvement is not restricted to device-resident execution.
+It remains observable when the defined processing interval includes
+host-to-device transfer, CUDA kernel execution, device-to-host transfer,
+and the synchronization required for completion.
 
-At 32~MiB CTR, pipeline throughput is 1188.9~MB/s on GTX, 2049.4~MB/s on T600 and 3713.9~MB/s
-on T4. Resident throughput is 4585.6, 4328.9 and 9166.8~MB/s, respectively. These absolute
-GPU rates are distinct from the CPU-relative speedups in Table~\ref{tab:gpu-speedups}.
+The measured result therefore establishes that a 4~GB laptop GPU can provide
+a repeatable advantage for a selected bulk AES-CTR workload even when data
+movement is included in the evaluated processing sequence.
 
-T4 pipeline throughput is nearly equal for ECB and CTR at this size, approximately 3713 and
-3714~MB/s. Its host AES-NI ECB throughput, however, is $5.378\times$ the CTR throughput, with
-session ratios ranging from $5.250$ to $5.795\times$. The corresponding ratios on GTX and T600
-are approximately $1.26\times$. The T4 disparity is consistent across sessions, but its cause
-was not isolated. A large paired speedup can therefore reflect CPU mode behavior as well as
-GPU throughput; it is not a direct measure of the GPU's advantage over another system.
+The Tesla T4 demonstrates a larger advantage under the same workload definition.
 
-\subsection{Size Dependence and Variability}
+For 32~MiB CTR encryption, its prepared-buffer CUDA pipeline achieves a median
+paired acceleration of $4.761\times$, with values ranging from approximately
+$4.691\times$ to $5.021\times$ across the five sessions.
 
-Throughput is not uniformly monotonic in input size. All four retained GTX mode/scope groups
-show a local 16~MiB dip below both 1 and 32~MiB in all five sessions. T4 resident measurements
-show that dip in four sessions, whereas its pipeline measurements show none. The size feature
-therefore depends on the configuration and measurement scope.
+The GPU pipeline outperforms the selected host AES-NI implementation in every
+recorded session.
 
-Session ranges also matter when the median is near parity. The mixed T600 ECB outcome and
-occasional GTX CTR gain at 32~MiB would be obscured by reporting only their medians. Together
-with the size-dependent reversals, these observations support retaining the full workload grid
-and session-level comparisons rather than selecting a single favorable measurement.
+These findings provide direct experimental evidence that GPU-assisted bulk
+AES-CTR processing can deliver measurable improvements over a hardware-accelerated
+CPU implementation under specific operating conditions.
+
+However, the T600 and T4 speedup factors refer to different host processors.
+They must not be interpreted as a direct measurement of relative GPU performance
+between the two systems.
+
+The results demonstrate the feasibility of the measured acceleration on the
+corresponding complete hardware--software configurations.
+
+
+\subsection{Conditions Limiting the Acceleration Benefit}
+\label{subsec:acceleration_constraints}
+
+The positive CTR results do not extend uniformly across the tested configurations.
+
+On the GTX system, the prepared-buffer AES-128 CTR pipeline achieves a median
+paired speedup of $0.935\times$ at 32~MiB.
+
+The observed session range is $0.918$--$1.008\times$, with the GPU pipeline
+outperforming AES-NI in only one of five sessions.
+
+Although resident GPU execution is consistently faster, the broader measured
+pipeline does not demonstrate a repeatable improvement over the CPU reference.
+
+The GTX ECB pipeline also remains slower than AES-NI in all five sessions
+at the same workload size.
+
+These findings are important because they show that the computational capability
+of the accelerator is not sufficient to guarantee an advantage for bulk
+processing when the application requires host--device data movement.
+
+The T4 results demonstrate a different limitation associated with cipher mode.
+
+At 32~MiB, the T4 prepared-buffer CTR pipeline achieves a substantial
+advantage, whereas the ECB pipeline reaches only $0.893\times$ relative
+to the corresponding CPU AES-NI path.
+
+The ECB pipeline is slower in every recorded session despite the resident
+GPU execution remaining faster than AES-NI.
+
+The T600 also exhibits mode-dependent behavior. Its 32~MiB ECB pipeline
+has a median speedup above one, but the GPU is faster in only three
+of five sessions.
+
+Thus, a positive aggregate median does not necessarily indicate a
+consistently favorable processing configuration.
+
+The experimental evidence identifies an important practical constraint:
+the conditions supporting GPU acceleration must be established for the
+specific workload and encryption mode rather than inferred solely from
+the presence of a parallel accelerator.
+
+For potential bulk cryptographic applications, these results indicate
+that processing volume alone is not sufficient to determine whether
+GPU execution will be advantageous.
+
+
+\subsection{Absolute Encryption Throughput}
+\label{subsec:absolute_throughput}
+
+Relative acceleration factors are useful for determining whether a GPU processing
+path improves upon its host CPU reference. However, absolute throughput is also
+necessary to characterize the processing capacity of the accelerator itself.
+
+At 32~MiB in CTR mode, the measured prepared-buffer pipeline throughput is
+approximately 1188.9~MB/s on GTX, 2049.4~MB/s on T600, and 3713.9~MB/s
+on T4.
+
+The corresponding device-resident throughput values are 4585.6~MB/s,
+4328.9~MB/s, and 9166.8~MB/s, respectively.
+
+These measurements demonstrate that the T4 provides the highest absolute
+CTR throughput among the evaluated systems under this workload.
+
+They also show that GPU pipeline throughput can differ substantially from
+device-resident throughput even when the same encryption implementation
+and input size are used.
+
+The distinction matters for system design because the amount of data
+that can be processed per second depends on the actual execution
+sequence required to make the input available and recover the result.
+
+A configuration with high resident throughput may not deliver a
+correspondingly high host-observed processing rate.
+
+Absolute throughput and host-relative acceleration therefore describe
+different aspects of the measured processing capability.
+
+The experiments do not isolate the individual contributions of PCIe
+transfer time, synchronization, and runtime overhead sufficiently
+to attribute the entire resident-to-pipeline difference to
+one component.
+
+
+\subsection{Cipher-Mode Dependence and Host Processing Behavior}
+\label{subsec:mode_dependence}
+
+The T4 measurements reveal an additional factor affecting the interpretation
+of GPU-assisted acceleration.
+
+For 32~MiB inputs, the baseline GPU pipeline achieves nearly identical
+absolute throughput in ECB and CTR modes, approximately 3713 and
+3714~MB/s, respectively.
+
+The corresponding resident GPU rates are also similar, at approximately
+9177~MB/s for ECB and 9167~MB/s for CTR.
+
+Nevertheless, the relative acceleration factors differ markedly:
+$0.893\times$ for ECB and $4.761\times$ for CTR.
+
+The principal distinction is associated with the measured host AES-NI
+execution rates.
+
+At 32~MiB, the T4 host's AES-NI ECB throughput is approximately
+$5.378\times$ its CTR throughput. The ratio ranges from
+$5.250\times$ to $5.795\times$ across sessions.
+
+By contrast, the corresponding ratios on the GTX and T600 host
+configurations are approximately $1.26\times$.
+
+The T4 host disparity is consistent across the recorded sessions,
+but its underlying cause was not isolated experimentally.
+
+Differences in cryptographic library behavior, mode-specific processing,
+processor characteristics, and runtime environment may contribute,
+but the available evidence does not identify a single causal mechanism.
+
+This observation is significant because a large GPU acceleration factor
+may result from the behavior of the CPU execution path as well as the
+absolute performance of the GPU.
+
+Consequently, the reported CTR improvement must be interpreted
+relative to the corresponding hardware-accelerated CPU implementation.
+
+The result does not establish that the T4 GPU itself processes CTR
+several times faster than ECB.
+
+For heterogeneous cryptographic systems, the finding reinforces
+the need to assess the complete selected execution path rather
+than assume that the same relative acceleration will occur
+under every implementation of an encryption mode.
+
+
+\subsection{Workload-Size Effects and Experimental Consistency}
+\label{subsec:variability_results}
+
+The measured performance relationships also depend on workload size.
+
+Although larger buffers can provide more independent AES operations
+for GPU execution, throughput does not increase monotonically
+across all evaluated sizes and platforms.
+
+On GTX, a local throughput reduction occurs at 16~MiB relative
+to both 1~MiB and 32~MiB.
+
+For the retained CUDA implementation, this pattern is observed
+across both encryption modes and both GPU timing scopes
+in all five study sessions.
+
+On T4, resident measurements show the corresponding local
+reduction in four sessions, whereas the pipeline measurements
+do not exhibit the same pattern.
+
+These differences demonstrate that the observed size dependence
+is not a universal property of GPU AES execution.
+
+The benchmark processes workload sizes in ascending order,
+which also prevents complete separation of buffer-size effects
+from time-dependent execution-environment behavior.
+
+The available results therefore do not establish whether
+the local reduction is caused by memory behavior, scheduling,
+device clocks, or another system-level mechanism.
+
+Session-level consistency is particularly important when the
+measured acceleration approaches parity.
+
+For example, GTX CTR at 32~MiB occasionally favors the GPU,
+but the median result and directional count do not support
+a consistently positive pipeline advantage.
+
+Similarly, T600 ECB at 32~MiB has a positive median acceleration
+while showing mixed results across sessions.
+
+By contrast, the T600 and T4 32~MiB CTR pipeline improvements
+remain positive in all five recorded sessions.
+
+For the T600 CTR configuration, the paired speedup has an
+interquartile range of 0.030896 and a sample coefficient
+of variation of approximately 8.18\%.
+
+These descriptive statistics provide information about
+the stability of the observed advantage within the tested
+sessions.
+
+They do not constitute confidence intervals or establish
+that the same performance improvement will occur on other
+devices or in different execution environments.
+
+The results therefore distinguish repeatable acceleration
+under observed conditions from isolated favorable outcomes.
+
+
+\subsection{Summary of Experimental Findings}
+\label{subsec:results_summary}
+
+The experiments establish three principal findings relevant
+to GPU-assisted bulk AES processing.
+
+First, device-resident CUDA execution provides a consistent
+computational advantage over the evaluated AES-NI CPU path
+at 32~MiB on all three systems and in both tested modes.
+
+Second, this advantage can persist when host--device transfers
+are included. The T600 and T4 systems demonstrate repeatable
+prepared-buffer AES-CTR improvements at 32~MiB, confirming
+that GPU-assisted bulk processing can be beneficial under
+specific execution conditions.
+
+Third, the improvement is conditional. The GTX pipeline
+does not achieve a consistently positive result, and
+the T4 ECB measurements demonstrate that the observed
+benefit also depends on cipher mode and host implementation
+behavior.
+
+Together, these findings identify experimentally supported
+opportunities and constraints for GPU-assisted bulk AES
+processing.
+
+They provide a basis for assessing heterogeneous cryptographic
+processing strategies in telecommunications-oriented systems,
+while the performance of actual packet batching, authenticated
+encryption, and complete network processing remains outside
+the scope of the present measurements.
