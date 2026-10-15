@@ -1,46 +1,27 @@
-
 \section{Conclusion}
 \label{sec:conclusion}
 
-This study demonstrates that GPU-assisted AES encryption can improve bulk cryptographic
-processing performance under specific operating conditions, even when the host processor
-already supports hardware-accelerated AES-NI. The contribution is the experimental
-identification of conditions under which this improvement remains observable after
-including synchronous host--device transfers, together with the practical constraints
-that determine its potential relevance to telecommunications systems.
+This study experimentally compared validated GPU-assisted AES-128 ECB and CTR encryption with
+hardware-assisted CPU AES-NI across three heterogeneous configurations. It distinguished
+device-resident execution from a prepared-buffer pipeline containing synchronous host--device
+transfers and synchronization, using paired measurements across repeated sessions.
 
-The strongest evidence is obtained for AES-128 CTR encryption of 32~MiB buffers.
-The validated CUDA pipeline achieved a median paired acceleration of $1.354\times$
-on the T600 configuration and $4.761\times$ on the T4 configuration, relative
-to their respective host AES-NI implementations. Both improvements were observed
-in all five experimental sessions. The T600 result is particularly relevant
-because it establishes that a repeatable bulk-processing advantage is possible
-on the tested 4~GB laptop GPU, without relying on a datacenter-class accelerator.
+For 32~MiB AES-CTR buffers, the pipeline achieved median paired accelerations of $1.354\times$
+on T600 and $4.761\times$ on T4 relative to their respective host implementations. Both
+improvements occurred in all five sessions, including on the tested 4~GB T600 laptop GPU.
+Resident execution outperformed AES-NI at this size on every system in both modes, but the GTX
+pipeline did not show a consistent advantage, and T4 ECB remained slower than its CPU reference.
+Thus, a computational advantage survived data movement for selected CTR workloads, while the
+outcome depended on the system, mode, and execution boundary.
 
-However, the experiments also establish important boundaries. The GTX configuration
-did not provide a consistent transfer-inclusive improvement over AES-NI, while
-the T4 ECB pipeline remained slower than its corresponding CPU reference.
-Although device-resident GPU execution consistently outperformed AES-NI at
-32~MiB, the advantage did not always survive the inclusion of data movement
-and synchronization. The results therefore identify workload-dependent
-acceleration opportunities rather than a universal GPU performance advantage.
+These findings establish measured operating conditions for GPU-assisted bulk encryption
+alongside existing CPU acceleration. They could inform workload placement in telecommunications
+gateways and other services handling large data buffers, including storage and analytics
+applications. Their relevance rests on matching the application's workload and data placement to
+the evaluated conditions. The experiments do not establish improved IPsec ESP, AES-GCM,
+packet-batching, or complete application performance.
 
-For telecommunications infrastructure, these findings support further consideration
-of GPU-assisted bulk encryption, particularly in systems capable of processing
-large buffers or organizing independent cryptographic operations into suitable
-workloads. AES-CTR parallelism provides a relevant computational basis for such
-architectures, including potential acceleration of the encryption component
-within IPsec-oriented processing systems. Nevertheless, the experiments do not
-establish improvements in complete IPsec ESP, AES-GCM, or packet-processing
-pipelines, where authentication, protocol state, batching, and communication
-latency introduce additional requirements.
-
-The validation-first experimental design, paired measurements, explicit timing
-boundaries, and preserved session-level evidence support the reproducibility
-and interpretation of the reported findings. The principal implication is that GPU-assisted AES should be investigated as
-a targeted processing strategy for suitable bulk cryptographic workloads,
-rather than as a direct replacement for CPU-based encryption. The findings
-provide experimentally grounded operating conditions and practical constraints
-that can inform the development of heterogeneous telecommunications
-architectures, while identifying authenticated encryption, packet aggregation,
-and workload-aware execution as areas requiring application-level evaluation.
+The next practical step is an IPsec-oriented authenticated-encryption prototype evaluated across
+the full packet-processing path. Measuring its throughput and latency with authentication,
+protocol state, packet aggregation, and delivery included would determine whether the
+demonstrated bulk AES-CTR improvement translates into an application-level benefit.
