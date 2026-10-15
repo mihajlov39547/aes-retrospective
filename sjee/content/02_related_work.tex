@@ -164,31 +164,24 @@ organization, and specialized execution strategies
 \cite{iwai2012acceleration,tezcan2021optimization,bitsliced2024gpu}. The
 importance of data-transfer overhead, strong CPU references, and rigorous
 performance measurement is likewise well established
-\cite{lee2010debunking,gregg2011data,kalibera2013rigorous}.
-
-The remaining problem is not whether AES can be accelerated on a GPU, but how
+\cite{lee2010debunking,gregg2011data,kalibera2013rigorous}. The
+remaining problem is not whether AES can be accelerated on a GPU, but how
 to identify operating conditions under which that acceleration produces a
 repeatable benefit for bulk cryptographic processing when the host already
 supports hardware-assisted encryption and data movement cannot be ignored.
 
 This question is particularly relevant to telecommunications-oriented systems,
 where the processing location and organization of encryption workloads may
-influence achievable throughput and latency.
-
-Existing high-throughput kernel results do not, by themselves, establish whether
+influence achievable throughput and latency. Existing high-throughput kernel results do not, by themselves, establish whether
 a particular GPU configuration is suitable for such processing. Conversely,
 an unfavorable transfer-inclusive result on one system does not demonstrate
 that GPU offloading is ineffective under different workload or platform conditions.
 
 The present study addresses this practical evidence gap by evaluating AES-128
 processing across three heterogeneous computing configurations using a common
-validation and measurement protocol.
-
-The evaluation considers ECB and CTR workloads of different sizes, with
+validation and measurement protocol. The evaluation considers ECB and CTR workloads of different sizes, with
 hardware-assisted CPU AES-NI serving as the reference for determining whether
-GPU processing offers an additional benefit.
-
-A distinction is maintained between device-resident execution and a synchronous
+GPU processing offers an additional benefit. A distinction is maintained between device-resident execution and a synchronous
 prepared-buffer pipeline that includes the measured host--device transfers.
 Session-level measurements are preserved to determine whether observed
 improvements remain consistent across repeated executions.
@@ -196,9 +189,7 @@ improvements remain consistent across repeated executions.
 The principal contribution is the identification of experimentally supported
 conditions in which GPU-assisted bulk AES processing provides an advantage,
 together with evidence of the constraints under which that advantage disappears
-or becomes inconsistent.
-
-Rather than proposing a new cryptographic primitive or claiming state-of-the-art
+or becomes inconsistent. Rather than proposing a new cryptographic primitive or claiming state-of-the-art
 GPU throughput, the study provides an empirical basis for assessing the
 feasibility of GPU-assisted AES processing in heterogeneous telecommunications
 architectures.

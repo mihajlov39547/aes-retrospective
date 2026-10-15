@@ -226,9 +226,7 @@ The distinction is particularly important for assessing potential
 acceleration. A GPU kernel may achieve higher computational throughput
 while the additional transfer and synchronization costs reduce or
 eliminate the advantage when a complete buffer must move between
-host and device.
-
-Conversely, applications in which input data are already available
+host and device. Conversely, applications in which input data are already available
 in device memory may have different processing costs. The study
 measures these execution scenarios separately rather
 than treating kernel throughput as a substitute for broader
