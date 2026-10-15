@@ -26,7 +26,6 @@ For telecommunications systems, the main opportunity is the processing of substa
 volumes of independent cryptographic work. Network gateways, communication servers,
 and data-processing services may encounter workloads in which multiple independent
 data units can be organized for parallel execution.
-
 AES-CTR is suitable for this form of processing because distinct counter blocks
 can be encrypted independently, provided that the counter and nonce requirements
 are satisfied~\cite{dworkin2001modes}. GPU execution can exploit this independence
@@ -36,14 +35,10 @@ The measured improvement on the T600 configuration is relevant because it demons
 that a repeatable bulk-processing advantage is not restricted to the tested
 datacenter-oriented configuration. Nevertheless, the results apply to the particular
 host CPU, GPU implementation, workload, and prepared-buffer execution boundary
-used in the experiment.
-
-The findings do not identify a universal minimum batch size. Although a 32~MiB
+used in the experiment. The findings do not identify a universal minimum batch size. Although a 32~MiB
 workload produces a consistent advantage on selected systems, the experiments
 do not establish that this size is optimal or that larger workloads will
-necessarily improve performance further.
-
-More importantly, a contiguous encryption buffer is not equivalent to a group
+necessarily improve performance further. More importantly, a contiguous encryption buffer is not equivalent to a group
 of independently managed network packets. Organizing packet data into a GPU
 workload requires additional processing whose performance was not evaluated.
 
@@ -74,7 +69,6 @@ Waiting for sufficient work to form a batch can increase queueing delay,
 particularly during periods of low traffic. Packet metadata, independent
 cryptographic contexts, counter allocation, and result ordering also
 introduce requirements absent from the contiguous-buffer experiments.
-
 Consequently, the results support investigating batching for throughput-oriented
 workloads, but they do not establish an optimal batching policy or a guaranteed
 improvement in packet-processing performance.
@@ -91,11 +85,8 @@ organization, authentication, and delivery of the protected data.
 
 These opportunities point toward a workload-aware architecture in which CPU
 AES-NI remains available for smaller or latency-sensitive operations, while
-GPU processing is considered for suitable bulk workloads.
-
-Such an architecture is a design implication of the measurements. It was not
+GPU processing is considered for suitable bulk workloads. Such an architecture is a design implication of the measurements. It was not
 implemented or experimentally evaluated as part of the present study.
-
 
 \subsection{Relationship to IPsec and Authenticated Encryption}
 \label{subsec:discussion_ipsec}
@@ -108,9 +99,7 @@ in RFC~4106~\cite{rfc4106}.
 These standards establish a direct connection between parallelizable AES
 processing and standardized telecommunications security mechanisms. In
 particular, the independent generation of counter-mode keystream blocks
-provides opportunities for GPU-based parallel execution.
-
-However, the present experiments evaluate AES-128 CTR encryption rather
+provides opportunities for GPU-based parallel execution. However, the present experiments evaluate AES-128 CTR encryption rather
 than complete IPsec ESP or AES-GCM processing. The measured acceleration
 therefore characterizes the encryption component under the defined
 experimental conditions, not the performance of an authenticated
@@ -120,7 +109,6 @@ An IPsec implementation must account for operations that are not represented
 by the measured AES-CTR processing interval. These include packet framing,
 security-association state, nonce and sequence-number management,
 authentication, and the processing required to deliver protected packets.
-
 For AES-GCM, the additional GHASH computation and authentication-tag
 processing must also be considered. A measured improvement in the
 counter-mode encryption component does not determine the performance
@@ -133,9 +121,7 @@ acceleration factors.
 
 A practical extension would need to preserve the security requirements
 of the selected protocol while measuring throughput and latency across
-the complete packet-processing path.
-
-In particular, independent packet contexts must not be combined in a way
+the complete packet-processing path. In particular, independent packet contexts must not be combined in a way
 that compromises counter uniqueness, authentication boundaries, or
 the association between encrypted data and its protocol metadata.
 
@@ -149,7 +135,6 @@ selection of a cryptographic execution path.
 The first is data location. Device-resident execution avoids host--device
 transfers within the measured interval, whereas the prepared-buffer
 pipeline includes the movement required to process a host-resident buffer.
-
 The different outcomes observed under these boundaries show that the
 computational benefit of GPU execution can be reduced or eliminated
 by additional processing operations.
@@ -162,9 +147,7 @@ implementation rather than assumed from an unaccelerated software reference.
 The third constraint is encryption-mode behavior. The T4 results
 demonstrate that similar absolute GPU throughput can produce different
 relative acceleration outcomes when the corresponding CPU modes
-have substantially different execution rates.
-
-The underlying cause of this host behavior was not isolated. Accordingly,
+have substantially different execution rates. The underlying cause of this host behavior was not isolated. Accordingly,
 the findings do not support attributing the observed difference to
 a particular processor feature, library version, or cloud mechanism.
 
@@ -177,9 +160,7 @@ CPU-to-GPU crossover threshold.
 These constraints suggest that a deployment-oriented execution policy
 would need to consider workload characteristics and data location
 rather than selecting an accelerator solely on the basis of peak
-kernel throughput.
-
-An adaptive selection mechanism could potentially assign suitable
+kernel throughput. An adaptive selection mechanism could potentially assign suitable
 bulk workloads to the GPU while retaining CPU execution for other
 requests. Determining an effective policy would require workload-specific
 measurements and remains outside the demonstrated results.
@@ -190,7 +171,6 @@ measurements and remains outside the demonstrated results.
 
 The observed advantages are supported by repeated measurements under
 the tested conditions, but several factors limit their generalization.
-
 Each configuration represents one host or cloud allocation with five
 study sessions. These sessions provide evidence of repeatability
 within the selected environment, not a statistical characterization
@@ -199,9 +179,7 @@ of the wider population of comparable machines.
 The configurations differ in processor models, GPU devices,
 operating systems, drivers, and supporting software. Their
 performance differences therefore cannot be attributed causally
-to a single hardware or software characteristic.
-
-The CPU reference is a selected AES-NI-enabled library path
+to a single hardware or software characteristic. The CPU reference is a selected AES-NI-enabled library path
 rather than a comprehensive evaluation of the fastest possible
 multithreaded CPU encryption service. Similarly, the CUDA kernel
 is a validated implementation, not a demonstrated performance
@@ -211,9 +189,7 @@ The prepared-buffer pipeline excludes initial host staging,
 allocation, authentication, external input/output, and
 application-level orchestration. Its results must therefore
 not be interpreted as complete telecommunications-system
-throughput.
-
-The fixed ascending order of input sizes also limits causal
+throughput. The fixed ascending order of input sizes also limits causal
 interpretation of the observed non-monotonic performance
 behavior. In particular, the local 16~MiB reduction cannot
 be assigned to memory effects, GPU scheduling, processor

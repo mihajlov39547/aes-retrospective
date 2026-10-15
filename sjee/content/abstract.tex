@@ -7,9 +7,7 @@ over hardware-accelerated CPU encryption. A validation-first experimental
 approach evaluates AES in CTR and ECB modes across three heterogeneous
 computing configurations, using paired workloads, five measurement sessions
 per system, and separate device-resident and synchronous transfer-inclusive
-GPU execution boundaries. The analysis retains 9,000 timing observations
-from a larger validated experimental campaign.
-
+GPU execution boundaries.
 For 32~MiB AES-CTR workloads, the GPU processing pipeline achieves median
 paired speedups of $1.354\times$ on the T600 Laptop GPU and $4.761\times$
 on the Tesla T4 relative to their respective AES-NI CPU implementations,
@@ -18,8 +16,11 @@ configuration achieves only $0.935\times$, demonstrating that acceleration
 is not universally beneficial. The results establish experimentally
 supported conditions under which GPU processing can improve bulk AES
 throughput despite synchronous data transfers.
+These findings provide experimental evidence that GPU-assisted AES-CTR
+processing can improve bulk encryption throughput over hardware-accelerated
+CPU execution, even when synchronous data transfers are included. The
+demonstrated gains identify concrete opportunities for accelerating
+cryptographic workloads in heterogeneous telecommunications systems,
+although improvements in complete IPsec and authenticated network
+processing remain to be established.
 
-These findings provide a basis for investigating workload-aware encryption
-and GPU-assisted bulk processing in heterogeneous telecommunications
-architectures. However, complete IPsec, authenticated-encryption,
-and packet-processing performance remain outside the evaluated scope.

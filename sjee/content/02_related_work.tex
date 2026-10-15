@@ -25,9 +25,8 @@ and the interaction between computation and data transfers. Their CUDA implement
 achieved approximately 35~Gbit/s for device-side AES processing and reported approximately
 22.5~Gbit/s when transfer-aware execution was considered. These findings established
 that GPU encryption performance depends not only on computational parallelism but also
-on how data are transferred and organized.
-
-Wang and Chu~\cite{wang2019gpu} investigated lookup-table-based AES implementations
+on how data are transferred and organized. Wang and Chu~\cite{wang2019gpu} investigated
+lookup-table-based AES implementations
 and GPU execution strategies, while Tezcan~\cite{tezcan2021optimization} demonstrated
 the performance benefits of shared-memory optimization and avoiding bank conflicts.
 The latter reported AES-128 encryption throughput of 878.6~Gbit/s on an NVIDIA
@@ -42,9 +41,8 @@ optimization and parallel cipher representations.
 However, these performance achievements do not necessarily establish the throughput
 available to a telecommunications application. Device-side encryption rates can be
 substantially different from the performance of a processing pipeline that must receive
-data, execute the cryptographic operation, and deliver the resulting output.
-
-Consequently, high GPU AES throughput provides evidence of computational capability,
+data, execute the cryptographic operation, and deliver the resulting output. Consequently
+high GPU AES throughput provides evidence of computational capability,
 but additional information is needed to determine whether that capability can improve
 the processing of bulk communication data under practical execution constraints.
 
@@ -67,9 +65,8 @@ For bulk cryptographic processing, the costs of moving data between processors a
 also important. Gregg and Hazelwood~\cite{gregg2011data} established that meaningful
 CPU--GPU performance evaluation requires explicit consideration of data location and
 movement. A computational advantage obtained on data already resident in GPU memory
-may be reduced when input and output must cross the host--device boundary.
-
-CUDA programming and performance guidelines similarly emphasize minimizing unnecessary
+may be reduced when input and output must cross the host--device boundary. CUDA
+programming and performance guidelines similarly emphasize minimizing unnecessary
 transfers, using appropriate synchronization, and considering overlap between data
 movement and computation~\cite{nvidiaBestPractices,harris2012overlap}. AES-specific
 research has already investigated these techniques~\cite{iwai2012acceleration}.
@@ -77,9 +74,8 @@ research has already investigated these techniques~\cite{iwai2012acceleration}.
 These findings are relevant to communication infrastructure because cryptographic
 processing rarely occurs in isolation. A network-oriented system may receive data
 through a host-managed interface, organize it into processing buffers, execute
-encryption, and subsequently forward the protected output.
-
-The placement of cryptographic computation within this processing path influences
+encryption, and subsequently forward the protected output. The placement of cryptographic
+computation within this processing path influences
 whether acceleration is beneficial. For example, the usefulness of GPU processing
 may differ between a large contiguous buffer, independently aggregated messages,
 and individual latency-sensitive packets.
@@ -107,9 +103,7 @@ collections of independent data units.
 However, confidentiality-only encryption is insufficient for many secure communication
 applications. Authenticated-encryption constructions such as AES-GCM combine
 counter-mode encryption with authentication through GHASH
-\cite{dworkin2007gcm}.
-
-This distinction is important when considering protocols such as IPsec or TLS.
+\cite{dworkin2007gcm}. This distinction is important when considering protocols such as IPsec or TLS.
 An improvement in AES-CTR computation may benefit one component of an
 authenticated-encryption pipeline, but does not establish equivalent improvement
 in complete protocol processing.
@@ -123,9 +117,8 @@ These considerations suggest that GPU acceleration is particularly worth investi
 for telecommunications workloads involving substantial volumes of independent
 cryptographic processing. Possible application contexts include bulk data protection,
 traffic aggregation, and cryptographic operations within heterogeneous communication
-gateways and data-processing services.
-
-Nevertheless, the effectiveness of these architectural approaches cannot be inferred
+gateways and data-processing services. Nevertheless, the effectiveness of these
+architectural approaches cannot be inferred
 solely from peak GPU throughput. It must be assessed against the available hardware
 acceleration and the operational requirements of the intended processing path.
 
@@ -148,17 +141,15 @@ and Belli~\cite{hoefler2015scientific} discussed scientifically defensible perfo
 evaluation of parallel computing systems.
 
 These contributions establish a methodological foundation for determining whether
-an observed acceleration is repeatable under the tested conditions.
-
-For cryptographic processing, functional correctness must also be established before
+an observed acceleration is repeatable under the tested conditions. For
+cryptographic processing, functional correctness must also be established before
 performance measurements are accepted. High throughput provides little useful
 evidence if the implementation does not produce the expected cryptographic output.
 
 The present study applies these principles through cryptographic validation,
 paired workloads, repeated study sessions, documented execution boundaries,
-and preservation of raw observations and experimental provenance.
-
-This approach supports the distinction between an isolated favorable measurement
+and preservation of raw observations and experimental provenance. This
+approach supports the distinction between an isolated favorable measurement
 and a performance advantage observed consistently across multiple executions.
 It also allows results that favor CPU processing to be retained alongside cases
 where GPU acceleration provides an advantage.
@@ -170,9 +161,8 @@ where GPU acceleration provides an advantage.
 Previous research has demonstrated that AES can achieve substantial throughput
 on GPUs and that optimized implementations can exploit parallelism, memory
 organization, and specialized execution strategies
-\cite{iwai2012acceleration,tezcan2021optimization,bitsliced2024gpu}.
-
-The importance of data-transfer overhead, strong CPU references, and rigorous
+\cite{iwai2012acceleration,tezcan2021optimization,bitsliced2024gpu}. The
+importance of data-transfer overhead, strong CPU references, and rigorous
 performance measurement is likewise well established
 \cite{lee2010debunking,gregg2011data,kalibera2013rigorous}.
 
