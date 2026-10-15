@@ -73,6 +73,18 @@ must also account for nonce management, packet preparation, synchronization, and
 delivery. These requirements distinguish a bulk encryption benchmark from a complete security
 service, even when the underlying cipher operations are parallelizable.
 
+Earlier research also examined GPU-assisted encryption in communication protocols.
+Sch{\"o}nberger and Fu{\ss}~\cite{schonberger2011gpu} investigated GPU precomputation of
+AES counter-mode keystream for an IPsec-oriented GCM implementation, with subsequent encryption
+and authentication performed on the CPU. More recently, Lee et al.~\cite{lee2025parallelgcm}
+developed a parallel GPU implementation of GCM, including GHASH processing, and reported
+throughput exceeding 400~Gbit/s on an RTX~4090. Thus, GPU-assisted telecommunications encryption
+and authenticated-encryption acceleration are established research directions. The present
+study instead characterizes reproducible operating conditions for bulk AES-128 processing,
+distinguishing device-resident execution from synchronous transfer-inclusive processing against
+hardware-assisted AES-NI. It neither introduces a new AES algorithm nor benchmarks complete
+AES-GCM or IPsec processing.
+
 Workload aggregation introduces a further throughput--latency trade-off. Combining small
 messages may increase the work available to the GPU, while waiting for a batch adds queueing
 delay. Bulk data protection, traffic aggregation, heterogeneous communication gateways, and

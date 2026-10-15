@@ -36,6 +36,7 @@ from pylatexenc.latexwalker import (
     LatexEnvironmentNode,
 )
 from pylatexenc.macrospec import MacroSpec, EnvironmentSpec
+from pylatexenc.latex2text import LatexNodes2Text
 
 ROOT = Path(__file__).resolve().parent
 SOURCE = ROOT / 'SJEE_Template.docx'
@@ -88,6 +89,10 @@ def inline(nodes, **formatting):
                 result.append(dict(text={',': '\u2009', ' ': ' ', '\\': '\n'}.get(name, name), **formatting))
             elif name in ('label', 'allowbreak', 'footnotesize'):
                 continue
+            elif name in ('"', "'", '`', '^', '~', '=', '.', 'u', 'v', 'H', 'c',
+                          'ss', 'ae', 'AE', 'oe', 'OE', 'o', 'O', 'l', 'L'):
+                result.append(dict(text=LatexNodes2Text().nodelist_to_text([node]),
+                                   **formatting))
             elif name in ('cite', 'ref', 'eqref'):
                 result.append(dict(link_kind=name, target=plain(argument(node)), **formatting))
             else:
@@ -280,7 +285,8 @@ def bibliography():
                             for word in first.split()]
                 names.append(' '.join(initials) + ' ' + plain(parse(last)))
         fields = [', '.join(names) + ': ' + value('title')]
-        for key in ('journal', 'booktitle', 'institution', 'publisher', 'address', 'howpublished'):
+        for key in ('journal', 'booktitle', 'series', 'institution', 'publisher',
+                    'address', 'howpublished'):
             if value(key):
                 fields.append(value(key))
         if value('type'):
@@ -295,6 +301,8 @@ def bibliography():
         if date:
             fields.append(date)
         for key, prefix in [('pages', 'pp. '), ('doi', 'doi: '), ('url', ''), ('note', '')]:
+            if key == 'url' and value('doi') and value('url') == 'https://doi.org/' + value('doi'):
+                continue
             if value(key):
                 fields.append(prefix + value(key))
         references.append({'key': entry['ID'], 'text': ', '.join(fields) + '.'})
@@ -742,7 +750,9 @@ def render(data, temporary):
         after_equation = kind == 'equation'
     paragraph('JSubtitle', [{'text': f'{section + 1}\tReferences'}])
     for reference in data['references']:
-        paragraph('JReference', [{'text': reference['text']}])
+        p = paragraph('JReference', [{'text': reference['text']}])
+        # Long documentation URLs should not stretch short preceding lines.
+        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
     document.core_properties.title = data['title']
     document.core_properties.author = data['author']
     document.core_properties.subject = 'SJEE manuscript draft'

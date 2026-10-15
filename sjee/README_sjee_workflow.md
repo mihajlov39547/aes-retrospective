@@ -87,7 +87,7 @@ Run the adapter regression checks from `sjee/`:
 ```
 
 The current manuscript exports four tables, two figures, six display equations,
-and 22 cited references. Labels and citation numbers are reconstructed from the
+and 24 cited references. Labels and citation numbers are reconstructed from the
 sources rather than read from potentially stale PDF auxiliary files.
 
 ## Preview and delivery

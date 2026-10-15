@@ -11,6 +11,15 @@ import fill_sjee_template_docx as g
 
 
 class AdapterTests(unittest.TestCase):
+    def test_bibliography_accents_and_doi(self):
+        refs = {r['key']: r['text'] for r in g.bibliography()}
+        entry = refs['schonberger2011gpu']
+        self.assertIn('Georg Sch\u00f6nberger, J\u00fcrgen Fu\u00df', entry)
+        self.assertIn('Lecture Notes in Computer Science', entry)
+        self.assertIn('10.1007/978-3-642-24712-5_16', entry)
+        self.assertEqual(g.plain(g.parse(r'Sch{\"o}nberger and Fu{\ss}')),
+                         'Sch\u00f6nberger and Fu\u00df')
+
     def test_numbered_list_keeps_all_paragraphs(self):
         result = g.blocks(r'\begin{enumerate}\item First.\item \textbf{Second.}\end{enumerate}')
         self.assertEqual([b['number'] for b in result], [1, 2])
@@ -81,7 +90,7 @@ class AdapterTests(unittest.TestCase):
         self.assertEqual(sum(b['kind'] == 'table' for b in data['blocks']), 4)
         self.assertEqual(sum(b['kind'] == 'figure' for b in data['blocks']), 2)
         self.assertEqual(sum(b['kind'] == 'equation' for b in data['blocks']), 6)
-        self.assertEqual(len(data['references']), 22)
+        self.assertEqual(len(data['references']), 24)
         self.assertIn('content/focused_results_table.tex', data['source_sha256'])
         self.assertEqual(data['labels']['fig:bulk-throughput'], '2')
         with TemporaryDirectory(dir=g.BUILD) as directory:
