@@ -10,7 +10,7 @@ The evaluation compares AES-128 encryption using hardware-assisted CPU AES-NI an
 CUDA implementation. CTR is the primary workload; ECB provides a controlled reference for
 mode-dependent implementation behavior. Both modes process contiguous buffers under the same
 validation and measurement protocol. Three complete hardware--software configurations are
-evaluated: two Windows laptop systems and a Linux-based cloud allocation.
+evaluated: two Windows systems and a Linux-based cloud allocation.
 Table~\ref{tab:experimental_platforms} lists the recorded hardware and software. The exact model
 of the cloud host CPU was unavailable in the archived environment records.
 
@@ -33,7 +33,7 @@ of the cloud host CPU was unavailable in the archived environment records.
     Driver 610.62; CUDA runtime 12.9; CuPy 13.6.0; PyCryptodome 3.23.0 \\
     \addlinespace
     T600 &
-    Intel Core i7-11850H; T600 Laptop GPU, 4~GB; Windows 11 &
+    Intel Core i7-11850H; T600 GPU, 4~GB; Windows 11 &
     Driver 581.95; CUDA runtime 12.9; CuPy 14.2.0; PyCryptodome 3.24.1 \\
     \addlinespace
     T4 &
