@@ -1,8 +1,12 @@
 # Primary DOCX build: template copy plus shared manuscript sources. No Pandoc.
 [CmdletBinding()]
-param([string]$PythonPath = '')
+param([string]$PythonPath = '', [switch]$RenderPreview)
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+# Resolve a caller-supplied relative interpreter before changing directories.
+if ($PythonPath -and (Test-Path -LiteralPath $PythonPath)) {
+    $PythonPath = (Resolve-Path -LiteralPath $PythonPath).Path
+}
 Push-Location -LiteralPath $PSScriptRoot
 try {
     if (-not $PythonPath) {
@@ -12,6 +16,9 @@ try {
     if (-not (Get-Command $PythonPath -ErrorAction SilentlyContinue)) {
         throw 'Python was not found. See README_sjee_workflow.md for DOCX setup.'
     }
+    if (-not (Get-Command 'pdftocairo' -ErrorAction SilentlyContinue)) {
+        throw 'pdftocairo is required to embed vector figures with PNG fallbacks. Install TeX Live or Poppler.'
+    }
     & $PythonPath -c 'import docx, pylatexenc, bibtexparser, latex2mathml, mathml2omml'
     if ($LASTEXITCODE -ne 0) {
         throw 'Missing DOCX dependencies. Install requirements_docx.txt in .venv-docx.'
@@ -19,6 +26,14 @@ try {
     & $PythonPath (Join-Path $PSScriptRoot 'fill_sjee_template_docx.py')
     if ($LASTEXITCODE -ne 0) { throw "DOCX generation failed (exit $LASTEXITCODE)." }
     if (-not (Test-Path -LiteralPath 'main_sjee.docx')) { throw 'No DOCX output was created.' }
+    $report = Get-Content -LiteralPath 'build/docx/build_report.json' -Raw | ConvertFrom-Json
+    if ($report.warnings.Count -gt 0) {
+        throw ('DOCX validation reported warnings: ' + ($report.warnings -join '; '))
+    }
+    Write-Host "Validated $($report.tables) tables, $($report.figures) vector figures, $($report.equations) display equations and $($report.references) references."
+    if ($RenderPreview) {
+        & (Join-Path $PSScriptRoot 'render_sjee_docx.ps1')
+    }
     Write-Host "Built $(Join-Path $PSScriptRoot 'main_sjee.docx') from an SJEE template copy."
 }
 catch {

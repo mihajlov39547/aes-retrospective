@@ -201,14 +201,15 @@ def main():
     plt.rcParams.update({"font.size": 12, "pdf.fonttype": 42, "svg.fonttype": "none"})
     fig, axes = plt.subplots(2, 1, figsize=(6.8, 7.0), sharex=True, sharey=True)
     colors = {"gtx1650ti": "#0072B2", "t600": "#D55E00", "t4": "#009E73"}
+    markers = {"gtx1650ti": "o", "t600": "s", "t4": "^"}
     for ax, mode in zip(axes, ("ECB", "CTR")):
         for platform in PLATFORMS:
-            for scope, marker, style in (("resident", "o", "-"), ("pipeline", "s", "--")):
+            for scope, style in (("resident", "-"), ("pipeline", "--")):
                 data = [next(r for r in aggregates
                              if (r["platform"], r["mode"], r["bytes"], r["scope"])
                              == (platform, mode, size, scope)) for size in SIZES]
                 ax.plot(SIZES, [r["median"] for r in data], color=colors[platform],
-                        marker=marker, linestyle=style, linewidth=1.6, markersize=4,
+                        marker=markers[platform], linestyle=style, linewidth=1.6, markersize=4,
                         label=f"{NAMES[platform]} {scope}")
                 ax.fill_between(SIZES, [r["minimum"] for r in data],
                                 [r["maximum"] for r in data],
@@ -238,7 +239,7 @@ def main():
         r"  \caption{Paired speedup over AES-NI at 32~MiB. R: resident; P: pipeline.",
         r"  Brackets show the five-session pipeline range; the last column counts P gains.}",
         r"  \label{tab:gpu-speedups}", r"  \begin{tabular}{llrrlc}",
-        r"    \toprule", "    System & Mode & R & P & P range & P $>1$ " + chr(92)*2,
+        r"    \toprule", "    System & Mode & R & P & P range & $P>1$ " + chr(92)*2,
         r"    \midrule"]
     for platform in PLATFORMS:
         for mode in ("ECB", "CTR"):

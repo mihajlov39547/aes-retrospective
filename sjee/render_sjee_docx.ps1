@@ -15,7 +15,7 @@ New-Item -ItemType Directory -Path $review -Force | Out-Null
 $source = Join-Path $PSScriptRoot 'main_sjee.docx'
 $snapshot = Join-Path $review 'main_sjee.docx'
 [System.IO.File]::WriteAllBytes($snapshot, [System.IO.File]::ReadAllBytes($source))
-$profile = Join-Path $env:TEMP ('sjee-lo-profile-' + [guid]::NewGuid().ToString('N'))
+$profile = Join-Path $review ('lo-profile-' + [guid]::NewGuid().ToString('N'))
 $profileUri = ([System.Uri]($profile + '\')).AbsoluteUri.TrimEnd('/')
 $arguments = @(('"-env:UserInstallation=' + $profileUri + '"'), '--headless',
     '--convert-to', 'pdf:writer_pdf_Export', '--outdir', ('"' + $review + '"'),

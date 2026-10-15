@@ -20,7 +20,7 @@ consistently slower pipeline results.
   \includegraphics[width=\linewidth]{figures/aesni_gpu_scopes.pdf}
   \caption{GPU-assisted AES-128 acceleration across input sizes and encryption modes.
   Curves represent median paired speedups relative to the corresponding host AES-NI
-  implementation, with one panel per mode and a distinct color for each GPU system.
+  implementation, with one panel per mode and distinct colors and markers for each GPU system.
   Solid lines denote resident execution; dashed lines denote the prepared-buffer pipeline.
   Resident execution measures device-side computation, whereas
   the prepared-buffer pipeline includes synchronous host--device transfers and
