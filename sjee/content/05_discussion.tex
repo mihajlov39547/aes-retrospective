@@ -1,4 +1,36 @@
 
+
+% {Summary of Experimental Findings}
+
+% The experiments establish three principal findings relevant
+% to GPU-assisted bulk AES processing.
+
+% First, device-resident CUDA execution provides a consistent
+% computational advantage over the evaluated AES-NI CPU path
+% at 32~MiB on all three systems and in both tested modes.
+
+% Second, this advantage can persist when host--device transfers
+% are included. The T600 and T4 systems demonstrate repeatable
+% prepared-buffer AES-CTR improvements at 32~MiB, confirming
+% that GPU-assisted bulk processing can be beneficial under
+% specific execution conditions.
+
+% Third, the improvement is conditional. The GTX pipeline
+% does not achieve a consistently positive result, and
+% the T4 ECB measurements demonstrate that the observed
+% benefit also depends on cipher mode and host implementation
+% behavior.
+
+% Together, these findings identify experimentally supported
+% opportunities and constraints for GPU-assisted bulk AES
+% processing. They provide a basis for assessing heterogeneous cryptographic
+% processing strategies in telecommunications-oriented systems,
+% while the performance of actual packet batching, authenticated
+% encryption, and complete network processing remains outside
+% the scope of the present measurements.
+
+
+
 \section{Discussion}
 \label{sec:discussion}
 

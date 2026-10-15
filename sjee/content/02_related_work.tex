@@ -1,199 +1,120 @@
-
 \section{Related Work and Research Gap}
 \label{sec:related_work}
-
-\subsection{GPU-Based AES Acceleration}
+% Retained labels refer to this section after removal of the subsection headings.
 \label{subsec:gpu_aes_literature}
-
-The use of graphics processing units for accelerating AES has been investigated extensively,
-with research demonstrating that parallel execution can substantially increase encryption
-throughput for suitable workloads. Early contributions by Manavski~\cite{manavski2007cuda}
-and Harrison and Waldron~\cite{harrison2007aes} established the feasibility of executing
-AES on programmable GPU architectures.
-
-The potential for parallel execution depends partly on the cryptographic mode. ECB permits
-independent block transformations, while CTR permits the parallel generation of keystream
-blocks using distinct counter values~\cite{dworkin2001modes}. This property is particularly
-relevant to bulk encryption, where sufficiently large amounts of independent work can be
-distributed across GPU execution threads. Nevertheless, ECB remains unsuitable for
-protecting general structured data and is primarily useful here as a controlled performance
-reference.
-
-Subsequent research focused on improving the efficiency of GPU AES implementations.
-Iwai et al.~\cite{iwai2012acceleration} examined thread granularity, memory organization,
-and the interaction between computation and data transfers. Their CUDA implementation
-achieved approximately 35~Gbit/s for device-side AES processing and reported approximately
-22.5~Gbit/s when transfer-aware execution was considered. These findings established
-that GPU encryption performance depends not only on computational parallelism but also
-on how data are transferred and organized. Wang and Chu~\cite{wang2019gpu} investigated
-lookup-table-based AES implementations
-and GPU execution strategies, while Tezcan~\cite{tezcan2021optimization} demonstrated
-the performance benefits of shared-memory optimization and avoiding bank conflicts.
-The latter reported AES-128 encryption throughput of 878.6~Gbit/s on an NVIDIA
-RTX~2070~Super.
-
-More recent bit-sliced implementations have further increased GPU AES throughput.
-A study published in 2024~\cite{bitsliced2024gpu} reported high-performance AES-CTR
-and AES-ECB execution on desktop and embedded NVIDIA platforms. These developments
-illustrate the considerable computational potential of architecture-specific
-optimization and parallel cipher representations.
-
-However, these performance achievements do not necessarily establish the throughput
-available to a telecommunications application. Device-side encryption rates can be
-substantially different from the performance of a processing pipeline that must receive
-data, execute the cryptographic operation, and deliver the resulting output. Consequently
-high GPU AES throughput provides evidence of computational capability,
-but additional information is needed to determine whether that capability can improve
-the processing of bulk communication data under practical execution constraints.
-
-
-\subsection{Hardware-Assisted CPU Encryption and Data Movement}
 \label{subsec:cpu_gpu_comparison}
-
-Modern CPUs provide dedicated cryptographic acceleration through instructions such
-as AES-NI, which reduce the execution cost of AES transformations
-\cite{intel2012aesni}. These capabilities establish a demanding performance reference
-for applications considering GPU offloading.
-
-Lee et al.~\cite{lee2010debunking} demonstrated that conclusions about heterogeneous
-acceleration depend strongly on the optimization level of the implementations being
-evaluated. Their findings underline the importance of using an appropriately accelerated
-CPU reference rather than assuming that the performance of conventional software
-encryption represents the capability of the host processor.
-
-For bulk cryptographic processing, the costs of moving data between processors are
-also important. Gregg and Hazelwood~\cite{gregg2011data} established that meaningful
-CPU--GPU performance evaluation requires explicit consideration of data location and
-movement. A computational advantage obtained on data already resident in GPU memory
-may be reduced when input and output must cross the host--device boundary. CUDA
-programming and performance guidelines similarly emphasize minimizing unnecessary
-transfers, using appropriate synchronization, and considering overlap between data
-movement and computation~\cite{nvidiaBestPractices,harris2012overlap}. AES-specific
-research has already investigated these techniques~\cite{iwai2012acceleration}.
-
-These findings are relevant to communication infrastructure because cryptographic
-processing rarely occurs in isolation. A network-oriented system may receive data
-through a host-managed interface, organize it into processing buffers, execute
-encryption, and subsequently forward the protected output. The placement of cryptographic
-computation within this processing path influences
-whether acceleration is beneficial. For example, the usefulness of GPU processing
-may differ between a large contiguous buffer, independently aggregated messages,
-and individual latency-sensitive packets.
-
-The present study therefore distinguishes GPU execution with data already resident
-in device memory from synchronous prepared-buffer processing that includes
-host-to-device and device-to-host transfers. The latter represents a broader,
-transfer-inclusive operation, although it does not include complete network
-input/output or application processing.
-
-
-\subsection{Relevance to Telecommunications Security}
 \label{subsec:telecommunications_related_work}
-
-Telecommunications systems require cryptographic processing that balances throughput
-with latency, integrity protection, and correct management of cryptographic state.
-These requirements make the selection of an acceleration strategy more complex than
-maximizing the throughput of an isolated encryption kernel.
-
-AES-CTR is particularly relevant to this discussion because counter-mode processing
-permits independent block-level encryption~\cite{dworkin2001modes}. This property
-suggests opportunities for parallel processing of large buffers or suitably organized
-collections of independent data units.
-
-However, confidentiality-only encryption is insufficient for many secure communication
-applications. Authenticated-encryption constructions such as AES-GCM combine
-counter-mode encryption with authentication through GHASH
-\cite{dworkin2007gcm}. This distinction is important when considering protocols such as IPsec or TLS.
-An improvement in AES-CTR computation may benefit one component of an
-authenticated-encryption pipeline, but does not establish equivalent improvement
-in complete protocol processing.
-
-Practical implementations must additionally account for authentication, nonce
-management, packet preparation, synchronization, and output delivery. Furthermore,
-aggregating multiple small messages may improve the amount of work available for
-parallel execution while introducing batching and queueing latency.
-
-These considerations suggest that GPU acceleration is particularly worth investigating
-for telecommunications workloads involving substantial volumes of independent
-cryptographic processing. Possible application contexts include bulk data protection,
-traffic aggregation, and cryptographic operations within heterogeneous communication
-gateways and data-processing services. Nevertheless, the effectiveness of these
-architectural approaches cannot be inferred
-solely from peak GPU throughput. It must be assessed against the available hardware
-acceleration and the operational requirements of the intended processing path.
-
-The present investigation addresses this prerequisite through validated measurements
-of bulk AES processing. It does not claim to implement or benchmark a complete
-telecommunications security protocol.
-
-
-\subsection{Experimental Reliability and Reproducibility}
 \label{subsec:benchmarking_literature}
-
-Reliable evidence of performance improvement requires more than reporting the
-highest measured throughput.
-
-Mytkowicz et al.~\cite{mytkowicz2009wrong} demonstrated that changes in experimental
-conditions can introduce systematic bias and substantially alter performance results.
-Kalibera and Jones~\cite{kalibera2013rigorous} emphasized the importance of accounting
-for variability across multiple levels of experimental replication, while Hoefler
-and Belli~\cite{hoefler2015scientific} discussed scientifically defensible performance
-evaluation of parallel computing systems.
-
-These contributions establish a methodological foundation for determining whether
-an observed acceleration is repeatable under the tested conditions. For
-cryptographic processing, functional correctness must also be established before
-performance measurements are accepted. High throughput provides little useful
-evidence if the implementation does not produce the expected cryptographic output.
-
-The present study applies these principles through cryptographic validation,
-paired workloads, repeated study sessions, documented execution boundaries,
-and preservation of raw observations and experimental provenance. This
-approach supports the distinction between an isolated favorable measurement
-and a performance advantage observed consistently across multiple executions.
-It also allows results that favor CPU processing to be retained alongside cases
-where GPU acceleration provides an advantage.
-
-
-\subsection{Research Gap and Positioning of the Present Study}
 \label{subsec:research_gap}
 
-Previous research has demonstrated that AES can achieve substantial throughput
-on GPUs and that optimized implementations can exploit parallelism, memory
-organization, and specialized execution strategies
-\cite{iwai2012acceleration,tezcan2021optimization,bitsliced2024gpu}. The
-importance of data-transfer overhead, strong CPU references, and rigorous
-performance measurement is likewise well established
-\cite{lee2010debunking,gregg2011data,kalibera2013rigorous}. The
-remaining problem is not whether AES can be accelerated on a GPU, but how
-to identify operating conditions under which that acceleration produces a
-repeatable benefit for bulk cryptographic processing when the host already
-supports hardware-assisted encryption and data movement cannot be ignored.
+Early contributions by Manavski~\cite{manavski2007cuda} and Harrison and
+Waldron~\cite{harrison2007aes} established the feasibility of AES execution on programmable GPU
+architectures. Subsequent work investigated how parallel processing, memory organization, and
+architecture-specific optimization affect encryption throughput. The available parallelism
+depends partly on the encryption mode: ECB permits independent block transformations, while CTR
+generates keystream from distinct counter values~\cite{dworkin2001modes}. Both expose
+independent work for GPU threads when buffers are sufficiently large. ECB is unsuitable for
+protecting general structured data and serves here only as a controlled performance reference.
 
-This question is particularly relevant to telecommunications-oriented systems,
-where the processing location and organization of encryption workloads may
-influence achievable throughput and latency. Existing high-throughput kernel results do not, by themselves, establish whether
-a particular GPU configuration is suitable for such processing. Conversely,
-an unfavorable transfer-inclusive result on one system does not demonstrate
-that GPU offloading is ineffective under different workload or platform conditions.
+Iwai et al.~\cite{iwai2012acceleration} examined thread granularity, memory organization, and
+the interaction between computation and data transfers, including overlapping transfers with
+computation. Their CUDA implementation achieved approximately 35~Gbit/s for device-side AES
+processing and approximately 22.5~Gbit/s for transfer-aware execution. These results demonstrate
+that the execution boundary and transfer strategy affect the reported encryption rate. Wang and
+Chu~\cite{wang2019gpu} investigated lookup-table-based AES implementations and GPU execution
+strategies. Tezcan~\cite{tezcan2021optimization} examined shared-memory optimization and
+bank-conflict avoidance, reporting AES-128 encryption throughput of 878.6~Gbit/s on an NVIDIA
+RTX~2070~Super.
 
-The present study addresses this practical evidence gap by evaluating AES-128
-processing across three heterogeneous computing configurations using a common
-validation and measurement protocol. The evaluation considers ECB and CTR workloads of different sizes, with
-hardware-assisted CPU AES-NI serving as the reference for determining whether
-GPU processing offers an additional benefit. A distinction is maintained between device-resident execution and a synchronous
-prepared-buffer pipeline that includes the measured host--device transfers.
-Session-level measurements are preserved to determine whether observed
-improvements remain consistent across repeated executions.
+More recent work has explored bit-sliced cipher representations. A 2024
+study~\cite{bitsliced2024gpu} reported high-performance AES-CTR and AES-ECB execution on desktop
+and embedded NVIDIA platforms. Together, these studies demonstrate the computational
+capabilities of optimized GPU implementations. Their reported rates must nevertheless be
+interpreted within their respective measurement boundaries: device-side encryption throughput
+does not directly specify the rate at which an application can receive, encrypt, and deliver
+data. It also does not establish whether offloading improves performance relative to the host
+processor available in a particular system.
 
-The principal contribution is the identification of experimentally supported
-conditions in which GPU-assisted bulk AES processing provides an advantage,
-together with evidence of the constraints under which that advantage disappears
-or becomes inconsistent. Rather than proposing a new cryptographic primitive or claiming state-of-the-art
-GPU throughput, the study provides an empirical basis for assessing the
-feasibility of GPU-assisted AES processing in heterogeneous telecommunications
-architectures.
+That comparison depends on the CPU implementation. Dedicated instructions such as AES-NI reduce
+the cost of AES transformations~\cite{intel2012aesni} and provide a hardware-assisted baseline
+for evaluating GPU offloading. Lee et al.~\cite{lee2010debunking} demonstrated that conclusions
+about heterogeneous acceleration depend strongly on the optimization level of the
+implementations being evaluated. Their findings support using an appropriately accelerated CPU
+reference when deciding whether GPU offloading offers an additional processing benefit.
+Accordingly, comparing GPU encryption with conventional unaccelerated software cannot establish
+an advantage over the host's hardware-assisted AES path. The reference must represent the
+execution path against which an offloading decision will actually be made, and the comparison
+remains specific to the implementations evaluated.
 
-Its findings can inform the design of future bulk encryption and workload-placement
-strategies, while the performance of complete authenticated-encryption and network
-processing pipelines remains a separate application-level question.
+Data location further determines which costs enter that decision. Gregg and
+Hazelwood~\cite{gregg2011data} showed that CPU--GPU performance evaluation requires explicit
+consideration of data movement. An advantage for device-resident input may shrink when both
+input and output cross the host--device boundary. CUDA guidance recommends minimizing
+unnecessary transfers, using appropriate synchronization, and considering overlap between
+communication and computation~\cite{nvidiaBestPractices,harris2012overlap}. The transfer-aware
+AES work of Iwai et al.~\cite{iwai2012acceleration} demonstrates that this concern is already
+established in GPU cryptographic processing.
+
+For communication infrastructure, these findings connect encryption performance to the
+surrounding processing path. A host-managed interface may receive data, organize buffers, invoke
+encryption, and forward the output. The resulting costs differ between contiguous buffers,
+aggregated independent messages, and individual latency-sensitive packets. Device-resident
+measurements and transfer-inclusive measurements therefore answer different questions. The
+present study distinguishes resident execution from a synchronous prepared-buffer pipeline
+containing host-to-device and device-to-host transfers. This pipeline measures a broader
+operation than the kernel alone, but excludes complete network input/output and application
+processing; it also does not evaluate transfer--computation overlap.
+
+Telecommunications security adds requirements beyond encryption throughput. AES-GCM combines
+counter-mode encryption with GHASH authentication~\cite{dworkin2007gcm}; an improvement in
+AES-CTR can therefore concern one component of an authenticated-encryption pipeline without
+establishing an equivalent improvement in IPsec or TLS processing. Practical implementations
+must also account for nonce management, packet preparation, synchronization, and output
+delivery. These requirements distinguish a bulk encryption benchmark from a complete security
+service, even when the underlying cipher operations are parallelizable.
+
+Workload aggregation introduces a further throughput--latency trade-off. Combining small
+messages may increase the work available to the GPU, while waiting for a batch adds queueing
+delay. Bulk data protection, traffic aggregation, heterogeneous communication gateways, and
+data-processing services are consequently possible application contexts, but their suitability
+depends on host acceleration, data placement, and operational requirements. Peak kernel rates
+alone cannot determine that suitability. The present measurements characterize contiguous bulk
+buffers and do not demonstrate packet batching or complete telecommunications protocol
+performance.
+
+Assessing whether an observed advantage is repeatable also requires control of experimental
+variability. Mytkowicz et al.~\cite{mytkowicz2009wrong} showed that experimental conditions can
+introduce systematic bias and alter performance results. Kalibera and
+Jones~\cite{kalibera2013rigorous} emphasized the importance of accounting for variability across
+multiple levels of experimental replication, while Hoefler and
+Belli~\cite{hoefler2015scientific} discussed scientifically defensible performance evaluation of
+parallel computing systems. These contributions provide a methodological basis for determining
+whether an acceleration is repeatable under the conditions tested. These studies motivate
+reporting repeated observations and their execution context rather than relying on the highest
+throughput measurement. For cryptographic workloads, functional correctness must additionally be
+verified before timings are accepted as evidence of encryption performance.
+
+The present evaluation applies these principles through cryptographic validation, paired
+workloads, repeated study sessions, documented timing boundaries, and preservation of raw
+observations and experimental provenance. Session-level evidence distinguishes isolated
+favorable measurements from advantages observed consistently across executions, while retaining
+outcomes that favor the CPU. Detailed procedures and aggregation equations are given in
+Section~\ref{sec:methodology}.
+
+The literature thus establishes GPU AES feasibility, optimization techniques, and the need to
+account for transfers, CPU acceleration, and measurement variability. The question addressed
+here is which operating conditions produce a repeatable bulk-processing benefit when the host
+already supports hardware-assisted encryption. High kernel throughput alone cannot answer this
+question, and an unfavorable transfer-inclusive result on one system cannot settle it for other
+platforms or workloads.
+
+To examine these conditions, the study compares AES-128 ECB and CTR workloads of different sizes
+across three heterogeneous configurations under a common validation and measurement protocol.
+The comparison uses hardware-assisted CPU AES-NI as its reference and retains session-level
+measurements for assessing consistency across repeated executions. Its contribution is the
+identification of experimentally supported operating conditions in which GPU-assisted bulk AES
+processing provides an advantage, together with evidence of constraints under which that
+advantage disappears or becomes inconsistent. This supports assessment of GPU-assisted bulk
+encryption and workload placement within the tested execution boundaries. Extending those
+findings to authenticated encryption and network processing requires separate application-level
+measurements.
