@@ -197,33 +197,38 @@ def main():
                 checks.append(dict(claim=f"{platform} {mode} {scope} local-dip sessions",
                                    computed=dips, displayed=str(dips)))
 
-    # One focused, vector figure: same-session estimates, no raw pooling or v1 curves.
-    plt.rcParams.update({"font.size": 11, "pdf.fonttype": 42, "svg.fonttype": "none"})
-    fig, axes = plt.subplots(3, 2, figsize=(7.0, 8.5), sharex=True, sharey=True)
-    colors = {"resident": "#0072B2", "pipeline": "#D55E00"}
-    for i, platform in enumerate(PLATFORMS):
-        for j, mode in enumerate(("ECB", "CTR")):
-            ax = axes[i, j]
+    # Two mode panels: platform colors and execution-scope line styles.
+    plt.rcParams.update({"font.size": 12, "pdf.fonttype": 42, "svg.fonttype": "none"})
+    fig, axes = plt.subplots(2, 1, figsize=(6.8, 7.0), sharex=True, sharey=True)
+    colors = {"gtx1650ti": "#0072B2", "t600": "#D55E00", "t4": "#009E73"}
+    for ax, mode in zip(axes, ("ECB", "CTR")):
+        for platform in PLATFORMS:
             for scope, marker, style in (("resident", "o", "-"), ("pipeline", "s", "--")):
-                data = [next(r for r in aggregates if (r["platform"], r["mode"], r["bytes"], r["scope"])
+                data = [next(r for r in aggregates
+                             if (r["platform"], r["mode"], r["bytes"], r["scope"])
                              == (platform, mode, size, scope)) for size in SIZES]
-                ax.plot(SIZES, [r["median"] for r in data], color=colors[scope], marker=marker,
-                        linestyle=style, linewidth=1.4, markersize=4, label=scope.capitalize())
-                ax.fill_between(SIZES, [r["minimum"] for r in data], [r["maximum"] for r in data],
-                                color=colors[scope], alpha=.14, linewidth=0)
-            ax.axhline(1, color=".35", linestyle=":", linewidth=1)
-            ax.set_xscale("log", base=2)
-            ax.set_yscale("log")
-            ax.set_ylim(.01, 20)
-            ax.set_title(f"{NAMES[platform]} / {mode}", fontsize=11)
-            ax.grid(alpha=.15)
-            if j == 0:
-                ax.set_ylabel("AES-NI / GPU time")
-            ax.set_xticks(SIZES, ["1 KiB", "16 KiB", "1 MiB", "16 MiB", "32 MiB"],
-                          rotation=60, ha="right", fontsize=9)
-            ax.tick_params(axis="x", labelbottom=True)
-    axes[0, 0].legend(fontsize=9, loc="upper left")
-    fig.subplots_adjust(left=.12, right=.985, bottom=.085, top=.965, hspace=.70, wspace=.20)
+                ax.plot(SIZES, [r["median"] for r in data], color=colors[platform],
+                        marker=marker, linestyle=style, linewidth=1.6, markersize=4,
+                        label=f"{NAMES[platform]} {scope}")
+                ax.fill_between(SIZES, [r["minimum"] for r in data],
+                                [r["maximum"] for r in data],
+                                color=colors[platform], alpha=.09, linewidth=0)
+        ax.axhline(1, color=".35", linestyle=":", linewidth=1)
+        ax.set_xscale("log", base=2)
+        ax.set_yscale("log")
+        ax.set_ylim(.01, 20)
+        ax.set_title(f"AES-128 {mode}", loc="left", fontsize=12)
+        ax.grid(alpha=.15)
+        ax.set_ylabel("AES-NI / GPU time")
+        ax.set_xticks(SIZES, ["1 KiB", "16 KiB", "1 MiB", "16 MiB", "32 MiB"],
+                      rotation=35, ha="right", fontsize=10)
+        ax.tick_params(axis="x", labelbottom=True)
+        ax.spines[["top", "right"]].set_visible(False)
+    axes[-1].set_xlabel("Input size")
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="upper center", ncol=3, frameon=False,
+               fontsize=10, bbox_to_anchor=(.55, .995), columnspacing=1.2)
+    fig.subplots_adjust(left=.14, right=.98, bottom=.12, top=.85, hspace=.48)
     fig.savefig(OUT / "aesni_gpu_scopes.pdf", metadata={"CreationDate": None, "ModDate": None})
     fig.savefig(OUT / "aesni_gpu_scopes.png", dpi=240)
     plt.close(fig)

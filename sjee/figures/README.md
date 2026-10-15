@@ -27,6 +27,10 @@ medians, and ranges. `bulk_throughput.png` is the preview. All outputs stay in
 
 The manuscript uses `aesni_gpu_scopes.pdf`, a vector plot of the retained CUDA
 path versus AES-NI. `aesni_gpu_scopes.png` is its high-resolution preview.
+The two panels show ECB and CTR, each combining all three systems. Blue denotes
+GTX, orange T600, and green T4; solid lines with circles show resident execution,
+and dashed lines with squares show the pipeline. The shared legend identifies
+all six curves. Shading retains the observed five-session ranges.
 Neither the software-only CPU nor optimized-v1 curves are included.
 
 Regenerate from the repository root with:
