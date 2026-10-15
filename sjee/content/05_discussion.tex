@@ -2,9 +2,6 @@
 \label{sec:discussion}
 
 \subsection{Interpretation of Experimental Findings}
-\label{subsec:discussion_bulk_processing}
-% Retained label for the constraints discussion merged into this theme.
-\label{subsec:discussion_constraints}
 
 The experiments show that GPU-assisted AES-CTR acceleration can persist beyond isolated kernel
 execution when synchronous host--device transfers and synchronization are included. The positive
@@ -40,9 +37,6 @@ outcomes, rather than peak kernel throughput or a single favorable observation. 
 establish that 32~MiB is optimal or that larger buffers would necessarily improve performance.
 
 \subsection{Practical Implications and Generalizability}
-\label{subsec:discussion_telecommunications}
-% Retained label for the IPsec discussion incorporated into this theme.
-\label{subsec:discussion_ipsec}
 
 For telecommunications, the findings provide a basis for evaluating GPU-assisted bulk encryption
 in communication gateways and server-side data-protection services. Systems already handling
@@ -91,7 +85,6 @@ smaller or latency-sensitive requests and considering GPU execution for bulk wor
 untested design implication.
 
 \subsection{Study Limitations}
-\label{subsec:discussion_validity}
 
 Each configuration represents one host or cloud allocation with five study sessions. The
 observations establish repeatability within those environments, not performance across a
@@ -110,7 +103,6 @@ intervals or formal significance tests. These limits constrain both causal expla
 predictions of performance beyond the tested execution paths.
 
 \subsection{Future Research}
-\label{subsec:discussion_future}
 
 Three extensions follow directly from the measured acceleration and its constraints.
 

@@ -1,10 +1,5 @@
 \section{Methodology}
 \label{sec:methodology}
-% Former subsection labels are retained as section-level aliases.
-\label{subsec:experimental_platform}
-\label{subsec:experimental_design}
-\label{subsec:measurement_boundaries}
-\label{subsec:statistical_analysis}
 
 The evaluation compares AES-128 encryption using hardware-assisted CPU AES-NI and a validated
 CUDA implementation. CTR is the primary workload; ECB provides a controlled reference for
@@ -88,7 +83,6 @@ The experiment uses five input sizes:
 \begin{equation}
   N \in \{1~\mathrm{KiB},\,16~\mathrm{KiB},\,1~\mathrm{MiB},
   \,16~\mathrm{MiB},\,32~\mathrm{MiB}\}.
-  \label{eq:workload_sizes}
 \end{equation}
 
 Corresponding CPU and GPU executions use deterministic input generation and matching plaintext,
@@ -101,7 +95,6 @@ giving
 
 \begin{equation}
   3 \times 5 \times 30 \times 20 = 9\,000
-  \label{eq:observation_count}
 \end{equation}
 
 raw timing observations across the three systems. Workload sizes execute in ascending order,
@@ -137,7 +130,6 @@ before the timed interval. Its processing stages are represented as
   T_{\mathrm{kernel}} +
   T_{\mathrm{D2H}} +
   T_{\mathrm{overhead}},
-  \label{eq:gpu_pipeline_components}
 \end{equation}
 
 where H2D and D2H denote host-to-device and device-to-host transfers, and the final term covers
@@ -160,7 +152,6 @@ of session $s$, throughput in decimal MB/s is
 
 \begin{equation}
   R_{s,r} = \frac{N}{10^6 T_{s,r}},
-  \label{eq:throughput}
 \end{equation}
 
 Input sizes use binary KiB and MiB units. Time and throughput medians are calculated
@@ -174,7 +165,6 @@ independently within each session, then aggregated across the five session estim
   \widetilde{R} =
   \operatorname{median}_{s}
   \left(\operatorname{median}_{r} R_{s,r}\right).
-  \label{eq:study_estimates}
 \end{equation}
 
 Throughput is summarized from the recorded per-repetition throughput values rather than obtained
@@ -188,7 +178,6 @@ acceleration is calculated from the paired session-level timing medians:
   \qquad
   \widetilde{S} =
   \operatorname{median}_{s=1,\ldots,5}(S_s).
-  \label{eq:study_speedup}
 \end{equation}
 
 Here, $\widetilde{T}_{\mathrm{AES\mbox{-}NI},s}$ and $\widetilde{T}_{\mathrm{GPU},s}$ denote
