@@ -1,35 +1,18 @@
-
 \section{Methodology}
 \label{sec:methodology}
-
-The experimental methodology is designed to determine under which operating conditions
-GPU-assisted AES processing can improve bulk encryption throughput while accounting for
-the overhead associated with accelerator execution. The evaluation focuses on AES-128
-encryption, using hardware-assisted CPU AES-NI as the reference and a validated CUDA
-implementation as the alternative processing path.
-
-The methodology follows a validation-first approach that combines cryptographic
-correctness checks, controlled input workloads, explicitly defined timing boundaries,
-repeated measurements, and independent verification of the resulting data. Its purpose
-is to identify reproducible acceleration conditions rather than to establish the
-maximum theoretical throughput of either processor architecture.
-
-The experimental workloads represent contiguous encryption buffers of different sizes.
-They are intended to characterize the computational behavior relevant to bulk data
-processing, not to reproduce a complete telecommunications protocol or network
-packet-processing pipeline.
-
-
-\subsection{Experimental Platforms and Implementations}
+% Former subsection labels are retained as section-level aliases.
 \label{subsec:experimental_platform}
+\label{subsec:experimental_design}
+\label{subsec:measurement_boundaries}
+\label{subsec:statistical_analysis}
 
-Three heterogeneous computing configurations were selected to investigate whether
-GPU-assisted AES processing can provide measurable benefits across different
-hardware and software environments.
-
-The configurations include two laptop systems equipped with NVIDIA GPUs and one
-Linux-based cloud environment using an NVIDIA Tesla T4. Their characteristics
-are summarized in Table~\ref{tab:experimental_platforms}.
+The evaluation compares AES-128 encryption using hardware-assisted CPU AES-NI and a validated
+CUDA implementation. CTR is the primary workload; ECB provides a controlled reference for
+mode-dependent implementation behavior. Both modes process contiguous buffers under the same
+validation and measurement protocol. Three complete hardware--software configurations are
+evaluated: two Windows laptop systems and a Linux-based cloud allocation.
+Table~\ref{tab:experimental_platforms} lists the recorded hardware and software. The exact model
+of the cloud host CPU was unavailable in the archived environment records.
 
 \begin{table}[htbp]
   \centering
@@ -62,61 +45,45 @@ are summarized in Table~\ref{tab:experimental_platforms}.
   \end{tabularx}
 \end{table}
 
-The two laptop configurations represent accessible GPU-equipped computing systems,
-while the T4 provides a datacenter-oriented environment. The exact model of the
-cloud host CPU was not available in the archived environment records. Each
-configuration is treated as a complete hardware--software system. Differences
-in observed performance cannot be attributed solely to the GPU, operating system,
-processor generation, driver, or cryptographic library because these characteristics
-were not independently controlled.
-
 The CPU reference uses PyCryptodome with hardware-assisted AES-NI explicitly enabled
-\cite{pycryptodome,intel2012aesni}. Native backend initialization was checked for
-both evaluated encryption modes. This supports the intended use of AES-NI, although
-it does not constitute a direct trace of executed processor instructions. The
-GPU implementation is the validated CUDA kernel archived as
-\texttt{cuda\_baseline}, executed through CuPy's custom kernel interface
-\cite{cupyRawKernel}. The kernel assigns one 16-byte AES block to each CUDA
-thread, with 128 threads per CUDA block.
+\cite{pycryptodome,intel2012aesni}. Native backend initialization was checked for both modes;
+executed processor instructions were not traced directly. The GPU path uses the validated
+\texttt{cuda\_baseline} kernel through CuPy's custom kernel interface \cite{cupyRawKernel}. Each
+CUDA thread processes one 16-byte AES block, with 128 threads per CUDA block. These paths are
+selected from a broader campaign that evaluated additional implementations. The analysis retains
+their original execution context, including interleaved jobs excluded from the selected results.
 
-This organization allows independent AES blocks to be distributed across GPU
-execution threads. It provides a controlled implementation for evaluating bulk
-encryption, but is not claimed to represent the highest attainable CUDA AES
-throughput. The selected CPU AES-NI and CUDA execution paths originate from a broader
-experimental campaign that also evaluated additional implementations. The
-present analysis retains only the paths relevant to the stated research objective.
+Cryptographic validation precedes acceptance of timing measurements. Known-answer tests and
+consistency checks against CPU reference operations use the AES specification and mode
+definitions \cite{nist2023aes,dworkin2001modes}. The archived records document successful CUDA
+execution and agreement with expected outputs. Executions failing the required checks are
+excluded from valid performance results. Experimental configuration, measurement-record
+completeness, and source-code identity are also verified.
 
+The archived harness validates each measured output against the CPU reference outside the timed
+call, in addition to the initial validation gate. An output mismatch stops performance export.
+For each size, mode, and repetition, a single synthetic message is replayed across the paired
+backends. Plaintext and a 16-byte key are generated from the seeded random generator. The
+initial CTR block consists of eight generated bytes followed by eight zero bytes. The CPU CTR
+call uses an empty nonce and interprets the full initial counter as a big-endian integer.
 
-\subsection{Cryptographic Validation and Workload Design}
-\label{subsec:experimental_design}
+Pair identifiers record size, mode, and repetition. A SHA-256 digest of the concatenated key,
+counter, and plaintext records the common input material. Raw records also retain the session
+identifier, seed, backend, mode, measurement scope, job order, global execution order, and
+validation flag. These fields allow the selected CPU and GPU observations to be matched without
+pooling observations from different sessions. Previous output buffers are released outside the
+next timed call.
 
-Functional correctness is established before performance measurements are
-accepted for analysis. This requirement ensures that observed throughput
-corresponds to a valid implementation of the intended AES transformation.
+The retained dataset is checked against the archived file hashes. For each platform, mode, size,
+and repetition, the selected observations contain one CPU transformation, one resident GPU
+measurement, and one pipeline measurement with matching input digests. Each configuration group
+contains all twenty recorded repetitions. Throughput is independently checked against the
+corresponding byte count and recorded time before session-level aggregation. Resident records
+specify one kernel iteration, and the GPU records identify pinned host memory. The verification
+reconstructs the aggregates from raw records rather than relying solely on the saved summary
+tables.
 
-Validation includes known-answer tests and consistency checks against CPU
-reference operations, using the AES specification and the definitions of
-the evaluated encryption modes \cite{nist2023aes,dworkin2001modes}. The
-archived validation records document successful CUDA execution and
-agreement with the expected cryptographic outputs. A failure of the required
-checks prevents the corresponding execution from being accepted as a valid
-performance result.
-
-Correctness validation is complemented by verification of experimental
-configuration, completeness of measurement records, and source-code identity.
-Passing cryptographic test vectors does not independently establish that
-a timing method is free from measurement bias. The experiment evaluates
-AES-128 encryption in Electronic Codebook (ECB) and Counter (CTR) modes.
-
-CTR is the principal mode of interest because independent counter blocks
-can be encrypted in parallel, providing a computational structure suitable
-for GPU-assisted bulk processing \cite{dworkin2001modes}. ECB
-is retained as a controlled reference for independent AES block
-transformations. Its inclusion supports analysis of mode-dependent
-implementation behavior and must not be interpreted as a recommendation
-to use ECB for general application data.
-
-Five input sizes were evaluated:
+The experiment uses five input sizes:
 
 \begin{equation}
   N \in \{1~\mathrm{KiB},\,16~\mathrm{KiB},\,1~\mathrm{MiB},
@@ -124,81 +91,45 @@ Five input sizes were evaluated:
   \label{eq:workload_sizes}
 \end{equation}
 
-The selected sizes span small encryption requests and larger contiguous
-buffers suitable for examining bulk-processing throughput.
-
-These workloads are not equivalent to individual telecommunications
-packets. In particular, processing a 32~MiB buffer does not demonstrate
-that independently received network packets can be grouped and encrypted
-with the same throughput or latency. Corresponding CPU and GPU executions
-use deterministic input generation
-and matching cryptographic parameters, including plaintext, encryption
-key, and mode-specific values.
-
-The experiments use five study sessions per platform with random seeds
-2003--2007. Each measured configuration includes five warm-up executions
-followed by twenty recorded timing repetitions. Warm-up operations are
-excluded from the reported timing records.
-
-The selected analysis contains thirty measured configuration groups per
-session, with twenty observations per group. Consequently, each session
-contributes 600 observations, giving
+Corresponding CPU and GPU executions use deterministic input generation and matching plaintext,
+encryption keys, and mode-specific parameters. Each platform has five study sessions with random
+seeds 2003--2007. For each measured configuration, five warm-up executions precede twenty
+recorded repetitions; warm-ups are excluded from the timing records. Each session contains
+thirty selected configuration groups, comprising two modes, five sizes, and three execution
+boundaries. With twenty observations per group, each session contributes 600 observations,
+giving
 
 \begin{equation}
   3 \times 5 \times 30 \times 20 = 9\,000
   \label{eq:observation_count}
 \end{equation}
 
-raw timing observations across the three systems.
+raw timing observations across the three systems. Workload sizes execute in ascending order,
+while mode and backend/\allowbreak measurement-scope jobs are shuffled using the session seed.
+Benchmark jobs run sequentially. The selected observations were extracted from the existing
+campaign, without rerunning or reordering the benchmark schedule.
 
-Workload sizes are executed in ascending order, while mode and
-backend/\allowbreak measurement-scope jobs are shuffled according to the session
-seed. Benchmark jobs execute sequentially rather than concurrently.
-
-The retained observations preserve their original execution context,
-including interleaved jobs excluded from the present analysis. This
-distinction is important because the selected subset was extracted
-from an existing experimental campaign rather than generated through
-a newly executed benchmark schedule.
-
-
-\subsection{GPU Processing Paths and Measurement Boundaries}
-\label{subsec:measurement_boundaries}
-
-To determine whether GPU acceleration provides a practical processing
-benefit, the methodology distinguishes computational execution from
-the additional work required to move data through the accelerator.
-
-Three timing boundaries are evaluated.
+Three timing boundaries are retained:
 
 \begin{enumerate}
-
-  \item \textbf{CPU AES-NI transformation.}
-  Measures the host encryption call using the hardware-accelerated
-  CPU library path. The interval includes output allocation performed
-  by the encryption call but excludes cipher construction and key setup.
-
-  \item \textbf{GPU resident execution.}
-  Measures a single CUDA kernel launch operating on data already present
-  in device memory. The interval is measured using CUDA events and
-  excludes host-to-device and device-to-host transfers.
-
-  \item \textbf{Prepared-buffer GPU pipeline.}
-  Measures the synchronous host-driven processing sequence consisting
-  of host-to-device transfer, CUDA kernel execution, device-to-host
-  transfer, and the synchronization required to complete these operations.
-
+  \item \textbf{CPU AES-NI transformation.} The interval measures the host encryption call,
+    including output allocation performed by that call. Cipher construction and key setup are
+    excluded.
+  \item \textbf{GPU resident execution.} CUDA events measure a single kernel launch with input
+    already in device memory. Host-to-device and device-to-host transfers are excluded.
+  \item \textbf{Prepared-buffer GPU pipeline.} The interval measures the synchronous host-driven
+    sequence of host-to-device transfer, CUDA kernel execution, device-to-host transfer, and
+    synchronization required to complete these operations.
 \end{enumerate}
 
-CPU execution and the GPU pipeline are timed using Python's monotonic
-high-resolution \texttt{time.perf\_counter\_ns()} interface. GPU resident
-execution uses CUDA event timing with the required synchronization,
-following CUDA and CuPy measurement guidance
-\cite{nvidiaBestPractices,cupyPerformance}.
+CPU execution and the GPU pipeline are timed with Python's monotonic high-resolution
+\texttt{time.perf\_counter\_ns()} interface. Resident execution uses CUDA event timing with the
+required synchronization, following CUDA and CuPy measurement guidance
+\cite{nvidiaBestPractices,cupyPerformance}. Thus, the CPU and pipeline intervals are measured
+from the host, while the resident interval measures device-side execution.
 
-The prepared-buffer pipeline uses pinned host memory and preallocated
-device buffers. These resources are prepared before the timed interval. The
-measured GPU processing sequence can be represented conceptually as
+The prepared-buffer pipeline uses pinned host memory and preallocated device buffers, prepared
+before the timed interval. Its processing stages are represented as
 
 \begin{equation}
   T_{\mathrm{pipeline}} =
@@ -209,56 +140,31 @@ measured GPU processing sequence can be represented conceptually as
   \label{eq:gpu_pipeline_components}
 \end{equation}
 
-where H2D and D2H denote the host-to-device and device-to-host stages,
-respectively, and the final term represents additional costs within
-the measured execution boundary. This expression illustrates the relevant processing stages rather
-than a decomposition calculated from separately aggregated measurements.
+where H2D and D2H denote host-to-device and device-to-host transfers, and the final term covers
+additional costs within the measured boundary. This expression describes the stages of the
+synchronous operation; it is not a decomposition calculated by adding separately aggregated
+component measurements. Recorded transfer-component intervals include synchronization effects
+and are not isolated measurements of physical PCIe transmission time.
 
-The pipeline excludes GPU compilation, memory allocation and pinning,
-initial host-side input staging, key preparation, and application-level
-input/output. It does not implement overlapping transfers and computation
-through multiple asynchronous CUDA streams. Consequently, its timing is
-broader than device-resident kernel timing,
-but it does not represent the complete execution of a telecommunications
-application.
+GPU compilation, memory allocation and pinning, initial host-side input staging, key
+preparation, and application-level input/output are excluded from the pipeline interval.
+Transfers and computation are not overlapped using multiple asynchronous CUDA streams. Resident
+execution and prepared-buffer processing are measured separately, with the latter including the
+movement needed to process a host-resident buffer and return its output. No network
+input/output, packet aggregation, or authenticated-encryption operation is included in these
+measurements.
 
-The distinction is particularly important for assessing potential
-acceleration. A GPU kernel may achieve higher computational throughput
-while the additional transfer and synchronization costs reduce or
-eliminate the advantage when a complete buffer must move between
-host and device. Conversely, applications in which input data are already available
-in device memory may have different processing costs. The study
-measures these execution scenarios separately rather
-than treating kernel throughput as a substitute for broader
-processing performance. Recorded transfer-component intervals include synchronization effects.
-They therefore cannot be interpreted as isolated measurements of
-physical PCIe transmission time.
-
-
-\subsection{Performance Metrics and Statistical Analysis}
-\label{subsec:statistical_analysis}
-
-The principal performance metrics are elapsed processing time,
-throughput, and the relative acceleration achieved by the selected
-GPU execution path.
-
-For an input of $N$ bytes and elapsed time $T_{s,r}$ measured in
-seconds during repetition $r$ of session $s$, throughput is
+Elapsed processing time, throughput, and host-relative GPU acceleration are summarized at
+session level. For an input of $N$ bytes and elapsed time $T_{s,r}$ in seconds at repetition $r$
+of session $s$, throughput in decimal MB/s is
 
 \begin{equation}
   R_{s,r} = \frac{N}{10^6 T_{s,r}},
   \label{eq:throughput}
 \end{equation}
 
-where throughput is expressed in decimal megabytes per second
-(MB/s). Input sizes are reported using binary KiB and MiB units.
-
-To account for repeated observations and session-level variation,
-the analysis uses hierarchical aggregation.
-
-First, the median elapsed time and throughput are calculated
-independently within each session. The principal aggregate
-statistics are then calculated across the five session estimates:
+Input sizes use binary KiB and MiB units. Time and throughput medians are calculated
+independently within each session, then aggregated across the five session estimates:
 
 \begin{equation}
   \widetilde{T} =
@@ -271,10 +177,9 @@ statistics are then calculated across the five session estimates:
   \label{eq:study_estimates}
 \end{equation}
 
-Throughput is summarized directly from the recorded throughput
-observations rather than calculated by inverting the aggregated
-latency statistic. The acceleration factor is based on the ratio of corresponding
-session-level timing medians:
+Throughput is summarized from the recorded per-repetition throughput values rather than obtained
+by inverting the aggregated latency statistic. For the corresponding CPU and GPU executions,
+acceleration is calculated from the paired session-level timing medians:
 
 \begin{equation}
   S_s =
@@ -286,24 +191,22 @@ session-level timing medians:
   \label{eq:study_speedup}
 \end{equation}
 
-A value greater than one indicates that the measured GPU path
-completes the corresponding operation faster than the host
-AES-NI reference. A value below one indicates that the CPU reference is faster.
+Here, $\widetilde{T}_{\mathrm{AES\mbox{-}NI},s}$ and $\widetilde{T}_{\mathrm{GPU},s}$ denote
+within-session median times for the same platform, mode, and input size. GPU resident and
+pipeline speedups are calculated separately against the corresponding AES-NI time. Values of
+$S_s>1$ indicate a faster GPU path, while values below one indicate a faster CPU reference. The
+reported $\widetilde{S}$ is the median of five paired ratios, not a ratio of independently
+aggregated CPU and GPU throughput values.
 
-The reported acceleration factor is the median of paired
-session-level timing ratios, not the ratio of independently
-aggregated CPU and GPU throughput values. The study additionally reports session ranges, interquartile
-ranges, coefficients of variation, and the number of sessions
-supporting a particular performance advantage.
+The analysis reports session ranges, interquartile ranges, sample coefficients of variation, and
+counts of sessions with $S_s>1$. For five ordered session estimates, the interquartile range is
+the fourth minus the second value; the sample coefficient of variation is the sample standard
+deviation divided by the mean. An advantage in every session is recorded as $5/5$ directional
+consistency. These are descriptive statistics, not confidence intervals or formal significance
+tests. The twenty repetitions within a session are not treated as independent sessions, and
+measurements are not removed merely because they appear extreme.
 
-An observed advantage in all five sessions is reported as
-$5/5$ directional consistency. This indicates repeatability
-within the recorded sessions but does not constitute a formal
-statistical significance test. The twenty repetitions within each session are not treated
-as twenty independent experimental sessions. Measurements
-are not excluded merely because they appear extreme.
-
-This approach follows established recommendations concerning
-the influence of experimental conditions and hierarchical
-variability on computer-system performance measurements
-\cite{mytkowicz2009wrong,kalibera2013rigorous,hoefler2015scientific}.
+The use of repeated sessions, paired workloads, and documented execution conditions follows
+recommendations on experimental bias and hierarchical variability in performance measurement
+\cite{mytkowicz2009wrong,kalibera2013rigorous,hoefler2015scientific}. Raw observations and their
+provenance are retained for verification of the session estimates and acceleration calculations.

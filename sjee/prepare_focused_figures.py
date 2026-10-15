@@ -239,9 +239,15 @@ def main():
         for mode in ("ECB", "CTR"):
             r, p = [next(x for x in aggregates if (x["platform"], x["mode"], x["bytes"], x["scope"])
                          == (platform, mode, 33554432, scope)) for scope in ("resident", "pipeline")]
-            lines.append(f"    {NAMES[platform]} & {mode} & {r['median']:.3f} & {p['median']:.3f} & "
-                         f"[{p['minimum']:.3f}, {p['maximum']:.3f}] & {p['wins']}/5 " + r"\\")
-    lines += [r"    \bottomrule", r"  \end{tabular}", r"\end{table}"]
+            median, wins = f"{p['median']:.3f}", f"{p['wins']}/5"
+            if p['wins'] == 5:
+                median, wins = [r"\textbf{" + v + "}" for v in (median, wins)]
+            lines.append(f"    {NAMES[platform]} & {mode} & {r['median']:.3f} & {median} & "
+                         f"[{p['minimum']:.3f}, {p['maximum']:.3f}] & {wins} " + r"\\")
+    lines += [r"    \bottomrule", r"  \end{tabular}", r"  \par\smallskip",
+        r"  \parbox{\linewidth}{\footnotesize Bold pipeline medians and counts indicate",
+        r"  acceleration in all five sessions. Resident execution is faster in all five sessions",
+        r"  for every row.}", r"\end{table}"]
     (ROOT / "content/focused_results_table.tex").write_bytes(("\n".join(lines)+"\n").encode())
     provenance = dict(selection="cpu_aesni transform + cuda_baseline resident/pipeline; AES-128 ECB/CTR",
         original_campaign_rows=18000, selected_rows=9000, seeds=SEEDS, repeats=20, warmup=5,

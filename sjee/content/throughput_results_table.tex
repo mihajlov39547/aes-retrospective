@@ -1,0 +1,19 @@
+\begin{table}[htbp]
+  \centering
+  \small
+  \caption{GPU throughput at 32~MiB in decimal MB/s. Values are medians of
+  five session-level throughput medians.}
+  \label{tab:gpu-throughput}
+  \begin{tabular}{llrr}
+    \toprule
+    System & Mode & Resident & Pipeline \\
+    \midrule
+    GTX & ECB & 4797.6 & 1207.8 \\
+    GTX & CTR & 4585.6 & 1188.9 \\
+    T600 & ECB & 4451.1 & 1997.8 \\
+    T600 & CTR & 4328.9 & 2049.4 \\
+    T4 & ECB & 9176.9 & 3713.0 \\
+    T4 & CTR & 9166.8 & 3713.9 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
