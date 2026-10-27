@@ -172,7 +172,7 @@ be added as if they described a single observation.
 \centering\small
 \caption{Tesla T4 Phase 2, 32 independent 1~MiB pages: separately summarized timings (five session medians).}
 \label{tab:page-32-components}
-\begin{tabular}{@{}lr@{}}\toprule
+\begin{tabularx}{\linewidth}{@{}Xr@{}}\toprule
 Measurement boundary & Approximate time (ms)\\\midrule
 Native OpenSSL CPU transform & 8.362\\
 CUDA resident kernel & 3.714\\
@@ -180,7 +180,7 @@ GPU H2D + D2H transfers & 5.418\\
 CUDA prepared pipeline, including transfers and synchronization & 9.153\\\midrule
 GPU compute-only speedup versus CPU transform & $2.251\times$\\
 GPU prepared-pipeline speedup versus CPU transform & $0.913\times$\\\bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table}
 
 The page-aware GPU prepared pipeline shows almost no relative penalty against
