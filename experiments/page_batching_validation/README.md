@@ -6,7 +6,7 @@ Historical experiments, data and manuscript are not modified. No full campaign h
 
 ## Requirements
 
-Python 3.10–3.12 x64, PyCryptodome, NumPy, CuPy, a compatible NVIDIA driver and CUDA runtime/NVRTC; C compiler and OpenSSL **3** development headers/libraries. CPU AES capability and OpenSSL's AES-NI capability bit must both be present. This is capability evidence, not an instruction trace. CPU encryption is sequential in one calling thread. No CPU thread pool, tuned CUDA kernels, new streams or overlap is used.
+Python 3.10–3.13 x64 (including Colab's Python 3.13 runtime), PyCryptodome, NumPy, CuPy, a compatible NVIDIA driver and CUDA runtime/NVRTC; C compiler and OpenSSL **3** development headers/libraries. CPU AES capability and OpenSSL's AES-NI capability bit must both be present. This is capability evidence, not an instruction trace. CPU encryption is sequential in one calling thread. No CPU thread pool, tuned CUDA kernels, new streams or overlap is used.
 
 `requirements.txt` pins portable Python dependencies; Colab setup selects the wheel for the installed CUDA major. Local Windows tests used existing NumPy 2.5.3; the portable installation pins 2.2.6. Versions are always recorded. Runtime rejects unexpected GPUs: study requires native Linux x86-64 **Tesla T4**, compute capability 7.5, one visible GPU. Only smoke permits the exact local **NVIDIA GeForce GTX 1650 Ti**, also 7.5. GPU errors never fall back to CPU.
 
@@ -33,21 +33,35 @@ Here `$Python` must be your selected x64 Python executable. The NVIDIA wheels pr
 
 ## Google Colab T4
 
-Select a T4 GPU runtime and place the complete repository (including these uncommitted/new files if applicable) at `/content/aes`. In a `%%bash` cell:
+Select a T4 GPU runtime and place the complete repository (including these uncommitted/new files if applicable) at `/content/aes`. The reported previous runtime used Python 3.13.16 and CUDA 13.0; check the current runtime instead of assuming those versions. In a `%%bash` cell:
 
 ```bash
+set -euo pipefail
 cd /content/aes
+export PYTHON="$(command -v python3)"
+export CUDA_PATH=/usr/local/cuda
+"$PYTHON" --version
+"$CUDA_PATH/bin/nvcc" --version
+nvidia-smi
 bash experiments/page_batching_validation/colab_setup.sh
 ```
 
-Compilation of the CUDA source is performed by CuPy NVRTC on GPU initialization, using the original AES source concatenated with the page-mapping kernel. The native OpenSSL wrapper is compiled by GCC. Final smoke, in another `%%bash` cell:
+`PYTHON` can instead be an explicit path to the notebook runtime's Python (`sys.executable` in a Python cell). Setup does not install Ubuntu's `python3-venv`: on Ubuntu 24.04 that package targets Python 3.12 and cannot repair a separate Python 3.13 runtime. It first tries the selected interpreter's `venv`; if creation or pip seeding fails, it installs `virtualenv==20.35.4` into a temporary bootstrap directory using that interpreter's existing pip, then seeds `.venv` without `ensurepip`. Bootstrap packages do not enter the runtime's global site-packages. If the selected runtime lacks pip too, setup stops with an error.
+
+An existing `.venv` from a different Python minor version is rejected and preserved. Rename it before retrying (for example, `mv experiments/page_batching_validation/.venv experiments/page_batching_validation/.venv-before-py313` with an unused destination). A same-version incomplete environment from failed `ensurepip` can be repaired by the fallback. The pinned NumPy/PyCryptodome versions and CUDA selection remain unchanged: CUDA 12 selects `cupy-cuda12x==13.6.0`; CUDA 13 selects `cupy-cuda13x==14.0.1`. Other CUDA majors are rejected.
+
+Setup stops on installation, `pip check`, native compilation or test failure. It declares completion only after the GCC/OpenSSL build and all CPU/regression/setup tests pass. It does not run GPU benchmarks. Compilation of the CUDA source is performed by CuPy NVRTC on GPU initialization, using the original AES source concatenated with the page-mapping kernel. Final smoke, in another `%%bash` cell:
 
 ```bash
+set -euo pipefail
 cd /content/aes
 export CUDA_PATH=/usr/local/cuda
 P=experiments/page_batching_validation
+"$P/.venv/bin/python" --version
 "$P/.venv/bin/python" "$P/run.py" --output "$P/results/t4-smoke-$(date -u +%Y%m%dT%H%M%SZ)"
 ```
+
+The smoke command checks the actual T4/compute capability and ciphertexts before accepting timings. A successful setup is not a successful GPU smoke. Verification of this revision: Linux Python **3.13.18**, real pinned package installation (including CuPy 14.0.1), GCC/OpenSSL build and **19 passing tests**, for both normal `venv` creation and an injected failure exercising the real `virtualenv` fallback. The local test substituted the CUDA version probe with a CUDA 13.0 response and used already-installed system development packages; no CUDA compilation or GPU execution occurred. Setup control-flow tests also cover both CUDA selections and refusal to report success after dependency, build or test failures. Exact Colab Python **3.13.16/CUDA 13.0/T4** execution still requires these cells on that runtime.
 
 **Only when ready to launch the full study**, use the following separate command. It is supplied for later execution and has not been run:
 
