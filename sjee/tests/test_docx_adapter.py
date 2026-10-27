@@ -14,7 +14,7 @@ class AdapterTests(unittest.TestCase):
     def test_bibliography_accents_and_doi(self):
         refs = {r['key']: r['text'] for r in g.bibliography()}
         entry = refs['schonberger2011gpu']
-        self.assertIn('Georg Sch\u00f6nberger, J\u00fcrgen Fu\u00df', entry)
+        self.assertIn('G. Sch\u00f6nberger, J. Fu\u00df', entry)
         self.assertIn('Lecture Notes in Computer Science', entry)
         self.assertIn('10.1007/978-3-642-24712-5_16', entry)
         self.assertEqual(g.plain(g.parse(r'Sch{\"o}nberger and Fu{\ss}')),
@@ -24,6 +24,22 @@ class AdapterTests(unittest.TestCase):
         result = g.blocks(r'\begin{enumerate}\item First.\item \textbf{Second.}\end{enumerate}')
         self.assertEqual([b['number'] for b in result], [1, 2])
         self.assertTrue(result[1]['runs'][0]['bold'])
+
+    def test_current_equation_symbols_and_structures(self):
+        data = g.read_manuscript()
+        self.assertEqual(len(list(g.source_math(data))), 40)
+        equations = [g.omml(b['math']) for b in data['blocks'] if b['kind'] == 'equation']
+        text = lambda node: ''.join(n.text or '' for n in node.iter(qn('m:t')))
+        self.assertIn('\u2208', text(equations[0]))
+        self.assertEqual(text(equations[1]).count('\u00d7'), 3)
+        for unit in ('H2D', 'kernel', 'D2H', 'overhead'):
+            self.assertIn(unit, text(equations[2]))
+        self.assertEqual(len(list(equations[3].iter(qn('m:f')))), 1)
+        self.assertEqual(len(list(equations[4].iter(qn('m:acc')))), 2)
+        self.assertEqual(len(list(equations[4].iter(qn('m:d')))), 2)
+        self.assertEqual(len(list(equations[5].iter(qn('m:acc')))), 3)
+        self.assertIn('AES-NI', text(equations[5]))
+        self.assertIn('\u2026', text(equations[5]))
 
     def test_unordered_list_uses_native_bullet_definition(self):
         result = g.blocks(r'\begin{itemize}\item One.\item Two.\end{itemize}')

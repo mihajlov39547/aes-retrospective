@@ -282,7 +282,7 @@ def bibliography():
             else:
                 last, first = person.split(',', 1)
                 initials = ['-'.join(part[0] + '.' for part in word.split('-') if part)
-                            for word in first.split()]
+                            for word in plain(parse(first)).split()]
                 names.append(' '.join(initials) + ' ' + plain(parse(last)))
         fields = [', '.join(names) + ': ' + value('title')]
         for key in ('journal', 'booktitle', 'series', 'institution', 'publisher',
@@ -500,6 +500,18 @@ def omml(tex):
     return root[0]
 
 
+def source_math(value):
+    """Yield math in manuscript order, including inline math and table cells."""
+    if isinstance(value, dict):
+        if 'math' in value:
+            yield value['math']
+        for child in value.values():
+            yield from source_math(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from source_math(child)
+
+
 def write_runs(paragraph, runs, warnings):
     for item in runs:
         if 'math' in item:
@@ -618,6 +630,8 @@ def render(data, temporary):
         node = deepcopy(prototypes[style])
         p = Paragraph(node, document._body)
         p.clear()
+        if style.startswith('JText') or style == 'JEquation':
+            p.paragraph_format.line_spacing = 1.0
         body.insert(len(body) - 1, node)
         if runs:
             write_runs(p, runs, warnings)
@@ -797,14 +811,35 @@ def validate(path, data):
         if len([n for n in result.namelist() if n.startswith('word/media/')
                 and n.endswith('.svg')]) != expected_figures:
             raise ValueError('Missing vector figure')
-        def math_count(value):
-            if isinstance(value, dict):
-                return int('math' in value) + sum(math_count(v) for v in value.values())
-            if isinstance(value, list):
-                return sum(math_count(v) for v in value)
-            return 0
-        if len(out.findall('.//' + qn('m:oMath'))) != math_count(data):
+        equations = out.findall('.//' + qn('m:oMath'))
+        expected_math = list(source_math(data))
+        if len(equations) != len(expected_math):
             raise ValueError('Native equation count mismatch')
+        # Compare complete structures, including accents, delimiters, fractions,
+        # indices and symbols; a count alone cannot detect a damaged equation.
+        def structure(node):
+            return (node.tag, sorted(node.attrib.items()), node.text or '',
+                    [structure(child) for child in node])
+        for index, (actual, tex) in enumerate(zip(equations, expected_math), 1):
+            if structure(actual) != structure(omml(tex)):
+                raise ValueError(f'Native equation content mismatch at expression {index}')
+            for run in actual.iter(qn('m:r')):
+                if run.find(qn('w:rPr')).find(qn('w:sz')).get(qn('w:val')) != '22':
+                    raise ValueError('Math full size must be 11 pt')
+        displays = out.xpath('.//w:p[w:pPr/w:pStyle[@w:val="JEquation"]]')
+        if len(displays) != sum(b['kind'] == 'equation' for b in data['blocks']):
+            raise ValueError('Display equation count mismatch')
+        for index, paragraph in enumerate(displays, 1):
+            if (len(paragraph.findall('.//' + qn('w:tab'))) != 2
+                    or ''.join(paragraph.itertext()) == ''
+                    or ''.join(n.text or '' for n in paragraph.iter(qn('w:t'))) != f'({index})'
+                    or paragraph.xpath('ancestor::w:tbl')):
+                raise ValueError(f'Display equation {index} has invalid numbering or layout')
+        styles = parse_xml(result.read('word/styles.xml'))
+        tabs = styles.xpath('.//w:style[@w:styleId="JEquation"]/w:pPr/w:tabs/w:tab')
+        if [(t.get(qn('w:val')), t.get(qn('w:pos'))) for t in tabs] != [
+                ('center', '3544'), ('right', '7088')]:
+            raise ValueError('Equation center/right tab stops changed')
         if '[MATH CLEANUP:' in ''.join(out.itertext()):
             raise ValueError('Unconverted math remains')
 
@@ -825,12 +860,22 @@ def main():
                 raise ValueError(f'Source changed during generation: {name}; rerun')
         if sha256(SOURCE.read_bytes()).hexdigest() != TEMPLATE_HASH:
             raise ValueError('Original template hash changed')
-        temporary.replace(OUTPUT)
+        try:
+            temporary.replace(OUTPUT)
+        except PermissionError as exc:
+            raise PermissionError(
+                f'Cannot replace {OUTPUT.name}. Save and close it in Word, then rebuild. '
+                'The existing document has not been changed.') from exc
     (BUILD / 'manuscript.json').write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding='utf-8')
     report = {'output': str(OUTPUT), 'generator': 'SJEE template copy; no Pandoc',
               'template_sha256': TEMPLATE_HASH, 'source_sha256': data['source_sha256'],
               'tables': sum(b['kind'] == 'table' for b in data['blocks']),
               'equations': sum(b['kind'] == 'equation' for b in data['blocks']),
+              'omml_expressions': len(list(source_math(data))),
+              'inline_equations': len(list(source_math(data))) - sum(
+                  b['kind'] == 'equation' for b in data['blocks']),
+              'mathtype_ole_equations': 0,
+              'mathtype_finalization': 'Manual conversion required; see MATHTYPE_FINALIZATION.md',
               'figures': sum(b['kind'] == 'figure' for b in data['blocks']),
               'references': len(data['references']), 'warnings': warnings,
               'manual_review': ['Review resolved numeric citations and cross-references before submission.',
