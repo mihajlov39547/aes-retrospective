@@ -76,21 +76,11 @@ across complete configurations but cannot substitute for a same-runtime
 OpenSSL-controlled study on those machines.
 
 
-\subsection{Cross-Architecture Evidence from Oracle ARM64}
-The Oracle CPU-only control strengthens the baseline-sensitivity argument:
-on the same ARM64 machine, native OpenSSL-default AES-128-CTR and the
-recorded PyCryptodome or capability-masked paths differ markedly.
-This does not show that ARM is intrinsically faster than x86, nor that
-all of the observed gap is due to AES instructions: implementations,
-Python interfaces, capability masking, and measurement scopes also
-matter. The two-worker envelope result additionally illustrates that
-aggregate throughput and single-request latency answer different
-questions. Thus, the portable finding is a methodological and
-architectural constraint: report an optimized, capability-aware host
-reference and the actual operation boundary before attributing an
-advantage to accelerator hardware. A future controlled ARM study should
-trace executed cryptographic instructions, harmonize native call
-boundaries, and examine additional core counts and AES-256.
+The CPU-only Oracle Neoverse-N1 observations offer an independent check
+on baseline sensitivity, but they cannot be ranked against T4 GPU times.
+Their default OpenSSL, PyCryptodome, and capability-masked implementations
+have distinct interfaces and dispatch options; the observed gap is not an
+isolated estimate of an AES instruction's effect.
 
 \subsection{Generalizability, Constraints and Future Work}
 The relevant engineering decision is whether a specific pipeline can retain

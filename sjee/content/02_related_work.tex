@@ -49,44 +49,14 @@ communication and computation~\cite{nvidiaBestPractices,harris2012overlap}. The 
 AES work of Iwai et al.~\cite{iwai2012acceleration} demonstrates that this concern is already
 established in GPU cryptographic processing.
 
-For communication infrastructure, these findings connect encryption performance to the
-surrounding processing path. A host-managed interface may receive data, organize buffers, invoke
-encryption, and forward the output. The resulting costs differ between contiguous buffers,
-aggregated independent messages, and individual latency-sensitive packets. Device-resident
-measurements and transfer-inclusive measurements therefore answer different questions. The
-present study distinguishes resident execution from a synchronous prepared-buffer pipeline
-containing host-to-device and device-to-host transfers. This pipeline measures a broader
-operation than the kernel alone, but excludes complete network input/output and application
-processing; it also does not evaluate transfer--computation overlap.
-
-Telecommunications security adds requirements beyond encryption throughput. AES-GCM combines
-counter-mode encryption with GHASH authentication~\cite{dworkin2007gcm}; an improvement in
-AES-CTR can therefore concern one component of an authenticated-encryption pipeline without
-establishing an equivalent improvement in IPsec or TLS processing. Practical implementations
-must also account for nonce management, packet preparation, synchronization, and output
-delivery. These requirements distinguish a bulk encryption benchmark from a complete security
-service, even when the underlying cipher operations are parallelizable.
-
-Earlier research also examined GPU-assisted encryption in communication protocols.
-Sch{\"o}nberger and Fu{\ss}~\cite{schonberger2011gpu} investigated GPU precomputation of
-AES counter-mode keystream for an IPsec-oriented GCM implementation, with subsequent encryption
-and authentication performed on the CPU. More recently, Lee et al.~\cite{lee2025parallelgcm}
-developed a parallel GPU implementation of GCM, including GHASH processing, and reported
-throughput exceeding 400~Gbit/s on an RTX~4090. Thus, GPU-assisted telecommunications encryption
-and authenticated-encryption acceleration are established research directions. The present
-study instead characterizes reproducible operating conditions for bulk AES-128 processing,
-distinguishing device-resident execution from synchronous transfer-inclusive processing against
-hardware-assisted AES-NI. It neither introduces a new AES algorithm nor benchmarks complete
-AES-GCM or IPsec processing.
-
-Workload aggregation introduces a further throughput--latency trade-off. Combining small
-messages may increase the work available to the GPU, while waiting for a batch adds queueing
-delay. Bulk data protection, traffic aggregation, heterogeneous communication gateways, and
-data-processing services are consequently possible application contexts, but their suitability
-depends on host acceleration, data placement, and operational requirements. Peak kernel rates
-alone cannot determine that suitability. The present measurements characterize contiguous bulk
-buffers and do not demonstrate packet batching or complete telecommunications protocol
-performance.
+For storage-oriented workloads, the Apache Parquet encryption specification
+supports the 	exttt{AES\_GCM\_CTR\_V1} construction, in which encrypted data
+pages motivate independently initialized CTR streams~\cite{parquet_encryption_spec}.
+Independent pages expose parallel work but require a distinct nonce/counter domain
+for each page. Unlike a single contiguous CTR stream, page-aware execution must
+map each GPU thread to a page-local counter without counter reuse. GPU-assisted
+GCM research~\cite{schonberger2011gpu,lee2025parallelgcm} is related, but
+accelerating AES-CTR alone does not provide authentication or a complete file-format implementation.
 
 Assessing whether an observed advantage is repeatable also requires control of experimental
 variability. Mytkowicz et al.~\cite{mytkowicz2009wrong} showed that experimental conditions can
@@ -100,27 +70,10 @@ reporting repeated observations and their execution context rather than relying 
 throughput measurement. For cryptographic workloads, functional correctness must additionally be
 verified before timings are accepted as evidence of encryption performance.
 
-The present evaluation applies these principles through cryptographic validation, paired
-workloads, repeated study sessions, documented timing boundaries, and preservation of raw
-observations and experimental provenance. Session-level evidence distinguishes isolated
-favorable measurements from advantages observed consistently across executions, while retaining
-outcomes that favor the CPU. Detailed procedures and aggregation equations are given in
-Section~\ref{sec:methodology}.
-
-The literature thus establishes GPU AES feasibility, optimization techniques, and the need to
-account for transfers, CPU acceleration, and measurement variability. The question addressed
-here is which operating conditions produce a repeatable bulk-processing benefit when the host
-already supports hardware-assisted encryption. High kernel throughput alone cannot answer this
-question, and an unfavorable transfer-inclusive result on one system cannot settle it for other
-platforms or workloads.
-
-To examine these conditions, the study compares AES-128 ECB and CTR workloads of different sizes
-across three heterogeneous configurations under a common validation and measurement protocol.
-The comparison uses hardware-assisted CPU AES-NI as its reference and retains session-level
-measurements for assessing consistency across repeated executions. Its contribution is the
-identification of experimentally supported operating conditions in which GPU-assisted bulk AES
-processing provides an advantage, together with evidence of constraints under which that
-advantage disappears or becomes inconsistent. This supports assessment of GPU-assisted bulk
-encryption and workload placement within the tested execution boundaries. Extending those
-findings to authenticated encryption and network processing requires separate application-level
-measurements.
+These studies motivate correctness-gated measurements, session-level variability,
+and explicit definitions of what is timed. The unresolved practical question is
+whether GPU computation remains attractive against a native hardware-accelerated
+CPU when independently encrypted pages and host--device transfers are measured.
+We address this with a same-runtime Tesla T4 study, while retaining a compact
+historical cross-platform comparison as context rather than treating it as
+statistically paired evidence.
