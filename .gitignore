@@ -51,3 +51,4 @@ experiments/results/*/source/export_results.py
 experiments/results/*/requirements-lock.txt
 experiments/results/**/*.py
 experiments/results/**/*.cu
+experiments/results/*.tar.gz

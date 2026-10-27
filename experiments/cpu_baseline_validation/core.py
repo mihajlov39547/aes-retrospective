@@ -7,6 +7,7 @@ from pathlib import Path
 from time import perf_counter_ns
 
 ROOT = Path(__file__).resolve().parent
+BUILD_DIR = ROOT / 'build' / 'windows-x86_64' if os.name == 'nt' else ROOT / 'build'
 SIZES = [1024, 16384, 1048576, 16777216, 33554432]
 SEEDS = list(range(2003, 2008))
 IMPLEMENTATIONS = ['pycryptodome', 'openssl_default']
@@ -42,16 +43,29 @@ def py_cipher(mode, key, iv):
 
 class Native:
     def __init__(self):
-        self.build = json.loads((ROOT / 'build/build.json').read_text(encoding='utf-8'))
-        lib = ROOT / 'build' / ('baseline.dll' if os.name == 'nt' else 'libbaseline.so')
+        self.build = json.loads((BUILD_DIR / 'build.json').read_text(encoding='utf-8'))
+        lib = BUILD_DIR / ('baseline.dll' if os.name == 'nt' else 'libbaseline.so')
         if hashlib.sha256(lib.read_bytes()).hexdigest() != self.build['library_sha256']:
             raise RuntimeError('Library differs from build manifest; rebuild')
         if hashlib.sha256((ROOT / 'native.c').read_bytes()).hexdigest() != self.build['source_sha256']:
             raise RuntimeError('Native source changed; rebuild')
         self.dll_dir = None
-        if os.name == 'nt' and self.build['openssl_root']:
-            self.dll_dir = os.add_dll_directory(str(Path(self.build['openssl_root']) / 'bin'))
+        self.windows_bindings = None
+        if os.name == 'nt':
+            from windows_native import require_x64_pe, sha256
+            if ct.sizeof(ct.c_void_p) != 8:
+                raise RuntimeError('Native Windows benchmark requires 64-bit Python')
+            crypto_path = Path(self.build['crypto_dll']).resolve(strict=True)
+            require_x64_pe(lib)
+            require_x64_pe(crypto_path)
+            if sha256(crypto_path) != self.build['crypto_dll_sha256']:
+                raise RuntimeError('Configured libcrypto changed since build; rebuild')
+            self.dll_dir = os.add_dll_directory(str(crypto_path.parent))
+            self.crypto = ct.CDLL(str(crypto_path))
         self.lib = ct.CDLL(str(lib))
+        if os.name == 'nt':
+            from windows_native import verify_bindings
+            self.windows_bindings = verify_bindings(self.lib, crypto_path, self.build['crypto_dll_sha256'])
         sig = [ct.c_int, ct.c_void_p, ct.c_void_p, ct.c_void_p, ct.c_void_p,
                ct.c_size_t, ct.POINTER(ct.c_uint64)]
         for name in ('baseline_encrypt', 'baseline_noop'):
@@ -68,7 +82,9 @@ class Native:
                     openssl_compiler=self.lib.baseline_build().decode(),
                     openssl_cpu_settings=self.lib.baseline_caps().decode(),
                     cpu_aes_available=self.lib.baseline_cpu_aes(), build=self.build,
-                    provider='default', instruction_execution='not traced')
+                    provider='default', instruction_execution='not traced',
+                    native_wrapper_path=str((BUILD_DIR / ('baseline.dll' if os.name == 'nt' else 'libbaseline.so')).resolve()),
+                    windows_verified_bindings=self.windows_bindings)
 
 
 def measure(implementation, native, mode, plain, key, iv):

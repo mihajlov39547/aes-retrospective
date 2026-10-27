@@ -5,6 +5,11 @@ compiled OpenSSL 3 EVP shared library. No historical source, result, or SJEE
 manuscript is changed. **Smoke timings are not study results.** Phase 1 establishes
 CPU performance; it does not by itself establish that any CUDA speedup survives.
 
+The operation-envelope extension retains the original timer placement and all
+component measurements. See [Oracle envelope review](ORACLE_ENVELOPE_REVIEW.md)
+for read-only reanalysis and [native Windows readiness](WINDOWS_READINESS.md) for
+this i5-10300H system's missing components and exact PowerShell commands.
+
 Repository inspection: `scripts/benchmark.py` includes output allocation in its
 Python transform boundary; `scripts/cpu_validation.py` gates with published KATs.
 `scripts/aes_cuda_baseline.py`, `scripts/aes_cuda_cpu_gpu.py`, and
@@ -38,6 +43,7 @@ convenience scripts rebuild and pass correctness + single-thread smoke first.
 Windows (native x86-64):
 
 ```powershell
+./experiments/cpu_baseline_validation/windows_readiness.ps1
 ./experiments/cpu_baseline_validation/run_windows.ps1 -OpenSSLRoot 'C:/OpenSSL-Win64'
 # After reviewing smoke output, full SINGLE-thread study:
 ./experiments/cpu_baseline_validation/run_windows.ps1 -OpenSSLRoot 'C:/OpenSSL-Win64' -Study -Notes 'AC power; idle; native Windows'
@@ -83,13 +89,20 @@ python run.py                          # 1/2 warmup/measured, 1 and 16 KiB, seed
 python run.py --workers 2              # separate multicore smoke
 python run.py --study                  # five independent process sessions
 python run.py --study --seed 2005       # one session, e.g. an independently launched replicate
-python aggregate.py results/SINGLE_SESSION_DIRECTORY
+python aggregate.py results/SINGLE_SESSION_DIRECTORY --output analysis-output/NEW_DIRECTORY
 ```
 
-Build artifacts are platform-specific; rebuild after switching OS, compiler, or
+Windows uses `.venv-windows/` and `build/windows-x86_64/`; Linux keeps `.venv/`
+and `build/`. Build artifacts are platform-specific; rebuild after changing compiler or
 OpenSSL. The manifest records compiler command/version and native source/binary
 hashes; the loader rejects changed C source or binary. Archive system package
 versions alongside the output when reproducing an environment exactly.
+Windows also records the selected libcrypto DLL and import-library hashes and
+verifies the DLL path/hash behind the wrapper's resolved imports for
+`OpenSSL_version`, `EVP_EncryptUpdate`, and `EVP_CIPHER_fetch`. A mismatched DLL
+or non-x64 PE image fails before validation/timing. `native_verification.json`
+captures the post-build check; each worker repeats it. A runtime DLL bundled with
+Git does not supply the development headers/import library for this build.
 
 ## Fixed study design and validation
 
@@ -137,12 +150,29 @@ through its public API. Native initialization is a fresh context per repetition,
 but OpenSSL fetch/provider caches may be warm; this is not a pure key-schedule
 microbenchmark. Timer reads have cost and small intervals have limited precision.
 
-Single-thread throughput is `bytes * 1000 / transform_ns` in decimal MB/s. The
-primary ratio is labelled `python_transform_vs_native_EVP`, deliberately exposing
-the boundary difference. It is an optimized native baseline comparison, **not a
-claim of identical library-call boundaries**. Raw allocation/setup/outer-call
-fields permit analysis without pretending that subtracting overhead yields an
-exact equivalent boundary. See [methodology.md](methodology.md).
+Transform throughput is `bytes * 1000 / transform_ns` in decimal MB/s **per worker**.
+Summary rows label this boundary `transform`, with `transform_boundary` stating
+`python_method_with_internal_FFI` or `native_EVP_Update_Final`. These are not
+identical library-call boundaries. Component/outer-call diagnostics are preserved;
+subtracting overhead is not used to manufacture an equivalent transform boundary.
+
+Single-thread **operation-envelope throughput** is separately reported as
+`bytes * 1000 / (operation_end_ns - operation_start_ns)`. Those timestamps already
+existed in schema 1. The timer still starts immediately before
+`actual, metrics = measure(...)` and stops immediately after it, exactly as for
+each multicore worker. It includes input checks, allocation/zero initialization,
+buffer binding and no-op diagnostic where applicable, cipher setup, encryption,
+cleanup, timer/metric bookkeeping, conversion to output bytes, local-object
+release, and replacement/release of the preceding result at assignment. It
+excludes data/reference preparation, barriers, IPC and ciphertext equality checks.
+This instrumented operation envelope is labelled `operation_envelope` with
+`operation_boundary=measure_call_v1`. No timers were moved or inserted inside
+`measure`; input generation and AES implementations remain unchanged.
+
+Thus single-thread and multicore **operation** rates share a boundary definition,
+while Python/EVP **transform** rates retain their documented differences. See
+[methodology.md](methodology.md). New summary rows must always be selected by
+`timing_boundary` and `throughput_scope`; never average across boundaries.
 
 ## ARM control and CPU capabilities
 
@@ -180,11 +210,15 @@ input checks, output allocation, bindings/no-op diagnostic where applicable,
 setup, transformation, cleanup, conversion to bytes and release skew. It excludes
 startup, data/reference preparation, barriers, IPC and ciphertext validation.
 Thus this is an aggregate operation benchmark, not aggregate pure EVP throughput.
-Individual worker component times remain in raw CSV. The summary deduplicates
-the common envelope per repetition. No mixed single/multicore summary is produced.
+Individual worker component times remain in raw CSV. The summary emits one
+`operation_envelope` row per configuration and a separate `transform` row **per
+worker**, with no sum of worker transform rates. The common envelope is deduplicated
+per repetition. Each session's summary stays separate. Single-thread uses this
+same envelope definition with N=1. Parallel release skew is part of the group
+envelope; per-worker overheads must not be summed as elapsed group time.
 Unpinned OS scheduling is deliberate and recorded; no claim of linear scaling.
 
-## Output schema (version 1)
+## Output schema (raw/summary version 2; schema-1 raw supported read-only)
 
 Each unique UUID session directory contains:
 
@@ -199,13 +233,22 @@ Each unique UUID session directory contains:
   `session_id, seed, experiment, workers, worker, bytes, mode, repeat,
   implementation, warmup, execution_index, validation_passed`; timing fields are
   above plus `operation_start_ns, operation_end_ns, aggregate_envelope_ns` and
-  `throughput_MB_s` (per-worker transform throughput). Blank means not applicable,
+  `throughput_MB_s` (unchanged per-worker transform throughput). New fields are
+  `operation_envelope_ns=end-start` and `operation_throughput_MB_s` (per-worker
+  bytes divided by that operation duration). `aggregate_envelope_ns` retains its
+  schema-1 meaning and remains blank for single-thread. Blank means not applicable,
   never zero. Negative residuals are retained. A failure may leave partial raw
   records for diagnosis, but the session is not accepted for aggregation.
 * `planned_order.json`, `execution_order.jsonl`: planned order and actual events.
-* `summary.csv/json`: per-session medians, extrema, sample counts, throughput at
+* `summary.csv/json`: boundary-explicit per-session medians, extrema, sample counts, throughput at
   median duration, ratio of PyCryptodome/session implementation medians, median
   of paired per-round ratios, and ARM fallback/default median-time ratio.
+  `summary_schema_version=2`, `timing_boundary`, `throughput_scope`, `worker`,
+  `bytes_per_timing`, and `operation_boundary` identify the denominator/numerator.
+  `transform` has scope `per_worker`, worker index 0..N-1 and n bytes. The
+  `operation_envelope` row has scope `all_workers`, null/blank worker and N*n bytes.
+  Both have exactly twenty measured samples per study configuration. Ratios pair
+  only within the same session, boundary, scope, worker, size, mode and repetition.
   `median_worker_*` fields also summarize each available timing component over
   measured worker samples; multicore component medians are diagnostics, not
   aggregate elapsed time. Not-applicable fields are omitted in JSON / blank in CSV.
@@ -214,8 +257,27 @@ Each unique UUID session directory contains:
 * `source/`: exact source, requirements and protocol snapshot.
 
 `aggregate.py` accepts one complete session, checks expected configurations and
-sample counts, rejects duplicates/mixed IDs/invalid timing, and writes only that
-session's summary. It never pairs across hosts or pools the five session samples.
+sample counts, rejects duplicates/mixed IDs/invalid timing and inconsistent
+envelope timestamps, and writes only that session's summary to a **new directory**
+selected with `--output`. Existing summaries cannot be overwritten. Schema-1 raw
+records derive operation envelopes from their original integer timestamps; raw
+records are never rewritten. The runner writes summaries directly only for its
+new UUID session. Aggregation never pairs across hosts or pools session samples.
 Report all five session-level results; any later across-session uncertainty
 analysis must use sessions as the replication unit. Build/results/venv are locally
 ignored; intentionally archive complete final sessions separately.
+
+Read-only archive reanalysis (no extraction or measurements, output must not exist):
+
+```powershell
+python experiments/cpu_baseline_validation/analyze_archives.py `
+  experiments/results/oracle-phase1-single-study.tar.gz `
+  experiments/results/oracle-phase1-multicore-study.tar.gz `
+  --output experiments/cpu_baseline_validation/analysis-output/oracle-envelope-NEW
+```
+
+The tool validates and deduplicates repeated session IDs only if raw and metadata
+hashes match. It writes per-session summaries, sample-level envelope diagnostics,
+component medians and source-archive/source-code hashes. Input archive hashes are
+checked again at the end. Smoke sessions carried in study archives remain labelled
+smoke and are excluded from the documented study interpretation.

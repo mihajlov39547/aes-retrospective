@@ -1,4 +1,6 @@
 build/
 results/
 .venv/
+.venv-windows/
+analysis-output/
 __pycache__/

@@ -124,7 +124,8 @@ def session(args, seed):
     sizes = SIZES if args.study else [1024, 16384]
     warmups, repetitions = (5, 20) if args.study else (1, 2)
     jobs = schedule(seed, sizes, implementations, warmups, repetitions)
-    meta = dict(schema_version=1, session_id=session_id, status='incomplete', seed=seed,
+    meta = dict(schema_version=2, session_id=session_id, status='incomplete', seed=seed,
+                operation_boundary='measure_call_v1',
                 purpose=purpose, experiment=experiment, workers=args.workers,
                 created_utc=datetime.now(timezone.utc).isoformat(),
                 hostname=platform.node(), architecture=platform.machine(), os=platform.platform(),
@@ -208,7 +209,9 @@ def session(args, seed):
                                workers=args.workers, worker=index, **job,
                                validation_passed=result['validation_passed'], **result['metrics'],
                                operation_start_ns=result['start_ns'], operation_end_ns=result['end_ns'],
+                               operation_envelope_ns=result['end_ns'] - result['start_ns'],
                                aggregate_envelope_ns=envelope if args.workers > 1 else None,
+                               operation_throughput_MB_s=job['bytes'] * 1000 / (result['end_ns'] - result['start_ns']),
                                throughput_MB_s=job['bytes'] * 1000 / result['metrics']['transform_ns'])
                     if writer is None:
                         writer = csv.DictWriter(raw, fieldnames=list(row))
