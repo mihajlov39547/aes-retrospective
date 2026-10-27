@@ -1,0 +1,26 @@
+\section{Experimental Material and Method}
+\subsection{Platforms and provenance}
+The retained CPU evidence comes from two distinct environments. The Windows host used an Intel Core i5-10300H (four physical cores, eight logical processors), Python 3.12.10, PyCryptodome 3.23.0 and verified 64-bit OpenSSL 3.6.5 libraries. The Linux Arm64 host was an Oracle Cloud instance on a Neoverse-N1-class CPU, with two available virtual CPUs, Python 3.12.3 and OpenSSL 3.0.13. Architecture, software version, CPU capability and source hashes were preserved in the original experiment records. The two hosts were not matched for frequency, memory hierarchy, virtualization or operating system; hence no intrinsic ``Intel versus Arm'' hardware speedup is reported.
+
+The campaigns comprised five seeded sessions (2003--2007), known-answer and differential correctness checks, and separate raw, metadata and summary records. In the CPU library-path campaigns, each size/mode/backend configuration used 20 measured repetitions following five warm-up repetitions. We aggregate session medians rather than pooling all repetitions as if they were independent machines. Historical CBC and GCM figures arose from earlier validated local campaigns; their definitions are retained and are not silently harmonized with the later OpenSSL measurements.
+
+A second Windows workstation (Intel Core i7-11850H, NVIDIA T600) participated in an earlier heterogeneous study. Since the available evidence does not establish an equivalent new OpenSSL CPU-only campaign on that workstation, it is deliberately excluded from the quantitative comparisons of this article. In the same spirit, historical CUDA and page-batching results belong to a distinct submitted manuscript and are not used here.
+
+\subsection{Compared operations and execution boundaries}
+The new CPU-only campaigns implement AES-128 in CTR and ECB modes using PyCryptodome and native OpenSSL EVP. CTR is analyzed as the confidentiality workload; ECB is retained solely as a same-platform implementation diagnostic. The OpenSSL native boundary measures the core EVP Update/Final transform. A separate operation-envelope boundary includes Python-side allocation, setup, bindings, native invocation, conversion to a \texttt{bytes} result and relevant cleanup, subject to the explicit wrapper instrumentation. The Python and native transform intervals are not perfectly symmetric: Python invocation/FFI is included in the PyCryptodome path but the outer \texttt{ctypes} entry is excluded from the native EVP interval.
+
+On Arm64 an additional \texttt{OPENSSL\_armcap=0} condition restricts several optimized instruction paths. It is a broad feature-mask control, \emph{not} a selective experiment disabling only AES rounds. The test verifies ciphertext correctness, but the study does not trace executed instructions or isolate NEON, AES and polynomial-multiply effects individually. We therefore describe these measurements as default-versus-masked OpenSSL paths.
+
+The historical CBC measurements compare software AES and an AES-NI-enabled library path for key lengths 128, 192 and 256 bits. Historical GCM measurements use AES-128 and AES-256, 96-bit nonces, a 128-bit tag and a 16-byte associated-data field. Known-answer tests and rejection of modified ciphertext, authentication tag and associated data were required before accepting samples. GCM encryption includes encryption and tag generation, while decryption includes tag verification, and excludes construction of a fresh GCM cipher object from its processing timer.
+
+\subsection{Estimators and statistical interpretation}
+For a payload of $B$ bytes and measured elapsed time $t$ nanoseconds, decimal throughput is
+\begin{equation}
+ P=\frac{10^3 B}{t}\quad [\mathrm{MB/s}]. \label{eq:rate}
+\end{equation}
+For implementations $A$ and $B$ measured on the same host and at compatible timing boundaries, the session speedup is the ratio of their median elapsed times:
+\begin{equation}
+ S_{A/B}^{(j)}=\frac{\widetilde t_A^{(j)}}{\widetilde t_B^{(j)}},\qquad
+ S_{A/B}=\operatorname{median}_{j=1}^{5} S_{A/B}^{(j)}.\label{eq:ratio}
+\end{equation}
+Numerical tables in this paper use session-median throughput summaries unless explicitly labeled as a paired time ratio. A median of time ratios need not equal a ratio of separately rounded throughput medians. Five sessions provide descriptive repeatability, not population-level confidence intervals or causality. No outlier exclusion is justified by performance direction. Underlying studies use different scopes; comparisons across them are labeled contextual rather than paired.
