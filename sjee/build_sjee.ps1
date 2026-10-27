@@ -1,5 +1,9 @@
 [CmdletBinding()]
-param()
+param(
+    [ValidateSet('Pdf', 'Docx', 'All')][string]$Target = 'Pdf',
+    [string]$PythonPath = '',
+    [switch]$RenderPreview
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -12,8 +16,7 @@ function Invoke-Checked {
     }
 }
 
-Push-Location -LiteralPath $PSScriptRoot
-try {
+function Build-Pdf {
     foreach ($program in @('pdflatex', 'bibtex')) {
         if (-not (Get-Command $program -ErrorAction SilentlyContinue)) {
             throw "Required executable '$program' was not found on PATH. Install TeX Live or MiKTeX."
@@ -41,8 +44,24 @@ try {
     Write-Host "Built $(Join-Path $PSScriptRoot 'main.pdf')"
     # Keep auxiliary files and logs for diagnosis; never remove source files.
 }
+
+# Resolve relative Python paths in the caller's directory, as the DOCX entry point does.
+if ($PythonPath -and (Test-Path -LiteralPath $PythonPath)) {
+    $PythonPath = (Resolve-Path -LiteralPath $PythonPath).Path
+}
+Push-Location -LiteralPath $PSScriptRoot
+try {
+    if ($RenderPreview -and $Target -eq 'Pdf') {
+        throw '-RenderPreview requires -Target Docx or -Target All.'
+    }
+    if ($Target -in @('Pdf', 'All')) { Build-Pdf }
+    if ($Target -in @('Docx', 'All')) {
+        & (Join-Path $PSScriptRoot 'build_sjee_docx.ps1') -PythonPath $PythonPath -RenderPreview:$RenderPreview
+        if ($LASTEXITCODE -ne 0) { throw "DOCX build failed (exit $LASTEXITCODE)." }
+    }
+}
 catch {
-    Write-Error "SJEE PDF build failed: $_"
+    Write-Error "SJEE $Target build failed: $_" -ErrorAction Continue
     exit 1
 }
 finally {

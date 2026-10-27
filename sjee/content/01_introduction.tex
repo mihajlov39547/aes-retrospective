@@ -1,71 +1,45 @@
 \section{Introduction}
+The Advanced Encryption Standard (AES) is widely used to protect stored and
+transmitted data~\cite{nist2023aes}. Counter (CTR) mode exposes independent
+block-encryption operations and is amenable to parallel execution
+~\cite{dworkin2001modes}. Nevertheless, a GPU is not automatically the fastest
+place to perform encryption: host processors provide dedicated AES instructions,
+and moving plaintext and ciphertext across the CPU--GPU boundary consumes time.
+An application using an accelerator must therefore distinguish the cost of AES
+computation from the cost of placing data where that computation occurs.
 
-Telecommunications infrastructure must protect increasing volumes of data while maintaining
-throughput and acceptable processing latency. Communication gateways, network services, and
-distributed processing systems therefore require efficient cryptographic operations. The
-Advanced Encryption Standard (AES), specified in NIST FIPS~197 \cite{nist2023aes}, is a
-fundamental building block of symmetric encryption. Its practical performance depends on
-hardware acceleration, execution strategy, and data movement between processing resources, as
-well as the cryptographic algorithm.
+This distinction matters for storage and analytics workloads consisting of many
+independent data units. The Apache Parquet encryption specification provides a
+concrete motivation: its \texttt{AES\_GCM\_CTR\_V1} mode uses CTR encryption for
+data pages and GCM protection for other encrypted modules. Rather than claim
+support for a complete Parquet file, we study a controlled, Parquet-inspired
+workload of independent 1~MiB pages with a distinct 96-bit nonce and a 32-bit
+counter initialized to one for each logical page. The study does not implement
+file framing, authenticated metadata, key management, compression, or Parquet
+interoperability. CTR encryption alone does not provide authentication.
 
-Hardware-assisted CPU encryption provides the reference against which an alternative processing
-path must be evaluated. Graphics processing units (GPUs) offer parallel execution that can
-benefit workloads containing many independent AES operations. Counter (CTR) mode permits
-independent counter blocks to be encrypted in parallel to generate keystream
-\cite{dworkin2001modes}, making it suitable for investigating GPU-assisted bulk encryption.
-Large buffers and collections of independent data units are potential workloads for
-telecommunications-oriented systems that already contain general-purpose GPUs. Such systems
-could use existing heterogeneous computing resources for bulk encryption without requiring a
-dedicated cryptographic accelerator. Whether this is beneficial depends on the costs of moving
-the workload through the GPU as well as the throughput of the encryption operation itself.
+The central question is not simply whether a GPU can execute AES quickly, but
+\emph{where a measured advantage exists and what must change in data placement
+for an application to exploit it}. A GPU-resident input can be encrypted without
+round-trip payload movement. A CPU-resident input that must return to host
+memory after GPU encryption requires two transfers. These are distinct
+workflows and must not be described by a single generic ``GPU speedup.''
 
-Using these resources for encryption introduces host-to-device transfers, kernel execution,
-synchronization, and transfers back to host memory. These costs can reduce or eliminate the
-computational advantage of parallel execution. The relevant question is therefore whether
-GPU-assisted AES processing provides a reproducible bulk-throughput improvement over
-hardware-accelerated CPU execution, and which workload, platform, and data-movement conditions
-determine that improvement. The study distinguishes performance with data already resident in
-GPU memory from performance that includes synchronous host--device transfers and
-synchronization.
+The study makes three bounded contributions. First, it establishes a
+same-runtime comparison with native OpenSSL EVP AES-NI, correcting the
+interpretation of earlier comparisons that used PyCryptodome as their host
+reference. Second, it quantifies how a GPU compute-only advantage for 32~MiB
+CTR is lost at a prepared transfer-inclusive boundary. Third, it validates
+independent nonce/counter domains per page and shows that their GPU processing
+cost is close to the cost of a continuous stream of equal length. The
+contribution is a measured execution-placement distinction and a reproducible
+page-aware implementation, not a new AES primitive or a demonstrated complete
+storage-engine speedup.
 
-This distinction also affects the interpretation of potential processing strategies. Encrypting
-a contiguous buffer, aggregating independent requests, and operating on device-resident data
-involve different data-placement and execution costs. Batching may provide more parallel work
-per invocation, but its usefulness depends on workload size and application latency
-requirements. A favorable result for one execution boundary does not establish an advantage for
-the others; each must be assessed against the available host implementation.
-
-The study evaluates validated AES-128 implementations in Electronic Codebook (ECB) and CTR modes
-across three heterogeneous computing configurations. CTR is the primary workload of interest,
-while ECB provides a controlled reference for independent block processing. Hardware-assisted
-CPU AES-NI serves as the baseline. Cryptographic correctness verification, controlled inputs,
-paired execution conditions, repeated measurement sessions, and explicit timing boundaries
-support the comparison. Section~\ref{sec:methodology} specifies the implementations, workload
-sizes, and session-level analysis.
-
-The contribution is experimental evidence identifying conditions under which GPU-assisted bulk
-AES processing improves throughput, including cases where an advantage remains after synchronous
-data movement. The measurements also identify configurations in which transfer costs or host
-implementation characteristics prevent consistent improvement. The common validation and
-measurement protocol provides a reproducible basis for assessing these outcomes across the
-tested systems. The study evaluates existing encryption approaches rather than introducing a new
-AES algorithm. Both favorable and unfavorable acceleration outcomes are used to delimit the
-operating conditions supported by the measurements. The results characterize the evaluated CPU
-and GPU paths; they do not establish a universal hardware advantage or the maximum throughput
-attainable by either architecture.
-
-For telecommunications, bulk data protection, workload aggregation, and device-resident
-processing are potential applications of these findings. Their application-level effectiveness
-remains untested. In particular, improved AES-CTR buffer processing does not demonstrate
-acceleration of complete network security protocols. Authenticated encryption additionally
-requires authentication processing, while practical protocols introduce packet handling,
-cryptographic state management, and data-delivery costs. These operations, along with batching
-and queueing latency, require separate evaluation before the measured bulk-processing
-improvements can be extended to telecommunications applications.
-
-Section~\ref{sec:related_work} reviews GPU AES implementations, CPU--GPU comparison methods, and
-the evidence needed to assess offloading. Section~\ref{sec:methodology} describes the
-experimental design, validation, timing boundaries, and statistical analysis.
-Section~\ref{sec:results} presents the measured acceleration outcomes, and
-Section~\ref{sec:discussion} examines their practical constraints and potential
-telecommunications applications. Section~\ref{sec:conclusion} summarizes the findings.
+Previously recorded measurements on GTX 1650 Ti, T600 and Tesla T4 are retained
+as historical, implementation-specific evidence. New same-runtime T4 CPU/GPU
+and page-batching sessions are presented separately; their observations are
+not pooled with the earlier data. Section~\ref{sec:methodology} defines the
+measurement boundaries, Section~\ref{sec:results} presents the positive and
+negative results together, and Sections~\ref{sec:discussion} and
+\ref{sec:conclusion} discuss the practical conditions and remaining work.

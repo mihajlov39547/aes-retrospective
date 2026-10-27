@@ -1,12 +1,20 @@
-This paper evaluates GPU computing for accelerating bulk AES encryption in
-telecommunications-oriented processing, where higher throughput must offset the cost of moving
-data through an accelerator. Validated AES-128 CTR and ECB implementations are compared with
-hardware-assisted CPU AES-NI across three heterogeneous systems, using paired workloads and five
-sessions per system. Measurements distinguish device-resident execution from a prepared-buffer
-pipeline including synchronous host--device transfers and synchronization. For 32~MiB CTR
-buffers, median paired pipeline speedups reach $1.354\times$ on T600 and $4.761\times$ on Tesla
-T4 relative to their respective CPU implementations, with gains in all five sessions. GTX
-achieves $0.935\times$, showing that the benefit depends on the configuration. These results
-demonstrate that GPU-assisted AES-CTR can outperform hardware-accelerated CPU encryption under
-the tested transfer-inclusive conditions, providing an experimental basis for bulk cryptographic
-processing in heterogeneous telecommunications architectures.
+Accelerating AES-CTR with a GPU is useful only when the gains from parallel
+computation exceed host--device data-movement costs. This study investigates that
+condition using validated AES-128 CUDA implementations, a native OpenSSL EVP
+AES-NI baseline, and a batch of independent 1~MiB data pages motivated by
+columnar storage encryption. Five repeated Tesla T4 sessions show that, for
+32 independently encrypted pages (32~MiB), GPU-resident AES-CTR computation
+achieves a $2.251\times$ speedup relative to the prepared native CPU
+transformation, whereas the transfer-inclusive prepared GPU pipeline achieves
+only $0.913\times$. The corresponding median times are 3.714~ms for the GPU
+resident kernel, 8.362~ms for OpenSSL transformation, and 9.153~ms for the
+GPU pipeline. Page-aware GPU execution has approximately the same pipeline
+throughput as a continuous 32~MiB CTR stream (a $1.007\times$ page-to-continuous
+ratio), indicating little added cost for independent counter domains in this
+implementation. In a separate same-runtime comparison, the apparent 32~MiB
+GPU advantage changes from $5.586\times$ against PyCryptodome to
+$0.942\times$ against native OpenSSL. The practical opportunity is therefore
+GPU-resident encryption as a stage within an already device-resident workflow,
+not general-purpose offloading of host-resident data. That application-level
+opportunity remains a conditional implication rather than a measured end-to-end
+application speedup.

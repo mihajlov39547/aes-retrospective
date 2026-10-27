@@ -1,126 +1,106 @@
 \section{Discussion}
 \label{sec:discussion}
 
-\subsection{Interpretation of Experimental Findings}
+\subsection{The Specific Favorable Case: Data Already on the GPU}
+The positive result is precise: for 32 independently encrypted 1~MiB pages,
+one CUDA resident AES-128-CTR launch takes approximately 3.714~ms, whereas
+native OpenSSL EVP requires approximately 8.362~ms for the prepared sequential
+CPU transformation. The measured $2.251\times$ ratio makes GPU execution a
+credible compute-stage candidate when plaintext is already GPU-resident and
+the encrypted result is needed on the device for another processing stage.
+This is not a claim that an ordinary host-memory encryption service becomes
+$2.251\times$ faster: the resident interval excludes data placement, GPU
+allocation and preparation, and a complete multi-stage application has not
+been benchmarked.
 
-The experiments show that GPU-assisted AES-CTR acceleration can persist beyond isolated kernel
-execution when synchronous host--device transfers and synchronization are included. The positive
-prepared-buffer results on T600 and T4 identify favorable bulk-processing conditions for the
-tested implementations. The T600 result also shows that the observed benefit is not confined to
-the datacenter-oriented configuration. The GTX pipeline and mode-dependent outcomes establish
-that resident computational performance alone does not determine whether offloading improves
-host-observed processing time.
+Potential workload classes include GPU-native analytics pipelines, pipelines
+that prepare columnar buffers on the GPU before encryption, and device-side
+processing that passes the resulting ciphertext to a later GPU operation.
+The common factor is \emph{avoided payload round trips}, not the mere presence
+of a GPU. Such placement can be attractive only if input data originate on the
+device or would need to move to it for other work anyway, and if the required
+output does not have to return immediately to the CPU. Where plaintext starts
+in host RAM and ciphertext is consumed by a host process, the tested prepared
+pipeline takes approximately 9.153~ms versus 8.362~ms for CPU transformation:
+the CPU is faster at these declared boundaries.
 
-CTR permits independent counter-block encryption, provided that counter and nonce requirements
-are satisfied~\cite{dworkin2001modes}. This independence supplies parallel work for the CUDA
-implementation. At 32~MiB, the resident measurements show an advantage over the evaluated AES-NI
-path on every system in both modes. The pipeline measurements then establish whether an
-advantage remains within the broader execution boundary. Their lower throughput reflects the
-additional operations in that boundary, but the measurements do not isolate how much of the
-difference is attributable to physical transfers, synchronization, or runtime overhead.
+\subsection{A Measured Data-Movement Budget, Not an Application Speedup}
+The 32~MiB prepared GPU pipeline is approximately 0.791~ms slower than the
+prepared CPU transformation, based on the displayed session-level median
+durations. This difference describes the margin to parity for the measured
+configuration, not an empirically achieved optimization. The approximately
+5.418~ms transfer component demonstrates that data movement is large relative
+to AES kernel execution; its separately reported median is not directly
+substitutable into a single-iteration latency equation. Avoiding transfers
+could make GPU-resident processing competitive, but the exact crossover
+requires a new workload-level experiment including data preparation, input
+residency, output placement, any subsequent consumer, and buffer lifetime.
 
-The host implementation is equally relevant to interpreting acceleration. On T4, similar GPU
-throughput in ECB and CTR accompanies different host-relative speedups because the corresponding
-AES-NI rates differ substantially. The CTR speedup therefore characterizes the complete CPU--GPU
-comparison; it does not indicate that the GPU executes CTR several times faster than ECB. The
-underlying cause of the host disparity was not isolated, so attributing it to a processor
-feature, library behavior, or cloud mechanism would exceed the evidence. The T600 and T4
-acceleration factors also use different host processors as their denominators. Their relative
-magnitudes cannot rank GPU performance independently of the host; absolute throughput and
-host-relative acceleration must be considered together when comparing the tested configurations.
+The ratio of CPU operation-envelope to GPU prepared-pipeline time is not a
+symmetrical end-to-end comparison: CPU allocation and setup are included,
+whereas GPU allocation, key upload, pinned-memory staging and final conversion
+are excluded. It must not be used to claim an application-level speedup.
+A second caution is that native OpenSSL EVP timings exclude the Python
+wrapper, unlike parts of the GPU path. The present study therefore provides
+a well-defined prepared-workload comparison rather than a common application
+API benchmark.
 
-Workload size and session consistency further qualify these findings. Non-monotonic throughput
-prevents identification of a universal CPU-to-GPU crossover threshold. A positive aggregate
-speedup can also coexist with sessions favoring the CPU, as observed for T600 ECB. The results
-support selecting execution paths using workload-specific measurements and paired session
-outcomes, rather than peak kernel throughput or a single favorable observation. They do not
-establish that 32~MiB is optimal or that larger buffers would necessarily improve performance.
+\subsection{Independent Pages and Practical Storage Workloads}
+Correct independent CTR processing is more than slicing a continuous stream:
+each logical page needs its own nonce/counter domain, and the counter must not
+cross the domain boundary. The page-aware CUDA implementation verifies these
+conditions and processes a batch in one launch. At 32~MiB, the measured GPU
+pipeline throughput differs by less than 1\% from the continuous control;
+hence handling page boundaries does not impose a large penalty in this
+specific kernel. The observation does not imply that page batching is faster
+than separately launching the pages: no separate-per-page launch baseline was
+included, and the CPU processes the pages sequentially.
 
-\subsection{Practical Implications and Generalizability}
+The Parquet \texttt{AES\_GCM\_CTR\_V1} design~\cite{parquet_encryption_spec} motivates the page geometry, but
+the experiment is not a Parquet writer, reader or encryptor. Format metadata,
+AAD, authentication, key management, compression and nonce-generation rules
+remain absent. Raw CTR encryption is malleable and provides no integrity
+protection. Practical storage deployment therefore requires a complete
+format-compliant and authenticated workflow; AES-CTR throughput alone cannot
+support security or end-to-end speedup claims about such a system.
 
-For telecommunications, the findings provide a basis for evaluating GPU-assisted bulk encryption
-in communication gateways and server-side data-protection services. Systems already handling
-substantial contiguous buffers could assess the GPU as an additional execution path alongside
-AES-NI. This is a potential use of the measured capability, not a demonstrated improvement in a
-deployed communication service. The relevant comparison must include the operations needed to
-acquire, organize, protect, and deliver data in the intended application. Where general-purpose
-GPUs are already present, this could allow bulk encryption to use existing heterogeneous
-resources without a separate cryptographic accelerator. The measurements support assessing that
-option against the available hardware-assisted CPU path rather than assuming that an additional
-accelerator will improve the service.
+\subsection{Why the CPU Baseline Matters}
+The historical $4.761\times$ T4 result used a PyCryptodome-based host interval.
+The fresh T4 campaign measured $5.586\times$ against PyCryptodome but only
+$0.942\times$ against native OpenSSL at the prepared GPU boundary. The native
+implementation makes the CPU substantially more competitive. Because library
+versions, API overhead and timing boundaries differ, this is evidence of
+baseline sensitivity rather than a proof that the old measurement was invalid.
+Historical GTX 1650 Ti and T600 findings remain useful for showing diversity
+across complete configurations but cannot substitute for a same-runtime
+OpenSSL-controlled study on those machines.
 
-Aggregating independent requests could increase the parallel work available per accelerator
-invocation, but introduces requirements absent from the buffer experiments. Queueing while a
-batch forms can increase latency, especially under low traffic. Packet metadata, independent
-cryptographic contexts, counter allocation, and output ordering must also be maintained.
-Consequently, a contiguous 32~MiB buffer is not interchangeable with a collection of
-independently managed packets, and the measurements establish neither an optimal batching policy
-nor a minimum packet batch size. The relevant trade-off is therefore between the processing
-benefit of a larger GPU workload and the time spent waiting to assemble and manage it. Requests
-with strict latency requirements may need a different execution policy from sustained bulk
-traffic.
+\subsection{Generalizability, Constraints and Future Work}
+The relevant engineering decision is whether a specific pipeline can retain
+plaintext and ciphertext on the GPU while maintaining its functional and
+security requirements. The following hypotheses are actionable but untested:
+(1) a GPU-first columnar transformation followed by resident encryption could
+avoid round-trip payload transfers; (2) encryption before another GPU-resident
+consumer could make cipher output placement beneficial; and (3) pipelined
+transfers or batch reuse might reduce the effective movement cost for
+host-resident data. None is demonstrated by the present one-launch benchmarks.
 
-AES-CTR is specified for IPsec Encapsulating Security Payload (ESP) confidentiality in
-RFC~3686~\cite{rfc3686}, while AES-GCM is specified for ESP in RFC~4106~\cite{rfc4106}. These
-standards connect the evaluated encryption operation to IPsec-oriented architectures, but the
-experiments cover neither complete ESP processing nor authenticated encryption. Such processing
-adds packet framing, security-association state, nonce and sequence-number management,
-authentication, and delivery. AES-GCM additionally requires GHASH and authentication-tag
-processing. The measured CTR acceleration cannot determine the throughput of that complete
-operation.
+The next experiment should implement an actual producer--encrypt--consumer
+CUDA pipeline, with device-resident buffers, an explicit encrypted-output
+consumer, correctness validation, and a CPU counterpart completing the same
+functional work. It should account for input acquisition, context/key and
+nonce-table setup, GPU allocation, transfers actually needed, synchronization
+and output disposition. A separate one-page-at-a-time GPU launch baseline
+would isolate the genuine \emph{batching} effect from the present continuous
+CTR control. Format-level work would integrate Parquet's full encryption
+rules, authenticated metadata, and key management, then report file or query
+throughput and latency. AES-GCM, AES-256, overlapping streams and multiple
+simultaneous requests are further experiments, not consequences of AES-128-CTR
+results.
 
-An IPsec extension must preserve counter uniqueness, authentication boundaries, and the
-association between packet data and protocol metadata when organizing parallel work. Its
-performance assessment would need to include both throughput and latency across the
-packet-processing path. Faster counter-mode encryption could benefit that path only to the
-extent that the remaining operations and their interactions permit an overall improvement.
-
-Device-resident processing offers another possible arrangement when input data are already
-available on the GPU. The resident measurements characterize encryption under this placement,
-while application acquisition, authentication, and delivery remain to be evaluated. Similar
-questions could arise in other data-intensive industries, such as storage or analytics services
-processing large buffers. These are plausible extensions of the workload structure, not
-validated application results. A workload-aware architecture retaining CPU processing for
-smaller or latency-sensitive requests and considering GPU execution for bulk work remains an
-untested design implication.
-
-\subsection{Study Limitations}
-
-Each configuration represents one host or cloud allocation with five study sessions. The
-observations establish repeatability within those environments, not performance across a
-population of comparable machines. Differences among the hardware and software configurations
-were not independently controlled, preventing causal attribution to a single component. The
-selected AES-NI library path and validated CUDA kernel also do not establish the fastest
-attainable CPU or GPU implementations, including multithreaded CPU services.
-
-The prepared-buffer boundary excludes application-level work and preparation costs specified in
-Section~\ref{sec:methodology}. Its throughput is therefore not complete
-telecommunications-system throughput. The fixed ascending size order confounds buffer-size
-effects with possible time-dependent execution behavior; the local 16~MiB reduction cannot be
-assigned to memory effects, scheduling, clocks, or thermal conditions from these measurements.
-Five-session ranges and directional consistency are descriptive evidence rather than confidence
-intervals or formal significance tests. These limits constrain both causal explanations and
-predictions of performance beyond the tested execution paths.
-
-\subsection{Future Research}
-
-Three extensions follow directly from the measured acceleration and its constraints.
-
-First, implement and evaluate an IPsec-oriented authenticated-encryption pipeline, including
-AES-GCM, GHASH, tag processing, and protocol state. A representative gateway workload should
-include packet preparation and delivery and compare complete throughput and latency with a
-hardware-assisted CPU implementation. This would test whether the observed encryption-component
-advantage survives the additional work required by the protocol.
-
-Second, evaluate packet aggregation and workload-aware CPU--GPU selection under varying traffic
-volume and latency requirements. The study should retain independent cryptographic contexts and
-output ordering while measuring queueing delay as well as processing time. More densely sampled
-workload sizes and additional independent systems would help assess whether a selection policy
-remains effective beyond the current size grid and host allocations.
-
-Third, compare the synchronous pipeline with overlapping transfers and computation, persistent
-device-resident processing, and supported direct-data-transfer mechanisms. Measurements should
-separate the relevant processing stages while also reporting the complete application interval.
-This would determine whether changing data placement and transfer scheduling alters the
-conditions favoring GPU execution; the present synchronous results alone do not predict those
-gains.
+The present measurements use one CUDA implementation and a single-threaded
+native CPU comparator, five sessions, synthetic data and a shared cloud
+platform. Kernel-level and transfer timings use different instrumentation;
+GPU scheduling, memory placement, host contention and CPU dispatch affect
+results. No instruction-level trace was captured. The work neither ranks all
+available CPUs/GPUs nor estimates a universal cross-platform crossover.

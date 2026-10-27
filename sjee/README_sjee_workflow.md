@@ -7,8 +7,15 @@ than the generated Word file. The supplied `SJEE_Template.docx` is never changed
 | Target | Command from `sjee/` | Output |
 | --- | --- | --- |
 | LaTeX PDF | `./build_sjee.ps1` | `main.pdf` |
+| PDF and Word document | `./build_sjee.ps1 -Target All` | `main.pdf` and `main_sjee.docx` |
+| Word through the shared entry point | `./build_sjee.ps1 -Target Docx` | `main_sjee.docx` |
 | Word document | `./build_sjee_docx.ps1` | `main_sjee.docx` |
 | Word and rendered preview | `./build_sjee_docx.ps1 -RenderPreview` | DOCX and `build/docx_preview/main_sjee.pdf` |
+
+From the repository root, run `./sjee/build_sjee.ps1 -Target All` to rebuild both
+formats. The default remains PDF-only. `-PythonPath` and `-RenderPreview` are
+also supported with `-Target Docx` or `-Target All`; failures stop the combined
+build. The separate DOCX entry point remains available.
 
 ## Requirements
 
@@ -86,8 +93,8 @@ Run the adapter regression checks from `sjee/`:
 ./.venv-docx/Scripts/python.exe -m unittest discover -s tests -v
 ```
 
-The current manuscript exports four tables, two figures, six display equations,
-and 24 cited references. Labels and citation numbers are reconstructed from the
+The current manuscript exports six tables, two figures, six display equations,
+and 23 cited references. Labels and citation numbers are reconstructed from the
 sources rather than read from potentially stale PDF auxiliary files.
 
 ## Preview and delivery

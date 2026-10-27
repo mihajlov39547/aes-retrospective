@@ -1,26 +1,30 @@
 \section{Conclusion}
 \label{sec:conclusion}
+The experiments identify a specific opportunity rather than a blanket GPU
+advantage: with 32 independent 1~MiB pages, Tesla T4 AES-128-CTR resident
+execution is approximately $2.251\times$ faster than native OpenSSL EVP
+transformation at the measured compute boundaries. Once the prepared GPU path
+includes synchronous host--device transfers and synchronization, that ratio
+falls to $0.913\times$ and the CPU wins in all five sessions. A page-aware
+kernel with independent counter domains has approximately the same GPU
+pipeline throughput as a continuous stream of equal size, but this does not
+establish an acceleration benefit over separate per-page launches.
 
-This study experimentally compared validated GPU-assisted AES-128 ECB and CTR encryption with
-hardware-assisted CPU AES-NI across three heterogeneous configurations. It distinguished
-device-resident execution from a prepared-buffer pipeline containing synchronous host--device
-transfers and synchronization, using paired measurements across repeated sessions.
+A second key finding is baseline sensitivity: the new T4 study reports a
+$5.586\times$ prepared-pipeline ratio relative to PyCryptodome but
+$0.942\times$ relative to native OpenSSL. Consequently, library choice and
+measurement boundaries are essential to any defensible GPU acceleration
+claim. Earlier three-platform measurements remain historical evidence tied to
+their original host implementation, not proof of an optimized-CPU advantage.
 
-For 32~MiB AES-CTR buffers, the pipeline achieved median paired accelerations of $1.354\times$
-on T600 and $4.761\times$ on T4 relative to their respective host implementations. Both
-improvements occurred in all five sessions, including on the tested 4~GB T600 GPU.
-Resident execution outperformed AES-NI at this size on every system in both modes, but the GTX
-pipeline did not show a consistent advantage, and T4 ECB remained slower than its CPU reference.
-Thus, a computational advantage survived data movement for selected CTR workloads, while the
-outcome depended on the system, mode, and execution boundary.
-
-These findings establish measured operating conditions for GPU-assisted bulk encryption
-alongside existing CPU acceleration. They could inform workload placement in telecommunications
-gateways and other services handling large data buffers, including storage and analytics
-applications. Their relevance rests on matching the application's workload and data placement to
-the evaluated conditions. The experiments do not establish improved IPsec ESP, AES-GCM,
-packet-batching, or complete application performance. Future work should explore
-an IPsec-oriented authenticated-encryption prototype evaluated across
-the full packet-processing path. Measuring its throughput and latency with authentication,
-protocol state, packet aggregation, and delivery included would determine whether the
-demonstrated bulk AES-CTR improvement translates into an application-level benefit.
+The practical candidate is an application that already keeps its input and
+subsequent ciphertext consumer on the GPU; in such a pipeline encryption can
+potentially exploit device-resident computation without paying a full payload
+round trip. This is an engineering hypothesis supported by the isolated
+resident result, not an established application speedup. Future work should
+measure a complete GPU-native producer--encrypt--consumer pipeline against an
+equivalent CPU workload and separately test one-page-per-launch overhead,
+Parquet-compliant authenticated storage processing, and overlapping data
+movement. The principal finding is therefore a reproducible boundary between
+GPU computational gain and transfer-limited execution, together with a
+validated independent-page workload for investigating that boundary.

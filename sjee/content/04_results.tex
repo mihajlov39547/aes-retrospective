@@ -99,3 +99,74 @@ both the 1~MiB and 32~MiB rates in all five sessions, for both modes and both GP
 boundaries. On T4, this local reduction appears in resident throughput in four sessions for each
 mode, while neither pipeline mode shows the same pattern. The session counts therefore differ
 between platforms and between the two timing boundaries on T4.
+
+
+\subsection{Revisiting the Host Baseline on the Tesla T4}
+\label{sec:new-t4-baseline}
+The historical $4.761\times$ T4 CTR speedup in the preceding tables is an
+\emph{earlier PyCryptodome-relative result}, not a speedup relative to an
+optimized native OpenSSL implementation. In a new five-session T4 campaign,
+32~MiB AES-128-CTR yields a $5.586\times$ median session ratio against
+PyCryptodome but only $0.942\times$ against native OpenSSL when the GPU
+prepared pipeline is the denominator. The OpenSSL transform throughput is
+approximately 3.874~GB/s and the GPU prepared-pipeline throughput is
+approximately 3.646~GB/s. When only GPU resident computation is considered,
+the native OpenSSL CPU/GPU ratio is $2.299\times$. Thus the improved CPU
+baseline reverses the prepared-pipeline ranking, without implying that the
+historical measurements were incorrect.
+
+\subsection{Independent Pages: A Compute Advantage That Does Not Survive Transfers}
+\label{sec:page-results}
+Table~\ref{tab:page-primary} gives the prespecified native OpenSSL transform
+to prepared CUDA pipeline time ratios in the page-batching study. Every
+reported ratio is below unity across all five sessions. The gap narrows at
+larger batch sizes but does not reverse direction.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Tesla T4 Phase 2: median of five session-level CPU OpenSSL transform / GPU prepared-pipeline ratios. Values below one favor the CPU at this boundary.}
+\label{tab:page-primary}
+\begin{tabular}{@{}rrr@{}}\toprule
+Total payload & Continuous CTR & Independent 1~MiB pages\\\midrule
+1~MiB & 0.5437 & 0.5404\\
+4~MiB & 0.6948 & 0.7137\\
+16~MiB & 0.8163 & 0.8240\\
+32~MiB & 0.8963 & 0.9125\\\bottomrule
+\end{tabular}
+\end{table}
+
+The most informative case is a batch of 32 independent pages. The median CPU
+native transform duration is approximately 8.362~ms, compared with 3.714~ms
+for one GPU-resident kernel and 9.153~ms for the prepared GPU pipeline.
+Table~\ref{tab:page-32-components} separates the measurements. The
+compute-only ratio is $2.251\times$ in favor of the GPU, whereas the
+transfer-inclusive ratio is $0.913\times$ and favors the CPU. Both directions
+are consistent across all five sessions. The observed H2D-plus-D2H component
+is about 5.418~ms. Medians of nested or separately timed components cannot
+be added as if they described a single observation.
+
+\begin{table}[htbp]
+\centering\small
+\caption{Tesla T4 Phase 2, 32 independent 1~MiB pages: separately summarized timings (five session medians).}
+\label{tab:page-32-components}
+\begin{tabularx}{\linewidth}{@{}Xr@{}}\toprule
+Measurement boundary & Approximate time (ms)\\\midrule
+Native OpenSSL CPU transform & 8.362\\
+CUDA resident kernel & 3.714\\
+GPU H2D + D2H transfers & 5.418\\
+CUDA prepared pipeline, including transfers and synchronization & 9.153\\\midrule
+GPU compute-only speedup versus CPU transform & $2.251\times$\\
+GPU prepared-pipeline speedup versus CPU transform & $0.913\times$\\\bottomrule
+\end{tabularx}
+\end{table}
+
+The page-aware GPU prepared pipeline shows almost no relative penalty against
+a single continuous CTR stream of the same size: its page/continuous
+throughput ratios are approximately $1.0007\times$ at 4~MiB,
+$1.0068\times$ at 16~MiB and $1.0066\times$ at 32~MiB. These sub-percent
+differences should not be described as a robust optimization gain. They
+support the narrower observation that independent per-page counter handling
+does not impose a large measured GPU pipeline overhead in the evaluated
+implementation. This is distinct from demonstrating an advantage from
+batching over sequential per-page GPU launches, which was not the control
+experiment.

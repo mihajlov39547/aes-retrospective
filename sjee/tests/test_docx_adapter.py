@@ -27,7 +27,7 @@ class AdapterTests(unittest.TestCase):
 
     def test_current_equation_symbols_and_structures(self):
         data = g.read_manuscript()
-        self.assertEqual(len(list(g.source_math(data))), 40)
+        self.assertEqual(len(list(g.source_math(data))), 61)
         equations = [g.omml(b['math']) for b in data['blocks'] if b['kind'] == 'equation']
         text = lambda node: ''.join(n.text or '' for n in node.iter(qn('m:t')))
         self.assertIn('\u2208', text(equations[0]))
@@ -103,10 +103,10 @@ class AdapterTests(unittest.TestCase):
 
     def test_current_manuscript_export(self):
         data = g.read_manuscript()
-        self.assertEqual(sum(b['kind'] == 'table' for b in data['blocks']), 4)
+        self.assertEqual(sum(b['kind'] == 'table' for b in data['blocks']), 6)
         self.assertEqual(sum(b['kind'] == 'figure' for b in data['blocks']), 2)
         self.assertEqual(sum(b['kind'] == 'equation' for b in data['blocks']), 6)
-        self.assertEqual(len(data['references']), 24)
+        self.assertEqual(len(data['references']), 23)
         self.assertIn('content/focused_results_table.tex', data['source_sha256'])
         self.assertEqual(data['labels']['fig:bulk-throughput'], '2')
         with TemporaryDirectory(dir=g.BUILD) as directory:

@@ -199,3 +199,50 @@ The use of repeated sessions, paired workloads, and documented execution conditi
 recommendations on experimental bias and hierarchical variability in performance measurement
 \cite{mytkowicz2009wrong,kalibera2013rigorous,hoefler2015scientific}. Raw observations and their
 provenance are retained for verification of the session estimates and acceleration calculations.
+
+
+\subsection{Native CPU Baseline and Same-Runtime T4 Validation}
+\label{sec:evp-method}
+The historical three-platform study used a hardware-assisted PyCryptodome host
+path. A later, independent T4 study compared that path, a native OpenSSL 3 EVP
+AES-128 implementation, and the original validated CUDA baseline on the same
+runtime allocation. The five sessions used seeds 2003--2007, five warm-ups and
+20 measurements per size and mode; buffers ranged from 1~KiB to 32~MiB.
+Results from this newer study are paired only within its own sessions.
+
+Native \emph{CPU transform time} was measured inside C around encryption with
+prepared contexts/output; it excludes the Python-to-C call, allocation and
+cipher setup. GPU \emph{resident time} is a CUDA-event compute interval with
+prepared device buffers. GPU \emph{prepared pipeline time} includes payload
+host-to-device transfer, kernel execution, device-to-host transfer and
+synchronization, but excludes GPU allocation, staging, key expansion and output
+conversion. These boundaries are useful for determining whether prepared GPU
+processing repays transfer cost, but they do not provide identical wrapper
+costs or full application latency. CPU operation-envelope measurements include
+additional setup/allocation/copying and are retained only as asymmetric
+diagnostics.
+
+\subsection{Independent-Page CTR Batch Experiment}
+\label{sec:page-method}
+A separate T4 campaign encrypted $N\in\{1,4,16,32\}$ independently managed
+1~MiB pages, for total sizes of 1, 4, 16 and 32~MiB. Each page used a separate
+96-bit synthetic test nonce concatenated with a 32-bit big-endian initial
+counter of one. The counter is advanced \emph{within} each page and never
+carried into another page's nonce. The page-aware CUDA kernel assigns blocks
+to their corresponding page and encrypts all pages in one launch using the
+unchanged historical AES round implementation. A native OpenSSL EVP path
+processes the page contexts sequentially on one calling CPU thread.
+
+An equal-size continuous CTR stream forms the control. For each size and
+repetition the page and continuous controls share plaintext and key but use
+distinct nonce domains. The experiment validates ciphertext independently
+against a CPU reference, including published vectors, page boundaries, counter
+carry and overflow guards. Five T4 sessions (seeds 2003--2007) each include
+five warm-ups and 20 measurements for all four batch sizes, both layouts and
+three scheduled measurement paths. This yields 2,400 measured observations
+plus 600 warm-ups. Actual execution order, input digests, source hashes,
+software versions and session identity are retained. All reported speedups
+use the CPU duration divided by GPU duration: values greater than one favor
+the GPU. Five session medians, not pooled individual repetitions, form the
+primary descriptive replication units. The study is synthetic and measures
+batch completion rather than application request latency.
