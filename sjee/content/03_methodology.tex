@@ -40,6 +40,25 @@ of the cloud host CPU was unavailable in the archived environment records.
   \end{tabularx}
 \end{table}
 
+
+\subsection{Independent ARM64 CPU Control}
+\label{sec:oracle-arm}
+An additional CPU-only study was conducted on an Oracle Cloud ARM64
+instance with two available vCPUs (Arm Neoverse-N1) and no GPU. It is
+reported as an architecture and implementation control, not as a fourth
+CPU--GPU pair. Five single-worker sessions measured AES-128-CTR using
+PyCryptodome, native OpenSSL 3 EVP with the default CPU capabilities,
+and an OpenSSL run with \texttt{OPENSSL\_armcap=0}. A separate
+five-session, two-worker experiment recorded aggregate operation-envelope
+throughput. All comparisons in this subsection are limited to the Oracle
+host and their explicitly named measurement intervals. In particular,
+\texttt{OPENSSL\_armcap=0} disables multiple Arm acceleration capabilities,
+so its performance difference is not an isolated measurement of a single
+AES instruction. Native EVP transform-only timing excludes allocation,
+Python interoperation, and output conversion; operation-envelope timing
+includes additional host-side costs. The two-worker results are aggregate
+throughput, not a twofold reduction in a single request's latency.
+
 The CPU reference uses PyCryptodome with hardware-assisted AES-NI explicitly enabled
 \cite{pycryptodome,intel2012aesni}. Native backend initialization was checked for both modes;
 executed processor instructions were not traced directly. The GPU path uses the validated

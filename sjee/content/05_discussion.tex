@@ -75,6 +75,23 @@ Historical GTX 1650 Ti and T600 findings remain useful for showing diversity
 across complete configurations but cannot substitute for a same-runtime
 OpenSSL-controlled study on those machines.
 
+
+\subsection{Cross-Architecture Evidence from Oracle ARM64}
+The Oracle CPU-only control strengthens the baseline-sensitivity argument:
+on the same ARM64 machine, native OpenSSL-default AES-128-CTR and the
+recorded PyCryptodome or capability-masked paths differ markedly.
+This does not show that ARM is intrinsically faster than x86, nor that
+all of the observed gap is due to AES instructions: implementations,
+Python interfaces, capability masking, and measurement scopes also
+matter. The two-worker envelope result additionally illustrates that
+aggregate throughput and single-request latency answer different
+questions. Thus, the portable finding is a methodological and
+architectural constraint: report an optimized, capability-aware host
+reference and the actual operation boundary before attributing an
+advantage to accelerator hardware. A future controlled ARM study should
+trace executed cryptographic instructions, harmonize native call
+boundaries, and examine additional core counts and AES-256.
+
 \subsection{Generalizability, Constraints and Future Work}
 The relevant engineering decision is whether a specific pipeline can retain
 plaintext and ciphertext on the GPU while maintaining its functional and

@@ -101,6 +101,29 @@ mode, while neither pipeline mode shows the same pattern. The session counts the
 between platforms and between the two timing boundaries on T4.
 
 
+
+\subsection{Oracle Cloud ARM64: CPU Implementation and Envelope Controls}
+\label{sec:oracle-results}
+On the independent Oracle Cloud ARM64 host, the five-session 32~MiB
+AES-128-CTR study produced approximately 4.03~GB/s of native
+OpenSSL-default transform-only throughput, compared with approximately
+209~MB/s for the PyCryptodome path and 218~MB/s for the
+\texttt{OPENSSL\_armcap=0} control. These values describe the specific
+library implementations and timed boundaries; they are not GPU speedups.
+The default OpenSSL path was approximately 19.3 times faster than the
+recorded PyCryptodome transform path at this size, with the important
+qualification that Python/FFI and C-native interval definitions differ.
+
+In a separate host-side envelope experiment, a single worker achieved
+approximately 1.06~GB/s at 32~MiB, while two concurrent workers reached
+approximately 2.03~GB/s in aggregate, or about 1.92 times the
+single-worker aggregate rate. These campaigns are not paired
+per-repetition observations and their envelope boundary differs from the
+4.03~GB/s native transform interval. The contrast demonstrates that
+buffer lifecycle and concurrency must be considered before extending
+cryptographic core throughput to a complete service. No Oracle result is
+used to calculate a speedup against the Tesla T4 or other GPU system.
+
 \subsection{Revisiting the Host Baseline on the Tesla T4}
 \label{sec:new-t4-baseline}
 The historical $4.761\times$ T4 CTR speedup in the preceding tables is an
@@ -149,7 +172,7 @@ be added as if they described a single observation.
 \centering\small
 \caption{Tesla T4 Phase 2, 32 independent 1~MiB pages: separately summarized timings (five session medians).}
 \label{tab:page-32-components}
-\begin{tabularx}{\linewidth}{@{}Xr@{}}\toprule
+\begin{tabular}{@{}lr@{}}\toprule
 Measurement boundary & Approximate time (ms)\\\midrule
 Native OpenSSL CPU transform & 8.362\\
 CUDA resident kernel & 3.714\\
@@ -157,7 +180,7 @@ GPU H2D + D2H transfers & 5.418\\
 CUDA prepared pipeline, including transfers and synchronization & 9.153\\\midrule
 GPU compute-only speedup versus CPU transform & $2.251\times$\\
 GPU prepared-pipeline speedup versus CPU transform & $0.913\times$\\\bottomrule
-\end{tabularx}
+\end{tabular}
 \end{table}
 
 The page-aware GPU prepared pipeline shows almost no relative penalty against

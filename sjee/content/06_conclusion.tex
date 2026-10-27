@@ -17,6 +17,15 @@ measurement boundaries are essential to any defensible GPU acceleration
 claim. Earlier three-platform measurements remain historical evidence tied to
 their original host implementation, not proof of an optimized-CPU advantage.
 
+
+An independent Oracle Cloud ARM64 CPU-only control further establishes
+implementation sensitivity outside x86: at 32~MiB AES-128-CTR, native
+OpenSSL-default transform throughput was approximately 4.03~GB/s,
+versus 209~MB/s for the recorded PyCryptodome path, while aggregate
+operation-envelope throughput increased from approximately 1.06~GB/s
+with one worker to 2.03~GB/s with two. These differently bounded
+observations are not compared directly with GPU measurements.
+
 The practical candidate is an application that already keeps its input and
 subsequent ciphertext consumer on the GPU; in such a pipeline encryption can
 potentially exploit device-resident computation without paying a full payload
