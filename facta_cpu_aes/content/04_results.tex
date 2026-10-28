@@ -10,7 +10,7 @@ Windows i5-10300H & PyCryptodome & 2877 & 1202\\
 Oracle Arm64 & OpenSSL default & 4030 & 1060\\
 Oracle Arm64 & OpenSSL armcap=0 & 218 & ---\\
 Oracle Arm64 & PyCryptodome & 209 & ---\\\bottomrule\end{tabular}
-\par\smallskip\footnotesize Transform and operation values are different measured intervals. Oracle operation-envelope throughput is shown for the default EVP path only; unavailable or nonmatching aggregates are not filled in.
+\par\smallskip\parbox{\linewidth}{\footnotesize Transform and operation values are different measured intervals. Oracle operation-envelope throughput is shown for the default EVP path only; unavailable or nonmatching aggregates are not filled in.}
 \end{table}
 
 The size dependency is shown separately in Fig.~\ref{fig:size}. On Windows, the small-message value at 1 KiB is dominated by a very short native interval; absolute rates at this scale are extremely sensitive to timer resolution, Python dispatch, and library overhead. Above 1 MiB the native EVP transform approaches a relatively stable multi-GB/s region, whereas the inspected PyCryptodome CTR path remains substantially slower. The Arm64 campaign shows a similarly strong separation of library paths across the tested sizes, but with its own software versions and hardware conditions. The two panels are intentionally not a matched platform speedup comparison.

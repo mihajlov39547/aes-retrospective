@@ -1,0 +1,44 @@
+# Primary DOCX build: template copy plus shared manuscript sources. No Pandoc.
+[CmdletBinding()]
+param([string]$PythonPath = '', [switch]$RenderPreview)
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+# Resolve a caller-supplied relative interpreter before changing directories.
+if ($PythonPath -and (Test-Path -LiteralPath $PythonPath)) {
+    $PythonPath = (Resolve-Path -LiteralPath $PythonPath).Path
+}
+Push-Location -LiteralPath $PSScriptRoot
+try {
+    if (-not $PythonPath) {
+        $PythonPath = Join-Path $PSScriptRoot '.venv-docx/Scripts/python.exe'
+        if (-not (Test-Path -LiteralPath $PythonPath)) { $PythonPath = Join-Path $PSScriptRoot '../sjee/.venv-docx/Scripts/python.exe' }
+        if (-not (Test-Path -LiteralPath $PythonPath)) { $PythonPath = 'python' }
+    }
+    if (-not (Get-Command $PythonPath -ErrorAction SilentlyContinue)) {
+        throw 'Python was not found. See README.md for DOCX setup.'
+    }
+    if (-not (Get-Command 'pdftocairo' -ErrorAction SilentlyContinue)) {
+        throw 'pdftocairo is required to embed vector figures with PNG fallbacks. Install TeX Live or Poppler.'
+    }
+    & $PythonPath -c 'import docx, pylatexenc, bibtexparser, latex2mathml, mathml2omml'
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Missing DOCX dependencies. Install requirements_docx.txt in .venv-docx.'
+    }
+    & $PythonPath (Join-Path $PSScriptRoot 'fill_facta_template_docx.py')
+    if ($LASTEXITCODE -ne 0) { throw "DOCX generation failed (exit $LASTEXITCODE)." }
+    if (-not (Test-Path -LiteralPath 'main_facta.docx')) { throw 'No DOCX output was created.' }
+    $report = Get-Content -LiteralPath 'build/docx/build_report.json' -Raw | ConvertFrom-Json
+    if ($report.warnings.Count -gt 0) {
+        throw ('DOCX validation reported warnings: ' + ($report.warnings -join '; '))
+    }
+    Write-Host "Validated $($report.tables) tables, $($report.figures) vector figures, $($report.equations) display equations and $($report.references) references."
+    if ($RenderPreview) {
+        & (Join-Path $PSScriptRoot 'render_facta_docx.ps1')
+    }
+    Write-Host "Built $(Join-Path $PSScriptRoot 'main_facta.docx') from an SJEE template copy."
+}
+catch {
+    Write-Error "Facta DOCX build failed: $_"
+    exit 1
+}
+finally { Pop-Location }

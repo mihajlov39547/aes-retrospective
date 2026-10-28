@@ -358,7 +358,7 @@ def read_manuscript():
     return data
 
 
-def resolve_links(data, contents):
+def resolve_links(data, contents, *, bibliography_order=False):
     """Resolve source labels and cite order independently of stale PDF aux files."""
     labels, cited = {}, []
     counters = dict(section=0, subsection=0, subsubsection=0, table=0, equation=0, figure=0)
@@ -410,6 +410,8 @@ def resolve_links(data, contents):
             raise ValueError(f'Unknown citation key: {key}')
     order = cited + ([k for k in by_key if k not in cited]
                      if data.get('include_uncited', True) else [])
+    if bibliography_order:
+        order = list(by_key)
     data['references'] = [by_key[k] for k in order]
     numbers = {key: i for i, key in enumerate(order, 1)}
 
@@ -769,8 +771,8 @@ def render(data, temporary):
         p.alignment = WD_ALIGN_PARAGRAPH.LEFT
     document.core_properties.title = data['title']
     document.core_properties.author = data['author']
-    document.core_properties.subject = 'SJEE manuscript draft'
-    document.core_properties.comments = 'Generated from content/*.tex and references.bib; edit those sources.'
+    document.core_properties.subject = data.get('subject', 'SJEE manuscript draft')
+    document.core_properties.comments = data.get('source_comment', 'Generated from content/*.tex and references.bib; edit those sources.')
     used = {v for el in body.iter() for k, v in el.attrib.items() if k.startswith('{http://schemas.openxmlformats.org/officeDocument/2006/relationships}')}
     for rid, rel in list(document.part.rels.items()):
         if rid not in used and rel.reltype.rsplit('/', 1)[-1] in ('image', 'oleObject'):
@@ -886,7 +888,7 @@ def main():
     for warning in warnings:
         print('WARNING:', warning)
     print('Preserved SJEE styles/page settings. Cleared sample headers. Original template unchanged.')
-    print('Source: content/*.tex and references.bib. Report: build/docx/build_report.json')
+    print(data.get('source_comment', 'Source: content/*.tex and references.bib.') + ' Report: build/docx/build_report.json')
 
 
 if __name__ == '__main__':
