@@ -1,49 +1,48 @@
-\section{Results}
-\subsection{Library-path sensitivity on two CPUs}
-Table~\ref{tab:impl} condenses the new CPU-only results at 32 MiB in CTR mode. Values are median throughputs of the five session-level medians. On Arm64, the default EVP path achieves approximately 4.03 GB/s at its native transformation boundary; the inspected PyCryptodome and masked-capability paths achieve about 0.21--0.22 GB/s. This more-than-one-order-of-magnitude separation is specific to the measured software paths. It does not show that Arm64 universally outperforms x86-64, and should not be presented as a pure hardware-instruction factor.
+\section{Experimental Results and Interpretation}
+\label{sec:results}
+\subsection{Effect of the library implementation}
+Table~\ref{tab:impl} summarizes AES-128-CTR throughput at 32 MiB. On Windows, the OpenSSL transform rate is 5537 MB/s, compared with 2877 MB/s for PyCryptodome. On Arm64, default OpenSSL reaches 4030 MB/s, whereas the masked OpenSSL configuration and PyCryptodome achieve 218 and 209 MB/s, respectively. These values are medians across five sessions for each configuration.
 
-\begin{table}[htbp]\centering\caption{AES-128-CTR, 32 MiB: reported throughput by CPU platform, implementation and timing boundary (decimal MB/s).}\label{tab:impl}\small
+\begin{table}[htbp]\centering\caption{AES-128-CTR, 32 MiB: throughput by platform, implementation and timing scope (decimal MB/s).}\label{tab:impl}\small
 \begin{tabular}{llrr}\toprule
-Host & Implementation & Transform & Operation\\\midrule
+Host & Implementation & Transform & Full call\\\midrule
 Windows i5-10300H & OpenSSL EVP & 5537 & 1479\\
 Windows i5-10300H & PyCryptodome & 2877 & 1202\\
-Oracle Arm64 & OpenSSL default & 4030 & 1060\\
+Oracle Arm64 & OpenSSL default & 4030 & ---\\
 Oracle Arm64 & OpenSSL armcap=0 & 218 & ---\\
 Oracle Arm64 & PyCryptodome & 209 & ---\\\bottomrule\end{tabular}
-\par\smallskip\parbox{\linewidth}{\footnotesize Transform and operation values are different measured intervals. Oracle operation-envelope throughput is shown for the default EVP path only; unavailable or nonmatching aggregates are not filled in.}
+\par\smallskip\parbox{\linewidth}{\footnotesize Transform and full-call rates use the intervals defined in Section~\ref{sec:method}. Full call denotes the instrumented operation. Dashes indicate results outside the Arm64 transform dataset analyzed here.}
 \end{table}
 
-The size dependency is shown separately in Fig.~\ref{fig:size}. On Windows, the small-message value at 1 KiB is dominated by a very short native interval; absolute rates at this scale are extremely sensitive to timer resolution, Python dispatch, and library overhead. Above 1 MiB the native EVP transform approaches a relatively stable multi-GB/s region, whereas the inspected PyCryptodome CTR path remains substantially slower. The Arm64 campaign shows a similarly strong separation of library paths across the tested sizes, but with its own software versions and hardware conditions. The two panels are intentionally not a matched platform speedup comparison.
+The Arm64 difference is large and repeatable within the recorded sessions. The default OpenSSL session medians range from 4018 to 4035 MB/s, while the masked configuration ranges from 217.4 to 218.4 MB/s and PyCryptodome from 208.8 to 209.5 MB/s. The approximately 19-fold throughput ratio between default OpenSSL and PyCryptodome therefore reflects a persistent difference between the evaluated paths. The reduction under capability masking also shows that OpenSSL's optimized capability selection is important on this host. Because the mask disables several features, the result cannot be attributed exclusively to AES instructions.
+
+Figure~\ref{fig:size} places the 32 MiB results in the context of message size. Larger payloads sustain substantially higher OpenSSL throughput than the alternative paths on each host. At 1 KiB, the native transform interval is very short, making the calculated rate more sensitive to timer resolution and call overhead. Large-buffer throughput should consequently not be used to predict the latency of short requests. The two panels describe separate software environments; differences between them are not estimates of an intrinsic x86-64 versus Arm64 performance ratio.
 
 \begin{figure}[htbp]\centering\includegraphics[width=.96\linewidth]{figures/ctr_size_curves.pdf}
-\caption{Size dependence of the AES-128-CTR transform boundary on (a) Windows x86-64 and (b) Oracle Arm64; original session summaries analyzed separately. The panels illustrate software paths, not an architecture ranking.}\label{fig:size}\end{figure}
+\caption{AES-128-CTR transform throughput versus payload size on (a) Windows x86-64 and (b) Oracle Arm64. Each panel compares implementations within one host.}\label{fig:size}\end{figure}
 
-The Windows transform ratio OpenSSL/PyCryptodome is about 1.9, but the operation-envelope improvement is closer to 1.2. These figures illustrate the sensitivity to timestamp placement. Crucially, some of this sensitivity is a wrapper-level effect: the Python-facing encryption path and native EVP inner interval do not make identical API calls. A system with a different caller, preallocated result buffers or cached contexts may obtain a different relationship.
-
-On Arm64, the default EVP transform rate is approximately 19 times the PyCryptodome path at the same payload size under the observed implementations. The broad feature-mask control closely approaches the PyCryptodome rate. Since the mask removes multiple capabilities, no isolated AES-instruction attribution is possible; differences in context state, provider dispatch, memory copying and language bindings remain alternative or additional explanations.
-
-\subsection{Cost of extending the measured boundary}
-Figure~\ref{fig:windows} shows the gap between transform-only and broader operation-envelope throughput at 32 MiB on Windows. OpenSSL inner transformation exceeds 5.5 GB/s but the broader calling operation is below 1.5 GB/s. PyCryptodome shows a smaller absolute difference, while its wrapper-level transform remains slower than EVP. These are not contradictory measurements: they include different work. A benchmark that publishes only the inner OpenSSL rate can overstate the throughput a simple Python caller obtains when allocation, cipher setup and copying are repeated for each request.
+\subsection{Effect of the timed software operation}
+Expanding the Windows timer from transformation to the instrumented operation changes the magnitude of the library difference (Fig.~\ref{fig:windows}). OpenSSL throughput decreases from 5537 to 1479 MB/s, while PyCryptodome decreases from 2877 to 1202 MB/s. The ratio of their aggregate rates consequently falls from approximately 1.93 to 1.23. Across sessions, the broader OpenSSL rate ranges from 1452 to 1625 MB/s and the PyCryptodome rate from 1179 to 1263 MB/s.
 
 \begin{figure}[htbp]\centering\includegraphics[width=.88\linewidth]{figures/windows_boundaries.pdf}
-\caption{Existing Windows measurements of AES-128-CTR at 32 MiB under two different execution boundaries. Both metrics are shown instead of selecting one favorable interval.}\label{fig:windows}\end{figure}
+\caption{AES-128-CTR throughput at 32 MiB on Windows: transform processing and the instrumented operation. The broader interval includes preparation, result handling and benchmark diagnostics.}\label{fig:windows}\end{figure}
 
-The Oracle experiment provides a complementary diagnostic. Its broader default-OpenSSL operation rate at 32 MiB is approximately 1.06 GB/s, compared with 4.03 GB/s at the native inner interval. A separate two-worker run increased aggregate operation-envelope throughput to approximately 2.03 GB/s in the original campaign. The two-worker observation is a system-level scaling diagnostic on that instance; it cannot be treated as a controlled CPU-core efficiency estimate or as a speedup over a GPU.
+The ordering remains the same, but the advantage is smaller when additional work is timed. Selecting the faster cipher path therefore does not produce an equally large improvement at every surrounding interface. Allocation, bindings, setup, result conversion and instrumentation contribute to the broader measurement, with different costs in each implementation. The measurements do not isolate their individual contributions, and subtracting aggregate medians would not provide a valid cost decomposition.
 
-\subsection{Key length and authenticated workload on Windows}
-Historical local AES-CBC measurements show that acceleration affects each key length differently. Table~\ref{tab:cbc} reports AES-NI-enabled and software AES throughput for 10 MiB CBC encryption. The ranking is consistent with a higher round count for longer AES keys, but measured ratios also depend on library implementation and setup conventions.
+For application design, the relevant implication is to measure the interface actually used by the service. The instrumented operation demonstrates the sensitivity to measurement scope, but its diagnostic overhead prevents treating 1479 or 1202 MB/s as a prediction of production throughput. Buffer reuse, persistent contexts and different language bindings could change the relationship and require separate evaluation.
 
-\begin{table}[htbp]\centering\caption{Historical 10 MiB CBC encryption on the Windows host (MB/s). These observations are not combined statistically with the later EVP campaign.}\label{tab:cbc}
-\begin{tabular}{lrrr}\toprule Key length & Software & AES-NI path & Reported gain\\\midrule
+\subsection{Key length and authenticated processing}
+The separate CBC experiment shows how key length affects both absolute throughput and relative acceleration (Table~\ref{tab:cbc}). Software encryption decreases from 225.1 MB/s for AES-128 to 174.9 MB/s for AES-256; the AES-NI path decreases from 531.6 to 474.0 MB/s. Nevertheless, the session-based acceleration factor increases from 2.37 to 2.71. Thus, a larger relative benefit from acceleration can coexist with lower absolute throughput. The pattern is consistent with the additional rounds required by longer keys, although the measured factors remain specific to this implementation and mode.
+
+\begin{table}[htbp]\centering\caption{AES-CBC encryption at 10 MiB on Windows (MB/s). Speedups are medians of session-level time ratios.}\label{tab:cbc}
+\begin{tabular}{lrrr}\toprule Key length & Software & AES-NI path & Speedup\\\midrule
 AES-128 & 225.1 & 531.6 & 2.37$\times$\\
 AES-192 & 198.5 & 504.3 & 2.53$\times$\\
 AES-256 & 174.9 & 474.0 & 2.71$\times$\\\bottomrule\end{tabular}\end{table}
 
-Although DES and triple DES were also measured in the historical investigation, their role is retrospective only. At 10 MiB, the corresponding software CBC encryption rates were approximately 87.4 and 32.6 MB/s; those values neither identify a modern deployment recommendation nor provide a matched cryptographic-security comparison. We do not expand that dataset into another algorithm-ranking table.
+Authenticated processing introduces a different workload. Table~\ref{tab:gcm} reports representative GCM sizes, and Fig.~\ref{fig:gcm} includes all five evaluated sizes. At 1 KiB, AES-128 encryption reaches 70.6 MB/s, while verified decryption reaches 38.1 MB/s. At 1 MiB, the corresponding rates rise to 1148.2 and 1131.4 MB/s. The encryption--decryption difference is therefore much more pronounced for short messages than for large buffers.
 
-Authentication changes the workload. Table~\ref{tab:gcm} summarizes existing AES-GCM measurements, including tag verification during decryption, at three representative sizes. Small payloads pay a relatively large fixed cost: at 1 KiB, verified decryption is approximately 38 MB/s, whereas at 1 MiB the AES-128 variant exceeds 1.1 GB/s. This is a workload-size effect within one implementation family, not an empirically measured isolated GHASH instruction cost.
-
-\begin{table}[htbp]\centering\caption{Existing authenticated AES-GCM throughput on Windows (decimal MB/s; encryption includes tag generation and decryption includes verification).}\label{tab:gcm}\small
+\begin{table}[htbp]\centering\caption{AES-GCM payload throughput on Windows (MB/s). Encryption includes tag generation; decryption includes verification. Cipher-object construction is excluded.}\label{tab:gcm}\small
 \begin{tabular}{llrr}\toprule Payload & Variant & Encrypt & Verify/decrypt\\\midrule
 1 KiB & AES-128-GCM & 70.6 & 38.1\\
 1 KiB & AES-256-GCM & 70.1 & 38.0\\
@@ -52,9 +51,9 @@ Authentication changes the workload. Table~\ref{tab:gcm} summarizes existing AES
 100 MiB & AES-128-GCM & 1179.7 & 1189.3\\
 100 MiB & AES-256-GCM & 1100.4 & 1080.4\\\bottomrule\end{tabular}\end{table}
 
-Figure~\ref{fig:gcm} uses a logarithmic payload axis to emphasize the transition from per-message overhead to sustained processing. At 16 KiB, authenticated decryption remains substantially slower than encryption, but at 1 MiB the gap is much smaller. This pattern is compatible with amortization of fixed work and mode-specific API behavior; the experiment did not independently time GHASH instructions or cryptographic setup at every size.
-
 \begin{figure}[htbp]\centering\includegraphics[width=.88\linewidth]{figures/gcm_payload_size.pdf}
-\caption{Existing Windows AES-GCM encryption and authenticated-decryption throughput for AES-128 and AES-256 over five payload sizes. Lines connect descriptive aggregate values, not a fitted scaling law.}\label{fig:gcm}\end{figure}
+\caption{AES-GCM encryption and verified-decryption throughput on Windows for five payload sizes. Lines connect the measured aggregate rates.}\label{fig:gcm}\end{figure}
 
-The apparent plateau at larger payloads supports an interpretation in which fixed per-message work is amortized, but the measurements do not identify exact allocation, hashing or memory-bandwidth fractions. CBC and GCM values must remain separate: GCM returns an authenticated result, while CBC by itself does not.
+This pattern is consistent with fixed processing costs being distributed over more payload bytes as message size increases. The plateau at larger sizes suggests that additional payload then increases processing time approximately in proportion to its length over the measured range. AES-256 generally achieves lower throughput than AES-128, as expected from its additional rounds. However, the experiment does not separately time authentication multiplication, verification or allocation, so it cannot assign the observed size dependence to one component.
+
+These GCM results complement the CTR and CBC observations by showing why a benchmark must represent the required cryptographic service. GCM includes authentication, whereas the CTR and CBC workloads reported here measure confidentiality operations. Their throughput figures therefore describe different functionality. The GCM timer also excludes object construction, so a service handling independent messages must additionally account for setup and its surrounding request-processing costs.
