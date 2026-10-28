@@ -28,7 +28,7 @@ experiments/history-index/
 
 # Local tooling
 .powershell/
-univerzitetska-misao/
+univerzitetska-misao/*.pdf
 
 # Secrets / environment
 .env

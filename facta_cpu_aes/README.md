@@ -30,7 +30,7 @@ python -m venv facta_cpu_aes/.venv-docx
 
 The optional preview uses LibreOffice, with the same executable fallback as SJEE; `render_facta_docx.ps1 -SofficePath <path>` accepts an explicit executable. It writes `build/docx_preview/main_facta.pdf`; Word pagination may differ.
 
-The PDF wrapper `facta.sty` loads the shared SJEE style directly. The DOCX adapter reuses the SJEE renderer and validator, including vector figures with PNG fallbacks and editable native Word equations. Both builds read metadata, abstract, keywords and body from `content/`. References remain in `content/07_references.tex`; DOCX citation numbers preserve the PDF's manual bibliography order. No Pandoc or separate Word manuscript source is used.
+The PDF wrapper `facta.sty` loads the shared SJEE style directly. The DOCX adapter reuses the SJEE renderer and validator, including vector figures with PNG fallbacks and editable native Word equations. Both builds read metadata, abstract, keywords and body from `content/`. References are maintained in `references.bib`. Use `\cite{key}` in the manuscript; PDF uses BibTeX with `unsrtnat`, exactly as SJEE does. DOCX uses the same shared BibTeX reader and numbers cited entries in first-citation order. Both formats omit uncited entries. No Pandoc or separate Word manuscript source is used.
 
 `build/docx/build_report.json` records template/source hashes and validation results; `build/docx/manuscript.json` is generated intermediate data. PDF logs are retained for diagnosis. The original SJEE Word template is never modified.
 
