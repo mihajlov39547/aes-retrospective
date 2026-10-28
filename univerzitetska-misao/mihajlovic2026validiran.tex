@@ -1,0 +1,405 @@
+\documentclass[11pt,b5paper]{article}
+
+% ============================================================
+% FORMAT ZA UNIVERZITETSKU MISAO
+% ============================================================
+\usepackage[
+  top=2.5cm,
+  bottom=2.5cm,
+  left=2.5cm,
+  right=2.5cm
+]{geometry}
+
+% Compile with XeLaTeX or LuaLaTeX
+\usepackage{fontspec}
+\IfFontExistsTF{Times New Roman}
+  {\setmainfont{Times New Roman}}
+  {\setmainfont{TeX Gyre Termes}}
+
+% Bez babel-a: srpska latinica radi direktno kroz XeLaTeX + fontspec.
+
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{caption}
+\AtBeginDocument{%
+  \renewcommand{\tablename}{Tabela}%
+  \renewcommand{\figurename}{Slika}%
+  \renewcommand{\refname}{Literatura}%
+}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xurl}
+\urlstyle{same}
+\usepackage{titlesec}
+\usepackage{placeins}
+
+% Literatura se unosi ručno na kraju rada.
+
+% ============================================================
+% PODEŠAVANJA STILA
+% ============================================================
+\pagestyle{empty}
+\linespread{1.0}
+\setlength{\parindent}{0.5cm}
+\setlength{\parskip}{0pt}
+
+\captionsetup{
+  font=small,
+  labelfont=bf,
+  justification=raggedright,
+  singlelinecheck=false
+}
+
+\titleformat{\section}
+  {\normalfont\fontsize{12}{14}\bfseries\MakeUppercase}
+  {\thesection.}
+  {0.5em}
+  {}
+
+\titleformat{\subsection}
+  {\normalfont\fontsize{11}{13}\bfseries}
+  {\thesubsection.}
+  {0.5em}
+  {}
+
+\titleformat{\subsubsection}
+  {\normalfont\fontsize{11}{13}\bfseries}
+  {\thesubsubsection.}
+  {0.5em}
+  {}
+
+\titlespacing*{\section}{0pt}{10pt}{6pt}
+\titlespacing*{\subsection}{0pt}{8pt}{4pt}
+\titlespacing*{\subsubsection}{0pt}{6pt}{3pt}
+
+\begin{document}
+
+% ============================================================
+% NASLOV, APSTRAKTI I KLJUČNE REČI
+% ============================================================
+
+\begin{center}
+{\fontsize{13}{15}\selectfont\bfseries
+VALIDIRAN METODOLOŠKI OKVIR ZA MIKROBENCHMARKING KRIPTOGRAFSKIH PRIMITIVA U CPU/GPU OKRUŽENJU}
+\end{center}
+
+\vspace{0.25cm}
+
+\section*{Apstrakt}
+
+Rad prikazuje validiran i ponovljiv metodološki okvir za eksperimentalno poređenje kriptografskih primitiva i njihovih implementacija u heterogenom CPU/GPU okruženju. Polazeći od DES/TDEA--AES retrospektive, istraživanje ne uvodi novi kriptografski algoritam, već ispituje kako izbor implementacione putanje i obuhvata merenja utiče na interpretaciju performansi. Poseban akcenat stavljen je na upareno poređenje CPU AES-NI i CUDA AES-128 implementacije, pri čemu se razdvajaju izolovano resident/kernel merenje i praktični end-to-end cevovod obrade (\emph{pipeline}) sa prenosima podataka između hosta i uređaja. Rezultati pokazuju da GPU resident merenje može dati visoku propusnost na većim ulazima, ali da uključivanje transfera i sinhronizacije menja zaključak u korist AES-NI putanje u testiranom okruženju. Demonstracije redukovanog prostora ključeva i avalanche efekta koriste se kao kontrolisani pokazatelji granica tumačenja performansnih i sigurnosnih metrika.
+
+\vspace{0.2cm}
+\noindent\textbf{Ključne reči:} AES, DES, TDEA, AES-NI, CUDA, mikrobenchmarking, GPU, kriptografske performanse, avalanche efekat, reproduktivnost
+
+\vspace{0.45cm}
+
+\begin{center}
+{\fontsize{13}{15}\selectfont\bfseries
+A VALIDATED METHODOLOGICAL FRAMEWORK FOR MICROBENCHMARKING CRYPTOGRAPHIC PRIMITIVES IN A CPU/GPU ENVIRONMENT}
+\end{center}
+
+\vspace{0.25cm}
+
+\section*{Abstract}
+
+This paper presents a validated and reproducible methodological framework for experimentally comparing cryptographic primitives and their implementations in a heterogeneous CPU/GPU environment. Starting from a DES/TDEA--AES retrospective, the study does not introduce a new cryptographic algorithm, but examines how implementation paths and measurement scope affect the interpretation of performance results. Particular emphasis is placed on a paired comparison between CPU AES-NI and CUDA AES-128 implementations, with a clear separation between isolated resident/kernel measurements and practical end-to-end pipelines that include host-device data transfers. The results show that GPU resident measurements can achieve high throughput for larger inputs, while the inclusion of transfer and synchronization costs changes the conclusion in favor of the AES-NI path in the tested environment. Reduced-keyspace and avalanche-effect demonstrations are used as controlled indicators of the limits of interpreting performance and security-related metrics.
+
+\vspace{0.2cm}
+\noindent\textbf{Keywords:} AES, DES, TDEA, AES-NI, CUDA, microbenchmarking, GPU, cryptographic performance, avalanche effect, reproducibility
+
+% ============================================================
+% RAD
+% ============================================================
+
+\section{Uvod}
+
+Savremena primena kriptografskih algoritama ne zavisi samo od njihove matematičke definicije, već i od načina na koji su implementirani, od hardverske podrške na kojoj se izvršavaju i od metodologije kojom se meri njihova performansa. Isti algoritam može imati bitno različitu cenu u softverskoj implementaciji, uz hardversku akceleraciju instrukcijama procesora ili u GPU okruženju. Zbog toga poređenja zasnovana samo na jednoj vrednosti propusnosti često nisu dovoljna za pravilno tumačenje rezultata.
+
+DES i TDEA imaju pre svega istorijski značaj: FIPS 46-3 i FIPS 81 su povučeni, dok je TDEA prema NIST preporukama u fazi ukidanja za savremenu upotrebu (National Institute of Standards and Technology, 1999; National Bureau of Standards, 1980; Barker \& Mouha, 2017; Barker \& Roginsky, 2019). AES ostaje centralni savremeni standard za simetrično šifrovanje (National Institute of Standards and Technology, 2023). Međutim, poređenje ovih algoritama ne može se svesti samo na brzinu. Neophodno je razlikovati veličinu ključa, veličinu bloka, režim rada, autentifikaciju, hardversku akceleraciju i obuhvat merenja. Režimi rada blokovskih šifara, uključujući CBC, CTR i GCM, dodatno menjaju značenje performansnog rezultata, jer ne obavljaju svi isti kriptografski posao (Dworkin, 2001; Dworkin, 2007).
+
+Polazni problem ovog rada jeste pitanje kako metodološki korektno uporediti kriptografske primitive i njihove implementacije u savremenom heterogenom okruženju. U praksi se često susreću tvrdnje o visokoj GPU propusnosti koje se zasnivaju na izolovanom merenju kernela, bez uključivanja troškova prenosa podataka između hosta i uređaja. Sa druge strane, savremene CPU implementacije AES-a često koriste AES-NI instrukcije (Intel Corporation, 2012), zbog čega poređenje GPU implementacije samo sa softverskim CPU AES-om može dovesti do neadekvatnih zaključaka.
+
+Doprinos rada je prvenstveno metodološki. Rad ne uvodi novi kriptografski algoritam, novu kriptoanalitičku metodu niti tvrdi da postiže state-of-the-art GPU performanse. Umesto toga, uspostavlja se validiran, ponovljiv i dokumentovan okvir za mikrobenchmarking kriptografskih primitiva. Okvir obuhvata validacione kapije pre merenja, smoke/pilot/study profile, fiksirane seedove, izvoz sirovih i agregiranih rezultata, dokumentovanje izvornog koda i agregaciju po nezavisnim sesijama.
+
+Centralno mesto zauzima upareni protokol poređenja CPU AES-NI i CUDA AES-128 implementacije, uz jasno razdvajanje resident/kernel i end-to-end pipeline obuhvata. Fixed-key GPU propusnost nije isto što i brzina pretrage velikog broja ključeva; resident GPU rezultat nije isto što i aplikacioni end-to-end rezultat; avalanche efekat nije dokaz ukupne kriptografske sigurnosti. Upravo ova razdvajanja čine osnovni istraživački fokus rada. 
+
+\section{Pregled literature i istraživački jaz}
+
+Prethodna istraživanja o AES izvršavanju na GPU platformama uglavnom se bave optimizacijom samog kernela i povećanjem propusnosti izolovanog šifarskog jezgra. Rani CUDA radovi i specifikacije režima rada podržavaju izbor ECB i CTR režima kao pogodnih kandidata za paralelizaciju, jer se blokovi mogu obrađivati nezavisno, dok CBC enkripcija sadrži zavisnost između susednih blokova (Dworkin, 2001; Iwai, Nishikawa, \& Kurokawa, 2012). Iwai, Nishikawa i Kurokawa (2012) analizirali su AES implementaciju na CUDA GPU platformi i razmatrali i varijante u kojima se obrada preklapa sa transferom podataka. Savremeniji radovi idu dalje ka T-table, shared-memory, bitsliced i low-level optimizacijama. Tezcan (2021), na primer, pokazuje da pažljivo uklanjanje shared-memory bank konflikata može dovesti do veoma visokih AES-128 propusnosti na RTX 2070 Super GPU-u.
+
+Takvi radovi su važni za razumevanje gornjih granica GPU AES performansi, ali često odgovaraju na drugačije pitanje od ovog rada. U fokusu optimizacionih radova najčešće je maksimalna device-resident ili kernel-only propusnost, često na snažnijem GPU hardveru, uz drugačije merne obuhvate i drugačije CPU reference. Nasuprot tome, praktično poređenje CPU i GPU izvršavanja zahteva da se jasno odvoje dve metrike: izolovano računanje nad podacima koji su već na GPU-u i kompletan host-driven tok koji uključuje H2D transfer, kernel, D2H transfer i sinhronizaciju. Bez te razlike, GPU rezultat može izgledati značajno povoljnije nego što jeste u aplikacionom scenariju.
+
+Istraživački jaz ovog rada nalazi se upravo u tom razdvajanju. Rad ne pokušava da reprodukuje rekordne CUDA AES implementacije niti da uvede novu optimizacionu tehniku. Umesto toga, cilj je da se u jedinstvenom i validiranom protokolu uporede softversko CPU izvršavanje, CPU AES-NI, CUDA baseline i laka CUDA optimizacija, pri čemu se posebno prijavljuju rezidentno merenje na uređaju, odnosno izolovano merenje kernela (\emph{resident/kernel-only}) i end-to-end pipeline rezultati. Time se doprinos pomera sa pitanja „koji je najbrži kernel” na pitanje „šta se realno meri kada se različite kriptografske putanje porede pod istim eksperimentalnim pravilima”.
+
+Ovakvo pozicioniranje je posebno važno zato što AES-NI predstavlja snažnu savremenu CPU referencu. Poređenje GPU implementacije samo sa softverskim CPU AES-om može preceniti praktičan dobitak GPU-a. Zato ovaj rad koristi AES-NI kao primarnu CPU referencu u uparenom CPU--GPU eksperimentu, dok se softverski CPU AES zadržava kao sekundarna i retrospektivna putanja. Na taj način se GPU performanse ne posmatraju izolovano, već u odnosu na realističniju savremenu CPU akceleraciju.
+
+\section{Metodološki okvir}
+
+Eksperimentalna platforma obuhvata Intel Core i5-10300H procesor, 16 GB RAM-a i NVIDIA GeForce GTX 1650 Ti GPU sa 4096 MiB VRAM-a. Korišćeni su Windows 10, Python 3.12, PyCryptodome, CuPy i CUDA runtime. GPU okruženje radi u WDDM režimu, što je relevantno za tumačenje host-driven GPU merenja, predaje komandi, sinhronizacije i mogućih režijskih troškova. PyCryptodome je korišćen kao kriptografska biblioteka za CPU eksperimente i referentne provere, pri čemu se rezultati tumače kao performanse konkretnih bibliotečkih putanja, a ne kao univerzalne performanse algoritama (PyCryptodome, n.d.). U ovom radu se WDDM tretira samo kao mogući izvor sistemske varijabilnosti, bez tvrdnje da je izolovani uzrok izmerenih razlika (Microsoft, n.d.-a; NVIDIA Corporation, n.d.-a).
+
+Primenjen je pristup \emph{validation-first}: poznati test vektori i funkcionalne provere prethode merenju. Neuspešna validacija zaustavlja eksperiment. Smoke provere ispituju funkcionalnost i izvoz, pilot služi proveri protokola, a finalne tabele koriste study sesije. Sesije imaju dokumentovane seedove, argumente i broj ponavljanja; zagrevanje ne ulazi u statistiku. Metadata, validation, raw i summary zapisi, prateći izveštaji i source snapshot/hash vrednosti omogućavaju sledljivost.
+
+Primarni CPU tajmer je monotoni \texttt{perf\_counter\_ns()}. Za $N$ obrađenih bajtova i zidno vreme $T$ u sekundama propusnost je:
+\begin{equation}
+R = \frac{N}{10^6 T},
+\label{eq:throughput}
+\end{equation}
+u decimalnim MB/s. CPU transform-only merenja uključuju transformacioni poziv, ali ne obavezno punu aplikacionu cenu. CUDA resident meri kernel nad podacima već pripremljenim na uređaju, dok pipeline uključuje pinned H2D $\rightarrow$ kernel $\rightarrow$ D2H tok. Pinned memorija i CUDA događaji koriste se u skladu sa preporukama za merenje CUDA performansi (NVIDIA Corporation, n.d.-c; CuPy, n.d.-a).
+
+Glavne performansne vrednosti agregiraju se kao medijane pet sesijskih medijana, bez objedinjavanja raw raspodela i bez uklanjanja ekstremnih vrednosti. Faktori ubrzanja računaju se po sesijskim odnosima medijana vremena. Ovakav okvir sprečava mešanje različitih obuhvata merenja: izolovani kernel, kompletan pipeline i CPU transformacija nisu ista metrika.
+
+Stabilnost rezultata procenjivana je kroz pet nezavisnih study sesija sa različitim seedovima. Run-to-run varijabilnost analizirana je na nivou sesijskih medijana, pri čemu se standardna devijacija i raspon koriste kao opisne mere stabilnosti, a ne kao formalni intervali poverenja. Zbog toga se termin ponovljivost u ovom radu odnosi na dokumentovan i ponovljiv eksperimentalni protokol, validacione zapise i stabilnost agregiranih sesijskih rezultata, a ne na statističku generalizaciju na druge platforme.
+
+\section{Rezultati i diskusija}
+
+\subsection{CPU poređenja DES/TDEA/AES i AES-NI akceleracija}
+
+Prvi eksperimenti postavljaju istorijsko i implementaciono polazište. DES, troključni TDEA i AES-128/192/256 poređeni su u CBC režimu bez padding-a. DES/TDEA rezultati imaju retrospektivnu funkciju, jer ovi algoritmi nisu preporuka za novu zaštitu podataka. AES se zatim meri softverski i uz AES-NI putanju. Validacija koristi poznate CBC test vektore iz standardizovanih izvora (National Bureau of Standards, 1980; Dworkin, 2001).
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{CPU performanse CBC i AES-NI eksperimenata. Propusnost je izražena u decimalnim MB/s; prikazane su agregirane medijane study sesija.}
+\label{tab:cpu-summary}
+\begin{tabular}{llrrr}
+\toprule
+Eksperiment & Algoritam / operacija & Software & AES-NI & Faktor \\
+\midrule
+CBC, 10 MiB enc. & DES      & 87.4  & --    & -- \\
+CBC, 10 MiB enc. & TDEA     & 32.6  & --    & -- \\
+CBC, 10 MiB enc. & AES-128  & 223.8 & --    & -- \\
+CBC, 10 MiB enc. & AES-192  & 198.9 & --    & -- \\
+CBC, 10 MiB enc. & AES-256  & 174.6 & --    & -- \\
+\midrule
+AES-NI, 10 MiB enc. & AES-128 & 225.1 & 531.6 & 2.37$\times$ \\
+AES-NI, 10 MiB dec. & AES-128 & 223.7 & 557.2 & 2.47$\times$ \\
+AES-NI, 10 MiB enc. & AES-192 & 198.5 & 504.3 & 2.53$\times$ \\
+AES-NI, 10 MiB dec. & AES-192 & 195.5 & 517.8 & 2.65$\times$ \\
+AES-NI, 10 MiB enc. & AES-256 & 174.9 & 474.0 & 2.71$\times$ \\
+AES-NI, 10 MiB dec. & AES-256 & 171.4 & 480.4 & 2.80$\times$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Rezultati pokazuju očekivanu razliku između istorijskih i savremenih implementacija. AES varijante u softverskom CBC režimu znatno su brže od TDEA, dok se AES-NI akceleracijom postiže dodatno ubrzanje od približno 2.4--2.8 puta u korišćenoj biblioteci, veličinama ulaza i definisanom mernom obuhvatu. Ovi faktori zavise od implementacije biblioteke, veličine ulaza i metodologije merenja, pa se ne tumače kao univerzalni AES-NI faktori. Ovi faktori ne predstavljaju meru sigurnosti, već cenu konkretne implementacione putanje. Veći broj rundi kod AES-192 i AES-256 smanjuje softversku propusnost, ali AES-NI značajno menja praktičnu cenu izvršavanja.
+
+\subsection{AES-GCM kao savremeni AEAD režim}
+
+AES-GCM proširuje analizu na autentifikovanu enkripciju. Eksperiment koristi AES-128-GCM i AES-256-GCM, 96-bitni nonce, 128-bitni tag i fiksni AAD od 16 bajtova, uz validaciju tag-a i odbijanje izmenjenog šifrata, tag-a ili AAD-a. GCM nije direktna zamena za CBC u smislu istog posla: pored poverljivosti, uključuje i autentifikaciju (Dworkin, 2007).
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Propusnost AES-GCM autentifikovane enkripcije na CPU AES-NI putanji. Propusnost je izražena u decimalnim MB/s.}
+\label{tab:gcm-summary}
+\begin{tabular}{llrr}
+\toprule
+Veličina & Algoritam & Enkripcija & Dekripcija \\
+\midrule
+1 KiB   & AES-128-GCM & 70.6   & 38.1 \\
+1 KiB   & AES-256-GCM & 70.1   & 38.0 \\
+1 MiB   & AES-128-GCM & 1148.2 & 1131.4 \\
+1 MiB   & AES-256-GCM & 1059.3 & 1059.8 \\
+100 MiB & AES-128-GCM & 1179.7 & 1189.3 \\
+100 MiB & AES-256-GCM & 1100.4 & 1080.4 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Kod malih ulaza dominiraju fiksni troškovi, dok se na 1 MiB i većim ulazima AES-128-GCM kreće oko 1.13--1.19 GB/s, a AES-256-GCM oko 1.06--1.10 GB/s. Rezultat potvrđuje da savremeni režimi rada zahtevaju pažljivo tumačenje: CBC i GCM propusnosti ne predstavljaju istu funkcionalnost, pa se ne smeju tumačiti kao izolovana cena istog kriptografskog zadatka.
+
+\subsection{CUDA baseline i upareno CPU--GPU poređenje}
+
+CUDA AES-128 baseline koristi čitljivi bajtovski kernel, jednu nit po 16-bajtnom AES bloku i 128 niti po CUDA bloku. ECB je korišćen isključivo kao mikrobenchmark nezavisnih blokova, dok CTR omogućava paralelizabilnu transformaciju definisanu u SP 800-38A (Dworkin, 2001). GPU implementacija se oslanja na CUDA/CuPy mehanizme za korisničke CUDA kernele i merenje događajima (NVIDIA Corporation, n.d.-b; CuPy, n.d.-a; CuPy, n.d.-b; Okuta et al., 2017).
+
+Centralni eksperiment poredi CPU software, CPU AES-NI, CUDA baseline i laki kandidat CUDA v1 u istom ECB/CTR protokolu. Za svaki režim, veličinu i ponavljanje koriste se isti plaintext, ključ i početni CTR brojač. Ključna metodološka vrednost eksperimenta nije samo u faktorima ubrzanja, već u razdvajanju dva pitanja: kolika je propusnost izolovanog GPU jezgra kada su podaci već na uređaju, i kolika je praktična propusnost kada se uključe transferi i sinhronizacija.
+
+\begin{table}[htbp]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\caption{Finalno upareno AES-128 CPU--GPU poređenje, u decimalnim MB/s. K označava resident kernel-only, E2E end-to-end pipeline.}
+\label{tab:cpu-gpu-summary}
+\begin{tabular}{llrrrrrr}
+\toprule
+ & & \multicolumn{2}{c}{CPU} & \multicolumn{2}{c}{CUDA baseline} & \multicolumn{2}{c}{CUDA v1} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+Režim & Veličina & Soft. & AES-NI & K & E2E & K & E2E \\
+\midrule
+ECB & 1 MiB  & 275.7 & 1793.5 & 4901.1 & 1339.1 & 5149.3 & 1320.1 \\
+ECB & 16 MiB & 280.5 & 1904.8 & 3667.5 & 1080.0 & 3424.4 & 866.2 \\
+ECB & 32 MiB & 282.1 & 1909.9 & 4753.5 & 1202.0 & 4792.6 & 1214.5 \\
+\midrule
+CTR & 1 MiB  & 257.4 & 1381.7 & 5017.1 & 1313.1 & 4853.9 & 1291.0 \\
+CTR & 16 MiB & 264.3 & 1446.5 & 3655.6 & 1103.1 & 3576.2 & 1074.0 \\
+CTR & 32 MiB & 266.3 & 1455.8 & 4800.6 & 1204.5 & 4877.7 & 1209.1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Resident GPU rezultati nadmašuju CPU AES-NI za veće ulaze, ali pipeline rezultati ne. Na primer, kod CTR 1 MiB resident baseline daje 5017.1 MB/s, dok end-to-end pipeline daje 1313.1 MB/s, ispod CPU AES-NI rezultata od 1381.7 MB/s. Na 32 MiB CTR resident rezultat je 4800.6 MB/s, ali pipeline ostaje 1204.5 MB/s, dok je CPU AES-NI 1455.8 MB/s. Time se pokazuje da resident i end-to-end merenja odgovaraju različitim istraživačkim pitanjima.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Faktori prema CPU AES-NI: medijane pet sesijskih odnosa vremena. I označava resident/isolated, P end-to-end pipeline; vrednost veća od jedan označava kraće GPU vreme.}
+\label{tab:gpu-speedups}
+\begin{tabular}{llrrrr}
+\toprule
+Režim & Veličina & Baseline I & v1 I & Baseline P & v1 P \\
+\midrule
+ECB & 1 MiB  & 2.65 & 2.91 & 0.75 & 0.77 \\
+ECB & 16 MiB & 1.89 & 1.77 & 0.58 & 0.42 \\
+ECB & 32 MiB & 2.50 & 2.52 & 0.63 & 0.64 \\
+\midrule
+CTR & 1 MiB  & 3.66 & 3.54 & 0.95 & 0.91 \\
+CTR & 16 MiB & 2.58 & 2.51 & 0.75 & 0.74 \\
+CTR & 32 MiB & 3.30 & 3.40 & 0.82 & 0.83 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Svi pipeline faktori ostaju ispod jedan. Najbliži je CTR 1 MiB sa 0.95, dok su na 32 MiB CTR faktori 0.82--0.83, a ECB 0.63--0.64. Laka CUDA optimizacija v1 ne daje dosledno poboljšanje: u nekim resident slučajevima rezultat raste, ali u ECB 16 MiB pipeline opada. Ovo pokazuje da optimizacija jezgra ne mora automatski poboljšati aplikacioni tok, jer transferi, sinhronizacija i runtime troškovi mogu promeniti zaključak.
+
+\subsection{Redukovani prostor ključeva i avalanche demonstracija}
+
+Demonstracija redukovanog prostora ključeva koristi AES-128 ECB sa softverskom putanjom i promenljivih 24 bita ključa. Tajmer uključuje formiranje ključa, novi cipher/key schedule, enkripciju dva bloka, alokaciju, poređenje i stop-on-match kontrolu. Cilj nije optimizovana pretraga punog prostora, već ilustracija eksponencijalnog rasta iscrpne pretrage.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{CPU demonstracija pretraživanja redukovanog 24-bitnog prostora AES-128 ključeva.}
+\label{tab:keyspace}
+\begin{tabular}{lrrr}
+\toprule
+Scenario & Kandidati & Vreme (s) & Kandidata/s \\
+\midrule
+start  & 1             & 0.0000088 & 113\,636 \\
+middle & 8\,388\,609   & 54.38     & 154\,263 \\
+end    & 16\,777\,216  & 109.01    & 153\,903 \\
+random & 6\,800\,733   & 43.00     & 154\,079 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+End scenario obilazi ceo redukovani prostor za oko 109 s pri 153.9 hiljada kandidata/s i jedini je osnov za linearne ekstrapolacije. Međutim, ta stopa nije DES/TDEA/GPU stopa, niti procena paralelnih farmi, ASIC/FPGA ili specifičnih kriptoanalitičkih napada. Double-DES meet-in-the-middle menja model napada i zahteva poseban protokol vremena, memorije i lažnih pogodaka, pa nije uključen u ovu studiju.
+
+Avalanche demonstracija meri Hammingovo rastojanje između osnovnog bloka šifrata i bloka dobijenog nakon promene jednog bita plaintext-a ili jednog efektivnog bita ključa. Ideja difuzije prati klasično razumevanje rasprostiranja statističke zavisnosti u kriptografskim sistemima (Shannon, 1949). Rezultat se normalizuje veličinom bloka: 64 bita za DES/TDEA i 128 bita za AES.
+
+\begin{table}[htbp]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\caption{Raspodele avalanche efekta pri promeni jednog bita otvorenog teksta (P) ili efektivnog ključa (K).}
+\label{tab:avalanche}
+\begin{tabular}{llrrrrr}
+\toprule
+Algoritam & Var. & Blok & Med. HD & Pros. HD & Med. norm. & Pros. norm. \\
+\midrule
+DES     & P & 64  & 32 & 32.02 & 0.50 & 0.5003 \\
+DES     & K & 64  & 32 & 31.94 & 0.50 & 0.4990 \\
+TDEA    & P & 64  & 32 & 31.97 & 0.50 & 0.4995 \\
+TDEA    & K & 64  & 32 & 32.02 & 0.50 & 0.5004 \\
+AES-128 & P & 128 & 64 & 63.99 & 0.50 & 0.4999 \\
+AES-128 & K & 128 & 64 & 63.99 & 0.50 & 0.4999 \\
+AES-192 & P & 128 & 64 & 64.03 & 0.50 & 0.5002 \\
+AES-192 & K & 128 & 64 & 64.09 & 0.50 & 0.5007 \\
+AES-256 & P & 128 & 64 & 63.98 & 0.50 & 0.4998 \\
+AES-256 & K & 128 & 64 & 64.00 & 0.50 & 0.5000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+DES/TDEA medijana je 32 od 64 bita, a AES medijana 64 od 128 bita, odnosno 0.5 u svih deset grupa. Normalizovani proseci su približno 0.4990--0.5007. Ovo je očekivan pokazatelj lokalne difuzije, ali nije dokaz kriptografske sigurnosti, kompletan SAC/BIC test niti osnov za rangiranje algoritama.
+
+\FloatBarrier
+\section{Zaključak}
+
+U radu je prikazan validiran i ponovljiv metodološki okvir za mikrobenchmarking kriptografskih primitiva u heterogenom CPU/GPU okruženju. Osnovni doprinos nije u novom algoritmu ili kriptoanalitičkoj metodi, već u eksperimentalnoj organizaciji koja razdvaja validaciju, obuhvat merenja, agregaciju rezultata i granice tumačenja. Takav pristup omogućava da se performanse DES/TDEA--AES familije algoritama i njihovih implementacija tumače u kontekstu konkretne platforme.
+
+Rezultati potvrđuju da izbor obuhvata merenja presudno utiče na zaključak. AES-NI značajno smanjuje cenu AES izvršavanja na CPU-u. CUDA AES-128 može postići visoku resident/kernel propusnost kada su podaci već dostupni na uređaju, ali u praktičnom end-to-end pipeline scenariju prednost izolovanog GPU kernela nestaje u testiranom okruženju. Time se pokazuje da resident i end-to-end merenja odgovaraju različitim istraživačkim pitanjima.
+
+Pokušaj lake CUDA optimizacije dodatno pokazuje da optimizacija kernela ne mora automatski dovesti do boljeg aplikacionog rezultata. Poboljšanje izolovanog koda može biti poništeno memorijskim ponašanjem, redosledom rada, transferima ili drugim sistemskim troškovima. Zbog toga GPU performanse treba analizirati u dva sloja: kao računarsku propusnost jezgra i kao propusnost celokupnog toka podataka.
+
+Demonstracija redukovanog prostora ključeva i avalanche analiza dopunjuju performansni deo rada, ali su ograničene u tumačenju. Redukovani prostor ključeva ilustruje eksponencijalni rast iscrpne pretrage, bez tvrdnje o napadu na pune prostore. Avalanche rezultati pokazuju očekivanu raspodelu promene oko polovine bloka, ali ne predstavljaju dokaz ukupne sigurnosti.
+
+Budući rad može ići u dva pravca. Prvi je dublja GPU optimizacija AES kernela, uključujući shared-memory T-table dizajne sa kontrolom bank konflikata, bitsliced/PTX implementacije i detaljnije merenje occupancy-ja, register pressure-a i memorijskih obrazaca. Drugi pravac je optimizacija samog pipeline-a, kroz chunking, \texttt{cudaMemcpyAsync}, non-default stream-ove i preklapanje transfera i računanja, što NVIDIA dokumentacija i tehnički blogovi navode kao uslovljeno pinned memorijom, asinkronim kopiranjem i odgovarajućim stream-ovima (NVIDIA Corporation, n.d.-c; Harris, 2012). Ovaj drugi pravac je posebno relevantan za rezultate ovog rada, jer finalno poređenje pokazuje da transferni i runtime troškovi mogu poništiti resident dobitak kernela. Dodatno, merenja na Linux/TCC okruženju, uz praćenje takta, temperature, potrošnje i Nsight Systems tragova, omogućila bi jasnije razdvajanje algoritamskih, drajverskih i sistemskih efekata.
+
+Najvažniji zaključak rada jeste da se kriptografske performanse ne mogu korektno tumačiti bez jasnog metodološkog okvira. Fixed-key throughput nije candidate-check stopa; resident GPU rezultat nije aplikacioni end-to-end rezultat; difuzija nije sigurnosni dokaz. Validacioni postupci, upareni protokoli, dokumentovani seedovi, metapodaci i agregacija po sesijama čine osnovu reproduktivnog poređenja kriptografskih implementacija.
+
+% ============================================================
+% LITERATURA
+% ============================================================
+\section*{Literatura}
+
+{\fontsize{10}{12}\selectfont
+\raggedright
+\sloppy
+
+\begin{enumerate}
+\item Barker, E., \& Mouha, N. (2017). \textit{Recommendation for the Triple Data Encryption Algorithm (TDEA) Block Cipher}. NIST Special Publication 800-67 Rev. 2. DOI: 10.6028/NIST.SP.800-67r2
+
+\item Barker, E., \& Roginsky, A. (2019). \textit{Transitioning the Use of Cryptographic Algorithms and Key Lengths}. NIST Special Publication 800-131A Rev. 2. DOI: 10.6028/NIST.SP.800-131Ar2
+
+\item CuPy. (n.d.-a). \textit{Performance Best Practices}. \url{https://docs.cupy.dev/en/stable/user_guide/performance.html}
+
+\item CuPy. (n.d.-b). \textit{cupy.RawKernel}. \url{https://docs.cupy.dev/en/stable/reference/generated/cupy.RawKernel.html}
+
+\item Dworkin, M. (2001). \textit{Recommendation for Block Cipher Modes of Operation: Methods and Techniques}. NIST Special Publication 800-38A. DOI: 10.6028/NIST.SP.800-38A
+
+\item Dworkin, M. (2007). \textit{Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM) and GMAC}. NIST Special Publication 800-38D. DOI: 10.6028/NIST.SP.800-38D
+
+\item Harris, M. (2012). \textit{How to Overlap Data Transfers in CUDA C/C++}. NVIDIA Technical Blog. \url{https://developer.nvidia.com/blog/how-overlap-data-transfers-cuda-cc/}
+
+\item Intel Corporation. (2012). \textit{Intel Advanced Encryption Standard Instructions (AES-NI)}. \url{https://www.intel.com/content/www/us/en/developer/articles/technical/advanced-encryption-standard-instructions-aes-ni.html}
+
+\item Iwai, K., Nishikawa, N., \& Kurokawa, T. (2012). Acceleration of AES encryption on CUDA GPU. \textit{International Journal of Networking and Computing}, 2(1), 131--145. DOI: 10.15803/ijnc.2.1\_131
+
+\item Microsoft. (n.d.-a). \textit{GPU Preemption}. Microsoft Learn. \url{https://learn.microsoft.com/en-us/windows-hardware/drivers/display/gpu-preemption}
+
+\item Microsoft. (n.d.-b). \textit{Timeout Detection and Recovery (TDR)}. Microsoft Learn. \url{https://learn.microsoft.com/en-us/windows-hardware/drivers/display/timeout-detection-and-recovery}
+
+\item National Bureau of Standards. (1980). \textit{DES Modes of Operation}. FIPS PUB 81. \url{https://csrc.nist.gov/pubs/fips/81/final}
+
+\item National Institute of Standards and Technology. (1999). \textit{Data Encryption Standard (DES)}. FIPS 46-3. \url{https://csrc.nist.gov/pubs/fips/46-3/final}
+
+\item National Institute of Standards and Technology. (2023). \textit{Advanced Encryption Standard (AES)}. FIPS 197, Update 1. DOI: 10.6028/NIST.FIPS.197-upd1
+
+\item NVIDIA Corporation. (n.d.-a). \textit{CUDA Installation Guide for Microsoft Windows}. \url{https://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/}
+
+\item NVIDIA Corporation. (n.d.-b). \textit{CUDA C++ Programming Guide}. Pristupljeno 2026. \url{https://docs.nvidia.com/cuda/cuda-c-programming-guide/}
+
+\item NVIDIA Corporation. (n.d.-c). \textit{CUDA C++ Best Practices Guide}. Pristupljeno 2026. \url{https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/}
+
+\item Okuta, R., Unno, Y., Nishino, D., Hido, S., \& Loomis, C. (2017). CuPy: A NumPy-compatible library for NVIDIA GPU calculations. \textit{Proceedings of Workshop on Machine Learning Systems (LearningSys) in NeurIPS 2017}. \url{https://cupy.dev/}
+
+\item PyCryptodome. (n.d.). \textit{PyCryptodome documentation}. \url{https://pycryptodome.readthedocs.io/}
+
+\item Shannon, C. E. (1949). Communication theory of secrecy systems. \textit{Bell System Technical Journal}, 28(4), 656--715. DOI: 10.1002/j.1538-7305.1949.tb00928.x
+
+\item Tezcan, C. (2021). Optimization of Advanced Encryption Standard on Graphics Processing Units. \textit{IEEE Access}, 9, 67315--67326. DOI: 10.1109/ACCESS.2021.3077551
+\end{enumerate}
+
+}
+
+% ============================================================
+% SUMMARY NA ENGLESKOM -- IDE POSLE LITERATURE
+% ============================================================
+
+\section*{SUMMARY}
+
+This paper presented a validated methodological framework for microbenchmarking cryptographic primitives in a heterogeneous CPU/GPU environment. The study was motivated by the need to distinguish between algorithmic performance, implementation-specific behavior and measurement scope. Instead of introducing a new cryptographic algorithm or a new cryptanalytic method, the paper focused on reproducibility, validation and careful interpretation of benchmark results.
+
+The central part of the study was a paired comparison between CPU AES-NI and CUDA AES-128 implementations. The results showed that isolated GPU resident/kernel measurements can reach high throughput for larger buffers, but that the inclusion of host-to-device and device-to-host transfers, synchronization and pipeline overhead changes the practical conclusion in the tested environment. Therefore, resident and end-to-end measurements should be interpreted as answers to different research questions.
+
+Additional reduced-keyspace and avalanche-effect demonstrations were included as controlled experiments. The reduced-keyspace experiment illustrated the exponential growth of exhaustive search, while the avalanche analysis showed that one-bit changes in plaintext or effective key bits produced distributions centered around one half of the ciphertext block. Both demonstrations were deliberately limited in interpretation: they do not represent full-space attacks or proofs of cryptographic security.
+
+The main conclusion is that cryptographic benchmarks require a clear methodological framework. Fixed-key throughput is not a candidate-check rate; a resident GPU result is not an application-level end-to-end result; and diffusion indicators are not security proofs. Validation gates, paired protocols, documented seeds, metadata and session-level aggregation provide a basis for reproducible and carefully interpreted comparisons of cryptographic implementations.
+
+\end{document}
