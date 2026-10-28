@@ -46,3 +46,15 @@ The SJEE layout is used intentionally as requested. These outputs do not claim c
 6. If SJEE includes the same exact CPU baseline observations, disclosure/citation of related submitted work may be required. Verify substantial overlap before submission.
 
 **Verification to do before submission:** reconcile all numbers with the original archive summaries; inspect each DOCX page in the official template; check citation bibliographic metadata; inspect journal rules and copyright/warranty paperwork; disclose relevant overlapping submissions to the editor.
+
+## Reproduce the contribution analysis and Figure 2
+
+```powershell
+python facta_cpu_aes/analyze_evidence.py
+python facta_cpu_aes/plot_windows_boundaries.py
+./facta_cpu_aes/build_facta.ps1 -Target All
+```
+
+Run these commands from the repository root. The analysis requires only Python's standard library and reads the existing Windows/Oracle CSV summaries plus the two Oracle study archives under `experiments/results/`. It verifies campaign metadata, correctness records and source hashes, reconstructs Oracle operation durations, and writes `build/evidence/audit.json`. It never runs benchmark code. The plot script requires matplotlib (used version: 3.11.2) and regenerates `figures/windows_boundaries.pdf` from the verified Windows summaries. Figure generation is separate from the unchanged document build scripts.
+
+See `REVISION_REPORT.md` for the exact ratios, Oracle provenance, second-Windows-system exclusion decision and validation results.

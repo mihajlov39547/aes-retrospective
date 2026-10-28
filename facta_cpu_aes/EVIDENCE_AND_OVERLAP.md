@@ -10,7 +10,7 @@
 | Windows i5, 32 MiB CTR EVP ~5.54 GB/s native transform | `evidence/windows_phase1_session_summaries.csv`, `openssl_default`, CTR, 33554432 bytes, `transform`; original `windows-phase1-single-study.zip` | Measured |
 | Windows i5, 32 MiB CTR EVP ~1.48 GB/s operation envelope | Same file, `operation_envelope` | Measured |
 | Windows i5, 32 MiB PyCryptodome 2.88 / 1.20 GB/s | Same file, two boundaries | Measured |
-| Oracle operation-envelope and two-worker results | Not included in the revised manuscript; the copied single-worker CSV supplies transform summaries only | Original draft values require a separate audit before reuse |
+| Oracle operation-envelope: 1059.553471 MB/s single, 2031.118743 MB/s two-worker aggregate | Original oracle-phase1-single-study.tar.gz and oracle-phase1-multicore-study.tar.gz raw timestamps, validated metadata and source; analyze_evidence.py | Verified retrospective derivation; ratio 1.916957, nonpaired campaigns |
 | CBC AES-128/192/256 software vs AES-NI | `evidence/09_eksperimentalna_analiza.tex`, section `Uticaj AES-NI` | Historical separate campaign |
 | Windows AES-128/256 GCM rates, validation and AAD policy | Same, section `AES-GCM autentifikovana enkripcija`; also `mihajlovic2026validiran(1).pdf` | Historical separate campaign |
 | DES/TDEA contextual comparisons | Removed from the revised manuscript to keep the focus on AES implementation and timing scope | Original evidence retained |
@@ -22,3 +22,5 @@
 This manuscript explicitly does NOT claim native AES instruction causation, a universal CPU architecture speed ranking, complete operation-envelope symmetry, or a new AES implementation. Independent novelty from reinterpreting the existing datasets is inherently more modest than from conducting a new experimental study. Reviewer acceptance is uncertain.
 
 The editorial revision adds ranges of the five session medians for the 32 MiB CTR results, calculated directly from the copied CSVs. These are descriptive ranges, not confidence intervals. The instrumented operation includes benchmark diagnostics; it is not production application latency. See `REVISION_REPORT.md`.
+
+Current scientific revision: Section 4.2 is centered on Windows attenuation and throughput retention. The Oracle operation audit now resolves the earlier provenance gap. The i7 historical mode contrast remains excluded for focus and SJEE overlap. Exact calculations, hashes and decisions are recorded in `REVISION_REPORT.md` and generated `build/evidence/audit.json`.
