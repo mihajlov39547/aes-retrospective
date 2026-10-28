@@ -1,4 +1,4 @@
-# Primary DOCX build: template copy plus shared manuscript sources. No Pandoc.
+﻿# Primary DOCX build: template copy plus shared manuscript sources. No Pandoc.
 [CmdletBinding()]
 param([string]$PythonPath = '', [switch]$RenderPreview)
 Set-StrictMode -Version Latest
@@ -18,9 +18,9 @@ try {
         throw 'Python was not found. See README.md for DOCX setup.'
     }
     if (-not (Get-Command 'pdftocairo' -ErrorAction SilentlyContinue)) {
-        throw 'pdftocairo is required to embed vector figures with PNG fallbacks. Install TeX Live or Poppler.'
+        throw 'pdftocairo is required to embed 300 dpi JPEG and TIFF figures. Install TeX Live or Poppler.'
     }
-    & $PythonPath -c 'import docx, pylatexenc, bibtexparser, latex2mathml, mathml2omml'
+    & $PythonPath -c 'import docx, pylatexenc, bibtexparser, latex2mathml, mathml2omml, PIL'
     if ($LASTEXITCODE -ne 0) {
         throw 'Missing DOCX dependencies. Install requirements_docx.txt in .venv-docx.'
     }
@@ -31,11 +31,11 @@ try {
     if ($report.warnings.Count -gt 0) {
         throw ('DOCX validation reported warnings: ' + ($report.warnings -join '; '))
     }
-    Write-Host "Validated $($report.tables) tables, $($report.figures) vector figures, $($report.equations) display equations and $($report.references) references."
+    Write-Host "Validated $($report.tables) tables, $($report.figures) figures, $($report.equations) display equations and $($report.references) references."
     if ($RenderPreview) {
         & (Join-Path $PSScriptRoot 'render_facta_docx.ps1')
     }
-    Write-Host "Built $(Join-Path $PSScriptRoot 'main_facta.docx') from an SJEE template copy."
+    Write-Host "Built $(Join-Path $PSScriptRoot 'main_facta.docx') from the official Facta template."
 }
 catch {
     Write-Error "Facta DOCX build failed: $_"

@@ -1,35 +1,36 @@
-# Optional visual review only. No effect on the primary main.pdf build.
+# Render the generated DOCX with Microsoft Word; never overwrite the LaTeX PDF.
 [CmdletBinding()]
-param([string]$SofficePath = '')
-Set-StrictMode -Version Latest
+param()
+# Word exposes optional COM arguments through late binding.
+Set-StrictMode -Off
 $ErrorActionPreference = 'Stop'
-if (-not $SofficePath) {
-    $SofficePath = 'soffice.exe'
-    if (-not (Get-Command $SofficePath -ErrorAction SilentlyContinue)) {
-        $SofficePath = Join-Path $env:TEMP 'sjee-lo-review/extracted/program/soffice.exe'
-    }
-}
-$executable = (Get-Command $SofficePath -ErrorAction Stop).Source
-$review = Join-Path $PSScriptRoot 'build/docx_preview'
+$review = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot 'build/docx_preview'))
 New-Item -ItemType Directory -Path $review -Force | Out-Null
-$source = Join-Path $PSScriptRoot 'main_facta.docx'
-$snapshot = Join-Path $review 'main_facta.docx'
-[System.IO.File]::WriteAllBytes($snapshot, [System.IO.File]::ReadAllBytes($source))
-$profile = Join-Path $review ('lo-profile-' + [guid]::NewGuid().ToString('N'))
-$profileUri = ([System.Uri]($profile + '\')).AbsoluteUri.TrimEnd('/')
-$arguments = @(('"-env:UserInstallation=' + $profileUri + '"'), '--headless',
-    '--convert-to', 'pdf:writer_pdf_Export', '--outdir', ('"' + $review + '"'),
-    ('"' + $snapshot + '"'))
-$process = Start-Process -FilePath $executable -ArgumentList $arguments -WindowStyle Hidden `
-    -PassThru -RedirectStandardOutput (Join-Path $review 'render.log') `
-    -RedirectStandardError (Join-Path $review 'render_errors.log')
-$null = $process.Handle
-if (-not $process.WaitForExit(60000)) {
-    Stop-Process -Id $process.Id -ErrorAction SilentlyContinue
-    throw 'DOCX preview renderer timed out.'
+$snapshot = Join-Path $review ('review-' + [guid]::NewGuid().ToString('N') + '.docx')
+Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'main_facta.docx') -Destination $snapshot -Force
+$word = $null
+$document = $null
+try {
+    $word = New-Object -ComObject Word.Application
+    $word.Visible = $false
+    $word.DisplayAlerts = 0
+    $word.AutomationSecurity = 3
+    Write-Host 'Opening DOCX in Word for visual verification...'
+    $document = $word.Documents.Open($snapshot, $false, $true)
+    Write-Host 'Exporting Word layout to PDF...'
+    [string]$pdf = Join-Path $review ('review-' + [guid]::NewGuid().ToString('N') + '.pdf')
+    [int]$pdfFormat = 17
+    $document.SaveAs2([ref]$pdf, [ref]$pdfFormat)
+} finally {
+    if ($null -ne $document) { $document.Close(0); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($document) }
+    if ($null -ne $word) { $word.Quit(); [void][Runtime.InteropServices.Marshal]::ReleaseComObject($word) }
 }
-if ($process.ExitCode -ne 0 -or -not (Test-Path -LiteralPath (Join-Path $review 'main_facta.pdf'))) {
-    throw "DOCX preview failed (exit $($process.ExitCode)). Verify the LibreOffice installation; inspect build/docx_preview/render_errors.log."
-}
-Write-Host "Rendered Word preview: $(Join-Path $review 'main_facta.pdf')"
-Write-Host 'LibreOffice pagination can differ from Word. main.pdf was not changed.'
+
+$finalPdf = Join-Path $review 'main_facta.pdf'
+Move-Item -LiteralPath $pdf -Destination $finalPdf -Force
+$info = & pdfinfo $finalPdf
+if ($LASTEXITCODE -ne 0) { throw 'PDF preview inspection failed.' }
+$pages = [int](($info | Select-String '^Pages:').Line -replace '^Pages:\s*', '')
+@{ renderer = 'Microsoft Word'; pages = $pages; pdf = $finalPdf; source = $snapshot } |
+    ConvertTo-Json | Set-Content -LiteralPath (Join-Path $review 'render_report.json') -Encoding utf8
+Write-Host "Rendered $pages pages: $finalPdf"

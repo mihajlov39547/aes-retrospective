@@ -1,0 +1,15 @@
+{
+  "source": "fu_elecenerg_instructions_for_authors.doc",
+  "source_sha256": "ef95814dd9f1fa2d7e8b876f2faf03b422a56c05b70524510ddcdd13f03b26a0",
+  "template": "Facta_Template.docx",
+  "template_sha256": "5a782f426dd0d676b75a9467f34edae14e4d0d11e68f19d4e34b219135ceb939",
+  "policy": "Written instructions override conflicting stored styles; page geometry retained.",
+  "differences": [
+    "Title spacing normalized to 30/0 pt instead of stored 18/18.",
+    "Author normalized to 10 pt instead of stored 12.",
+    "Affiliation spacing after normalized to 18 pt instead of stored 12.",
+    "Subheading left indent normalized to 5 pt instead of about 14.",
+    "Abstract indentation uses actual template 0.75 cm (425 twips), correcting prose unit typo.",
+    "Publication header/footer metadata replaced with editable placeholders."
+  ]
+}

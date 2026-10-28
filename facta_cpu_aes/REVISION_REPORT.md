@@ -70,3 +70,7 @@ Cloud capability-diagnostic guidance was checked against the official OpenSSL 3.
 ## Validation
 
 PDF and DOCX builds passed. The PDF has 14 pages including references, retaining the original fonts and geometry. The manuscript has three figures and three tables (six combined), two display equations and ten references. The abstract contains 127 whitespace-delimited words. PDF/DOCX citation numbering and structural validation are checked. PDF pages are visually reviewed; DOCX pagination in Microsoft Word has not been verified and can differ from the PDF.
+
+## Official Facta Word layout update
+
+The DOCX now uses the supplied Facta template, with affiliation, linked ORCID, corresponding-author footnote, six keywords, journal styles and 300 dpi JPEG/TIFF figures. Microsoft Word renders 13 pages; the separately rebuilt LaTeX proof remains 14 pages. Template conversion and the complete PDF/DOCX/Word-preview build passed. See `TEMPLATE_REVIEW.md` for the template comparison and publication fields left for completion.

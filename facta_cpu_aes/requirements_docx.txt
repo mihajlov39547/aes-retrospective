@@ -1,1 +1,2 @@
 -r ../sjee/requirements_docx.txt
+Pillow==12.2.0
