@@ -1,7 +1,7 @@
 """Convert the two UTF-8 LaTeX sources using Pandoc and existing journal styles.
 
-Only Python's standard library is required. Layout work is deliberately deferred;
-the source .tex files remain the single source of manuscript content.
+The source .tex files remain the single source of manuscript content. SJEE
+styles are adapted to the local author instructions by docx_layout.py.
 """
 import argparse
 from collections import Counter
@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import xml.etree.ElementTree as ET
 from zipfile import ZipFile
+from docx_layout import format_docx
 
 ROOT = Path(__file__).resolve().parent
 STEMS = {'article': 'mihajlovic2026validiran', 'cover': 'naslovna_mihajlovic2026validiran'}
@@ -63,6 +64,9 @@ def build(kind, reference, build_dir):
     # numeric year after \selectfont. Word uses the reference document's fonts.
     prepared = re.sub(r'\\fontsize\s*\{[^{}]*\}\s*\{[^{}]*\}', '', text)
     prepared = re.sub(r'\\selectfont\b', '', prepared)
+    # Pandoc leaks booktabs trim/range arguments into the first header cell.
+    # Word table borders are applied by docx_layout instead.
+    prepared = re.sub(r'\\cmidrule(?:\[[^\]]*\])?(?:\([^)]*\))?\{[^{}]*\}', '', prepared)
     intermediate = build_dir / f'{stem}.tex'
     intermediate.write_text(prepared, encoding='utf-8')
     ast_path = build_dir / f'{stem}.json'
@@ -83,6 +87,7 @@ def build(kind, reference, build_dir):
     pandoc([ast_path, '--from=json', '--to=docx', '--standalone', '--number-sections',
             '--metadata=lang:sr-Latn', '--reference-doc', reference, '-o', temporary],
            build_dir / f'{stem}-write.log')
+    layout_report = format_docx(temporary, kind)
     with ZipFile(temporary) as archive:
         bad = archive.testzip()
         if bad:
@@ -97,13 +102,14 @@ def build(kind, reference, build_dir):
         for required in ('2026', '0009-0006-7979-0341', 'marko.mihajlovic.23@singimail.rs'):
             if required not in visible:
                 raise ValueError(f'Cover lost required content: {required}')
-    elif not all(heading in visible for heading in ('Apstrakt', 'Abstract', 'Literatura', 'SUMMARY')):
+    elif not all(heading in visible for heading in ('Apstrakt', 'Abstract', 'LITERATURA', 'SUMMARY')):
         raise ValueError('Article lost an abstract, references or summary heading')
     output = ROOT / f'{stem}.docx'
     shutil.copyfile(temporary, output)
     print(f'Built {output} ({tables} tables, {equations} display equations, {references} references)')
     return dict(source=str(source), source_sha256=sha256(source.read_bytes()).hexdigest(),
-                output=str(output), tables=tables, equations=equations, references=references)
+                output=str(output), tables=tables, equations=equations, references=references,
+                layout=layout_report)
 
 
 def main():

@@ -4,6 +4,8 @@
 % FORMAT ZA UNIVERZITETSKU MISAO
 % ============================================================
 \usepackage[
+  paperwidth=17.6cm,
+  paperheight=25.1cm,
   top=2.5cm,
   bottom=2.5cm,
   left=2.5cm,
@@ -131,7 +133,7 @@ Centralno mesto zauzima upareni protokol poređenja CPU AES-NI i CUDA AES-128 im
 
 \section{Pregled literature i istraživački jaz}
 
-Prethodna istraživanja o AES izvršavanju na GPU platformama uglavnom se bave optimizacijom samog kernela i povećanjem propusnosti izolovanog šifarskog jezgra. Rani CUDA radovi i specifikacije režima rada podržavaju izbor ECB i CTR režima kao pogodnih kandidata za paralelizaciju, jer se blokovi mogu obrađivati nezavisno, dok CBC enkripcija sadrži zavisnost između susednih blokova (Dworkin, 2001; Iwai, Nishikawa, \& Kurokawa, 2012). Iwai, Nishikawa i Kurokawa (2012) analizirali su AES implementaciju na CUDA GPU platformi i razmatrali i varijante u kojima se obrada preklapa sa transferom podataka. Savremeniji radovi idu dalje ka T-table, shared-memory, bitsliced i low-level optimizacijama. Tezcan (2021), na primer, pokazuje da pažljivo uklanjanje shared-memory bank konflikata može dovesti do veoma visokih AES-128 propusnosti na RTX 2070 Super GPU-u.
+Prethodna istraživanja o AES izvršavanju na GPU platformama uglavnom se bave optimizacijom samog kernela i povećanjem propusnosti izolovanog šifarskog jezgra. Rani CUDA radovi i specifikacije režima rada podržavaju izbor ECB i CTR režima kao pogodnih kandidata za paralelizaciju, jer se blokovi mogu obrađivati nezavisno, dok CBC enkripcija sadrži zavisnost između susednih blokova (Dworkin, 2001; Iwai et al., 2012). Iwai et al. (2012) analizirali su AES implementaciju na CUDA GPU platformi i razmatrali i varijante u kojima se obrada preklapa sa transferom podataka. Savremeniji radovi idu dalje ka T-table, shared-memory, bitsliced i low-level optimizacijama. Tezcan (2021), na primer, pokazuje da pažljivo uklanjanje shared-memory bank konflikata može dovesti do veoma visokih AES-128 propusnosti na RTX 2070 Super GPU-u.
 
 Takvi radovi su važni za razumevanje gornjih granica GPU AES performansi, ali često odgovaraju na drugačije pitanje od ovog rada. U fokusu optimizacionih radova najčešće je maksimalna device-resident ili kernel-only propusnost, često na snažnijem GPU hardveru, uz drugačije merne obuhvate i drugačije CPU reference. Nasuprot tome, praktično poređenje CPU i GPU izvršavanja zahteva da se jasno odvoje dve metrike: izolovano računanje nad podacima koji su već na GPU-u i kompletan host-driven tok koji uključuje H2D transfer, kernel, D2H transfer i sinhronizaciju. Bez te razlike, GPU rezultat može izgledati značajno povoljnije nego što jeste u aplikacionom scenariju.
 
@@ -161,6 +163,8 @@ Stabilnost rezultata procenjivana je kroz pet nezavisnih study sesija sa različ
 \subsection{CPU poređenja DES/TDEA/AES i AES-NI akceleracija}
 
 Prvi eksperimenti postavljaju istorijsko i implementaciono polazište. DES, troključni TDEA i AES-128/192/256 poređeni su u CBC režimu bez padding-a. DES/TDEA rezultati imaju retrospektivnu funkciju, jer ovi algoritmi nisu preporuka za novu zaštitu podataka. AES se zatim meri softverski i uz AES-NI putanju. Validacija koristi poznate CBC test vektore iz standardizovanih izvora (National Bureau of Standards, 1980; Dworkin, 2001).
+
+Tabela 1 prikazuje objedinjene rezultate CPU CBC i AES-NI eksperimenata.
 
 \begin{table}[htbp]
 \centering
@@ -193,6 +197,8 @@ Rezultati pokazuju očekivanu razliku između istorijskih i savremenih implement
 
 AES-GCM proširuje analizu na autentifikovanu enkripciju. Eksperiment koristi AES-128-GCM i AES-256-GCM, 96-bitni nonce, 128-bitni tag i fiksni AAD od 16 bajtova, uz validaciju tag-a i odbijanje izmenjenog šifrata, tag-a ili AAD-a. GCM nije direktna zamena za CBC u smislu istog posla: pored poverljivosti, uključuje i autentifikaciju (Dworkin, 2007).
 
+Tabela 2 prikazuje propusnost AES-GCM enkripcije i dekripcije za tri veličine ulaza.
+
 \begin{table}[htbp]
 \centering
 \small
@@ -220,6 +226,8 @@ CUDA AES-128 baseline koristi čitljivi bajtovski kernel, jednu nit po 16-bajtno
 
 Centralni eksperiment poredi CPU software, CPU AES-NI, CUDA baseline i laki kandidat CUDA v1 u istom ECB/CTR protokolu. Za svaki režim, veličinu i ponavljanje koriste se isti plaintext, ključ i početni CTR brojač. Ključna metodološka vrednost eksperimenta nije samo u faktorima ubrzanja, već u razdvajanju dva pitanja: kolika je propusnost izolovanog GPU jezgra kada su podaci već na uređaju, i kolika je praktična propusnost kada se uključe transferi i sinhronizacija.
 
+Tabela 3 prikazuje propusnost uparenih CPU i GPU putanja po režimu i veličini ulaza.
+
 \begin{table}[htbp]
 \centering
 \small
@@ -244,6 +252,8 @@ CTR & 32 MiB & 266.3 & 1455.8 & 4800.6 & 1204.5 & 4877.7 & 1209.1 \\
 \end{table}
 
 Resident GPU rezultati nadmašuju CPU AES-NI za veće ulaze, ali pipeline rezultati ne. Na primer, kod CTR 1 MiB resident baseline daje 5017.1 MB/s, dok end-to-end pipeline daje 1313.1 MB/s, ispod CPU AES-NI rezultata od 1381.7 MB/s. Na 32 MiB CTR resident rezultat je 4800.6 MB/s, ali pipeline ostaje 1204.5 MB/s, dok je CPU AES-NI 1455.8 MB/s. Time se pokazuje da resident i end-to-end merenja odgovaraju različitim istraživačkim pitanjima.
+
+Tabela 4 prikazuje faktore ubrzanja GPU putanja u odnosu na CPU AES-NI.
 
 \begin{table}[htbp]
 \centering
@@ -271,6 +281,8 @@ Svi pipeline faktori ostaju ispod jedan. Najbliži je CTR 1 MiB sa 0.95, dok su 
 
 Demonstracija redukovanog prostora ključeva koristi AES-128 ECB sa softverskom putanjom i promenljivih 24 bita ključa. Tajmer uključuje formiranje ključa, novi cipher/key schedule, enkripciju dva bloka, alokaciju, poređenje i stop-on-match kontrolu. Cilj nije optimizovana pretraga punog prostora, već ilustracija eksponencijalnog rasta iscrpne pretrage.
 
+Tabela 5 prikazuje vreme i broj kandidata za četiri scenarija redukovane pretrage.
+
 \begin{table}[htbp]
 \centering
 \small
@@ -291,6 +303,8 @@ random & 6\,800\,733   & 43.00     & 154\,079 \\
 End scenario obilazi ceo redukovani prostor za oko 109 s pri 153.9 hiljada kandidata/s i jedini je osnov za linearne ekstrapolacije. Međutim, ta stopa nije DES/TDEA/GPU stopa, niti procena paralelnih farmi, ASIC/FPGA ili specifičnih kriptoanalitičkih napada. Double-DES meet-in-the-middle menja model napada i zahteva poseban protokol vremena, memorije i lažnih pogodaka, pa nije uključen u ovu studiju.
 
 Avalanche demonstracija meri Hammingovo rastojanje između osnovnog bloka šifrata i bloka dobijenog nakon promene jednog bita plaintext-a ili jednog efektivnog bita ključa. Ideja difuzije prati klasično razumevanje rasprostiranja statističke zavisnosti u kriptografskim sistemima (Shannon, 1949). Rezultat se normalizuje veličinom bloka: 64 bita za DES/TDEA i 128 bita za AES.
+
+Tabela 6 prikazuje sirove i normalizovane mere Hammingovog rastojanja.
 
 \begin{table}[htbp]
 \centering
