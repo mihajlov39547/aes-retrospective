@@ -67,20 +67,62 @@ def build(kind, reference, build_dir):
     # Pandoc leaks booktabs trim/range arguments into the first header cell.
     # Word table borders are applied by docx_layout instead.
     prepared = re.sub(r'\\cmidrule(?:\[[^\]]*\])?(?:\([^)]*\))?\{[^{}]*\}', '', prepared)
+    equation_labels = {}
+    for number, equation in enumerate(re.findall(r'\\begin\{equation\}(.*?)\\end\{equation\}', text, re.S), 1):
+        for label in re.findall(r'\\label\{([^{}]+)\}', equation):
+            equation_labels[label] = number
+    prepared = re.sub(r'\\eqref\{([^{}]+)\}',
+                      lambda m: f'({equation_labels[m[1]]})', prepared)
+    prepared = re.sub(r'width=(\d*\.?\d*)\\linewidth',
+                      lambda m: f'width={12.6 * float(m[1] or 1):g}cm', prepared)
+    # Word cannot embed PDF figures. Rasterize a build-only copy at print resolution.
+    figures = re.findall(r'\\includegraphics(?:\[[^\]]*\])?\{([^{}]+)\}', text)
+    for figure in dict.fromkeys(figures):
+        if Path(figure).suffix.lower() != '.pdf':
+            continue
+        if not shutil.which('pdftocairo'):
+            raise RuntimeError('pdftocairo is required to convert PDF figures for DOCX')
+        target = build_dir / Path(figure).stem
+        subprocess.run(['pdftocairo', '-png', '-singlefile', '-r', '300',
+                        str(ROOT / figure), str(target)], check=True, capture_output=True)
+        prepared = prepared.replace('{' + figure + '}', '{' + target.with_suffix('.png').as_posix() + '}')
     intermediate = build_dir / f'{stem}.tex'
     intermediate.write_text(prepared, encoding='utf-8')
     ast_path = build_dir / f'{stem}.json'
-    pandoc([intermediate, '--from=latex', '--to=json', '-o', ast_path],
+    bib_options = ['--citeproc', '--bibliography', ROOT / 'references.bib',
+                   '--metadata=reference-section-title:Literatura'] if '\\addbibresource' in text else []
+    pandoc([intermediate, '--from=latex', '--to=json', *bib_options, '-o', ast_path],
            build_dir / f'{stem}-read.log')
     ast = json.loads(ast_path.read_text(encoding='utf-8'))
+    if bib_options:
+        # Citeproc appends references; preserve the manuscript's bibliography-before-summary order.
+        blocks = ast['blocks']
+        refs = [b for b in blocks if b['t'] == 'Div' and b['c'][0][0] == 'refs']
+        headings = [b for b in blocks if b['t'] == 'Header' and
+                    any(n.get('t') == 'Str' and n.get('c') == 'Literatura' for n in nodes(b))]
+        blocks[:] = [b for b in blocks if b not in refs + headings]
+        summary_index = next(i for i, b in enumerate(blocks) if b['t'] == 'Header' and
+                             any(n.get('t') == 'Str' and n.get('c') == 'SUMMARY' for n in nodes(b)))
+        blocks[summary_index:summary_index] = headings + refs
+        ast_path.write_text(json.dumps(ast, ensure_ascii=False), encoding='utf-8')
     all_nodes = list(nodes(ast))
     counts = Counter(n['t'] for n in all_nodes)
     if counts['RawBlock'] or counts['RawInline']:
         raise ValueError(f'{stem}: unconverted LaTeX in Pandoc AST; inspect {ast_path}')
     expected_tables = len(re.findall(r'\\begin\{table\}', text))
     expected_equations = len(re.findall(r'\\begin\{equation\}', text))
-    expected_references = len(re.findall(r'\\item\b', text))
-    references = sum(len(n['c'][1]) for n in all_nodes if n['t'] == 'OrderedList')
+    if bib_options:
+        cited = {key.strip() for keys in re.findall(r'\\(?:citep|citet|cite|parencite|textcite)(?:\[[^\]]*\])*\{([^{}]+)\}', text)
+                 for key in keys.split(',')}
+        reference_ids = {n['c'][0][0][4:] for n in all_nodes
+                         if n['t'] == 'Div' and n['c'][0][0].startswith('ref-')}
+        if reference_ids != cited:
+            raise ValueError(f'Bibliography mismatch: cited {cited}, rendered {reference_ids}')
+        expected_references = len(cited)
+        references = len(reference_ids)
+    else:
+        expected_references = len(re.findall(r'\\item\b', text))
+        references = sum(len(n['c'][1]) for n in all_nodes if n['t'] == 'OrderedList')
     if counts['Table'] != expected_tables or references != expected_references:
         raise ValueError(f'{stem}: table or reference content was lost during conversion')
     temporary = build_dir / f'{stem}.docx'
@@ -95,9 +137,14 @@ def build(kind, reference, build_dir):
         tree = ET.fromstring(archive.read('word/document.xml'))
     tables = len(tree.findall('.//w:tbl', NS))
     equations = len(tree.findall('.//m:oMathPara', NS))
+    images = len(tree.findall('.//w:drawing', NS))
+    if images != len(figures):
+        raise ValueError(f'{stem}: DOCX figure count does not match the source')
     if tables != expected_tables or equations != expected_equations:
         raise ValueError(f'{stem}: DOCX table/equation count does not match the source')
     visible = ''.join(tree.itertext())
+    if re.search(r'\[eq:[^\]]+\]', visible):
+        raise ValueError('Unresolved equation reference in DOCX')
     if kind == 'cover':
         for required in ('2026', '0009-0006-7979-0341', 'marko.mihajlovic.23@singimail.rs'):
             if required not in visible:
@@ -108,7 +155,7 @@ def build(kind, reference, build_dir):
     shutil.copyfile(temporary, output)
     print(f'Built {output} ({tables} tables, {equations} display equations, {references} references)')
     return dict(source=str(source), source_sha256=sha256(source.read_bytes()).hexdigest(),
-                output=str(output), tables=tables, equations=equations, references=references,
+                output=str(output), tables=tables, equations=equations, references=references, figures=images,
                 layout=layout_report)
 
 

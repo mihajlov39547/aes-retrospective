@@ -33,8 +33,17 @@ try {
         if ($Document -in @('All', 'Cover')) { $stems += 'naslovna_mihajlovic2026validiran' }
         foreach ($stem in $stems) {
             $latexArguments = @('-interaction=nonstopmode', '-halt-on-error', '-file-line-error', "-output-directory=$build", "$stem.tex")
-            # References are handwritten in these sources; no BibTeX pass is needed.
-            1..3 | ForEach-Object { Invoke-Checked 'xelatex' $latexArguments }
+            Invoke-Checked 'xelatex' $latexArguments
+            if ((Get-Content -LiteralPath "$stem.tex" -Raw) -match '\\addbibresource') {
+                if (-not (Get-Command biber -ErrorAction SilentlyContinue)) { throw 'Biber is required for references.bib.' }
+                $previousLocale = $env:LC_ALL
+                try {
+                    $env:LC_ALL = 'C'
+                    Invoke-Checked 'biber' @("--input-directory=$build", "--output-directory=$build", $stem)
+                }
+                finally { $env:LC_ALL = $previousLocale }
+            }
+            1..2 | ForEach-Object { Invoke-Checked 'xelatex' $latexArguments }
             $logPath = Join-Path $build "$stem.log"
             $log = Get-Content -LiteralPath $logPath -Raw
             if ($log -match 'There were undefined references|Citation .+ undefined|Rerun to get cross-references right|Missing character:') {

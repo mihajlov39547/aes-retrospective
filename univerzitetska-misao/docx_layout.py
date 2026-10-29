@@ -91,6 +91,7 @@ def format_docx(path, kind):
     style(d, 'UMTableTitle', 10, left, italic=True, after=4, keep=True)
     style(d, 'UMTableSource', 10, left, before=3, after=8)
     style(d, 'JEquation', 11, center, before=6, after=6)
+    style(d, 'UMFigureCaption', 10, left, after=8)
     style(d, 'JAuthor', 10, center, bold=True, after=8)
     style(d, 'UMCoverDetail', 10, center, after=8)
     style(d, 'UMCoverContact', 10, center, italic=True, after=8)
@@ -123,9 +124,11 @@ def format_docx(path, kind):
     references = False
     reference_number = 0
     abstract_words = {}
+    equation_number = 0
+    figure_number = 0
     for i, p in enumerate(d.paragraphs):
         text = p.text.strip()
-        if i == 0 or text.startswith('A VALIDATED METHODOLOGICAL FRAMEWORK'):
+        if i == 0 or text.startswith(('A VALIDATED METHODOLOGICAL FRAMEWORK', 'CPU/GPU AES ENCRYPTION')):
             apply(p, 'JTitle')
         elif text in ('Apstrakt', 'Abstract'):
             abstract = text
@@ -168,23 +171,39 @@ def format_docx(path, kind):
             p.paragraph_format.first_line_indent = Cm(-.55)
         elif p._p.xpath('.//m:oMathPara'):
             apply(p, 'JEquation')
+            equation_number += 1
+            p.add_run(f' ({equation_number})')
+        elif p._p.xpath('.//w:drawing'):
+            apply(p, 'JText')
+            p.paragraph_format.alignment = center
+            p.paragraph_format.first_line_indent = Cm(0)
+            p.paragraph_format.keep_with_next = True
+        elif i > 0 and d.paragraphs[i - 1]._p.xpath('.//w:drawing'):
+            figure_number += 1
+            apply(p, 'UMFigureCaption')
+            run = p.add_run(f'Slika {figure_number}. ')
+            p._p.insert(1, run._r)
         else:
             apply(p, 'JText')
 
+    for shape in d.inline_shapes:
+        if shape.width > Cm(12.6):
+            shape.height = int(shape.height * Cm(12.6) / shape.width)
+            shape.width = Cm(12.6)
+
     # Explicit widths fit the 12.6 cm printable width, including merged cells.
-    widths = [[3.0, 3.5, 2.0, 2.0, 2.1], [2.4, 3.6, 3.3, 3.3],
-              [1.2, 1.5, 1.65, 1.65, 1.65, 1.65, 1.65, 1.65],
-              [1.3, 1.7, 2.4, 2.4, 2.4, 2.4], [2.5, 3.4, 3.3, 3.4],
-              [2.1, .8, 1.0, 1.8, 1.9, 2.5, 2.5]]
+    widths = {6: [1.5, 2.3, 2.2, 2.2, 2.2, 2.2], 4: [2.0, 2.4, 4.1, 4.1]}
     for number, table in enumerate(d.tables, 1):
         caption = Paragraph(table._tbl.getprevious(), d._body)
         if not caption.text.strip():
             raise ValueError(f'Table {number} is missing its caption')
         caption.insert_paragraph_before(f'Tabela {number}', 'UMTableNumber')
         apply(caption, 'UMTableTitle')
-        insert_after(table._tbl, 'Izvor: Eksperimentalni rezultati autora.', d, 'UMTableSource')
+        source = ('Izvor: Eksperimentalni rezultati autora.' if number == 1 else
+                  'Izvor: Proračun autora na osnovu eksperimentalnih rezultata; normalizovani troškovi.')
+        insert_after(table._tbl, source, d, 'UMTableSource')
         table.autofit = False
-        grid = widths[number - 1]
+        grid = widths.get(len(table.columns), [12.6 / len(table.columns)] * len(table.columns))
         for col, width in zip(table.columns, grid):
             col.width = Cm(width)
         props = table._tbl.tblPr

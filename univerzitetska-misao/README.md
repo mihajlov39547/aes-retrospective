@@ -19,7 +19,7 @@ Run from the repository root in PowerShell:
 
 Scripts also work from other working directories when invoked by their full path.
 
-Requirements: XeLaTeX (TeX Live or MiKTeX) for PDF; Python 3 and Pandoc on PATH
+Requirements: XeLaTeX and Biber (TeX Live or MiKTeX) for PDF; Python 3, Pandoc and pdftocairo on PATH
 for DOCX, plus `python-docx` (`python -m pip install -r univerzitetska-misao/requirements_docx.txt`).
 The script automatically reuses `sjee/.venv-docx` if available. Use `-PythonPath`
 to select another interpreter. The sources use `fontspec`, so pdfLaTeX cannot compile them.
@@ -34,8 +34,14 @@ Outputs beside the sources:
 The cover and anonymous article remain separate. Edit the UTF-8 `.tex` sources
 and rebuild; edits made directly to generated files will be overwritten.
 
-PDF builds run XeLaTeX three times and retain auxiliary files in `build/pdf`.
-Bibliography entries are handwritten in the article, so BibTeX is not used.
+The main article contains the complete updated economic manuscript supplied in
+`ekonomski_izazovi_aes_v2.tex`, using the established page and typography settings.
+Edit `mihajlovic2026validiran.tex` and the standard shared `references.bib` from now on.
+The supplied v2 files are retained as the import originals. Both figures are read
+from `aes_throughput_comparison.pdf` and `t4_page_batch_ratios.pdf`.
+
+PDF builds run XeLaTeX, Biber, then two XeLaTeX passes and retain auxiliary files in `build/pdf`.
+The bibliography uses author-year citations; both output formats read `references.bib`.
 Unresolved references or missing glyphs fail the build; layout warnings are
 reported for later formatting work.
 
@@ -57,10 +63,11 @@ JReference and JTableText styles to `uputstvo_za_autore.pdf`:
   captions and notes but do not prescribe a table-cell font size).
 
 The abstract word counts are checked against the required 100-200 words.
-Table source notes are generated for these six author-experiment tables; update
-that provenance in `docx_layout.py` if a table is later replaced with external data.
-The LaTeX sources also use the prescribed page dimensions and contain explicit
-in-text mentions of all six tables. DOCX layout is applied independently of TeX
+Table source notes distinguish the measured throughput table from the derived
+normalized-cost table. Update that provenance in `docx_layout.py` if tables change.
+DOCX builds resolve citations with Pandoc citeproc and embed 300 dpi PNG copies
+of the two PDF figures generated only under `build/docx`.
+DOCX layout is applied independently of TeX
 layout; this does not make the two rendering engines paginate identically.
 
 For visual review, run `render_univerzitetska_misao_docx.ps1 -SofficePath path\soffice.exe`.
