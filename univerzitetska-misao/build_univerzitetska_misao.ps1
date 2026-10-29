@@ -22,6 +22,11 @@ if ($PythonPath -and (Test-Path -LiteralPath $PythonPath)) {
 if ($ReferenceDoc) { $ReferenceDoc = (Resolve-Path -LiteralPath $ReferenceDoc).Path }
 Push-Location -LiteralPath $PSScriptRoot
 try {
+    if ($Document -in @('All', 'Article')) {
+        $figurePython = Join-Path $PSScriptRoot '../.venv/Scripts/python.exe'
+        if (-not (Test-Path -LiteralPath $figurePython)) { $figurePython = 'python' }
+        Invoke-Checked $figurePython @((Join-Path $PSScriptRoot 'prepare_figures.py'))
+    }
     if ($Target -in @('Pdf', 'All')) {
         if (-not (Get-Command xelatex -ErrorAction SilentlyContinue)) {
             throw 'XeLaTeX is required (the sources use fontspec). Install TeX Live or MiKTeX and add it to PATH.'

@@ -37,7 +37,7 @@ and rebuild; edits made directly to generated files will be overwritten.
 The main article contains the complete updated economic manuscript supplied in
 `ekonomski_izazovi_aes_v2.tex`, using the established page and typography settings.
 Edit `mihajlovic2026validiran.tex` and the standard shared `references.bib` from now on.
-The supplied v2 files are retained as the import originals. Both figures are read
+The supplied v2 files were merged and deleted after verification. Both figures are read
 from `aes_throughput_comparison.pdf` and `t4_page_batch_ratios.pdf`.
 
 PDF builds run XeLaTeX, Biber, then two XeLaTeX passes and retain auxiliary files in `build/pdf`.
@@ -83,3 +83,26 @@ references fail the build. The cover conversion also checks its year, email,
 and ORCID. The generated source removes `\fontsize` and `\selectfont` layout
 commands because Pandoc otherwise consumes the numeric cover year after font
 selection. Word fonts come from the reference template.
+
+
+### Grayscale figures and APA references
+
+`prepare_figures.py` reconstructs both figures from the audited CSV files in
+`experiments/analysis/economic_aes_existing_evidence_2026_10/`. It performs no
+benchmarking. The earlier PDF figures had no discoverable generation script;
+this script documents their reproducible replacement, not original authorship.
+The main PowerShell build regenerates them using the repository Python environment
+(matplotlib already available), or Python on PATH. For standalone DOCX builds,
+first run `.venv/Scripts/python.exe univerzitetska-misao/prepare_figures.py` from
+repository root. Input hashes and estimators are in `figure_provenance.json`.
+T4 uses discrete categories, no interpolation, and a separate experimental campaign.
+
+PDF references use biblatex-apa; Word uses the vendored `apa.csl` (APA 7,
+Citation Style Language styles project, CC BY-SA 3.0; attribution and license
+are in the CSL header). Source:
+https://github.com/citation-style-language/styles/blob/master/apa.csl
+Both formats add the journal's requested reference numbering. Narrative citation
+conjunctions are localized to Serbian `i`; parenthetical citations retain `&`.
+Lee et al. retains the conference DOI 10.1145/1815961.1816021.
+The article remains anonymous; author details are in the separate
+`naslovna_mihajlovic2026validiran.docx`.

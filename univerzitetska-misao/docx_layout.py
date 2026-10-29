@@ -91,7 +91,8 @@ def format_docx(path, kind):
     style(d, 'UMTableTitle', 10, left, italic=True, after=4, keep=True)
     style(d, 'UMTableSource', 10, left, before=3, after=8)
     style(d, 'JEquation', 11, center, before=6, after=6)
-    style(d, 'UMFigureCaption', 10, left, after=8)
+    style(d, 'UMFigureCaption', 10, left, italic=True, after=3, keep=True)
+    style(d, 'UMFigureNumber', 10, left, bold=True, after=2, keep=True)
     style(d, 'JAuthor', 10, center, bold=True, after=8)
     style(d, 'UMCoverDetail', 10, center, after=8)
     style(d, 'UMCoverContact', 10, center, italic=True, after=8)
@@ -126,7 +127,8 @@ def format_docx(path, kind):
     abstract_words = {}
     equation_number = 0
     figure_number = 0
-    for i, p in enumerate(d.paragraphs):
+    paragraphs = list(d.paragraphs)
+    for i, p in enumerate(paragraphs):
         text = p.text.strip()
         if i == 0 or text.startswith(('A VALIDATED METHODOLOGICAL FRAMEWORK', 'CPU/GPU AES ENCRYPTION')):
             apply(p, 'JTitle')
@@ -178,11 +180,11 @@ def format_docx(path, kind):
             p.paragraph_format.alignment = center
             p.paragraph_format.first_line_indent = Cm(0)
             p.paragraph_format.keep_with_next = True
-        elif i > 0 and d.paragraphs[i - 1]._p.xpath('.//w:drawing'):
+        elif i > 0 and paragraphs[i - 1]._p.xpath('.//w:drawing'):
             figure_number += 1
             apply(p, 'UMFigureCaption')
-            run = p.add_run(f'Slika {figure_number}. ')
-            p._p.insert(1, run._r)
+            p.insert_paragraph_before(f'Slika {figure_number}', 'UMFigureNumber')
+            insert_after(p._p, 'Izvor: Eksperimentalni rezultati autora.', d, 'UMTableSource')
         else:
             apply(p, 'JText')
 

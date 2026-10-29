@@ -35,8 +35,13 @@
   \renewcommand{\refname}{Literatura}%
 }
 % Shared bibliography for PDF and DOCX builds.
-\usepackage[backend=biber,style=authoryear,natbib=true,sorting=nyt,maxbibnames=6]{biblatex}
+\usepackage[backend=biber,style=apa,natbib=true,sorting=nyt]{biblatex}
 \addbibresource{references.bib}
+\DefineBibliographyStrings{english}{and={i}}
+\newcounter{journalbib}
+\defbibenvironment{bibliography}
+  {\list{\arabic{journalbib}.}{\usecounter{journalbib}\setlength{\leftmargin}{1.7em}\setlength{\labelwidth}{1.2em}\setlength{\labelsep}{.5em}\setlength{\itemsep}{4pt}}}
+  {\endlist}{\item}
 \usepackage{microtype}
 \setlength{\emergencystretch}{2em}
 \newcommand{\mbs}{\,\mathrm{MB/s}}
@@ -58,6 +63,8 @@
 \captionsetup{
   font=small,
   labelfont=bf,
+  textfont=it,
+  labelsep=newline,
   justification=raggedright,
   singlelinecheck=false
 }
@@ -155,6 +162,9 @@ Ulaz & CPU AES-NI & CUDA K & CUDA P & v1 K & v1 P\\\midrule
 \includegraphics[width=\linewidth]{aes_throughput_comparison.pdf}
 \caption{Izmerena propusnost AES-128-CTR izvršnih putanja na i5-10300H/GTX 1650 Ti: CPU AES-NI, GPU resident kernel i pripremljeni GPU pipeline. Decimalni MB/s; medijana pet sesijskih medijana.}
 \label{fig:throughput}
+% FIGURE_SOURCE_START
+{\raggedright\fontsize{10}{12}\selectfont Izvor: Eksperimentalni rezultati autora.\par}
+% FIGURE_SOURCE_END
 \end{figure}
 Na 32 MiB CUDA baseline dostiže 4800,6 MB/s u izolovanom merenju, ali samo 1204,5 MB/s kada se uključi pripremljeni prenosni cevovod. CPU AES-NI postiže 1455,8 MB/s. Uparen odnos sesijskih medijana CPU/GPU vremena iznosi približno 0,823 za pipeline, dok izolovano GPU jezgro daje odnos oko 3,30. Nije opravdano razliku u celosti pripisati samom PCIe interfejsu: izmereni intervali uključuju sinhronizaciju i sistemske režijske troškove.\par
 Na 16 MiB primećen je izraženiji pad GPU performansi. Nije izdvojen uzrok; veličina ulaza, redosled testova, radni takt i izvršno okruženje nisu nezavisno kontrolisani za kauzalno objašnjenje. Zbog toga se rezultati ne interpoliraju u univerzalnu krivu kapaciteta.
@@ -178,8 +188,11 @@ Zaseban T4 eksperiment pokazuje da se medijana sesijskih odnosa CPU/GPU vremena 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.90\linewidth]{t4_page_batch_ratios.pdf}
-\caption{Zasebna Linux/T4 studija nezavisnih AES-128-CTR stranica (1 MiB po stranici): medijana pet odnosa sesijskih medijana vremena CPU EVP transformacije i GPU pripremljenog pipeline-a. Vrednosti manje od 1 favorizuju CPU; horizontalna linija označava izjednačenje.}
+\caption{Zasebna Linux/T4 studija nezavisnih AES-128-CTR stranica (1 MiB po stranici): medijana pet odnosa sesijskih medijana vremena CPU EVP transformacije i GPU pripremljenog pipeline-a. Vrednosti manje od 1 favorizuju CPU; horizontalna linija označava izjednačenje. Veličine batch-a su diskretne kategorije; ovo nije direktno poređenje T4 i GTX rezultata.}
 \label{fig:t4pages}
+% FIGURE_SOURCE_START
+{\raggedright\fontsize{10}{12}\selectfont Izvor: Eksperimentalni rezultati autora.\par}
+% FIGURE_SOURCE_END
 \end{figure}
 Ekonomsku interpretaciju T4 rezultata dodatno ograničava model pristupa: besplatan ili povremeno dostupan cloud akcelerator nema automatski definisanu pripisivu cenu po satu niti garantovani kapacitet. Zbog toga se njegova dostupnost ovde tretira kao argument za \emph{pristupačnost reproduktivnih eksperimenata}, a ne kao dokaz ekonomske besplatnosti produkcione enkripcije.
 
@@ -196,7 +209,7 @@ Rezultati pokazuju da za jednokratnu AES-128-CTR obradu podataka iz sistemske me
 Zasebna Linux/T4 kampanja sa CPU OpenSSL EVP pokazuje da povećanje broja nezavisnih stranica sa 1 na 32 smanjuje relativni zaostatak GPU pipeline-a prema posmatranom estimatoru. Ipak, sva četiri testirana batch-a ostaju sporija od CPU EVP transformacije u svih pet sesija. Za 32 stranice medijana sesijskih odnosa CPU/GPU vremena iznosi 0,9125, odnosno CPU vreme je približno 8,75\% kraće u odnosu na GPU vreme prema tom estimatoru. Ova kampanja ostaje odvojena od GTX merenja i nije dokaz isplativosti GPU obrade Parquet datoteka.\par
 Ekonomski doprinos rada nije dokaz univerzalne isplativosti jedne arhitekture, već identifikacija uslova u kojima izbor izvršne putanje može smanjiti modelovani trošak obrade. Pragovi relativne GPU/CPU satne cene iz agregiranih GTX pipeline propusnosti iznose 0,9503; 0,7626; 0,8273 za 1, 16 i 32 MiB. Oni važe uz definisane merne granice i dosledno pripisivanje resursa, uključujući potreban GPU host. Bez dokumentovanih cena, fiksnih troškova, energije i iskorišćenosti ne predstavljaju stvarne račune, ostvarene uštede ili zaključak o opravdanosti nabavke GPU-a. Sprovedeni eksperimenti i izvedeni model omogućavaju uslovnu odluku o izvršnoj putanji; širi aplikacioni i investicioni zaključci ostaju izvan obuhvata rada.
 
-\begingroup\fontsize{9}{11}\selectfont\sloppy
+\begingroup\fontsize{10}{12}\selectfont\sloppy
 \printbibliography[title={Literatura}]
 \endgroup
 

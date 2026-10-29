@@ -1,0 +1,15 @@
+{
+  "inputs": {
+    "RECONSTRUCTED_RESULTS.csv": "40446ded98afb44291f24bfe6b31780fa5df1df5cf083f29ca76ae3e76b8a5cf",
+    "SUPPLEMENTARY_RESULTS.csv": "b911d460e5cd8ae3b531fcda49563f915dc65d8c5c711ce23e5635a84425a3eb"
+  },
+  "primary_estimator": "median of five session throughput medians",
+  "T4_estimator": "median of five session CPU/GPU median-time ratios",
+  "T4_categories": [
+    1,
+    4,
+    16,
+    32
+  ],
+  "new_measurements": false
+}

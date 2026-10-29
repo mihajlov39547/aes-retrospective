@@ -60,6 +60,7 @@ def build(kind, reference, build_dir):
     stem = STEMS[kind]
     source = ROOT / f'{stem}.tex'
     text = source.read_text(encoding='utf-8')
+    text = re.sub(r'% FIGURE_SOURCE_START.*?% FIGURE_SOURCE_END', '', text, flags=re.S)
     # Strip font selection in a generated copy: Pandoc consumes a following
     # numeric year after \selectfont. Word uses the reference document's fonts.
     prepared = re.sub(r'\\fontsize\s*\{[^{}]*\}\s*\{[^{}]*\}', '', text)
@@ -90,7 +91,7 @@ def build(kind, reference, build_dir):
     intermediate.write_text(prepared, encoding='utf-8')
     ast_path = build_dir / f'{stem}.json'
     bib_options = ['--citeproc', '--bibliography', ROOT / 'references.bib',
-                   '--metadata=reference-section-title:Literatura'] if '\\addbibresource' in text else []
+                   '--metadata=reference-section-title:Literatura', '--csl', ROOT / 'apa.csl'] if '\\addbibresource' in text else []
     pandoc([intermediate, '--from=latex', '--to=json', *bib_options, '-o', ast_path],
            build_dir / f'{stem}-read.log')
     ast = json.loads(ast_path.read_text(encoding='utf-8'))
@@ -105,6 +106,12 @@ def build(kind, reference, build_dir):
                              any(n.get('t') == 'Str' and n.get('c') == 'SUMMARY' for n in nodes(b)))
         blocks[summary_index:summary_index] = headings + refs
         ast_path.write_text(json.dumps(ast, ensure_ascii=False), encoding='utf-8')
+    for node in nodes(ast):
+        if node.get('t') == 'Cite' and any(c.get('citationMode', {}).get('t') == 'AuthorInText' for c in node['c'][0]):
+            for inline in nodes(node['c'][1]):
+                if inline.get('t') == 'Str' and inline.get('c') in ('and', '&'):
+                    inline['c'] = 'i'
+    ast_path.write_text(json.dumps(ast, ensure_ascii=False), encoding='utf-8')
     all_nodes = list(nodes(ast))
     counts = Counter(n['t'] for n in all_nodes)
     if counts['RawBlock'] or counts['RawInline']:
