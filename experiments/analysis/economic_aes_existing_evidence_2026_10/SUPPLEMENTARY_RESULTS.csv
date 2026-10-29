@@ -1,0 +1,44 @@
+campaign,seed,workers,backend,mode,key_bits,bytes_per_worker,boundary,worker,throughput_MB_s,estimator,session,pages,layout,median,minimum,maximum,favorable_sessions
+Windows CPU,2003,1,openssl_default,CTR,128,33554432,operation_envelope,,1493.5284678778005,bytes / session median time,single-study-2003-13e3f5df-1ed2-45a5-a63f-8e69d2c47dcf,,,,,,
+Windows CPU,2003,1,openssl_default,CTR,128,33554432,transform,0,5263.646731244363,bytes / session median time,single-study-2003-13e3f5df-1ed2-45a5-a63f-8e69d2c47dcf,,,,,,
+Windows CPU,2004,1,openssl_default,CTR,128,33554432,operation_envelope,,1478.875674055661,bytes / session median time,single-study-2004-08939c5b-271b-4085-b67c-17220c4d3846,,,,,,
+Windows CPU,2004,1,openssl_default,CTR,128,33554432,transform,0,5575.07613833667,bytes / session median time,single-study-2004-08939c5b-271b-4085-b67c-17220c4d3846,,,,,,
+Windows CPU,2005,1,openssl_default,CTR,128,33554432,operation_envelope,,1452.2427586803865,bytes / session median time,single-study-2005-41b63d4b-c2f3-49f5-ae65-e72f0d59cb9d,,,,,,
+Windows CPU,2005,1,openssl_default,CTR,128,33554432,transform,0,5536.578170117977,bytes / session median time,single-study-2005-41b63d4b-c2f3-49f5-ae65-e72f0d59cb9d,,,,,,
+Windows CPU,2006,1,openssl_default,CTR,128,33554432,operation_envelope,,1475.815307747117,bytes / session median time,single-study-2006-69348ff3-085a-4a46-82a4-5574a22c8916,,,,,,
+Windows CPU,2006,1,openssl_default,CTR,128,33554432,transform,0,5373.997133179048,bytes / session median time,single-study-2006-69348ff3-085a-4a46-82a4-5574a22c8916,,,,,,
+Windows CPU,2007,1,openssl_default,CTR,128,33554432,operation_envelope,,1624.8214748331206,bytes / session median time,single-study-2007-90c9f3fe-c7c4-44c0-b3cd-7008e1463e59,,,,,,
+Windows CPU,2007,1,openssl_default,CTR,128,33554432,transform,0,5741.2962836219285,bytes / session median time,single-study-2007-90c9f3fe-c7c4-44c0-b3cd-7008e1463e59,,,,,,
+Oracle ARM64,2003,2,openssl_default,CTR,128,33554432,operation_envelope,,2031.801393940473,bytes / session median time,multicore-study-2003-bff4ac10-6aa6-4e48-b983-7b2b1e67aeb7,,,,,,
+Oracle ARM64,2003,2,openssl_default,CTR,128,33554432,transform,0,4005.7620439175284,bytes / session median time,multicore-study-2003-bff4ac10-6aa6-4e48-b983-7b2b1e67aeb7,,,,,,
+Oracle ARM64,2003,2,openssl_default,CTR,128,33554432,transform,1,4011.8730976010615,bytes / session median time,multicore-study-2003-bff4ac10-6aa6-4e48-b983-7b2b1e67aeb7,,,,,,
+Oracle ARM64,2004,2,openssl_default,CTR,128,33554432,operation_envelope,,2031.1187428581632,bytes / session median time,multicore-study-2004-efc41901-9172-4ff6-b77d-cf08a5b81a98,,,,,,
+Oracle ARM64,2004,2,openssl_default,CTR,128,33554432,transform,0,4014.744069642242,bytes / session median time,multicore-study-2004-efc41901-9172-4ff6-b77d-cf08a5b81a98,,,,,,
+Oracle ARM64,2004,2,openssl_default,CTR,128,33554432,transform,1,4013.8988159784944,bytes / session median time,multicore-study-2004-efc41901-9172-4ff6-b77d-cf08a5b81a98,,,,,,
+Oracle ARM64,2005,2,openssl_default,CTR,128,33554432,operation_envelope,,2042.7731240900814,bytes / session median time,multicore-study-2005-cc6321a8-8aa7-445b-8366-61022ede48cb,,,,,,
+Oracle ARM64,2005,2,openssl_default,CTR,128,33554432,transform,0,4014.4268176625565,bytes / session median time,multicore-study-2005-cc6321a8-8aa7-445b-8366-61022ede48cb,,,,,,
+Oracle ARM64,2005,2,openssl_default,CTR,128,33554432,transform,1,4013.8217523155527,bytes / session median time,multicore-study-2005-cc6321a8-8aa7-445b-8366-61022ede48cb,,,,,,
+Oracle ARM64,2006,2,openssl_default,CTR,128,33554432,operation_envelope,,2015.3074667699873,bytes / session median time,multicore-study-2006-42f7f25f-4247-4c52-9481-bdb1cfe84e75,,,,,,
+Oracle ARM64,2006,2,openssl_default,CTR,128,33554432,transform,0,4013.5048861107593,bytes / session median time,multicore-study-2006-42f7f25f-4247-4c52-9481-bdb1cfe84e75,,,,,,
+Oracle ARM64,2006,2,openssl_default,CTR,128,33554432,transform,1,4014.7822585378085,bytes / session median time,multicore-study-2006-42f7f25f-4247-4c52-9481-bdb1cfe84e75,,,,,,
+Oracle ARM64,2007,2,openssl_default,CTR,128,33554432,operation_envelope,,2021.8576727596433,bytes / session median time,multicore-study-2007-4f6887b6-8da2-40ee-91fe-71f4bb4d41f5,,,,,,
+Oracle ARM64,2007,2,openssl_default,CTR,128,33554432,transform,0,4012.0364326097097,bytes / session median time,multicore-study-2007-4f6887b6-8da2-40ee-91fe-71f4bb4d41f5,,,,,,
+Oracle ARM64,2007,2,openssl_default,CTR,128,33554432,transform,1,4020.439105761565,bytes / session median time,multicore-study-2007-4f6887b6-8da2-40ee-91fe-71f4bb4d41f5,,,,,,
+Oracle ARM64,2003,1,openssl_default,CTR,128,33554432,operation_envelope,,1059.5534706213264,bytes / session median time,single-study-2003-1c5425a9-c04e-4aa1-b128-2be572105d71,,,,,,
+Oracle ARM64,2003,1,openssl_default,CTR,128,33554432,transform,0,4029.6608716668493,bytes / session median time,single-study-2003-1c5425a9-c04e-4aa1-b128-2be572105d71,,,,,,
+Oracle ARM64,2004,1,openssl_default,CTR,128,33554432,operation_envelope,,1056.4756314599242,bytes / session median time,single-study-2004-5b197896-348b-4641-a0df-4bb8599e647b,,,,,,
+Oracle ARM64,2004,1,openssl_default,CTR,128,33554432,transform,0,4018.2241615460034,bytes / session median time,single-study-2004-5b197896-348b-4641-a0df-4bb8599e647b,,,,,,
+Oracle ARM64,2005,1,openssl_default,CTR,128,33554432,operation_envelope,,1063.5600825498882,bytes / session median time,single-study-2005-a4baeb88-145b-4ee8-90a5-f91640219970,,,,,,
+Oracle ARM64,2005,1,openssl_default,CTR,128,33554432,transform,0,4035.2241162688547,bytes / session median time,single-study-2005-a4baeb88-145b-4ee8-90a5-f91640219970,,,,,,
+Oracle ARM64,2006,1,openssl_default,CTR,128,33554432,operation_envelope,,1059.1935882269847,bytes / session median time,single-study-2006-41f6eadf-495c-4bec-a6db-ab540c55c78b,,,,,,
+Oracle ARM64,2006,1,openssl_default,CTR,128,33554432,transform,0,4033.1385242165193,bytes / session median time,single-study-2006-41f6eadf-495c-4bec-a6db-ab540c55c78b,,,,,,
+Oracle ARM64,2007,1,openssl_default,CTR,128,33554432,operation_envelope,,1059.6859796166086,bytes / session median time,single-study-2007-e076b8a5-072a-4ee9-8e45-85680d4868c6,,,,,,
+Oracle ARM64,2007,1,openssl_default,CTR,128,33554432,transform,0,4025.5902544394867,bytes / session median time,single-study-2007-e076b8a5-072a-4ee9-8e45-85680d4868c6,,,,,,
+T4 independent pages,,,,,,,prepared_cpu_transform_over_gpu_pipeline,,,median_paired_ratio,,1,pages,0.5326432150196632,0.520372192138363,0.5502695556881392,0
+T4 independent pages,,,,,,,prepared_cpu_transform_over_gpu_pipeline,,,ratio_of_medians,,1,pages,0.5404374046466199,0.5250297988608001,0.5520128742856418,0
+T4 independent pages,,,,,,,prepared_cpu_transform_over_gpu_pipeline,,,median_paired_ratio,,4,pages,0.7131349438940765,0.7036952306383242,0.7220308170894023,0
+T4 independent pages,,,,,,,prepared_cpu_transform_over_gpu_pipeline,,,ratio_of_medians,,4,pages,0.7136633902899733,0.6921200743191612,0.7293292273763754,0
+T4 independent pages,,,,,,,prepared_cpu_transform_over_gpu_pipeline,,,median_paired_ratio,,16,pages,0.8256444844552084,0.80502642351892,0.839594057405891,0
+T4 independent pages,,,,,,,prepared_cpu_transform_over_gpu_pipeline,,,ratio_of_medians,,16,pages,0.8239612909891052,0.814384240607768,0.8366620997756012,0
+T4 independent pages,,,,,,,prepared_cpu_transform_over_gpu_pipeline,,,median_paired_ratio,,32,pages,0.9126349317359534,0.9061227154140719,0.9170089395970261,0
+T4 independent pages,,,,,,,prepared_cpu_transform_over_gpu_pipeline,,,ratio_of_medians,,32,pages,0.9124680203992888,0.908140192368887,0.9211788252323831,0

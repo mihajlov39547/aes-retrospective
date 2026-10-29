@@ -1,0 +1,45 @@
+"""Emit the authored claim register; no input measurements or benchmark execution."""
+import sys
+sys.dont_write_bytecode=True
+from audit_existing import write
+
+ROWS=[
+('E01','EMPIRICALLY MEASURED','Five September paired AES-128 study sessions contain 6000 retained encryption observations.','reconstruction_manifest.json; RECONSTRUCTED_SESSION_RESULTS.csv','Five processes on one hardware pair; warmups provenance-supported, not retained.'),
+('E02','EMPIRICALLY MEASURED','Baseline pipeline is slower than the allocating CPU AES-NI transform in every session at 1/16/32 MiB.','SESSION_ECONOMIC_INDICATORS.csv','Prepared host-memory pipeline; no claim about total CPU capacity.'),
+('E03','EMPIRICALLY MEASURED','GPU H2D and D2H host intervals and pipeline kernel events were recorded.','scripts/aes_cuda_baseline.py:193-212; original raw.csv','Copy intervals include synchronization; transfer sum is computed.'),
+('S01','VERIFIED FROM SOURCE CODE','The historical CPU factory explicitly requests AES-NI and dispatch is checked outside timing.','scripts/aes_cuda_cpu_gpu.py:78-95; scripts/aes_acceleration.py:52-97; validation.json','Native initialization, not instruction tracing.'),
+('S02','VERIFIED FROM SOURCE CODE','The application executes one synchronous CPU encryption call with serial orchestration.','scripts/aes_cuda_cpu_gpu.py:128-138,177-210','Supports single-stream/application-level serial wording only.'),
+('S03','VERIFIED FROM SOURCE CODE','CPU output allocation is timed; GPU pinning, staging, buffers and key setup are excluded.','MEASUREMENT_BOUNDARIES.md','Scopes are asymmetric; prepared in-memory comparison only.'),
+('S04','VERIFIED FROM SOURCE CODE','Payload sizes are binary and throughput decimal; measurements encrypt only.','scripts/aes_cuda_cpu_gpu.py:137,201; raw.csv','CTR has no authentication.'),
+('D01','DERIVED FROM MEASUREMENTS','All nine supplied manuscript throughput values reconstruct at one decimal.','RECONSTRUCTED_RESULTS.csv','Median of five session throughput medians, not reciprocal median time.'),
+('D02','DERIVED FROM MEASUREMENTS','Rate-based pipeline price thresholds at 1/16/32 MiB are 0.950326/0.762598/0.827330.','ECONOMIC_THRESHOLDS.csv','Unrounded aggregate throughput ratio; not session-paired speedup.'),
+('D03','DERIVED FROM MEASUREMENTS','Paired-time pipeline thresholds are 0.952927/0.749551/0.823251.','SESSION_ECONOMIC_INDICATORS.csv; ECONOMIC_THRESHOLDS.csv','Median across five CPU-median/GPU-median time ratios; report session ranges.'),
+('D04','DERIVED FROM MEASUREMENTS','Combined pipeline non-kernel fractions can be derived using the same-pipeline event component.','ECONOMIC_THRESHOLDS.csv; MEASUREMENT_BOUNDARIES.md','Mixed clock residual; not pure PCIe, allocation, energy or utilization.'),
+('D05','DERIVED FROM MEASUREMENTS','Seconds per decimal GB are 1000/R for repeated batches at the measured rate.','economic_model.py; ECONOMIC_THRESHOLDS.csv','Not a measured contiguous 1 GB request or long-running service test.'),
+('A01','ILLUSTRATIVE ASSUMPTION','CPU hourly cost is 1 normalized unit and GPU ratios are .50/.75/1/1.25/1.50/2.','SENSITIVITY_ANALYSIS.csv','No EUR/USD, market observation or power assumption.'),
+('A02','ILLUSTRATIVE ASSUMPTION','Variable charge is proportional to occupied time, using consistent resource attribution.','ECONOMIC_STUDY_READINESS.md','Include GPU host allocation; minimum billing, utilization and capacity are outside model.'),
+('A03','ILLUSTRATIVE ASSUMPTION','A linear fixed-plus-variable cost model defines a break-even candidate.','economic_model.py:break_even; ECONOMIC_STUDY_READINESS.md','No empirical fixed costs, volume or period; feasible positive V* not established.'),
+('D06','DERIVED FROM MEASUREMENTS','Under equal hourly charge and nonnegative GPU fixed premium, baseline large-batch pipeline has no positive break-even.','ECONOMIC_STUDY_READINESS.md','Conditional conclusion; does not establish actual procurement cost.'),
+('E04','EMPIRICALLY MEASURED','Later Windows EVP and Oracle one/two-worker studies exist and validate.','SUPPLEMENTARY_CHECKS.csv; SUPPLEMENTARY_RESULTS.csv','Different implementation and operation scopes; never replace historical CPU.'),
+('D07','DERIVED FROM MEASUREMENTS','T4 page prepared-pipeline/EVP comparison favors CPU transform at all four batch sizes in all five sessions.','SUPPLEMENTARY_RESULTS.csv','Different campaign and independent-page semantics; ratio direction CPU time/GPU time below one.'),
+('E05','EMPIRICALLY MEASURED','Three later platform studies have retained complete validated evidence.','SUPPLEMENTARY_CHECKS.csv; prior INTEGRITY_AUDIT.md','Existing numerical audit reused after checking all 405 referenced artifact hashes; no pooling.'),
+('U01','UNSUPPORTED / UNKNOWN','The historical CPU benchmark measures aggregate multicore capacity.','CPU_THREADING_AUDIT.md','Reject: single-stream measurements cannot estimate total CPU capacity.'),
+('U02','UNSUPPORTED / UNKNOWN','All native execution was independently confirmed single-threaded and pinned to one core.','CPU_THREADING_AUDIT.md','Reject: no native thread trace or affinity restriction.'),
+('U03','UNSUPPORTED / UNKNOWN','The GIL proves the native AES function uses one thread.','CPU_THREADING_AUDIT.md','Reject: native FFI GIL release and native concurrency are separate questions.'),
+('U04','UNSUPPORTED / UNKNOWN','GPU throughput proves superior energy efficiency.','metadata telemetry; ECONOMIC_STUDY_READINESS.md','Reject: no integrated validated CPU/GPU energy data.'),
+('U05','UNSUPPORTED / UNKNOWN','GPU is cheaper at actual market prices or yields positive investment ROI.','economic_model.py','Reject: prices, fixed costs, utilization and capacity scenario not supplied.'),
+('U06','UNSUPPORTED / UNKNOWN','GPU E2E measures complete business-application latency.','MEASUREMENT_BOUNDARIES.md','Reject: excluded setup/staging/I/O/authentication/orchestration.'),
+('U07','UNSUPPORTED / UNKNOWN','Pipeline minus separately measured resident time is measured PCIe transfer time.','MEASUREMENT_BOUNDARIES.md','Reject: independent executions/scopes, synchronization, launch and mixed clocks.'),
+('U08','UNSUPPORTED / UNKNOWN','Baseline/v1 CUDA represents highly optimized production AES.','experiments/cuda_optimized_cpu_gpu_protocol.md','Reject: educational candidates, no tuning/side-channel/production claim.'),
+('U09','UNSUPPORTED / UNKNOWN','AES-128 CTR encryption results establish authenticated secure application throughput.','raw.csv; protocol','Reject: unauthenticated CTR; no authentication overhead measured.'),
+('U10','UNSUPPORTED / UNKNOWN','Results generalize to all CPU/GPU platforms, cloud prices or operating systems.','DATASET_AUDIT.md','Reject: primary one local pair, later heterogeneous contexts not controlled causal interventions.'),
+('U11','UNSUPPORTED / UNKNOWN','The 16 MiB dip is caused by PCIe, thermals or a library version.','prior ANOMALY_16MIB.md; DATASET_AUDIT.md','Reject: fixed size order and confounded hardware/software; retain observed dip.'),
+('U12','UNSUPPORTED / UNKNOWN','A two-worker ARM result replaces Windows multicore AES-NI data.','SUPPLEMENTARY_RESULTS.csv','Reject: platform, implementation and scope differ.'),
+('U13','UNSUPPORTED / UNKNOWN','Five sessions and 100 repetitions establish population significance or independent machines.','DATASET_AUDIT.md','Reject: repetitions nested within five sessions on one platform.'),
+('U14','UNSUPPORTED / UNKNOWN','The proposed study is novel and has no prior-publication overlap.','chapters/09_eksperimentalna_analiza.tex; univerzitetska-misao/mihajlovic2026validiran.tex; sjee','Unknown: authors must disclose reused data; repository absence is not novelty evidence.'),
+('U15','UNSUPPORTED / UNKNOWN','The normalized linear model is empirically measured TCO.','ECONOMIC_STUDY_READINESS.md','Reject: only conditional resource charges; fixed costs and business factors absent.'),
+]
+
+if __name__=='__main__':
+    write('CLAIM_EVIDENCE_MATRIX.csv',[dict(zip(('claim_id','evidence_status','claim','evidence','qualification'),r)) for r in ROWS])
+    print('Wrote',len(ROWS),'authored claim-status records')

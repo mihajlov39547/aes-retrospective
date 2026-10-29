@@ -1,0 +1,27 @@
+campaign,detail,status
+gtx1650ti,"['C:\\Projects\\aes\\experiments\\results_orchestrated\\first-gpu-windows\\6748c32fac83b2916aa48311\\heterogeneous-core-v1-20261014T102836520134Z-1472bd2f13cf', 'primary', 'heterogeneous-core-v1-20261014T102836520134Z-1472bd2f13cf']",manifest input identity
+gtx1650ti,"135 archived audit input hashes rechecked; prior numerical audit retained, no campaign pooling",PASS
+t4,"['C:/Projects/aes/experiments/results_orchestrated/t4-colab/heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386.tar.gz', 'primary', 'heterogeneous-core-v1-20261014T105540691660Z-9bb918a84386']",manifest input identity
+t4,"135 archived audit input hashes rechecked; prior numerical audit retained, no campaign pooling",PASS
+t600,"['C:\\Projects\\aes\\experiments\\results_orchestrated\\second-gpu\\aa12d1868e30b6956f14d503\\heterogeneous-core-v1-20261014T064407642462Z-636c48c0ebaf', 'primary', 'heterogeneous-core-v1-20261014T064407642462Z-636c48c0ebaf']",manifest input identity
+t600,"135 archived audit input hashes rechecked; prior numerical audit retained, no campaign pooling",PASS
+single-study-2003-13e3f5df-1ed2-45a5-a63f-8e69d2c47dcf,"source hashes, validation, full sample grid, all saved summary fields",PASS
+single-study-2004-08939c5b-271b-4085-b67c-17220c4d3846,"source hashes, validation, full sample grid, all saved summary fields",PASS
+single-study-2005-41b63d4b-c2f3-49f5-ae65-e72f0d59cb9d,"source hashes, validation, full sample grid, all saved summary fields",PASS
+single-study-2006-69348ff3-085a-4a46-82a4-5574a22c8916,"source hashes, validation, full sample grid, all saved summary fields",PASS
+single-study-2007-90c9f3fe-c7c4-44c0-b3cd-7008e1463e59,"source hashes, validation, full sample grid, all saved summary fields",PASS
+multicore-study-2003-bff4ac10-6aa6-4e48-b983-7b2b1e67aeb7,"archive source hashes, validation and complete raw grid; operation envelope reconstructed from timestamps",PASS
+multicore-study-2004-efc41901-9172-4ff6-b77d-cf08a5b81a98,"archive source hashes, validation and complete raw grid; operation envelope reconstructed from timestamps",PASS
+multicore-study-2005-cc6321a8-8aa7-445b-8366-61022ede48cb,"archive source hashes, validation and complete raw grid; operation envelope reconstructed from timestamps",PASS
+multicore-study-2006-42f7f25f-4247-4c52-9481-bdb1cfe84e75,"archive source hashes, validation and complete raw grid; operation envelope reconstructed from timestamps",PASS
+multicore-study-2007-4f6887b6-8da2-40ee-91fe-71f4bb4d41f5,"archive source hashes, validation and complete raw grid; operation envelope reconstructed from timestamps",PASS
+single-study-2003-1c5425a9-c04e-4aa1-b128-2be572105d71,"archive source hashes, validation and complete raw grid; operation envelope reconstructed from timestamps",PASS
+single-study-2004-5b197896-348b-4641-a0df-4bb8599e647b,"archive source hashes, validation and complete raw grid; operation envelope reconstructed from timestamps",PASS
+single-study-2005-a4baeb88-145b-4ee8-90a5-f91640219970,"archive source hashes, validation and complete raw grid; operation envelope reconstructed from timestamps",PASS
+single-study-2006-41f6eadf-495c-4bec-a6db-ab540c55c78b,"archive source hashes, validation and complete raw grid; operation envelope reconstructed from timestamps",PASS
+single-study-2007-e076b8a5-072a-4ee9-8e45-85680d4868c6,"archive source hashes, validation and complete raw grid; operation envelope reconstructed from timestamps",PASS
+f3382fb5-b1f9-45af-9e5d-cf03863a7c2a,"600 rows including warmup, complete schedule/pairs, validation, source hashes, all saved session summary fields",PASS
+6f09a8c8-c133-4327-b551-e3992df8082d,"600 rows including warmup, complete schedule/pairs, validation, source hashes, all saved session summary fields",PASS
+272e952d-a39b-4447-a56d-1f15cbbaedcc,"600 rows including warmup, complete schedule/pairs, validation, source hashes, all saved session summary fields",PASS
+c5d693dd-4f12-4e1c-ba31-b965fa3ebd53,"600 rows including warmup, complete schedule/pairs, validation, source hashes, all saved session summary fields",PASS
+961aa526-1082-45b5-a7c1-17d9f34e8f11,"600 rows including warmup, complete schedule/pairs, validation, source hashes, all saved session summary fields",PASS

@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="460" viewBox="0 0 960 460">
+<rect width="960" height="460" fill="white"/>
+<g font-family="sans-serif" fill="#20252b">
+<text x="30" y="30" font-size="20">Conditional cost decision: baseline CUDA prepared pipeline</text>
+<text x="30" y="55" font-size="13">September 2026 GTX 1650 Ti / i5-10300H, AES-128-CTR; h_CPU = 1 normalized unit/hour</text>
+<text x="30" y="117" font-size="14">0.000976562 MiB</text>
+<rect x="170" y="95" width="710" height="32" fill="#f2c7bf"/>
+<rect x="170" y="95" width="11.507293354943274" height="32" fill="#b6dece"/>
+<line x1="181.50729335494327" x2="181.50729335494327" y1="95" y2="127" stroke="#17232d"/>
+<text x="186.50729335494327" y="116" font-size="12">0.0324</text>
+<text x="30" y="165" font-size="14">0.015625 MiB</text>
+<rect x="170" y="143" width="710" height="32" fill="#f2c7bf"/>
+<rect x="170" y="143" width="22.72338194060589" height="32" fill="#b6dece"/>
+<line x1="192.7233819406059" x2="192.7233819406059" y1="143" y2="175" stroke="#17232d"/>
+<text x="197.7233819406059" y="164" font-size="12">0.0640</text>
+<text x="30" y="213" font-size="14">1 MiB</text>
+<rect x="170" y="191" width="710" height="32" fill="#f2c7bf"/>
+<rect x="170" y="191" width="337.3657504146137" height="32" fill="#b6dece"/>
+<line x1="507.3657504146137" x2="507.3657504146137" y1="191" y2="223" stroke="#17232d"/>
+<text x="512.3657504146137" y="212" font-size="12">0.9503</text>
+<text x="30" y="261" font-size="14">16 MiB</text>
+<rect x="170" y="239" width="710" height="32" fill="#f2c7bf"/>
+<rect x="170" y="239" width="270.722456137085" height="32" fill="#b6dece"/>
+<line x1="440.722456137085" x2="440.722456137085" y1="239" y2="271" stroke="#17232d"/>
+<text x="445.722456137085" y="260" font-size="12">0.7626</text>
+<text x="30" y="309" font-size="14">32 MiB</text>
+<rect x="170" y="287" width="710" height="32" fill="#f2c7bf"/>
+<rect x="170" y="287" width="293.70213578096883" height="32" fill="#b6dece"/>
+<line x1="463.70213578096883" x2="463.70213578096883" y1="287" y2="319" stroke="#17232d"/>
+<text x="468.70213578096883" y="308" font-size="12">0.8273</text>
+<text x="170.0" y="355" text-anchor="middle" font-size="12">0</text>
+<text x="347.5" y="355" text-anchor="middle" font-size="12">0.5</text>
+<text x="436.25" y="355" text-anchor="middle" font-size="12">0.75</text>
+<text x="525.0" y="355" text-anchor="middle" font-size="12">1</text>
+<text x="613.75" y="355" text-anchor="middle" font-size="12">1.25</text>
+<text x="702.5" y="355" text-anchor="middle" font-size="12">1.5</text>
+<text x="880.0" y="355" text-anchor="middle" font-size="12">2</text>
+<text x="400" y="382" font-size="14">GPU / CPU attributable hourly cost ratio</text>
+<text x="30" y="410" font-size="13">Green: GPU lower variable cost. Red: CPU lower variable cost. Boundary: equal.</text>
+<text x="30" y="435" font-size="12">Threshold = ratio of unrounded aggregate throughput medians; session variation in CSV. No market or energy costs.</text>
+</g></svg>

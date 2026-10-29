@@ -1,0 +1,418 @@
+{
+  "checks": "PASS; 6000 raw rows; 300 session groups; 60 aggregates; nine manuscript cells",
+  "discrepancies": [],
+  "input_sha256": {
+    "experiments/results/aes_cuda_cpu_gpu-final-aggregate/aggregate.csv": "112e57bf1edd431e1ef1142608933c724fcb2120f6a69315dc5fa554e8ef8c3a",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/metadata.json": "8a6da61e0e1f1d0523f97a8426e907e84bc409d0ea0e7a14aa6c9f2e1d9abd79",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/raw.csv": "54e1a3357362d7b774d7b296a92f5836f9901d6d6461ad9aacbf9c0aa3239e9f",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/results.json": "841f7cc362db440c611c98d1b78f7d6dacf4f7e20db61cf1584a78a8c11da48e",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/source/aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/source/aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/source/aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/source/aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/source/aes_cuda_cpu_gpu_smoke_check.py": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/source/aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/source/aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/source/benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/source/common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/source/cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/source/cuda_optimized_cpu_gpu_protocol.md": "73beb98afcefeb45ca13e741ff4fc4654f032047b36140a8346af57dd3834848",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/summary.csv": "bf922a577c754c2360d606581410ecfdf09bc00fc35950f554fa1a9891e37d14",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/validation.json": "3c2dec242405bc3576cac13c9f6c82fad903493bce3485a454224c98fcd326af",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/metadata.json": "8e2012c2bc414acb00ff81171df3cb3f31963b5fcaa59a61d4cad8e6ce320af8",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/raw.csv": "16beff8eaa3e455a87bdbfd4e3839a235b31e291b7d76b62df967eef8a96fc57",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/results.json": "b22f93672c2d876fcb7564e725e28e16557479e6710b6244f2d9e7114f59fa5a",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/source/aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/source/aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/source/aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/source/aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/source/aes_cuda_cpu_gpu_smoke_check.py": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/source/aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/source/aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/source/benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/source/common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/source/cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/source/cuda_optimized_cpu_gpu_protocol.md": "73beb98afcefeb45ca13e741ff4fc4654f032047b36140a8346af57dd3834848",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/summary.csv": "1c4c658a35991dbd15b3cce930bcce5250946374ef7874fd7817a1f54fad5bea",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/validation.json": "e465531fe36a4846d4aa52258af14ff034af319a79e0cdfc8058ea8eb074d2ea",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/metadata.json": "88c66ec1302586f96c1eea7996328fdb82976316090461b02925a455736cd6b2",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/raw.csv": "1b5475e3f16e77f0ccad3ddf6a58f494c535cf5350061b303f0d3e0b88f0fd30",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/results.json": "3fc3643328a895fdad3ad6e2c777abda3ec81bd734b68dbf0185325eba6717c2",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/source/aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/source/aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/source/aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/source/aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/source/aes_cuda_cpu_gpu_smoke_check.py": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/source/aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/source/aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/source/benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/source/common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/source/cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/source/cuda_optimized_cpu_gpu_protocol.md": "73beb98afcefeb45ca13e741ff4fc4654f032047b36140a8346af57dd3834848",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/summary.csv": "691f8bf719a09e19e4eda8815425c32686c8d514d8c5ea38fc3398b8b3c9de8b",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/validation.json": "d79e46725c821d521abf2325cea9ddad39aeb82d4e235e1ddfbf7946573b382e",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/metadata.json": "e3f9a2c57951924bdccdf7fdd1f162805f133ff0a83bc4211b2a5003a4b26469",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/raw.csv": "e5c3f3b8cd9feb1be65e68dee255e2119fcad1fea07e4094c345faf558acb020",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/results.json": "dca32dff787d5be78034fc6e7b9dfb2119497d4d3f713e92fc5e587a27b6bbbb",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/source/aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/source/aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/source/aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/source/aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/source/aes_cuda_cpu_gpu_smoke_check.py": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/source/aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/source/aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/source/benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/source/common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/source/cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/source/cuda_optimized_cpu_gpu_protocol.md": "73beb98afcefeb45ca13e741ff4fc4654f032047b36140a8346af57dd3834848",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/summary.csv": "32534c60b264d8ba284982fa08de23f62851fc195ec5cec22182e305cda2864a",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/validation.json": "fed636f3f663379ce6a1626665a6915e47adf1e92b8f1b0791c6854b9bd1f704",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205950403576Z/metadata.json": "2d54b94cf32fa63038c4868e09d2041a20b3ae8669730c0cc6404cc51dec97eb",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205950403576Z/raw.csv": "669706c984341dd3084d93bf6d8bee0d6771ac695abb8727169a4ce4fbdd3727",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205950403576Z/results.json": "02d31f008057e3e55b901413132c9d6aac84eafda2bc28a6a4a6aa68f488f2e0",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205950403576Z/source/aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205950403576Z/source/aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205950403576Z/source/aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205950403576Z/source/aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205950403576Z/source/aes_cuda_cpu_gpu_smoke_check.py": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205950403576Z/source/aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205950403576Z/source/aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205950403576Z/source/benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205950403576Z/source/common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205950403576Z/source/cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205950403576Z/source/cuda_optimized_cpu_gpu_protocol.md": "73beb98afcefeb45ca13e741ff4fc4654f032047b36140a8346af57dd3834848",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205950403576Z/summary.csv": "9eb56b587a9a3d304de6c29ec81643f0f92c4be319df676b2869b8332d791d1b",
+    "experiments/results/aes_cuda_cpu_gpu-study-20260930T205950403576Z/validation.json": "a72e1c7e8a18924e4379069d04de87017392ac34fa93ecb33d35a6d885d97497"
+  },
+  "selected_sessions": [
+    {
+      "arguments": {
+        "host_memory": "pinned",
+        "measurements": [
+          "resident",
+          "pipeline"
+        ],
+        "modes": [
+          "ECB",
+          "CTR"
+        ],
+        "notes": "",
+        "output": "C:\\Projects\\aes\\experiments\\results",
+        "profile": [
+          "baseline",
+          "optimized"
+        ],
+        "purpose": "study",
+        "repeats": 20,
+        "resident_iterations": 1,
+        "run": true,
+        "seed": 2003,
+        "sizes": [
+          1024,
+          16384,
+          1048576,
+          16777216,
+          33554432
+        ],
+        "warmup": 5
+      },
+      "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+      "git_commit": "cd6b18f46414ac2e2f9d5ae61d848867b17361f9",
+      "git_status": "?? experiments/results/aes_cuda_cpu_gpu-validation-41fe6b46-d014-4944-8798-d1f805277064/",
+      "gpu": {
+        "compute_capability": "75",
+        "cuda_path": "C:\\Projects\\aes\\.venv\\Lib\\site-packages\\nvidia\\cuda_runtime",
+        "cupy_version": "13.6.0",
+        "device_id": 0,
+        "driver_version": 13030,
+        "gpu_name": "NVIDIA GeForce GTX 1650 Ti",
+        "pci_bus_id": "0000:01:00.0",
+        "runtime_version": 12090,
+        "vram_bytes": 4294639616
+      },
+      "os": "Windows-10-10.0.19045-SP0",
+      "raw_rows": 1200,
+      "run_id": "aes_cuda_cpu_gpu-study-20260930T205447700308Z",
+      "seed": 2003,
+      "session_id": "41fe6b46-d014-4944-8798-d1f805277064",
+      "source_sha256": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_cpu_gpu_smoke_check.py": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866",
+        "cuda_optimized_cpu_gpu_protocol.md": "73beb98afcefeb45ca13e741ff4fc4654f032047b36140a8346af57dd3834848"
+      },
+      "validation": "PASS"
+    },
+    {
+      "arguments": {
+        "host_memory": "pinned",
+        "measurements": [
+          "resident",
+          "pipeline"
+        ],
+        "modes": [
+          "ECB",
+          "CTR"
+        ],
+        "notes": "",
+        "output": "C:\\Projects\\aes\\experiments\\results",
+        "profile": [
+          "baseline",
+          "optimized"
+        ],
+        "purpose": "study",
+        "repeats": 20,
+        "resident_iterations": 1,
+        "run": true,
+        "seed": 2004,
+        "sizes": [
+          1024,
+          16384,
+          1048576,
+          16777216,
+          33554432
+        ],
+        "warmup": 5
+      },
+      "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+      "git_commit": "cd6b18f46414ac2e2f9d5ae61d848867b17361f9",
+      "git_status": "?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/\n?? experiments/results/aes_cuda_cpu_gpu-validation-1a68b061-2098-4352-95ab-257dbc02c55a/\n?? experiments/results/aes_cuda_cpu_gpu-validation-41fe6b46-d014-4944-8798-d1f805277064/",
+      "gpu": {
+        "compute_capability": "75",
+        "cuda_path": "C:\\Projects\\aes\\.venv\\Lib\\site-packages\\nvidia\\cuda_runtime",
+        "cupy_version": "13.6.0",
+        "device_id": 0,
+        "driver_version": 13030,
+        "gpu_name": "NVIDIA GeForce GTX 1650 Ti",
+        "pci_bus_id": "0000:01:00.0",
+        "runtime_version": 12090,
+        "vram_bytes": 4294639616
+      },
+      "os": "Windows-10-10.0.19045-SP0",
+      "raw_rows": 1200,
+      "run_id": "aes_cuda_cpu_gpu-study-20260930T205542542732Z",
+      "seed": 2004,
+      "session_id": "1a68b061-2098-4352-95ab-257dbc02c55a",
+      "source_sha256": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_cpu_gpu_smoke_check.py": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866",
+        "cuda_optimized_cpu_gpu_protocol.md": "73beb98afcefeb45ca13e741ff4fc4654f032047b36140a8346af57dd3834848"
+      },
+      "validation": "PASS"
+    },
+    {
+      "arguments": {
+        "host_memory": "pinned",
+        "measurements": [
+          "resident",
+          "pipeline"
+        ],
+        "modes": [
+          "ECB",
+          "CTR"
+        ],
+        "notes": "",
+        "output": "C:\\Projects\\aes\\experiments\\results",
+        "profile": [
+          "baseline",
+          "optimized"
+        ],
+        "purpose": "study",
+        "repeats": 20,
+        "resident_iterations": 1,
+        "run": true,
+        "seed": 2005,
+        "sizes": [
+          1024,
+          16384,
+          1048576,
+          16777216,
+          33554432
+        ],
+        "warmup": 5
+      },
+      "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+      "git_commit": "cd6b18f46414ac2e2f9d5ae61d848867b17361f9",
+      "git_status": "A  experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/source/cuda_optimized_cpu_gpu_protocol.md\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/metadata.json\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/raw.csv\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/results.json\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/summary.csv\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/validation.json\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/\n?? experiments/results/aes_cuda_cpu_gpu-validation-1a68b061-2098-4352-95ab-257dbc02c55a/\n?? experiments/results/aes_cuda_cpu_gpu-validation-3360d814-a7e0-4cb6-90e9-6baac00bb485/\n?? experiments/results/aes_cuda_cpu_gpu-validation-41fe6b46-d014-4944-8798-d1f805277064/",
+      "gpu": {
+        "compute_capability": "75",
+        "cuda_path": "C:\\Projects\\aes\\.venv\\Lib\\site-packages\\nvidia\\cuda_runtime",
+        "cupy_version": "13.6.0",
+        "device_id": 0,
+        "driver_version": 13030,
+        "gpu_name": "NVIDIA GeForce GTX 1650 Ti",
+        "pci_bus_id": "0000:01:00.0",
+        "runtime_version": 12090,
+        "vram_bytes": 4294639616
+      },
+      "os": "Windows-10-10.0.19045-SP0",
+      "raw_rows": 1200,
+      "run_id": "aes_cuda_cpu_gpu-study-20260930T205652619168Z",
+      "seed": 2005,
+      "session_id": "3360d814-a7e0-4cb6-90e9-6baac00bb485",
+      "source_sha256": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_cpu_gpu_smoke_check.py": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866",
+        "cuda_optimized_cpu_gpu_protocol.md": "73beb98afcefeb45ca13e741ff4fc4654f032047b36140a8346af57dd3834848"
+      },
+      "validation": "PASS"
+    },
+    {
+      "arguments": {
+        "host_memory": "pinned",
+        "measurements": [
+          "resident",
+          "pipeline"
+        ],
+        "modes": [
+          "ECB",
+          "CTR"
+        ],
+        "notes": "",
+        "output": "C:\\Projects\\aes\\experiments\\results",
+        "profile": [
+          "baseline",
+          "optimized"
+        ],
+        "purpose": "study",
+        "repeats": 20,
+        "resident_iterations": 1,
+        "run": true,
+        "seed": 2006,
+        "sizes": [
+          1024,
+          16384,
+          1048576,
+          16777216,
+          33554432
+        ],
+        "warmup": 5
+      },
+      "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+      "git_commit": "cd6b18f46414ac2e2f9d5ae61d848867b17361f9",
+      "git_status": "A  experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/source/cuda_optimized_cpu_gpu_protocol.md\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/metadata.json\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/raw.csv\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/results.json\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/summary.csv\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/validation.json\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/\n?? experiments/results/aes_cuda_cpu_gpu-validation-1a68b061-2098-4352-95ab-257dbc02c55a/\n?? experiments/results/aes_cuda_cpu_gpu-validation-3360d814-a7e0-4cb6-90e9-6baac00bb485/\n?? experiments/results/aes_cuda_cpu_gpu-validation-41fe6b46-d014-4944-8798-d1f805277064/\n?? experiments/results/aes_cuda_cpu_gpu-validation-efc8908b-b014-4804-ab95-33de26614148/",
+      "gpu": {
+        "compute_capability": "75",
+        "cuda_path": "C:\\Projects\\aes\\.venv\\Lib\\site-packages\\nvidia\\cuda_runtime",
+        "cupy_version": "13.6.0",
+        "device_id": 0,
+        "driver_version": 13030,
+        "gpu_name": "NVIDIA GeForce GTX 1650 Ti",
+        "pci_bus_id": "0000:01:00.0",
+        "runtime_version": 12090,
+        "vram_bytes": 4294639616
+      },
+      "os": "Windows-10-10.0.19045-SP0",
+      "raw_rows": 1200,
+      "run_id": "aes_cuda_cpu_gpu-study-20260930T205851562886Z",
+      "seed": 2006,
+      "session_id": "efc8908b-b014-4804-ab95-33de26614148",
+      "source_sha256": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_cpu_gpu_smoke_check.py": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866",
+        "cuda_optimized_cpu_gpu_protocol.md": "73beb98afcefeb45ca13e741ff4fc4654f032047b36140a8346af57dd3834848"
+      },
+      "validation": "PASS"
+    },
+    {
+      "arguments": {
+        "host_memory": "pinned",
+        "measurements": [
+          "resident",
+          "pipeline"
+        ],
+        "modes": [
+          "ECB",
+          "CTR"
+        ],
+        "notes": "",
+        "output": "C:\\Projects\\aes\\experiments\\results",
+        "profile": [
+          "baseline",
+          "optimized"
+        ],
+        "purpose": "study",
+        "repeats": 20,
+        "resident_iterations": 1,
+        "run": true,
+        "seed": 2007,
+        "sizes": [
+          1024,
+          16384,
+          1048576,
+          16777216,
+          33554432
+        ],
+        "warmup": 5
+      },
+      "cpu": "Intel(R) Core(TM) i5-10300H CPU @ 2.50GHz",
+      "git_commit": "cd6b18f46414ac2e2f9d5ae61d848867b17361f9",
+      "git_status": "A  experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/source/cuda_optimized_cpu_gpu_protocol.md\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/metadata.json\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/raw.csv\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/results.json\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/summary.csv\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205447700308Z/validation.json\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205542542732Z/\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205652619168Z/\n?? experiments/results/aes_cuda_cpu_gpu-study-20260930T205851562886Z/\n?? experiments/results/aes_cuda_cpu_gpu-validation-0e63ef0f-78d2-4dca-98d8-8f74edad751a/\n?? experiments/results/aes_cuda_cpu_gpu-validation-1a68b061-2098-4352-95ab-257dbc02c55a/\n?? experiments/results/aes_cuda_cpu_gpu-validation-3360d814-a7e0-4cb6-90e9-6baac00bb485/\n?? experiments/results/aes_cuda_cpu_gpu-validation-41fe6b46-d014-4944-8798-d1f805277064/\n?? experiments/results/aes_cuda_cpu_gpu-validation-efc8908b-b014-4804-ab95-33de26614148/",
+      "gpu": {
+        "compute_capability": "75",
+        "cuda_path": "C:\\Projects\\aes\\.venv\\Lib\\site-packages\\nvidia\\cuda_runtime",
+        "cupy_version": "13.6.0",
+        "device_id": 0,
+        "driver_version": 13030,
+        "gpu_name": "NVIDIA GeForce GTX 1650 Ti",
+        "pci_bus_id": "0000:01:00.0",
+        "runtime_version": 12090,
+        "vram_bytes": 4294639616
+      },
+      "os": "Windows-10-10.0.19045-SP0",
+      "raw_rows": 1200,
+      "run_id": "aes_cuda_cpu_gpu-study-20260930T205950403576Z",
+      "seed": 2007,
+      "session_id": "0e63ef0f-78d2-4dca-98d8-8f74edad751a",
+      "source_sha256": {
+        "aes_acceleration.py": "0ac9dee69d9e644cd3b644691d63b70d735fdcc7c6c36dd2f86dfbea2ed4b85a",
+        "aes_cuda_baseline.cu": "1f90fbf8b524b4477c6f42c93e75e48eafa59dea6c72ce1a8f617a4359835b5a",
+        "aes_cuda_baseline.py": "a5f72fd72c99e5cc0d97bc7d1ae680d38616b71f9faa8f29880da61f44c63eea",
+        "aes_cuda_cpu_gpu.py": "6421444064ee24039fe568dec0806921b3ed465605e0d3fc312084f59dea71e5",
+        "aes_cuda_cpu_gpu_smoke_check.py": "bfde6e68cd9ceda12a30dd6a3f3f3ca644444f35c4d51a928e867693aa02c917",
+        "aes_cuda_optimized.cu": "8f61621817a85e97a4126c9fa13717b4b94342c6bc0b6ab4d9add16862e2b866",
+        "aes_cuda_ttable.cu": "3fbd717d20a207f5984fcdc3a241e4b74e939efa6e4e8e769eae30e3e28b4998",
+        "benchmark.py": "fe8589d8faed59b76b2496c9d39ea29b8f6a9f581f5d2373194960062767c393",
+        "common.py": "940bf72418e7f7ec132779b5265309912b8f7773cc9e0f844b450082bb10987b",
+        "cpu_validation.py": "f00b18f325fd94a95481e2bd22e402e4a09c0dab9992b697e3f0f15ad4c3b866",
+        "cuda_optimized_cpu_gpu_protocol.md": "73beb98afcefeb45ca13e741ff4fc4654f032047b36140a8346af57dd3834848"
+      },
+      "validation": "PASS"
+    }
+  ],
+  "tolerance": {
+    "absolute": 1e-15,
+    "relative": 1e-10
+  }
+}
