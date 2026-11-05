@@ -141,8 +141,8 @@ def format_docx(path, kind):
         elif abstract:
             apply(p, 'JAbstract')
             abstract_words[abstract] = len(text.split())
-        elif text in ('Literatura', 'SUMMARY') or re.match(r'^\d+\t', text):
-            references = text == 'Literatura'
+        elif text in ('References', 'SUMMARY') or re.match(r'^\d+\t', text):
+            references = text == 'References'
             apply(p, 'JSubtitle')
             for node in p._p.xpath('.//w:t'):
                 node.text = node.text.upper() if node.text else node.text
@@ -183,8 +183,8 @@ def format_docx(path, kind):
         elif i > 0 and paragraphs[i - 1]._p.xpath('.//w:drawing'):
             figure_number += 1
             apply(p, 'UMFigureCaption')
-            p.insert_paragraph_before(f'Slika {figure_number}', 'UMFigureNumber')
-            insert_after(p._p, 'Izvor: Eksperimentalni rezultati autora.', d, 'UMTableSource')
+            p.insert_paragraph_before(f'Figure {figure_number}', 'UMFigureNumber')
+            insert_after(p._p, "Source: Author's experimental results.", d, 'UMTableSource')
         else:
             apply(p, 'JText')
 
@@ -199,10 +199,10 @@ def format_docx(path, kind):
         caption = Paragraph(table._tbl.getprevious(), d._body)
         if not caption.text.strip():
             raise ValueError(f'Table {number} is missing its caption')
-        caption.insert_paragraph_before(f'Tabela {number}', 'UMTableNumber')
+        caption.insert_paragraph_before(f'Table {number}', 'UMTableNumber')
         apply(caption, 'UMTableTitle')
-        source = ('Izvor: Eksperimentalni rezultati autora.' if number == 1 else
-                  'Izvor: Proračun autora na osnovu eksperimentalnih rezultata; normalizovani troškovi.')
+        source = ("Source: Author's experimental results." if number == 1 else
+                  "Source: Author's calculations based on experimental results; normalized costs.")
         insert_after(table._tbl, source, d, 'UMTableSource')
         table.autofit = False
         grid = widths.get(len(table.columns), [12.6 / len(table.columns)] * len(table.columns))

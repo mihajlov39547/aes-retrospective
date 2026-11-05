@@ -1,7 +1,7 @@
 \documentclass[11pt,b5paper]{article}
 
 % ============================================================
-% FORMAT ZA UNIVERZITETSKU MISAO
+% FORMAT FOR UNIVERZITETSKA MISAO
 % ============================================================
 \usepackage[
   paperwidth=17.6cm,
@@ -18,7 +18,7 @@
   {\setmainfont{Times New Roman}}
   {\setmainfont{TeX Gyre Termes}}
 
-% Bez babel-a: srpska latinica radi direktno kroz XeLaTeX + fontspec.
+% Unicode text is supported directly through XeLaTeX + fontspec.
 
 \usepackage{booktabs}
 \usepackage{array}
@@ -30,14 +30,13 @@
 \usepackage{graphicx}
 \usepackage{caption}
 \AtBeginDocument{%
-  \renewcommand{\tablename}{Tabela}%
-  \renewcommand{\figurename}{Slika}%
-  \renewcommand{\refname}{Literatura}%
+  \renewcommand{\tablename}{Table}%
+  \renewcommand{\figurename}{Figure}%
+  \renewcommand{\refname}{References}%
 }
 % Shared bibliography for PDF and DOCX builds.
 \usepackage[backend=biber,style=apa,natbib=true,sorting=nyt]{biblatex}
 \addbibresource{references.bib}
-\DefineBibliographyStrings{english}{and={i}}
 \newcounter{journalbib}
 \defbibenvironment{bibliography}
   {\list{\arabic{journalbib}.}{\usecounter{journalbib}\setlength{\leftmargin}{1.7em}\setlength{\labelwidth}{1.2em}\setlength{\labelsep}{.5em}\setlength{\itemsep}{4pt}}}
@@ -53,7 +52,7 @@
 
 
 % ============================================================
-% PODEŠAVANJA STILA
+% STYLE SETTINGS
 % ============================================================
 \pagestyle{empty}
 \linespread{1.0}
@@ -94,16 +93,6 @@
 \begin{document}
 \begin{center}
 {\fontsize{13}{15}\selectfont\bfseries
-CPU/GPU AES ENKRIPCIJA NA DOSTUPNIM RAČUNARSKIM PLATFORMAMA: PERFORMANSE I USLOVNA TROŠKOVNA EFIKASNOST\par}
-\end{center}
-\vspace{.2cm}
-\section*{Apstrakt}
-Rad prikazuje sprovedene i validirane eksperimente AES-128-CTR enkripcije i izvodi uslove za izbor izvršne putanje prema modelovanom trošku obrade. Na Windows x64 mašini sa Intel i5-10300H i GTX 1650 Ti upoređene su single-stream CPU AES-NI transformacija, rezidentni CUDA kernel i pripremljeni GPU pipeline. CPU je brži od pipeline-a za 1, 16 i 32 MiB. Za 32 MiB propusnosti iznose 1455,8 MB/s za CPU, 4800,6 MB/s za GPU kernel i 1204,5 MB/s za pipeline. Pri jednakom pripisivom satnom trošku CPU ima niži modelovani trošak po GB; prag relativne GPU/CPU satne cene za pipeline na 32 MiB iznosi 0,8273. Zasebna Linux/T4 kampanja koristi CPU OpenSSL EVP i nezavisne stranice od 1 MiB. Povećanjem batch-a sa 1 na 32 stranice medijana sesijskih odnosa CPU/GPU vremena raste sa 0,5404 na 0,9125, ali CPU transformacija ostaje brža u svim testiranim konfiguracijama. Kampanje se ne objedinjuju zbog različitih implementacija i mernih granica. Rezidentni GPU rezultati pokazuju potencijal obrade bez transfera, dok Parquet ostaje motivacioni primer, bez aplikacionog merenja. Ekonomski doprinos je identifikacija uslovnih troškovnih pragova, a ne dokaz stvarnih ušteda ili univerzalne opravdanosti nabavke.
-
-\noindent\textbf{Ključne reči:} AES-CTR; AES-NI; CUDA; CPU/GPU; performanse; troškovna efikasnost; poslovni informacioni sistemi
-\vspace{.35cm}
-\begin{center}
-{\fontsize{13}{15}\selectfont\bfseries
 CPU/GPU AES ENCRYPTION ON ACCESSIBLE COMPUTING PLATFORMS: PERFORMANCE AND CONDITIONAL COST EFFICIENCY\par}
 \end{center}
 \vspace{.2cm}
@@ -112,105 +101,105 @@ This paper presents validated AES-128-CTR experiments and derives conditional re
 
 \noindent\textbf{Keywords:} AES-CTR; AES-NI; CUDA; CPU/GPU; performance evaluation; conditional cost efficiency; business information systems
 
-\section{Uvod}
-Zaštita podataka u poslovnim informacionim sistemima zahteva kriptografski ispravne implementacije, ali i racionalno korišćenje postojeće procesorske i memorijske infrastrukture. Šifrovanje se nalazi na putanji između obrade i čuvanja podataka; njegovo trajanje može biti relevantno za propusnost sistema, zauzeće resursa i planiranje kapaciteta. Uvođenje GPU akceleracije nije samo tehničko pitanje: namenska infrastruktura ima fiksne troškove, a njen angažman i prenos podataka mogu ograničiti ostvarivu korist.\par
-Standard AES definiše kriptografsku transformaciju \citep{nist_aes2023}, dok CTR režim omogućava obradu nezavisnih blokova \citep{nist_ctr2001}. Savremeni CPU može koristiti namensku AES-NI podršku \citep{intel_aesni}, a GPU paralelizuje blokovske operacije velikim brojem niti. Međutim, visok protok izolovanog GPU jezgra nije dokaz kraćeg ukupnog trajanja obrade kada su ulazni podaci u sistemskoj memoriji.\par
-Cilj rada je da, na osnovu sprovedenih eksperimenata, (i) razdvoji tehničke granice CPU/GPU merenja, (ii) uporedi propusnosti na dostupnim platformama i (iii) pokaže kakav uslov za niži pripisivi trošak po GB proizlazi iz tih merenja. Osnovno istraživačko pitanje glasi: \emph{pod kojim odnosom cene zauzetih CPU i GPU resursa tehnički rezultat može promeniti izbor implementacione putanje?} Time se tehničko istraživanje povezuje sa ekonomikom upotrebe IT infrastrukture, bez tvrdnje o stvarnim finansijskim uštedama.\par
-Doprinos rada je eksperimentalno poređenje validiranih CPU/GPU izvršnih putanja uz eksplicitno definisane merne granice, dopunjeno modelom troška računarskog vremena. Sprovedena merenja daju tehničku osnovu za izvođenje uslovnih pragova relativne cene usluge obrade. Eksperimentalno su merene performanse, dok su troškovni pokazatelji izvedeni iz tih merenja i navedenih pretpostavki modela; stvarne tržišne uštede nisu merene.
+\section{Introduction}
+Data protection in business information systems requires cryptographically correct implementations as well as efficient use of existing processing and memory infrastructure. Encryption lies on the path between data processing and storage; its duration can affect system throughput, resource occupancy, and capacity planning. Introducing GPU acceleration is not merely a technical issue: dedicated infrastructure entails fixed costs, while resource occupancy and data transfers can limit the achievable benefit.\par
+The AES standard defines the cryptographic transformation \citep{nist_aes2023}, while CTR mode enables independent blocks to be processed \citep{nist_ctr2001}. Modern CPUs can use dedicated AES-NI support \citep{intel_aesni}, whereas GPUs parallelize block operations across large numbers of threads. However, high isolated GPU kernel throughput does not demonstrate a shorter total processing time when the input data reside in system memory.\par
+Based on the experiments conducted, this paper aims to (i) distinguish the technical timing boundaries of CPU/GPU measurements, (ii) compare throughput on accessible platforms, and (iii) establish the condition for a lower attributable cost per GB implied by those measurements. The central research question is: \emph{at what price ratio for occupied CPU and GPU resources can the technical result change the choice of implementation path?} This connects the technical investigation with the economics of IT infrastructure use, without claiming actual financial savings.\par
+The contribution is an experimental comparison of validated CPU/GPU execution paths with explicitly defined timing boundaries, complemented by a compute-time cost model. The measurements provide the technical basis for deriving conditional thresholds for the relative price of processing services. Performance was measured experimentally, whereas cost indicators were derived from those measurements and the stated model assumptions; actual market savings were not measured.
 
-\section{Pregled literature i kontekst poslovne primene}
-Radovi o GPU AES implementacijama pokazuju da organizacija memorije i paralelizacija mogu znatno promeniti propusnost jezgra \citep{iwai2012,tezcan2021}. Ipak, \citet{gregg2011} naglašavaju da položaj podataka i prenosi između CPU i GPU memorije određuju smisao samog poređenja. \citet{lee2010} takođe ukazuju da neujednačena optimizacija CPU i GPU referenci može proizvesti zavaravajuće faktore ubrzanja. Zbog toga se u ovom radu primarna CPU referenca ne svodi na čisto softverski AES već obuhvata eksplicitnu AES-NI putanju.\par
-Energetski aspekt heterogenog AES računanja već je obrađen u literaturi. \citet{fei2020} proučavaju energetsku efikasnost paralelnog AES-a kroz raspodelu posla, preklapanje i izbor frekvencije, dok \citet{barroso2007} razmatraju načela energetski proporcionalnog računanja. Za razliku od energetskih eksperimenata, ovde nisu prikupljeni validirani podaci o džulima po GB. Ekonomski sloj zato posmatra samo \emph{modelovane troškove zauzetog računarskog vremena}, a ne potrošnju ili ukupan trošak posedovanja.\par
-Konkretan primer primene je modularna enkripcija kolonskih datoteka Apache Parquet. Specifikacija \texttt{AES\_GCM\_CTR\_V1} predviđa AES-CTR za stranice podataka, dok se drugi moduli štite pomoću AES-GCM; zaštita integriteta samih CTR stranica nije obezbeđena na isti način kao kod punog GCM režima \citep{parquet_encrypt}. Organizacija većeg broja stranica otvara pitanje grupne obrade i troška premeštanja podataka između uređaja. U posmatranoj GTX studiji GPU resident kernel na 32 MiB ima 3,30 puta veću propusnost od CPU AES-NI, što ukazuje na računarski potencijal GPU-a za već rezidentne grupe stranica, ali bez dokazane prednosti punog toka. Dopunski T4 eksperiment sa 32 nezavisne stranice pokazuje suprotan ishod za pripremljeni pipeline: odnos CPU/GPU vremena 0,9125. Prema tome, Parquet je \emph{uslovni kandidat} za GPU offloading, a ne demonstrirana finansijska ušteda. Ovo je \emph{motivacioni primer}, ne rezultat merenja Parquet sistema: naši sintetički baferi nisu Parquet datoteke i ne uključuju formatiranje, kompresiju, metapodatke, skladište ni upravljanje ključevima. Parquet specifikacija ne određuje tržišnu cenu šifrovanja po GB; takva cena zavisi od konkretnog izvršnog okruženja.\par
-Istraživački doprinos nije u novom kriptografskom algoritmu ni u univerzalnom modelu TCO, već u povezivanju stvarno dokumentovanih granica merenja sa uslovnim pokazateljem cene računarskog rada. Slični tehnički i energetski radovi već postoje; tvrdnja o potpunoj metodološkoj novini zahtevala bi dodatni sistematski pregled.
+\section{Literature Review and Business Application Context}
+Studies of GPU AES implementations show that memory organization and parallelization can substantially change kernel throughput \citep{iwai2012,tezcan2021}. Nevertheless, \citet{gregg2011} emphasize that data location and transfers between CPU and GPU memory determine the meaning of the comparison itself. \citet{lee2010} likewise point out that uneven optimization of CPU and GPU baselines can produce misleading speedup factors. Accordingly, the primary CPU baseline in this paper is not limited to software-only AES but includes an explicit AES-NI path.\par
+The energy aspects of heterogeneous AES computing have already been addressed in the literature. \citet{fei2020} investigate the energy efficiency of parallel AES through workload distribution, overlap, and frequency selection, while \citet{barroso2007} discuss the principles of energy-proportional computing. Unlike energy-focused experiments, the present study did not collect validated data on joules per GB. The economic analysis therefore considers only \emph{modeled costs of occupied compute time}, rather than energy consumption or total cost of ownership.\par
+A concrete application example is modular encryption of Apache Parquet columnar files. The \texttt{AES\_GCM\_CTR\_V1} specification uses AES-CTR for data pages, while other modules are protected using AES-GCM; integrity protection for the CTR pages themselves is not provided in the same way as in full GCM mode \citep{parquet_encrypt}. Organizing multiple pages raises the question of batch processing and the cost of moving data between devices. In the observed GTX study, the resident GPU kernel at 32 MiB has 3.30 times the throughput of CPU AES-NI, indicating the GPU's computational potential for batches of pages already resident on the device, but without a demonstrated advantage for the complete pipeline. The supplementary T4 experiment with 32 independent pages shows the opposite outcome for the prepared pipeline: a CPU/GPU time ratio of 0.9125. Thus, Parquet is a \emph{conditional candidate} for GPU offloading, not a demonstrated financial saving. This is a \emph{motivating example}, not a benchmark result for a Parquet system: our synthetic buffers are not Parquet files and do not include formatting, compression, metadata, storage, or key management. The Parquet specification does not define a market price for encryption per GB; that price depends on the specific execution environment.\par
+The research contribution is neither a new cryptographic algorithm nor a universal TCO model, but a connection between documented timing boundaries and a conditional indicator of compute-time cost. Related technical and energy studies already exist; a claim of complete methodological novelty would require an additional systematic review.
 
-\section{Metodologija i merne granice}
-\subsection{Primarna platforma i validacija}
-Primarnu platformu predstavlja Windows 10 x64 mašina sa potrošačkim hardverom: Intel Core i5-10300H (4 fizička / 8 logičkih jezgara), 16 GB RAM-a i NVIDIA GTX 1650 Ti (4 GB). Testiran je AES-128-CTR kroz PyCryptodome 3.23.0 sa eksplicitno izabranom nativnom AES-NI putanjom, kao i CUDA baseline i jednostavna optimizaciona varijanta v1. Validacija poznatim vektorima, provera izabranog nativnog backend-a i upareni identični ulazi prethodili su merenju. Pet study sesija sa seedovima 2003--2007 koristi pet zagrevanja i dvadeset zadržanih ponavljanja po grupi. Sačuvano je ukupno 6000 posmatranja za širi ECB/CTR skup; za ekonomski model koriste se CTR zapisi.\par
-CPU putanja je sekvencijalna na nivou aplikacije: jedan sinhroni poziv \texttt{encrypt()} po posmatranju. Nisu mereni maksimalni višenitni kapacitet procesora niti kontrolisana pripadnost fizičkom jezgru; zato je precizniji izraz \emph{single-stream CPU AES-NI transform} nego tvrdnja o svim fizičkim aspektima jednonitnog izvršavanja.\par
-Merenje CPU transformacije uključuje alokaciju izlaza i poziv biblioteke, ali isključuje konstrukciju šifre i raspored ključa. GPU resident rezultat meri izolovan kernel nad već pripremljenim podacima u memoriji uređaja. GPU pipeline obuhvata H2D prenos, kernel, D2H prenos i sinhronizaciju, ali ne uključuje alokacije uređaja, pinned memorije, prethodno kopiranje u pinned bafer, pripremu ključa, skladišni I/O ili poslovnu orkestraciju \citep{nvidia_guide}. Navedena asimetrija znači da su CPU transform i GPU pipeline \emph{korisni za uslovno poređenje}, ali nisu istovetne granice kompletnog poslovnog procesa.\par
-Propusnost u decimalnim MB/s računa se kao
+\section{Methodology and Timing Boundaries}
+\subsection{Primary Platform and Validation}
+The primary platform is a Windows 10 x64 machine with consumer hardware: an Intel Core i5-10300H (4 physical / 8 logical cores), 16 GB of RAM, and an NVIDIA GTX 1650 Ti (4 GB). AES-128-CTR was tested using PyCryptodome 3.23.0 with an explicitly selected native AES-NI path, alongside a CUDA baseline and a simple optimization variant, v1. Known-answer vector validation, verification of the selected native backend, and paired identical inputs preceded measurement. Five study sessions with seeds 2003--2007 use five warm-up iterations and twenty retained repetitions per group. A total of 6000 observations were retained for the broader ECB/CTR dataset; the economic model uses the CTR records.\par
+The CPU path is sequential at the application level: one synchronous \texttt{encrypt()} call per observation. Neither the processor's maximum multithreaded capacity nor controlled physical-core affinity was measured; therefore, \emph{single-stream CPU AES-NI transform} is more precise than a claim covering all physical aspects of single-threaded execution.\par
+CPU transform timing includes output allocation and the library call but excludes cipher construction and key scheduling. The resident GPU result measures an isolated kernel operating on data already prepared in device memory. The GPU pipeline includes the H2D transfer, kernel, D2H transfer, and synchronization, but excludes device and pinned-memory allocations, prior copying into a pinned buffer, key preparation, storage I/O, and business-process orchestration \citep{nvidia_guide}. This asymmetry means that the CPU transform and GPU pipeline are \emph{useful for a conditional comparison}, but do not cover identical boundaries of a complete business process.\par
+Throughput in decimal MB/s is calculated as
 \begin{equation}\label{eq:rate}R=\frac{N}{10^6T},\end{equation}
-gde je $N$ broj bajtova, a $T$ izmereno trajanje u sekundama. Osnovni prikaz je medijana pet sesijskih medijana propusnosti. Upareni faktori vremena računaju se zasebno kao medijana pet odnosa sesijskih medijana trajanja; oni ne moraju numerički biti jednaki odnosu agregiranih propusnosti.
+where $N$ is the number of bytes and $T$ is the measured duration in seconds. The primary reported statistic is the median of five session throughput medians. Paired time ratios are calculated separately as the median of five ratios of session median durations; they need not be numerically equal to the ratio of aggregated throughputs.
 
-\subsection{Tesla T4 i dodatni dostupni resursi}
-Dopunski eksperimentalni deo obuhvata metodološki zasebna merenja na NVIDIA Tesla T4 i CPU hostu u Linux okruženju, kao i Windows/ARM CPU validacije. T4 je akcelerator koji se može dobiti u određenim besplatnim ili ograničenim cloud istraživačkim okruženjima, uključujući Google Colab kada je dostupan; to ga ne čini potrošačkom grafičkom karticom niti garantuje besplatnu i stalnu dostupnost \citep{colab}. Različiti procesori, biblioteke, okruženja i merne granice sprečavaju objedinjavanje tih uzoraka sa primarnom GTX studijom.\par
-Poseban T4 eksperiment obrađuje 1, 4, 16 i 32 nezavisne stranice od 1 MiB u AES-128-CTR režimu. Koristi Intel Xeon host u Linux okruženju i OpenSSL 3.0.13 EVP, za razliku od Windows/PyCryptodome AES-NI putanje primarne GTX kampanje. CPU referenca meri pripremljenu nativnu EVP transformaciju sa unapred alociranim izlazom, a GPU referenca pripremljeni pipeline. Za svaki batch prvo se računa odnos sesijske medijane CPU vremena i sesijske medijane GPU vremena, a zatim medijana tih pet odnosa. Rezultati redom iznose 0,5404; 0,7137; 0,8240; 0,9125. CPU transformacija je brža u svih pet sesija za svaku veličinu batch-a. Izvor je lokalno arhivirana kampanja \texttt{t4-phase2-study}, sa seedovima 2003--2007. Njeni odnosi ne zamenjuju GTX CPU referencu i ne objedinjuju se sa GTX rezultatima u univerzalni faktor ubrzanja.
+\subsection{Tesla T4 and Additional Accessible Resources}
+The supplementary experimental component includes methodologically separate measurements on an NVIDIA Tesla T4 and its CPU host in a Linux environment, as well as Windows/ARM CPU validations. The T4 is an accelerator that can be accessed in certain free or limited cloud research environments, including Google Colab when available; this does not make it a consumer graphics card or guarantee free and continuous availability \citep{colab}. Differences in processors, libraries, environments, and timing boundaries preclude pooling these samples with the primary GTX study.\par
+A separate T4 experiment processes 1, 4, 16, and 32 independent 1 MiB pages in AES-128-CTR mode. It uses an Intel Xeon host running Linux and OpenSSL 3.0.13 EVP, unlike the Windows/PyCryptodome AES-NI path of the primary GTX campaign. The CPU baseline measures a prepared native EVP transform with preallocated output, while the GPU baseline measures a prepared pipeline. For each batch size, the ratio of the session median CPU time to the session median GPU time is calculated first, followed by the median of those five ratios. The results are 0.5404, 0.7137, 0.8240, and 0.9125, respectively. The CPU transform is faster in all five sessions at each batch size. The source is the locally archived \texttt{t4-phase2-study} campaign, with seeds 2003--2007. Its ratios do not replace the GTX CPU baseline and are not pooled with the GTX results into a universal speedup factor.
 
-\subsection{Uslovni model troška računarskog vremena}
-Neka $h_C$ i $h_G$ označavaju dosledno pripisiv satni trošak CPU i GPU putanje (kod GPU uključujući potreban host resurs). Kada se ponavljaju obrade pri izmerenoj propusnosti $R_j$, modelovano trajanje po decimalnom GB i varijabilni trošak iznose
+\subsection{Conditional Compute-Time Cost Model}
+Let $h_C$ and $h_G$ denote the consistently attributable hourly cost of the CPU and GPU paths, respectively (including the required host resources for the GPU). For repeated processing at the measured throughput $R_j$, the modeled duration per decimal GB and variable cost are
 \begin{equation}\label{eq:cost}t_j=\frac{1000}{R_j},\qquad c_j=\frac{h_jt_j}{3600}.\end{equation}
-Ovaj model pretpostavlja da se usluga obrade naplaćuje proporcionalno zauzetom vremenu i da su satni troškovi obe putanje dosledno pripisani istom zadatku i obračunskom periodu. Kod GPU putanje pripisivi trošak uključuje i potreban host; kod CPU putanje mora biti jasno definisan angažovani kapacitet. Model ne uključuje minimalne obračunske intervale, čekanje u redu niti korekciju za iskorišćenost i ne procenjuje stvarne cene, potrošnju električne energije ili CAPEX. Iz $c_G<c_C$ sledi uslov
+This model assumes that processing services are charged in proportion to occupied time and that the hourly costs of both paths are consistently attributed to the same task and billing period. For the GPU path, attributable cost includes the required host; for the CPU path, the capacity used must be clearly defined. The model excludes minimum billing intervals, queueing, and utilization adjustments, and does not estimate actual prices, electricity consumption, or CAPEX. The condition $c_G<c_C$ implies
 \begin{equation}\label{eq:threshold}\frac{h_G}{h_C}<\frac{R_G}{R_C}.\end{equation}
-Za transparentnu analizu osetljivosti postavlja se $h_C=1$ normalizovana jedinica po satu i ispituje $h_G/h_C\in\{0{,}50;0{,}75;1{,}00;1{,}25;1{,}50;2{,}00\}$. To su \emph{pretpostavljene relativne cene}, ne evri ili dolari. Odvojeni model eventualnog fiksnog ulaganja je $\Delta C(V)=F_G-F_C+(c_G-c_C)V$; bez opaženih fiksnih troškova i obima ne može se izračunati stvarna tačka rentabilnosti.
+For a transparent sensitivity analysis, $h_C=1$ normalized unit per hour is assumed and $h_G/h_C\in\{0.50;0.75;1.00;1.25;1.50;2.00\}$ is examined. These are \emph{assumed relative prices}, not euros or dollars. A separate model for a potential fixed investment is $\Delta C(V)=F_G-F_C+(c_G-c_C)V$; without observed fixed costs and processing volumes, an actual break-even point cannot be calculated.
 
-\section{Rezultati i tehničko-ekonomska interpretacija}
-\subsection{Propusnost CPU i GPU putanja}
-Tabela~\ref{tab:primary} prikazuje agregirane eksperimentalne propusnosti proverene prema izvornim zapisima merenja. GPU kernel je višestruko brži od jedne CPU transformacione putanje, dok GPU pipeline sa transferima ostaje sporiji na testiranim većim ulazima.\par
+\section{Results and Technical-Economic Interpretation}
+\subsection{Throughput of CPU and GPU Paths}
+Table~\ref{tab:primary} presents the aggregated experimental throughputs verified against the original measurement records. The GPU kernel is several times faster than a single CPU transform path, while the GPU pipeline including transfers remains slower for the larger tested inputs.\par
 \begin{table}[htbp]\centering\small
-\caption{AES-128-CTR propusnost na GTX 1650 Ti / i5-10300H, decimalni MB/s; pet sesija. K: rezidentni kernel; P: pripremljeni pipeline.}\label{tab:primary}
+\caption{AES-128-CTR throughput on GTX 1650 Ti / i5-10300H, decimal MB/s; five sessions. K: resident kernel; P: prepared pipeline.}\label{tab:primary}
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{lrrrrr}\toprule
-Ulaz & CPU AES-NI & CUDA K & CUDA P & v1 K & v1 P\\\midrule
-1 MiB & 1381,7 & 5017,1 & 1313,1 & 4853,9 & 1291,0\\
-16 MiB & 1446,5 & 3655,6 & 1103,1 & 3576,2 & 1074,0\\
-32 MiB & 1455,8 & 4800,6 & 1204,5 & 4877,7 & 1209,1\\\bottomrule
+Input & CPU AES-NI & CUDA K & CUDA P & v1 K & v1 P\\\midrule
+1 MiB & 1381.7 & 5017.1 & 1313.1 & 4853.9 & 1291.0\\
+16 MiB & 1446.5 & 3655.6 & 1103.1 & 3576.2 & 1074.0\\
+32 MiB & 1455.8 & 4800.6 & 1204.5 & 4877.7 & 1209.1\\\bottomrule
 \end{tabular}
 \end{table}
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth]{aes_throughput_comparison.pdf}
-\caption{Izmerena propusnost AES-128-CTR izvršnih putanja na i5-10300H/GTX 1650 Ti: CPU AES-NI, GPU resident kernel i pripremljeni GPU pipeline. Decimalni MB/s; medijana pet sesijskih medijana.}
+\caption{Measured throughput of AES-128-CTR execution paths on i5-10300H/GTX 1650 Ti: CPU AES-NI, resident GPU kernel, and prepared GPU pipeline. Decimal MB/s; median of five session medians.}
 \label{fig:throughput}
 % FIGURE_SOURCE_START
-{\raggedright\fontsize{10}{12}\selectfont Izvor: Eksperimentalni rezultati autora.\par}
+{\raggedright\fontsize{10}{12}\selectfont Source: Author's experimental results.\par}
 % FIGURE_SOURCE_END
 \end{figure}
-Na 32 MiB CUDA baseline dostiže 4800,6 MB/s u izolovanom merenju, ali samo 1204,5 MB/s kada se uključi pripremljeni prenosni cevovod. CPU AES-NI postiže 1455,8 MB/s. Uparen odnos sesijskih medijana CPU/GPU vremena iznosi približno 0,823 za pipeline, dok izolovano GPU jezgro daje odnos oko 3,30. Nije opravdano razliku u celosti pripisati samom PCIe interfejsu: izmereni intervali uključuju sinhronizaciju i sistemske režijske troškove.\par
-Na 16 MiB primećen je izraženiji pad GPU performansi. Nije izdvojen uzrok; veličina ulaza, redosled testova, radni takt i izvršno okruženje nisu nezavisno kontrolisani za kauzalno objašnjenje. Zbog toga se rezultati ne interpoliraju u univerzalnu krivu kapaciteta.
+At 32 MiB, the CUDA baseline reaches 4800.6 MB/s in isolated measurement, but only 1204.5 MB/s when the prepared transfer pipeline is included. CPU AES-NI achieves 1455.8 MB/s. The paired ratio of session median CPU/GPU times is approximately 0.823 for the pipeline, while the isolated GPU kernel yields a ratio of about 3.30. It is not justified to attribute the entire difference to the PCIe interface alone: the measured intervals include synchronization and system overhead.\par
+A more pronounced decline in GPU performance was observed at 16 MiB. No cause was isolated; input size, test order, clock frequency, and the execution environment were not independently controlled to establish a causal explanation. Consequently, the results are not interpolated into a universal capacity curve.
 
-\subsection{Relativni troškovni pragovi}
-U Tabeli~\ref{tab:econ} prikazani su izvedeni pragovi iz agregiranih propusnosti i odgovarajući uslovni troškovi po GB pri jednakoj normalizovanoj satnoj ceni. Pošto CPU transform i GPU pripremljeni pipeline nisu identični po obuhvatu, reč je o indikativnoj ekonomskoj vezi, ne dokazanoj tržišnoj prednosti.\par
+\subsection{Relative Cost Thresholds}
+Table~\ref{tab:econ} presents thresholds derived from aggregated throughputs and the corresponding conditional costs per GB at an equal normalized hourly price. Since the CPU transform and prepared GPU pipeline are not identical in scope, this is an indicative economic relationship, not a demonstrated market advantage.\par
 \begin{table}[htbp]\centering\small
-\caption{Izvedeni ekonomski pokazatelji za CPU AES-NI i CUDA baseline pipeline. Troškovi su normalizovane jedinice/GB, ne tržišne valute.}\label{tab:econ}
+\caption{Derived economic indicators for CPU AES-NI and the CUDA baseline pipeline. Costs are normalized units/GB, not market currencies.}\label{tab:econ}
 \begin{tabular}{lrrr}\toprule
-Ulaz & $R_G/R_C$ & $c_C$ ($h_C=1$) & $c_G$ ($h_G=1$)\\\midrule
-1 MiB & 0,9503 & 0,0002010 & 0,0002116\\
-16 MiB & 0,7626 & 0,0001920 & 0,0002518\\
-32 MiB & 0,8273 & 0,0001908 & 0,0002306\\\bottomrule
+Input & $R_G/R_C$ & $c_C$ ($h_C=1$) & $c_G$ ($h_G=1$)\\\midrule
+1 MiB & 0.9503 & 0.0002010 & 0.0002116\\
+16 MiB & 0.7626 & 0.0001920 & 0.0002518\\
+32 MiB & 0.8273 & 0.0001908 & 0.0002306\\\bottomrule
 \end{tabular}
 \end{table}
-Na 32 MiB, prema jednačini~\eqref{eq:threshold}, pripisiva satna cena usluge obrade GPU putanjom mora biti manja od 82,73\% odgovarajuće CPU cene da bi modelovani varijabilni trošak po GB bio niži. Ovo je \emph{prag relativne cene usluge}, a ne dokaz novčane uštede, popust na nabavnu cenu uređaja ili procenat smanjenja poslovnih rashoda. Zaključak važi uz proporcionalnu naplatu vremena i dosledno definisane pripisive troškove. U poslovnoj praksi CPU kapacitet, GPU uređaj i potreban host mogu imati različite strukture fiksnih i varijabilnih troškova, rezervacije kapaciteta i obračunske intervale. Zato se satna cena jednog CPU jezgra ne može neposredno porediti sa cenom celog GPU servera bez usklađivanja pripisanih resursa. Pri jednakim tako definisanim satnim cenama CPU ima niži modelovani varijabilni trošak. Ako je GPU satni trošak samo 75\% CPU troška, uslovni model za tri prikazane veličine može dati prednost GPU-u, ali 16 MiB granični slučaj je osetljiv na sesijsku varijabilnost. Medijane sesijski uparenih vremenskih pragova iznose 0,9529; 0,7496; 0,8233, različito od odnosa agregiranih propusnosti, uz naročito širi raspon kod 16 MiB.\par
-Niži modelovani trošak nije isto što i kratkoročno ulaganje: kupovina GPU-a, amortizacija, energija, održavanje i stvarna iskorišćenost nisu kvantifikovani. Kada oba modelovana varijabilna troška i nenegativna razlika fiksnih troškova favorizuju CPU, pozitivan prag isplativosti GPU investicije ne postoji u ovom linearnom scenariju.
+At 32 MiB, according to Equation~\eqref{eq:threshold}, the attributable hourly price of processing through the GPU path must be less than 82.73\% of the corresponding CPU price for its modeled variable cost per GB to be lower. This is a \emph{relative service-price threshold}, not evidence of monetary savings, a discount on the device purchase price, or a percentage reduction in business expenditure. The conclusion holds under proportional time-based charging and consistently defined attributable costs. In business practice, CPU capacity, the GPU device, and the required host can have different fixed and variable cost structures, capacity reservations, and billing intervals. Therefore, the hourly price of one CPU core cannot be compared directly with the price of an entire GPU server without matching the attributed resources. At equal hourly prices defined in this way, the CPU has a lower modeled variable cost. If the GPU hourly cost is only 75\% of the CPU cost, the conditional model may favor the GPU for the three sizes shown, but the borderline 16 MiB case is sensitive to session variability. The medians of the session-paired time thresholds are 0.9529, 0.7496, and 0.8233, differing from the ratios of aggregated throughputs, with a particularly wider range at 16 MiB.\par
+A lower modeled cost does not in itself establish the case for a near-term investment: GPU acquisition, depreciation, energy, maintenance, and actual utilization have not been quantified. When both the modeled variable costs and a nonnegative difference in fixed costs favor the CPU, no positive break-even volume for GPU investment exists in this linear scenario.
 
-\subsection{Dopunski primer obrade stranica na T4}
-Zaseban T4 eksperiment pokazuje da se medijana sesijskih odnosa CPU/GPU vremena približava jedinici sa povećanjem broja nezavisnih stranica: od 0,5404 za jednu do 0,9125 za 32 stranice. GPU pipeline time smanjuje relativni zaostatak prema testiranoj CPU EVP transformaciji, ali ne ostvaruje prednost ni na jednoj od četiri veličine batch-a. Za 32 stranice, odnos CPU/GPU vremena od 0,9125 odgovara približno 8,75\% kraćem CPU vremenu u odnosu na GPU vreme, prema korišćenom estimatoru. To nije procenat izračunat iz objedinjavanja svih ponavljanja. Pri jednakim pripisivim satnim troškovima, isti model vremena daje niži varijabilni trošak CPU putanje unutar ovog zasebnog poređenja. Nalaz ne dokazuje uzrok približavanja niti dozvoljava ekstrapolaciju tačke u kojoj bi GPU preuzeo prednost izvan testiranog opsega.\par
+\subsection{Supplementary T4 Page-Processing Example}
+The separate T4 experiment shows that the median of session CPU/GPU time ratios approaches unity as the number of independent pages increases: from 0.5404 for one page to 0.9125 for 32 pages. The GPU pipeline thus narrows its relative gap to the tested CPU EVP transform, but does not outperform it at any of the four batch sizes. For 32 pages, a CPU/GPU time ratio of 0.9125 corresponds to approximately 8.75\% shorter CPU time relative to GPU time under the estimator used. This is not a percentage calculated by pooling all repetitions. At equal attributable hourly costs, the same time-based model yields a lower variable cost for the CPU path within this separate comparison. The finding neither establishes the cause of the convergence nor permits extrapolation of a crossover point beyond the tested range.\par
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=.90\linewidth]{t4_page_batch_ratios.pdf}
-\caption{Zasebna Linux/T4 studija nezavisnih AES-128-CTR stranica (1 MiB po stranici): medijana pet odnosa sesijskih medijana vremena CPU EVP transformacije i GPU pripremljenog pipeline-a. Vrednosti manje od 1 favorizuju CPU; horizontalna linija označava izjednačenje. Veličine batch-a su diskretne kategorije; ovo nije direktno poređenje T4 i GTX rezultata.}
+\caption{Separate Linux/T4 study of independent AES-128-CTR pages (1 MiB per page): median of five ratios of session median CPU EVP transform time to prepared GPU pipeline time. Values below 1 favor the CPU; the horizontal line denotes equal times. Batch sizes are discrete categories; this is not a direct comparison of T4 and GTX results.}
 \label{fig:t4pages}
 % FIGURE_SOURCE_START
-{\raggedright\fontsize{10}{12}\selectfont Izvor: Eksperimentalni rezultati autora.\par}
+{\raggedright\fontsize{10}{12}\selectfont Source: Author's experimental results.\par}
 % FIGURE_SOURCE_END
 \end{figure}
-Ekonomsku interpretaciju T4 rezultata dodatno ograničava model pristupa: besplatan ili povremeno dostupan cloud akcelerator nema automatski definisanu pripisivu cenu po satu niti garantovani kapacitet. Zbog toga se njegova dostupnost ovde tretira kao argument za \emph{pristupačnost reproduktivnih eksperimenata}, a ne kao dokaz ekonomske besplatnosti produkcione enkripcije.
+The economic interpretation of the T4 results is further constrained by the access model: a free or intermittently available cloud accelerator does not automatically have a defined attributable hourly price or guaranteed capacity. Its availability is therefore treated here as an argument for the \emph{accessibility of reproducible experiments}, not as evidence that production encryption is economically free.
 
-\section{Diskusija, ograničenja i budući rad}
-Praktična pouka sprovedenih eksperimenata jeste da tehnički izbor treba zasnivati na lokaciji podataka, obuhvatu merenja i dostupnim alternativama. Kada podaci počinju u sistemskoj memoriji, trošak pripreme i kopiranja može poništiti prednost GPU kernela. Kada su podaci već na GPU-u, resident propusnost može biti korisna, ali trošak njihovog nastanka, naknadnog izlaza i druge obrade mora biti pridružen istom poslovnom zadatku. Standardna AES-NI putanja ostaje snažna referenca, ali studija jedne sekvencijalne putanje ne meri puni višejegarni CPU kapacitet.\par
-Ograničenja su četiri. Prvo, primarni rezultati potiču sa jedne Windows x64 mašine sa potrošačkim hardverom, a T4 iz druge, heterogene kampanje. Drugo, GPU kod služi kao validirani eksperimentalni baseline, a ne kao dokaz produkciono optimalne CUDA implementacije. Treće, isključeni su skladišni I/O, puni aplikacioni protokol i autentifikacija; sam CTR ne pruža integritet, pa se rezultati ne mogu direktno preneti na potpunu AES-GCM uslugu \citep{nist_gcm2007}. Četvrto, nemamo merenja utrošene energije niti dokumentovane tržišne cene; ekonomski rezultati su normalizovani i uslovni.\par
-Za jednokratnu obradu bafera u sistemskoj memoriji, posmatrana GTX kampanja favorizuje postojeću single-stream CPU AES-NI putanju po vremenu izvršavanja i, pri jednakom pripisivom satnom trošku, po modelovanom varijabilnom trošku. To nije tvrdnja da se nabavka GPU-a ne može opravdati: odluka o nabavci zahteva zasebne podatke o fiksnim troškovima, drugim namenama uređaja i iskorišćenosti. Kada enkripcija predstavlja fazu šireg GPU toka, rezidentna propusnost pokazuje potencijal, ali ne dokazuje nižu cenu kompletne usluge.\par
-T4 nalazi dopunjuju diskusiju ekonomije batch obrade samo u svojim mernim granicama. Različiti CPU host, operativni sistem, biblioteka i politika alokacije izlaza sprečavaju da se približavanje odnosa jedinici tumači kao zajednička GTX/T4 kriva ubrzanja. Sintetičke nezavisne stranice nisu Parquet implementacija: nisu obuhvaćeni format datoteke, kompresija, autentifikacija drugih modula, skladišni tok i upravljanje ključevima. Zbog toga ovi rezultati ne dokazuju ekonomsku opravdanost GPU-a za Parquet.\par
-Za ekonomiku poslovnih informacionih sistema budući rad najpre treba da razmotri aplikacioni tok enkripcije nezavisnih stranica (npr. Parquet), ukupne troškove vlasništva i obračun host/GPU resursa u zajedničkom periodu. Drugi pravac je merenje energije i angažovanja resursa, a tek zatim scenariji nabavke opreme ili cloud iznajmljivanja. Tehnički su relevantni streaming, preklapanje kopiranja i izvršavanja i višeradnička CPU referenca, ali ti eksperimenti nisu deo ovog rada. Ekonomska isplativost zato se ne generalizuje na GPU servere ili šire tržište bez novih podataka.\par
+\section{Discussion, Limitations, and Future Work}
+The practical lesson from the experiments is that technical choices should be based on data location, measurement scope, and available alternatives. When data originate in system memory, preparation and copying costs can offset the GPU kernel's advantage. When data are already on the GPU, resident throughput can be useful, but the cost of generating those data, subsequent output, and other processing must be attributed to the same business task. The standard AES-NI path remains a strong baseline, but studying a single sequential path does not measure the CPU's full multicore capacity.\par
+There are four limitations. First, the primary results come from one Windows x64 machine with consumer hardware, while the T4 results come from a different, heterogeneous campaign. Second, the GPU code serves as a validated experimental baseline, not evidence of a production-optimal CUDA implementation. Third, storage I/O, the full application protocol, and authentication are excluded; CTR alone does not provide integrity, so the results cannot be transferred directly to a complete AES-GCM service \citep{nist_gcm2007}. Fourth, neither energy-consumption measurements nor documented market prices are available; the economic results are normalized and conditional.\par
+For one-off processing of buffers in system memory, the observed GTX campaign favors the existing single-stream CPU AES-NI path in execution time and, at equal attributable hourly cost, in modeled variable cost. This does not imply that GPU procurement cannot be justified: a procurement decision requires separate data on fixed costs, other uses of the device, and utilization. When encryption is a stage within a broader GPU workflow, resident throughput indicates potential but does not demonstrate a lower price for the complete service.\par
+The T4 findings inform the discussion of batch-processing economics only within their own timing boundaries. Differences in CPU host, operating system, library, and output-allocation policy prevent the ratio's approach to unity from being interpreted as a common GTX/T4 speedup curve. Synthetic independent pages are not a Parquet implementation: the file format, compression, authentication of other modules, storage workflow, and key management are not included. These results therefore do not establish the economic viability of GPUs for Parquet.\par
+For the economics of business information systems, future work should first examine the application-level workflow for encrypting independent pages (e.g., Parquet), total cost of ownership, and accounting for host/GPU resources over a common period. A second direction is to measure energy and resource occupancy before considering equipment-procurement or cloud-rental scenarios. Streaming, overlapping copying with execution, and a multiworker CPU baseline are technically relevant, but these experiments are not part of this paper. Economic viability is therefore not generalized to GPU servers or the wider market without new data.\par
 
 
-\section{Zaključak}
-Rezultati pokazuju da za jednokratnu AES-128-CTR obradu podataka iz sistemske memorije, na testiranoj Windows x64/i5-10300H/GTX 1650 Ti platformi, single-stream CPU AES-NI predstavlja bržu izvršnu putanju od testiranog CUDA pipeline-a za 1, 16 i 32 MiB. Pri jednakom pripisivom satnom trošku CPU ostvaruje i niži modelovani varijabilni trošak po GB. Istovremeno, rezidentni GPU kernel na 32 MiB postiže 4800,6 MB/s prema CPU rezultatu od 1455,8 MB/s, odnosno oko 3,30 puta veću propusnost, ali bez prenosa podataka. To ukazuje na potencijal obrade kada su podaci već na uređaju, a ne na prednost kompletnog poslovnog toka.\par
-Zasebna Linux/T4 kampanja sa CPU OpenSSL EVP pokazuje da povećanje broja nezavisnih stranica sa 1 na 32 smanjuje relativni zaostatak GPU pipeline-a prema posmatranom estimatoru. Ipak, sva četiri testirana batch-a ostaju sporija od CPU EVP transformacije u svih pet sesija. Za 32 stranice medijana sesijskih odnosa CPU/GPU vremena iznosi 0,9125, odnosno CPU vreme je približno 8,75\% kraće u odnosu na GPU vreme prema tom estimatoru. Ova kampanja ostaje odvojena od GTX merenja i nije dokaz isplativosti GPU obrade Parquet datoteka.\par
-Ekonomski doprinos rada nije dokaz univerzalne isplativosti jedne arhitekture, već identifikacija uslova u kojima izbor izvršne putanje može smanjiti modelovani trošak obrade. Pragovi relativne GPU/CPU satne cene iz agregiranih GTX pipeline propusnosti iznose 0,9503; 0,7626; 0,8273 za 1, 16 i 32 MiB. Oni važe uz definisane merne granice i dosledno pripisivanje resursa, uključujući potreban GPU host. Bez dokumentovanih cena, fiksnih troškova, energije i iskorišćenosti ne predstavljaju stvarne račune, ostvarene uštede ili zaključak o opravdanosti nabavke GPU-a. Sprovedeni eksperimenti i izvedeni model omogućavaju uslovnu odluku o izvršnoj putanji; širi aplikacioni i investicioni zaključci ostaju izvan obuhvata rada.
+\section{Conclusion}
+The results show that, for one-off AES-128-CTR processing of data from system memory on the tested Windows x64/i5-10300H/GTX 1650 Ti platform, single-stream CPU AES-NI is a faster execution path than the tested CUDA pipeline at 1, 16, and 32 MiB. At equal attributable hourly cost, the CPU also achieves a lower modeled variable cost per GB. At the same time, the resident GPU kernel at 32 MiB achieves 4800.6 MB/s compared with the CPU's 1455.8 MB/s, or about 3.30 times the throughput, but without data transfers. This indicates processing potential when data are already on the device, rather than an advantage for the complete business workflow.\par
+The separate Linux/T4 campaign with CPU OpenSSL EVP shows that increasing the number of independent pages from 1 to 32 reduces the GPU pipeline's relative gap under the observed estimator. Nevertheless, all four tested batch sizes remain slower than the CPU EVP transform in all five sessions. For 32 pages, the median of session CPU/GPU time ratios is 0.9125, meaning that CPU time is approximately 8.75\% shorter relative to GPU time under that estimator. This campaign remains separate from the GTX measurements and is not evidence of the cost-effectiveness of GPU processing of Parquet files.\par
+The paper's economic contribution is not proof of the universal cost-effectiveness of either architecture, but the identification of conditions under which the choice of execution path can reduce modeled processing cost. The relative GPU/CPU hourly-price thresholds derived from aggregated GTX pipeline throughputs are 0.9503, 0.7626, and 0.8273 for 1, 16, and 32 MiB, respectively. They hold under the defined timing boundaries and consistent attribution of resources, including the required GPU host. Without documented prices, fixed costs, energy use, and utilization, they do not represent actual bills, realized savings, or a conclusion about the justification for GPU procurement. The experiments and derived model support a conditional execution-path decision; broader application-level and investment conclusions remain outside the scope of this paper.
 
 \begingroup\fontsize{10}{12}\selectfont\sloppy
-\printbibliography[title={Literatura}]
+\printbibliography[title={References}]
 \endgroup
 
 \section*{SUMMARY}

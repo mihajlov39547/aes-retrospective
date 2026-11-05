@@ -91,7 +91,7 @@ def build(kind, reference, build_dir):
     intermediate.write_text(prepared, encoding='utf-8')
     ast_path = build_dir / f'{stem}.json'
     bib_options = ['--citeproc', '--bibliography', ROOT / 'references.bib',
-                   '--metadata=reference-section-title:Literatura', '--csl', ROOT / 'apa.csl'] if '\\addbibresource' in text else []
+                   '--metadata=reference-section-title:References', '--csl', ROOT / 'apa.csl'] if '\\addbibresource' in text else []
     pandoc([intermediate, '--from=latex', '--to=json', *bib_options, '-o', ast_path],
            build_dir / f'{stem}-read.log')
     ast = json.loads(ast_path.read_text(encoding='utf-8'))
@@ -100,17 +100,12 @@ def build(kind, reference, build_dir):
         blocks = ast['blocks']
         refs = [b for b in blocks if b['t'] == 'Div' and b['c'][0][0] == 'refs']
         headings = [b for b in blocks if b['t'] == 'Header' and
-                    any(n.get('t') == 'Str' and n.get('c') == 'Literatura' for n in nodes(b))]
+                    any(n.get('t') == 'Str' and n.get('c') == 'References' for n in nodes(b))]
         blocks[:] = [b for b in blocks if b not in refs + headings]
         summary_index = next(i for i, b in enumerate(blocks) if b['t'] == 'Header' and
                              any(n.get('t') == 'Str' and n.get('c') == 'SUMMARY' for n in nodes(b)))
         blocks[summary_index:summary_index] = headings + refs
         ast_path.write_text(json.dumps(ast, ensure_ascii=False), encoding='utf-8')
-    for node in nodes(ast):
-        if node.get('t') == 'Cite' and any(c.get('citationMode', {}).get('t') == 'AuthorInText' for c in node['c'][0]):
-            for inline in nodes(node['c'][1]):
-                if inline.get('t') == 'Str' and inline.get('c') in ('and', '&'):
-                    inline['c'] = 'i'
     ast_path.write_text(json.dumps(ast, ensure_ascii=False), encoding='utf-8')
     all_nodes = list(nodes(ast))
     counts = Counter(n['t'] for n in all_nodes)
@@ -134,7 +129,7 @@ def build(kind, reference, build_dir):
         raise ValueError(f'{stem}: table or reference content was lost during conversion')
     temporary = build_dir / f'{stem}.docx'
     pandoc([ast_path, '--from=json', '--to=docx', '--standalone', '--number-sections',
-            '--metadata=lang:sr-Latn', '--reference-doc', reference, '-o', temporary],
+            '--metadata=lang:en-US', '--reference-doc', reference, '-o', temporary],
            build_dir / f'{stem}-write.log')
     layout_report = format_docx(temporary, kind)
     with ZipFile(temporary) as archive:
@@ -156,8 +151,11 @@ def build(kind, reference, build_dir):
         for required in ('2026', '0009-0006-7979-0341', 'marko.mihajlovic.23@singimail.rs'):
             if required not in visible:
                 raise ValueError(f'Cover lost required content: {required}')
-    elif not all(heading in visible for heading in ('Apstrakt', 'Abstract', 'LITERATURA', 'SUMMARY')):
-        raise ValueError('Article lost an abstract, references or summary heading')
+    else:
+        headings = {''.join(p.itertext()).strip() for p in tree.findall('.//w:p', NS)}
+        missing = {'Abstract', 'REFERENCES', 'SUMMARY'} - headings
+        if missing:
+            raise ValueError(f'Article lost required headings: {", ".join(sorted(missing))}')
     output = ROOT / f'{stem}.docx'
     shutil.copyfile(temporary, output)
     print(f'Built {output} ({tables} tables, {equations} display equations, {references} references)')

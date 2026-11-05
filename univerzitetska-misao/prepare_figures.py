@@ -40,8 +40,8 @@ def main():
                       width=.25, label=label, color=color, edgecolor='black', hatch=hatch)
         ax.bar_label(bars, fmt='%.1f', fontsize=8, padding=3)
     ax.set_xticks(range(3), ['1', '16', '32'])
-    ax.set_xlabel('Veličina ulaza (MiB)')
-    ax.set_ylabel('Propusnost (decimalni MB/s)')
+    ax.set_xlabel('Input size (MiB)')
+    ax.set_ylabel('Throughput (decimal MB/s)')
     ax.set_ylim(0, 6200)
     ax.legend(ncol=3, loc='upper center', frameon=False, fontsize=9)
     save(fig, 'aes_throughput_comparison')
@@ -58,12 +58,12 @@ def main():
     for x, value in enumerate(values):
         ax.annotate(f'{value:.4f}', (x, value), xytext=(0, 10),
                     textcoords='offset points', ha='center')
-    ax.axhline(1, color='.4', linestyle='--', label='Jednaka vremena')
+    ax.axhline(1, color='.4', linestyle='--', label='Equal times')
     ax.set_xticks(range(4), ['1', '4', '16', '32'])
     ax.set_xlim(-.4, 3.4)
     ax.set_ylim(.45, 1.12)
-    ax.set_xlabel('Broj nezavisnih stranica od 1 MiB (diskretne kategorije)')
-    ax.set_ylabel('Odnos vremena CPU EVP / GPU pipeline')
+    ax.set_xlabel('Number of independent 1 MiB pages (discrete categories)')
+    ax.set_ylabel('CPU EVP / GPU pipeline time ratio')
     ax.legend(frameon=False, loc='upper left')
     save(fig, 't4_page_batch_ratios')
     names = ['RECONSTRUCTED_RESULTS.csv', 'SUPPLEMENTARY_RESULTS.csv']
