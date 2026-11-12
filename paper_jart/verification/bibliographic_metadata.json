@@ -1,0 +1,656 @@
+{
+  "10.6028/NIST.FIPS.197-upd1": {
+    "title": [
+      "Advanced Encryption Standard (AES)"
+    ],
+    "author": [
+      {
+        "name": "National Institute of Standards and Technology (US)",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2023,
+          5,
+          9
+        ]
+      ]
+    },
+    "container-title": [],
+    "volume": null,
+    "issue": null,
+    "page": null,
+    "article-number": null,
+    "DOI": "10.6028/nist.fips.197-upd1",
+    "URL": "https://doi.org/10.6028/nist.fips.197-upd1"
+  },
+  "10.6028/NIST.SP.800-38A": {
+    "title": [
+      "Recommendation for block cipher modes of operation :"
+    ],
+    "author": [
+      {
+        "given": "M J",
+        "family": "Dworkin",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2001
+        ]
+      ]
+    },
+    "container-title": [],
+    "volume": null,
+    "issue": null,
+    "page": null,
+    "article-number": null,
+    "DOI": "10.6028/nist.sp.800-38a",
+    "URL": "https://doi.org/10.6028/nist.sp.800-38a"
+  },
+  "10.6028/NIST.SP.800-38D": {
+    "title": [
+      "Recommendation for block cipher modes of operation :"
+    ],
+    "author": [
+      {
+        "given": "M J",
+        "family": "Dworkin",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2007
+        ]
+      ]
+    },
+    "container-title": [],
+    "volume": null,
+    "issue": null,
+    "page": null,
+    "article-number": null,
+    "DOI": "10.6028/nist.sp.800-38d",
+    "URL": "https://doi.org/10.6028/nist.sp.800-38d"
+  },
+  "10.1109/ISPASS.2011.5762730": {
+    "title": [
+      "Where is the data? Why you cannot debate CPU vs. GPU performance without the answer"
+    ],
+    "author": [
+      {
+        "given": "Chris",
+        "family": "Gregg",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Kim",
+        "family": "Hazelwood",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2011,
+          4
+        ]
+      ]
+    },
+    "container-title": [
+      "(IEEE ISPASS) IEEE INTERNATIONAL SYMPOSIUM ON PERFORMANCE ANALYSIS OF SYSTEMS AND SOFTWARE"
+    ],
+    "volume": null,
+    "issue": null,
+    "page": "134-144",
+    "article-number": null,
+    "DOI": "10.1109/ispass.2011.5762730",
+    "URL": "https://doi.org/10.1109/ispass.2011.5762730"
+  },
+  "10.1145/1815961.1816021": {
+    "title": [
+      "Debunking the 100X GPU vs. CPU myth"
+    ],
+    "author": [
+      {
+        "given": "Victor W.",
+        "family": "Lee",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Intel Corporation, Santa Clara, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Changkyu",
+        "family": "Kim",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Intel Corporation, Santa Clara, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Jatin",
+        "family": "Chhugani",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Intel Corporation, Santa Clara, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Michael",
+        "family": "Deisher",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Intel Corporation, Hillsboro, OR, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Daehyun",
+        "family": "Kim",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Intel Corporation, Santa Clara, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Anthony D.",
+        "family": "Nguyen",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Intel Corporation, Santa Clara, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Nadathur",
+        "family": "Satish",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Intel Corporation, Santa Clara, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Mikhail",
+        "family": "Smelyanskiy",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Intel Corporation, Santa Clara, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Srinivas",
+        "family": "Chennupaty",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Intel Corporation, Hillsboro, OR, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Per",
+        "family": "Hammarlund",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Intel Corporation, Hillsboro, OR, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Ronak",
+        "family": "Singhal",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Intel Corporation, Hillsboro, OR, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Pradeep",
+        "family": "Dubey",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Intel Corporation, Santa Clara, CA, USA"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2010,
+          6,
+          19
+        ]
+      ]
+    },
+    "container-title": [
+      "Proceedings of the 37th annual international symposium on Computer architecture"
+    ],
+    "volume": null,
+    "issue": null,
+    "page": "451-460",
+    "article-number": null,
+    "DOI": "10.1145/1815961.1816021",
+    "URL": "https://doi.org/10.1145/1815961.1816021"
+  },
+  "10.1016/j.parco.2020.102621": {
+    "title": [
+      "Analysis of energy efficiency of a parallel AES algorithm for CPU-GPU heterogeneous platforms"
+    ],
+    "author": [
+      {
+        "given": "Xiongwei",
+        "family": "Fei",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Kenli",
+        "family": "Li",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Wangdong",
+        "family": "Yang",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Keqin",
+        "family": "Li",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2020,
+          6
+        ]
+      ]
+    },
+    "container-title": [
+      "Parallel Computing"
+    ],
+    "volume": "94-95",
+    "issue": null,
+    "page": "102621",
+    "article-number": "102621",
+    "DOI": "10.1016/j.parco.2020.102621",
+    "URL": "https://doi.org/10.1016/j.parco.2020.102621"
+  },
+  "10.15803/ijnc.2.1_131": {
+    "title": [
+      "Acceleration of AES encryption on CUDA GPU"
+    ],
+    "author": [
+      {
+        "given": "Keisuke",
+        "family": "Iwai",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "National Defense Academy"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Naoki",
+        "family": "Nishikawa",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Ministry of Defense"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Takakazu",
+        "family": "Kurokawa",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "National Defense Academy"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2012
+        ]
+      ]
+    },
+    "container-title": [
+      "International Journal of Networking and Computing"
+    ],
+    "volume": "2",
+    "issue": "1",
+    "page": "131-145",
+    "article-number": null,
+    "DOI": "10.15803/ijnc.2.1_131",
+    "URL": "https://doi.org/10.15803/ijnc.2.1_131"
+  },
+  "10.1109/ACCESS.2021.3077551": {
+    "title": [
+      "Optimization of Advanced Encryption Standard on Graphics Processing Units"
+    ],
+    "author": [
+      {
+        "ORCID": "https://orcid.org/0000-0002-9041-1932",
+        "authenticated-orcid": false,
+        "given": "Cihangir",
+        "family": "Tezcan",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2021
+        ]
+      ]
+    },
+    "container-title": [
+      "IEEE Access"
+    ],
+    "volume": "9",
+    "issue": null,
+    "page": "67315-67326",
+    "article-number": null,
+    "DOI": "10.1109/access.2021.3077551",
+    "URL": "https://doi.org/10.1109/access.2021.3077551"
+  },
+  "10.1109/MC.2007.443": {
+    "title": [
+      "The Case for Energy-Proportional Computing"
+    ],
+    "author": [
+      {
+        "given": "Luiz André",
+        "family": "Barroso",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Urs",
+        "family": "Hölzle",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2007,
+          12
+        ]
+      ]
+    },
+    "container-title": [
+      "Computer"
+    ],
+    "volume": "40",
+    "issue": "12",
+    "page": "33-37",
+    "article-number": null,
+    "DOI": "10.1109/mc.2007.443",
+    "URL": "https://doi.org/10.1109/mc.2007.443"
+  },
+  "10.3390/app15073863": {
+    "title": [
+      "Optimized Hybrid Central Processing Unit–Graphics Processing Unit Workflow for Accelerating Advanced Encryption Standard Encryption: Performance Evaluation and Computational Modeling"
+    ],
+    "author": [
+      {
+        "ORCID": "https://orcid.org/0000-0002-8006-8405",
+        "authenticated-orcid": false,
+        "given": "Min Kyu",
+        "family": "Yang",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Division of Artificial Intelligence Convergence Engineering, Sahmyook University, Seoul 01795, Republic of Korea"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-0716-3526",
+        "authenticated-orcid": false,
+        "given": "Jae-Seung",
+        "family": "Jeong",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Division of Artificial Intelligence Convergence Engineering, Sahmyook University, Seoul 01795, Republic of Korea"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "published": {
+      "date-parts": [
+        [
+          2025,
+          4,
+          1
+        ]
+      ]
+    },
+    "container-title": [
+      "Applied Sciences"
+    ],
+    "volume": "15",
+    "issue": "7",
+    "page": "3863",
+    "article-number": null,
+    "DOI": "10.3390/app15073863",
+    "URL": "https://doi.org/10.3390/app15073863"
+  }
+}

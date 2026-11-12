@@ -1,0 +1,159 @@
+{
+  "status": "PASS",
+  "new_benchmarks": false,
+  "original_manuscript_files_unchanged": true,
+  "primary_sessions": 5,
+  "T4_sessions": 5,
+  "numerical_results": [
+    {
+      "MiB": 1,
+      "backend": "cpu_aesni",
+      "scope": "transform",
+      "rate": 1381.693380810638
+    },
+    {
+      "MiB": 1,
+      "backend": "cuda_baseline",
+      "scope": "resident",
+      "rate": 5017.110898059185
+    },
+    {
+      "MiB": 1,
+      "backend": "cuda_baseline",
+      "scope": "pipeline",
+      "rate": 1313.0592232678464
+    },
+    {
+      "MiB": 1,
+      "backend": "cuda_optimized_v1",
+      "scope": "resident",
+      "rate": 4853.929938220846
+    },
+    {
+      "MiB": 1,
+      "backend": "cuda_optimized_v1",
+      "scope": "pipeline",
+      "rate": 1290.9526892510444
+    },
+    {
+      "MiB": 1,
+      "rate_threshold": 0.950326057505954,
+      "paired_time_median": 0.9529272398528587,
+      "paired_time_min": 0.9225568146246791,
+      "paired_time_max": 0.9856412909902335
+    },
+    {
+      "MiB": 16,
+      "backend": "cpu_aesni",
+      "scope": "transform",
+      "rate": 1446.5452973979511
+    },
+    {
+      "MiB": 16,
+      "backend": "cuda_baseline",
+      "scope": "resident",
+      "rate": 3655.5943396669923
+    },
+    {
+      "MiB": 16,
+      "backend": "cuda_baseline",
+      "scope": "pipeline",
+      "rate": 1103.1332276764037
+    },
+    {
+      "MiB": 16,
+      "backend": "cuda_optimized_v1",
+      "scope": "resident",
+      "rate": 3576.1952123866085
+    },
+    {
+      "MiB": 16,
+      "backend": "cuda_optimized_v1",
+      "scope": "pipeline",
+      "rate": 1073.9729129382392
+    },
+    {
+      "MiB": 16,
+      "rate_threshold": 0.7625984679917887,
+      "paired_time_median": 0.7495514568083695,
+      "paired_time_min": 0.5619367623403554,
+      "paired_time_max": 0.7668067649365535
+    },
+    {
+      "MiB": 32,
+      "backend": "cpu_aesni",
+      "scope": "transform",
+      "rate": 1455.844546269704
+    },
+    {
+      "MiB": 32,
+      "backend": "cuda_baseline",
+      "scope": "resident",
+      "rate": 4800.634311617898
+    },
+    {
+      "MiB": 32,
+      "backend": "cuda_baseline",
+      "scope": "pipeline",
+      "rate": 1204.463810153486
+    },
+    {
+      "MiB": 32,
+      "backend": "cuda_optimized_v1",
+      "scope": "resident",
+      "rate": 4877.734408634896
+    },
+    {
+      "MiB": 32,
+      "backend": "cuda_optimized_v1",
+      "scope": "pipeline",
+      "rate": 1209.14711743024
+    },
+    {
+      "MiB": 32,
+      "rate_threshold": 0.827329959946391,
+      "paired_time_median": 0.8232512226858705,
+      "paired_time_min": 0.8217421299671812,
+      "paired_time_max": 0.842243281042736
+    },
+    {
+      "pages": 1,
+      "time_ratio_median": 0.5404374046466199,
+      "time_ratio_min": 0.5250297988608001,
+      "time_ratio_max": 0.5520128742856418
+    },
+    {
+      "pages": 4,
+      "time_ratio_median": 0.7136633902899733,
+      "time_ratio_min": 0.6921200743191612,
+      "time_ratio_max": 0.7293292273763754
+    },
+    {
+      "pages": 16,
+      "time_ratio_median": 0.8239612909891052,
+      "time_ratio_min": 0.814384240607768,
+      "time_ratio_max": 0.8366620997756012
+    },
+    {
+      "pages": 32,
+      "time_ratio_median": 0.9124680203992888,
+      "time_ratio_min": 0.908140192368887,
+      "time_ratio_max": 0.9211788252323831
+    }
+  ],
+  "input_sha256": {
+    "experiments\\analysis\\economic_aes_existing_evidence_2026_10\\RECONSTRUCTED_RESULTS.csv": "40446ded98afb44291f24bfe6b31780fa5df1df5cf083f29ca76ae3e76b8a5cf",
+    "experiments\\analysis\\economic_aes_existing_evidence_2026_10\\ECONOMIC_THRESHOLDS.csv": "1bd117ae27fa2a1337c3cc04c667e3c5dfcf7e7fe20c60a025b4fe6ab0456c86",
+    "experiments\\results\\aes_cuda_cpu_gpu-study-20260930T205447700308Z\\raw.csv": "54e1a3357362d7b774d7b296a92f5836f9901d6d6461ad9aacbf9c0aa3239e9f",
+    "experiments\\results\\aes_cuda_cpu_gpu-study-20260930T205542542732Z\\raw.csv": "16beff8eaa3e455a87bdbfd4e3839a235b31e291b7d76b62df967eef8a96fc57",
+    "experiments\\results\\aes_cuda_cpu_gpu-study-20260930T205652619168Z\\raw.csv": "1b5475e3f16e77f0ccad3ddf6a58f494c535cf5350061b303f0d3e0b88f0fd30",
+    "experiments\\results\\aes_cuda_cpu_gpu-study-20260930T205851562886Z\\raw.csv": "e5c3f3b8cd9feb1be65e68dee255e2119fcad1fea07e4094c345faf558acb020",
+    "experiments\\results\\aes_cuda_cpu_gpu-study-20260930T205950403576Z\\raw.csv": "669706c984341dd3084d93bf6d8bee0d6771ac695abb8727169a4ce4fbdd3727",
+    "experiments\\analysis\\economic_aes_existing_evidence_2026_10\\SUPPLEMENTARY_RESULTS.csv": "b911d460e5cd8ae3b531fcda49563f915dc65d8c5c711ce23e5635a84425a3eb",
+    "experiments\\page_batching_validation\\results\\t4-phase2-study\\2003\\raw.jsonl": "7a3cadfacdd73ee81aa711baa1781735a4e48f26a1fa76939cc2e54f832d1fc8",
+    "experiments\\page_batching_validation\\results\\t4-phase2-study\\2004\\raw.jsonl": "fd79fb0bdff7625917aafe00c38571ca9daa15df7111e9c562dac45f87aada39",
+    "experiments\\page_batching_validation\\results\\t4-phase2-study\\2005\\raw.jsonl": "c86e375e3497b3f6dd4edbf0e19efadc488995019e5795c9846d542a09ab2ef8",
+    "experiments\\page_batching_validation\\results\\t4-phase2-study\\2006\\raw.jsonl": "2ba11ad18b7eda487e41b7b65914faadc173c1e7e8c70f860e4bc61176f1c4e5",
+    "experiments\\page_batching_validation\\results\\t4-phase2-study\\2007\\raw.jsonl": "97b47eb17e7564c163e3fa75a72dc43cb7cdb620b319b4520043e295b1ed1706"
+  }
+}

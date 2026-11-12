@@ -1,0 +1,15 @@
+*.aux
+*.bcf
+*.blg
+*.log
+*.out
+*.run.xml
+__pycache__/
+verification/__pycache__/
+verification/*page-*.png
+verification/*contact-*.png
+verification/main-bbox.html
+verification/main-links.xml
+verification/main.txt
+verification/xelatex-pass*.txt
+verification/biber.txt
