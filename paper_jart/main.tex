@@ -1,7 +1,7 @@
 \documentclass[11pt,a4paper]{article}
 
 % ============================================================
-% PHASE 1 SCIENTIFIC WORKING MANUSCRIPT
+% JART MANUSCRIPT — PHASE 2
 % ============================================================
 \usepackage[
   paperwidth=21cm,
@@ -96,10 +96,18 @@
 \renewcommand{\floatpagefraction}{0.85}
 \AtBeginBibliography{\interlinepenalty=10000}
 \hypersetup{pdftitle={Experimental Evaluation of CPU AES-NI and CUDA Encryption: Data Transfer Overhead and Cost-Efficiency Implications}}
+\hypersetup{pdfauthor={Marko Mihajlović}}
 
 \begin{document}
 \begin{center}
 {\fontsize{15}{18}\selectfont\bfseries Experimental Evaluation of CPU AES-NI and CUDA Encryption: Data Transfer Overhead and Cost-Efficiency Implications\par}
+\medskip
+{\bfseries Marko Mihajlović\par}
+Faculty of Informatics and Computing\\
+Singidunum University\\
+Belgrade, Serbia\\
+\href{mailto:marko.mihajlovic.23@singimail.rs}{marko.mihajlovic.23@singimail.rs}\\
+ORCID: 0009-0006-7979-0341
 \end{center}
 
 \section*{Abstract}
@@ -282,6 +290,12 @@ The existing validated AES-128-CTR measurements distinguish CPU transform throug
 The separate Tesla T4 study shows that increasing independent-page batches from one to 32 pages raises the median session CPU/GPU time ratio from 0.5404 to 0.9125. Batching narrows the pipeline's relative gap, but the prepared native EVP transform remains faster throughout the observed grid. This finding applies to its own software and measurement boundaries and supplies no extrapolated crossover.
 
 The conditional cost model translates these technical results into explicit execution-path criteria. The GTX pipeline charge thresholds of 0.9503, 0.7626, and 0.8273 imply lower modeled CPU cost at equal consistently attributed hourly charges. They are useful for assessing a defined workload and resource-allocation scenario, not evidence of realized monetary or energy savings. Together, the experiments support boundary-aware path selection while limiting generalization to the tested implementations, data locations, and workloads.
+
+\section*{Funding}
+The author received no specific funding for this work.
+
+\section*{Conflict of interest}
+The author has no conflict of interest to declare.
 
 \begingroup\fontsize{10}{12}\selectfont\sloppy
 \printbibliography[title={References}]

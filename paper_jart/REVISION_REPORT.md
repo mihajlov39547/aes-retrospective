@@ -1,4 +1,14 @@
-# JART manuscript revision — Phase 1
+# JART manuscript revision — Phases 1 and 2
+
+## Phase 2 — author information and declarations
+
+Updated `main.tex` and rebuilt `main.pdf` following the [official JART submission guidelines](https://jart.icat.unam.mx/index.php/jart/about/submissions). The guidelines require full author information and funding/conflict disclosures in the manuscript; no specific initial-submission layout is prescribed.
+
+Added Marko Mihajlović's supplied faculty, university, city/country, email and ORCID immediately below the title on page 1, and set the PDF author metadata. Added the exact author-supplied unfunded-work and no-conflict statements under **Funding** and **Conflict of interest**, immediately after Conclusion and before References on page 9. No ECOSwarm funding was attributed to this work. Scientific text, numerical results and bibliography were preserved.
+
+Rebuilt with XeLaTeX/Biber and passed the updated document checks: author details on the first page, declaration wording/order, resolved citations, figure/table ordering, intact links, page bounds and no LaTeX warnings. Visually inspected the first page and declaration/reference pages. Current PDF: **10 pages; 32,990 characters including spaces; 28,380 excluding whitespace**, using the counting convention below. No submission was initiated or administrative form prepared.
+
+## Phase 1 record
 
 Completed 12 November 2026. The revised scientific manuscript is `main.tex`, with compiled `main.pdf`, `references.bib`, and three vector PDF figures in `figures/`. This is a scientific working draft, not a final journal submission package.
 
@@ -24,7 +34,7 @@ No benchmarks were run, and no raw dataset or existing audit output was changed.
 
 `verify_document.py` confirmed 12 resolved citation keys, three figures and two tables first referenced in numerical order, four equations, intact external link destinations, no SUMMARY, no empty pages, and all extracted words within page bounds. The final XeLaTeX log has no undefined references, overflow/underflow warnings, or other LaTeX warnings. All pages were visually inspected; the measurement diagram, equations, plots, tables, bibliography wrapping, and final-page placement are readable without clipping. Wrapped URL text retains the complete hyperlink target. Publisher access restrictions are distinguished from malformed links.
 
-Final PDF: **10 A4 pages; 32,701 characters including spaces; 28,128 characters excluding whitespace.** Counts use PDF-extracted text, collapse whitespace to single spaces, remove page-number footers, and include the title, headings, captions, figure labels, tables, equations as extracted, and references. Machine-readable details are in `verification/document_checks.json`.
+Phase 1 PDF: **10 A4 pages; 32,701 characters including spaces; 28,128 characters excluding whitespace.** Counts use PDF-extracted text, collapse whitespace to single spaces, remove page-number footers, and include the title, headings, captions, figure labels, tables, equations as extracted, and references. Current machine-readable details are in `verification/document_checks.json`.
 
 ## Rebuild
 

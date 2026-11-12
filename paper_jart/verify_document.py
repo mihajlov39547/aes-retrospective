@@ -55,6 +55,17 @@ def main():
         cleaned.append('\n'.join(lines))
     normalized=' '.join(' '.join(cleaned).split())
     assert 'SUMMARY' not in normalized and '??' not in normalized
+    first_page=' '.join(text_pages[0].split())
+    for detail in ['Marko Mihajlović', 'Faculty of Informatics and Computing',
+                   'Singidunum University', 'Belgrade, Serbia',
+                   'marko.mihajlovic.23@singimail.rs', 'ORCID: 0009-0006-7979-0341']:
+        assert detail in first_page, detail
+    assert first_page.index('Marko Mihajlović') < first_page.index('Abstract')
+    positions=[tex.index(section) for section in [r'\section{Conclusion}',
+               r'\section*{Funding}', r'\section*{Conflict of interest}', r'\printbibliography']]
+    assert positions==sorted(positions)
+    assert 'The author received no specific funding for this work.' in normalized
+    assert 'The author has no conflict of interest to declare.' in normalized
     abstract=tex.split(r'\section*{Abstract}')[1].split(r'\noindent')[0]
     report=dict(status='PASS',pages=len(pages),citations=len(keys),figures=3,tables=2,equations=4,
                 characters_with_spaces=len(normalized),characters_without_whitespace=len(re.sub(r'\s','',normalized)),
@@ -63,8 +74,9 @@ def main():
                 external_links=sorted(urls),page_word_counts=word_counts,
                 all_words_within_page_bounds=True,all_citation_keys_resolve=True,
                 figures_and_tables_first_mentioned_in_number_order=True,final_summary_absent=True,
+                author_details_on_first_page=True,required_declarations_present_in_order=True,
                 latex_warnings=[])
-    (OUT/'document_checks.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
+    (OUT/'document_checks.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8',newline='\n')
     print(json.dumps({k:report[k] for k in ['status','pages','characters_with_spaces','characters_without_whitespace','abstract_words','citations']}))
 
 if __name__=='__main__': main()
